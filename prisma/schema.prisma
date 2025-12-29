@@ -310,6 +310,8 @@ model AIInteraction {
   type         AIInteractionType
   inputTokens  Int               @map("input_tokens")
   outputTokens Int               @map("output_tokens")
+  prompt       String?           @db.Text
+  response     String?           @db.Text
   createdAt    DateTime          @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
