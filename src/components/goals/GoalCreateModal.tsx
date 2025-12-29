@@ -22,8 +22,10 @@ import { useCreateGoal } from "@/hooks";
 import { GOAL_CATEGORY_LABELS } from "@/types/goals";
 import type { GoalLevel } from "@/types/goals";
 import type { GoalCategory } from "@prisma/client";
-import { Sparkles, Target, Calendar, Layers, CheckCircle2, Loader2 } from "lucide-react";
+import { Sparkles, Target, Calendar, Layers, CheckCircle2, Loader2, Wand2 } from "lucide-react";
 import { toast } from "sonner";
+import { AiButton, GoalSharpenModal } from "@/components/ai";
+import type { GoalSharpenResponse } from "@/lib/ai/schemas";
 
 interface GoalCreateModalProps {
   open: boolean;
@@ -84,9 +86,16 @@ export function GoalCreateModal({
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<GoalCategory | "">("");
   const [targetDate, setTargetDate] = useState("");
+  const [showSharpenModal, setShowSharpenModal] = useState(false);
 
   const createGoal = useCreateGoal();
   const config = LEVEL_CONFIG[level];
+
+  const handleApplySharpen = (result: GoalSharpenResponse) => {
+    setTitle(result.sharpened_title);
+    setDescription(result.description);
+    toast.success("AI suggestions applied!");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -154,9 +163,23 @@ export function GoalCreateModal({
         <form onSubmit={handleSubmit} className="space-y-5 pt-2">
           {/* Title */}
           <div className="space-y-2">
-            <Label htmlFor="title" className="text-moon-soft text-sm">
-              Title <span className="text-zen-red">*</span>
-            </Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="title" className="text-moon-soft text-sm">
+                Title <span className="text-zen-red">*</span>
+              </Label>
+              {title.trim() && (
+                <AiButton
+                  onClick={() => setShowSharpenModal(true)}
+                  size="sm"
+                  variant="ghost"
+                  showUsage={false}
+                  className="h-7 text-xs"
+                >
+                  <Wand2 className="w-3 h-3 mr-1" />
+                  Sharpen
+                </AiButton>
+              )}
+            </div>
             <Input
               id="title"
               placeholder={config.placeholder}
@@ -284,6 +307,15 @@ export function GoalCreateModal({
           </div>
         </form>
       </DialogContent>
+
+      {/* AI Goal Sharpener Modal */}
+      <GoalSharpenModal
+        open={showSharpenModal}
+        onOpenChange={setShowSharpenModal}
+        goalTitle={title}
+        goalCategory={category || undefined}
+        onApply={handleApplySharpen}
+      />
     </Dialog>
   );
 }
