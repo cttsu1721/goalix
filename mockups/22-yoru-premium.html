@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goalix - Yoru Premium</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;500;600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --night-deep: #08080c;
+      --night: #0b0b10;
+      --night-mid: #101016;
+      --night-soft: #161620;
+      --night-lighter: #1e1e2a;
+      --night-glass: rgba(16, 16, 22, 0.8);
+      --moonlight: #eeeef6;
+      --moonlight-dim: #a0a0b8;
+      --moonlight-faint: #5c5c70;
+      --lantern: #e8a857;
+      --lantern-bright: #f4be70;
+      --lantern-soft: rgba(232, 168, 87, 0.12);
+      --lantern-glow: rgba(232, 168, 87, 0.06);
+      --gold: #d4af37;
+      --gold-soft: rgba(212, 175, 55, 0.1);
+      --border: rgba(255, 255, 255, 0.06);
+      --border-glass: rgba(255, 255, 255, 0.08);
+      --success: #4eca7a;
+      --gradient-gold: linear-gradient(135deg, var(--lantern), var(--gold));
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--night);
+      color: var(--moonlight);
+      min-height: 100vh;
+      font-weight: 400;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Ambient effects */
+    .ambient {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 40% 30% at 85% 5%, rgba(232, 168, 87, 0.04), transparent),
+        radial-gradient(ellipse 30% 40% at 10% 90%, rgba(212, 175, 55, 0.02), transparent);
+    }
+
+    @keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
+    /* Layout */
+    .app { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: var(--night-deep);
+      border-right: 1px solid var(--border);
+      display: none;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      z-index: 100;
+    }
+
+    .sidebar-header {
+      padding: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.5rem;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .logo-sub {
+      font-size: 0.625rem;
+      color: var(--moonlight-faint);
+      letter-spacing: 0.2em;
+      margin-top: 2px;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 20px 16px;
+      overflow-y: auto;
+    }
+
+    .nav-section { margin-bottom: 28px; }
+
+    .nav-section-title {
+      font-size: 0.5625rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--moonlight-faint);
+      padding: 0 12px 10px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 12px;
+      border-radius: 10px;
+      color: var(--moonlight-dim);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.875rem;
+      margin-bottom: 2px;
+    }
+
+    .nav-item:hover { background: var(--night-soft); color: var(--moonlight); }
+    .nav-item.active {
+      background: var(--lantern-soft);
+      color: var(--lantern);
+      border: 1px solid rgba(232, 168, 87, 0.15);
+    }
+
+    .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+
+    .nav-badge {
+      margin-left: auto;
+      background: var(--gradient-gold);
+      color: var(--night);
+      font-size: 0.625rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    /* Sidebar user */
+    .sidebar-user {
+      padding: 20px;
+      border-top: 1px solid var(--border);
+      background: var(--night-glass);
+      backdrop-filter: blur(10px);
+    }
+
+    .user-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-avatar {
+      width: 42px;
+      height: 42px;
+      background: var(--gradient-gold);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--night);
+    }
+
+    .user-info { flex: 1; }
+    .user-name { font-size: 0.875rem; font-weight: 500; }
+    .user-level { font-size: 0.6875rem; color: var(--lantern); }
+
+    /* Main content */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Mobile header */
+    .mobile-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: var(--night-glass);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .mobile-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mobile-logo {
+      width: 36px;
+      height: 36px;
+      background: var(--gradient-gold);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Crimson Pro', serif;
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--night);
+    }
+
+    .mobile-title { font-weight: 500; font-size: 1rem; }
+
+    .mobile-actions { display: flex; gap: 8px; }
+
+    .mobile-btn {
+      width: 36px;
+      height: 36px;
+      background: var(--night-soft);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--moonlight-dim);
+      cursor: pointer;
+      font-size: 0.9375rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Content wrapper */
+    .content-wrapper {
+      flex: 1;
+      display: flex;
+    }
+
+    /* Main task area */
+    .task-area {
+      flex: 1;
+      padding: 28px 24px 120px;
+      overflow-y: auto;
+      max-width: 800px;
+    }
+
+    /* Page header */
+    .page-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 32px;
+    }
+
+    .page-header-left {}
+
+    .page-title {
+      font-family: 'Crimson Pro', serif;
+      font-size: 2rem;
+      font-weight: 400;
+      margin-bottom: 4px;
+    }
+
+    .page-date { font-size: 0.875rem; color: var(--moonlight-faint); }
+
+    .ai-header-btn {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      background: var(--night-glass);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      color: var(--lantern);
+      font-family: inherit;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .ai-header-btn:hover {
+      background: var(--lantern-soft);
+      border-color: rgba(232, 168, 87, 0.2);
+    }
+
+    .ai-uses {
+      font-size: 0.6875rem;
+      color: var(--moonlight-faint);
+      padding: 2px 6px;
+      background: var(--night-lighter);
+      border-radius: 6px;
+    }
+
+    /* MIT Hero Card - Glass morphism */
+    .mit-hero {
+      background: var(--night-glass);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border-glass);
+      border-radius: 20px;
+      padding: 32px;
+      margin-bottom: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mit-hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--gradient-gold);
+    }
+
+    .mit-hero::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, var(--lantern-glow), transparent 60%);
+      pointer-events: none;
+    }
+
+    .mit-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    .mit-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      background: var(--gold-soft);
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      border-radius: 10px;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    .mit-points {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--lantern);
+    }
+
+    .mit-content { position: relative; }
+
+    .mit-task {
+      font-family: 'Crimson Pro', serif;
+      font-size: clamp(1.5rem, 3.5vw, 1.875rem);
+      font-weight: 400;
+      line-height: 1.4;
+      margin-bottom: 20px;
+    }
+
+    .mit-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+
+    .mit-tag {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--night-lighter);
+      border-radius: 8px;
+      font-size: 0.8125rem;
+      color: var(--moonlight-dim);
+    }
+
+    .mit-tag.category {
+      background: var(--lantern-glow);
+      color: var(--lantern);
+    }
+
+    .mit-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    .complete-btn {
+      width: 56px;
+      height: 56px;
+      background: transparent;
+      border: 2px solid var(--lantern);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+      position: relative;
+    }
+
+    .complete-btn::before {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border: 1px solid var(--lantern);
+      border-radius: 50%;
+      opacity: 0;
+      transition: all 0.3s;
+    }
+
+    .complete-btn:hover {
+      background: var(--lantern);
+      box-shadow: 0 0 30px var(--lantern-soft);
+    }
+
+    .complete-btn:hover::before { opacity: 0.3; }
+
+    .complete-btn svg {
+      width: 24px;
+      height: 24px;
+      stroke: var(--lantern);
+      stroke-width: 2;
+      fill: none;
+      transition: stroke 0.3s;
+    }
+
+    .complete-btn:hover svg { stroke: var(--night); }
+
+    .complete-info { flex: 1; }
+    .complete-text { font-size: 0.9375rem; font-weight: 500; }
+    .complete-hint { font-size: 0.75rem; color: var(--moonlight-faint); margin-top: 2px; }
+
+    .mit-ai-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px;
+      background: var(--night-soft);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--moonlight-dim);
+      font-family: inherit;
+      font-size: 0.8125rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .mit-ai-btn:hover {
+      background: var(--lantern-soft);
+      border-color: var(--lantern);
+      color: var(--lantern);
+    }
+
+    /* Task sections */
+    .task-section { margin-bottom: 28px; }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .section-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--night-soft);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9375rem;
+    }
+
+    .section-info {}
+    .section-title { font-size: 0.9375rem; font-weight: 500; }
+    .section-count { font-size: 0.75rem; color: var(--moonlight-faint); }
+    .section-points { font-size: 0.8125rem; color: var(--lantern); font-weight: 500; }
+
+    /* Task list - glass cards */
+    .task-list {
+      background: var(--night-glass);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .task-item:last-child { border-bottom: none; }
+    .task-item:hover { background: var(--night-soft); }
+
+    .task-checkbox {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--moonlight-faint);
+      border-radius: 6px;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .task-checkbox:hover { border-color: var(--lantern); }
+
+    .task-checkbox.checked {
+      background: var(--success);
+      border-color: var(--success);
+    }
+
+    .task-checkbox.checked::after {
+      content: '✓';
+      color: white;
+      font-size: 0.6875rem;
+      font-weight: 700;
+    }
+
+    .task-content { flex: 1; min-width: 0; }
+    .task-title { font-size: 0.9375rem; }
+
+    .task-item.completed .task-title {
+      text-decoration: line-through;
+      color: var(--moonlight-faint);
+    }
+
+    .task-category {
+      font-size: 0.6875rem;
+      color: var(--moonlight-faint);
+      margin-top: 3px;
+    }
+
+    .task-points { font-size: 0.75rem; color: var(--moonlight-faint); font-weight: 500; }
+
+    /* Add task */
+    .add-task {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      color: var(--moonlight-faint);
+      cursor: pointer;
+      transition: all 0.2s;
+      border-top: 1px solid var(--border);
+      font-size: 0.875rem;
+    }
+
+    .add-task:hover { background: var(--night-soft); color: var(--lantern); }
+
+    /* Right stats panel */
+    .stats-panel {
+      width: 300px;
+      background: var(--night-deep);
+      border-left: 1px solid var(--border);
+      padding: 28px 20px;
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+      overflow-y: auto;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    .stats-card {
+      background: var(--night-glass);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      padding: 20px;
+    }
+
+    .stats-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .stats-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8125rem;
+      color: var(--moonlight-dim);
+    }
+
+    .stats-card-icon { font-size: 1rem; }
+
+    /* Streak card */
+    .streak-value {
+      font-family: 'Crimson Pro', serif;
+      font-size: 2.5rem;
+      font-weight: 400;
+      color: var(--lantern);
+      line-height: 1;
+    }
+
+    .streak-label { font-size: 0.75rem; color: var(--moonlight-faint); margin-top: 4px; }
+
+    .streak-flame {
+      font-size: 1.5rem;
+      animation: float 2s ease-in-out infinite;
+    }
+
+    /* Level progress */
+    .level-info { margin-bottom: 12px; }
+    .level-name { font-size: 1rem; font-weight: 500; }
+    .level-points { font-size: 0.75rem; color: var(--moonlight-faint); margin-top: 2px; }
+
+    .level-bar {
+      height: 8px;
+      background: var(--night-lighter);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .level-fill {
+      height: 100%;
+      background: var(--gradient-gold);
+      border-radius: 4px;
+      width: 65%;
+      position: relative;
+    }
+
+    .level-fill::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      animation: shimmer 2s infinite;
+      background-size: 200% 100%;
+    }
+
+    /* Today's progress */
+    .today-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .today-stat {
+      text-align: center;
+      padding: 14px;
+      background: var(--night-soft);
+      border-radius: 12px;
+    }
+
+    .today-stat-value { font-size: 1.25rem; font-weight: 600; }
+    .today-stat-label { font-size: 0.625rem; color: var(--moonlight-faint); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+
+    /* Goal alignment */
+    .alignment-value {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--success);
+    }
+
+    .alignment-label { font-size: 0.75rem; color: var(--moonlight-faint); margin-top: 4px; }
+
+    /* Kaizen card */
+    .kaizen-card {
+      background: linear-gradient(135deg, var(--night-soft), var(--night-mid));
+      border: 1px solid var(--border-glass);
+    }
+
+    .kaizen-prompt { font-size: 0.9375rem; margin-bottom: 16px; }
+
+    .kaizen-areas {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .kaizen-area {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      background: var(--night-lighter);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.75rem;
+      color: var(--moonlight-dim);
+    }
+
+    .kaizen-area:hover { border-color: var(--lantern); color: var(--lantern); }
+
+    .kaizen-area.checked {
+      background: var(--lantern-soft);
+      border-color: var(--lantern);
+      color: var(--lantern);
+    }
+
+    .kaizen-check {
+      width: 14px;
+      height: 14px;
+      border: 1.5px solid currentColor;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.625rem;
+    }
+
+    .kaizen-area.checked .kaizen-check {
+      background: var(--lantern);
+      color: var(--night);
+    }
+
+    .kaizen-submit {
+      width: 100%;
+      margin-top: 16px;
+      padding: 12px;
+      background: var(--gradient-gold);
+      border: none;
+      border-radius: 10px;
+      color: var(--night);
+      font-family: inherit;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .kaizen-submit:hover { transform: translateY(-1px); box-shadow: 0 4px 20px var(--lantern-soft); }
+
+    .kaizen-points { font-size: 0.6875rem; color: var(--moonlight-faint); text-align: center; margin-top: 8px; }
+
+    /* Bottom nav */
+    .bottom-nav {
+      display: flex;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--night-glass);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
+      padding: 10px 0;
+      padding-bottom: calc(10px + env(safe-area-inset-bottom));
+      z-index: 100;
+    }
+
+    .bottom-nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--moonlight-faint);
+      cursor: pointer;
+    }
+
+    .bottom-nav-item.active { color: var(--lantern); }
+    .bottom-nav-icon { font-size: 1.25rem; }
+    .bottom-nav-label { font-size: 0.625rem; font-weight: 500; }
+
+    /* Responsive */
+    @media (min-width: 768px) {
+      .sidebar { display: flex; }
+      .main { margin-left: 260px; }
+      .mobile-header { display: none; }
+      .bottom-nav { display: none; }
+      .task-area { padding: 40px 32px 40px; }
+      .ai-header-btn { display: flex; }
+    }
+
+    @media (min-width: 1200px) {
+      .stats-panel { display: flex; }
+    }
+
+    @media (min-width: 1400px) {
+      .task-area { padding: 48px 48px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="ambient"></div>
+
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">Goalix</div>
+        <div class="logo-sub">夜 Premium</div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <a class="nav-item active">
+            <span class="nav-icon">📅</span>
+            <span>Today</span>
+            <span class="nav-badge">6</span>
+          </a>
+          <a class="nav-item">
+            <span class="nav-icon">📥</span>
+            <span>Inbox</span>
+          </a>
+          <a class="nav-item">
+            <span class="nav-icon">📆</span>
+            <span>Upcoming</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Goals</div>
+          <a class="nav-item">
+            <span class="nav-icon">🌟</span>
+            <span>Dreams</span>
+          </a>
+          <a class="nav-item">
+            <span class="nav-icon">🎯</span>
+            <span>5-Year Goals</span>
+          </a>
+          <a class="nav-item">
+            <span class="nav-icon">📊</span>
+            <span>1-Year Goals</span>
+          </a>
+          <a class="nav-item">
+            <span class="nav-icon">📋</span>
+            <span>Monthly</span>
+          </a>
+          <a class="nav-item">
+            <span class="nav-icon">✨</span>
+            <span>Weekly</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Categories</div>
+          <a class="nav-item"><span class="nav-icon">💼</span><span>Career</span></a>
+          <a class="nav-item"><span class="nav-icon">💪</span><span>Health</span></a>
+          <a class="nav-item"><span class="nav-icon">💰</span><span>Wealth</span></a>
+          <a class="nav-item"><span class="nav-icon">🌱</span><span>Growth</span></a>
+        </div>
+      </nav>
+
+      <div class="sidebar-user">
+        <div class="user-card">
+          <div class="user-avatar">JD</div>
+          <div class="user-info">
+            <div class="user-name">John Doe</div>
+            <div class="user-level">Level 4 · Go-Getter</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+      <header class="mobile-header">
+        <div class="mobile-brand">
+          <div class="mobile-logo">G</div>
+          <span class="mobile-title">Today</span>
+        </div>
+        <div class="mobile-actions">
+          <button class="mobile-btn">🤖</button>
+          <button class="mobile-btn">⚙️</button>
+        </div>
+      </header>
+
+      <div class="content-wrapper">
+        <div class="task-area">
+          <div class="page-header">
+            <div class="page-header-left">
+              <h1 class="page-title">Today</h1>
+              <p class="page-date">Sunday, December 29 · 6 tasks</p>
+            </div>
+            <button class="ai-header-btn">
+              <span>🤖</span>
+              <span>AI Suggest</span>
+              <span class="ai-uses">3/5</span>
+            </button>
+          </div>
+
+          <!-- MIT Hero -->
+          <div class="mit-hero">
+            <div class="mit-header">
+              <div class="mit-badge">
+                <span>🎯</span>
+                <span>Most Important Task</span>
+              </div>
+              <span class="mit-points">+100 pts</span>
+            </div>
+
+            <div class="mit-content">
+              <h2 class="mit-task">Complete quarterly business review presentation</h2>
+              <div class="mit-meta">
+                <span class="mit-tag category">💼 Career</span>
+                <span class="mit-tag">~2 hours</span>
+                <span class="mit-tag">🔗 Q1 Revenue Target</span>
+              </div>
+            </div>
+
+            <div class="mit-actions">
+              <button class="complete-btn">
+                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              </button>
+              <div class="complete-info">
+                <div class="complete-text">Mark as complete</div>
+                <div class="complete-hint">Earn 100 points + streak bonus</div>
+              </div>
+              <button class="mit-ai-btn">
+                <span>🤖</span>
+                <span>Suggest MIT</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Primary Tasks -->
+          <div class="task-section">
+            <div class="section-header">
+              <div class="section-left">
+                <div class="section-icon">📌</div>
+                <div class="section-info">
+                  <div class="section-title">Primary Tasks</div>
+                  <div class="section-count">1 of 3 completed</div>
+                </div>
+              </div>
+              <span class="section-points">150 pts</span>
+            </div>
+
+            <div class="task-list">
+              <div class="task-item completed">
+                <div class="task-checkbox checked"></div>
+                <div class="task-content">
+                  <div class="task-title">Morning workout - 30 min HIIT</div>
+                  <div class="task-category">💪 Health</div>
+                </div>
+                <span class="task-points">50</span>
+              </div>
+              <div class="task-item">
+                <div class="task-checkbox"></div>
+                <div class="task-content">
+                  <div class="task-title">Review investment portfolio performance</div>
+                  <div class="task-category">💰 Wealth · 🔗 Financial Freedom</div>
+                </div>
+                <span class="task-points">50</span>
+              </div>
+              <div class="task-item">
+                <div class="task-checkbox"></div>
+                <div class="task-content">
+                  <div class="task-title">Read 20 pages of "The Millionaire Fastlane"</div>
+                  <div class="task-category">🌱 Growth</div>
+                </div>
+                <span class="task-points">50</span>
+              </div>
+              <div class="add-task">
+                <span>+</span>
+                <span>Add primary task</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Secondary Tasks -->
+          <div class="task-section">
+            <div class="section-header">
+              <div class="section-left">
+                <div class="section-icon">📝</div>
+                <div class="section-info">
+                  <div class="section-title">Secondary Tasks</div>
+                  <div class="section-count">0 of 2 completed</div>
+                </div>
+              </div>
+              <span class="section-points">50 pts</span>
+            </div>
+
+            <div class="task-list">
+              <div class="task-item">
+                <div class="task-checkbox"></div>
+                <div class="task-content">
+                  <div class="task-title">Reply to team emails</div>
+                  <div class="task-category">💼 Career</div>
+                </div>
+                <span class="task-points">25</span>
+              </div>
+              <div class="task-item">
+                <div class="task-checkbox"></div>
+                <div class="task-content">
+                  <div class="task-title">Organize workspace</div>
+                  <div class="task-category">🏠 Lifestyle</div>
+                </div>
+                <span class="task-points">25</span>
+              </div>
+              <div class="add-task">
+                <span>+</span>
+                <span>Add secondary task</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Stats Panel -->
+        <aside class="stats-panel">
+          <!-- Streak -->
+          <div class="stats-card">
+            <div class="stats-card-header">
+              <span class="stats-card-title">
+                <span class="stats-card-icon">🔥</span>
+                Current Streak
+              </span>
+              <span class="streak-flame">🔥</span>
+            </div>
+            <div class="streak-value">12</div>
+            <div class="streak-label">consecutive days</div>
+          </div>
+
+          <!-- Level -->
+          <div class="stats-card">
+            <div class="stats-card-header">
+              <span class="stats-card-title">
+                <span class="stats-card-icon">⭐</span>
+                Level Progress
+              </span>
+            </div>
+            <div class="level-info">
+              <div class="level-name">Level 4 · Go-Getter</div>
+              <div class="level-points">6,420 / 10,000 pts</div>
+            </div>
+            <div class="level-bar">
+              <div class="level-fill"></div>
+            </div>
+          </div>
+
+          <!-- Today's Progress -->
+          <div class="stats-card">
+            <div class="stats-card-header">
+              <span class="stats-card-title">
+                <span class="stats-card-icon">📊</span>
+                Today's Progress
+              </span>
+            </div>
+            <div class="today-grid">
+              <div class="today-stat">
+                <div class="today-stat-value">1/6</div>
+                <div class="today-stat-label">Tasks</div>
+              </div>
+              <div class="today-stat">
+                <div class="today-stat-value">50</div>
+                <div class="today-stat-label">Points</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Goal Alignment -->
+          <div class="stats-card">
+            <div class="stats-card-header">
+              <span class="stats-card-title">
+                <span class="stats-card-icon">🎯</span>
+                Goal Alignment
+              </span>
+            </div>
+            <div class="alignment-value">67%</div>
+            <div class="alignment-label">goal-aligned this week</div>
+          </div>
+
+          <!-- Kaizen -->
+          <div class="stats-card kaizen-card">
+            <div class="stats-card-header">
+              <span class="stats-card-title">
+                <span class="stats-card-icon">🌸</span>
+                Daily Kaizen
+              </span>
+            </div>
+            <div class="kaizen-prompt">Did you improve today?</div>
+            <div class="kaizen-areas">
+              <div class="kaizen-area checked" onclick="this.classList.toggle('checked')">
+                <span class="kaizen-check">✓</span>
+                <span>Health</span>
+              </div>
+              <div class="kaizen-area" onclick="this.classList.toggle('checked')">
+                <span class="kaizen-check"></span>
+                <span>Relations</span>
+              </div>
+              <div class="kaizen-area checked" onclick="this.classList.toggle('checked')">
+                <span class="kaizen-check">✓</span>
+                <span>Wealth</span>
+              </div>
+              <div class="kaizen-area checked" onclick="this.classList.toggle('checked')">
+                <span class="kaizen-check">✓</span>
+                <span>Career</span>
+              </div>
+              <div class="kaizen-area" onclick="this.classList.toggle('checked')">
+                <span class="kaizen-check"></span>
+                <span>Growth</span>
+              </div>
+              <div class="kaizen-area" onclick="this.classList.toggle('checked')">
+                <span class="kaizen-check"></span>
+                <span>Lifestyle</span>
+              </div>
+            </div>
+            <button class="kaizen-submit">Save Reflection</button>
+            <div class="kaizen-points">+10 pts · Check all 6 for +25 bonus</div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Bottom Nav -->
+      <nav class="bottom-nav">
+        <a class="bottom-nav-item active">
+          <span class="bottom-nav-icon">📅</span>
+          <span class="bottom-nav-label">Today</span>
+        </a>
+        <a class="bottom-nav-item">
+          <span class="bottom-nav-icon">🎯</span>
+          <span class="bottom-nav-label">Goals</span>
+        </a>
+        <a class="bottom-nav-item">
+          <span class="bottom-nav-icon">🌸</span>
+          <span class="bottom-nav-label">Kaizen</span>
+        </a>
+        <a class="bottom-nav-item">
+          <span class="bottom-nav-icon">📊</span>
+          <span class="bottom-nav-label">Progress</span>
+        </a>
+      </nav>
+    </main>
+  </div>
+</body>
+</html>

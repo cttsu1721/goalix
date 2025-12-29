@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goalix - Weekly Review | Yoru Zen</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --void: #08080c;
+      --night: #0c0c12;
+      --night-soft: #12121a;
+      --night-mist: #1a1a24;
+      --night-glow: #242430;
+      --lantern: #e8a857;
+      --lantern-soft: rgba(232, 168, 87, 0.08);
+      --lantern-mist: rgba(232, 168, 87, 0.04);
+      --moon: #f0eef8;
+      --moon-soft: #c4c2d0;
+      --moon-dim: #8a889a;
+      --moon-faint: #5a5868;
+      --zen-green: #7dd3a8;
+      --zen-green-soft: rgba(125, 211, 168, 0.1);
+      --zen-blue: #7db8d3;
+      --zen-purple: #a87dd3;
+    }
+
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--void);
+      color: var(--moon);
+      min-height: 100vh;
+      font-weight: 400;
+      line-height: 1.7;
+      letter-spacing: 0.01em;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      background: var(--night);
+      border-right: 1px solid var(--night-mist);
+      display: flex;
+      flex-direction: column;
+      padding: 40px 0;
+    }
+
+    .sidebar-header {
+      padding: 0 28px 40px;
+    }
+
+    .logo {
+      font-size: 1.375rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--moon);
+    }
+
+    .logo span {
+      color: var(--lantern);
+      font-weight: 300;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 0 16px;
+    }
+
+    .nav-group {
+      margin-bottom: 40px;
+    }
+
+    .nav-label {
+      font-size: 0.625rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--moon-faint);
+      padding: 0 16px;
+      margin-bottom: 16px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      color: var(--moon-dim);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      margin-bottom: 4px;
+    }
+
+    .nav-item:hover {
+      background: var(--night-soft);
+      color: var(--moon-soft);
+    }
+
+    .nav-item.active {
+      background: var(--lantern-soft);
+      color: var(--lantern);
+    }
+
+    .nav-icon {
+      width: 20px;
+      height: 20px;
+      opacity: 0.7;
+    }
+
+    .nav-item.active .nav-icon {
+      opacity: 1;
+    }
+
+    .sidebar-user {
+      padding: 28px;
+      margin-top: auto;
+    }
+
+    .user-block {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .user-avatar {
+      width: 44px;
+      height: 44px;
+      background: var(--night-mist);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 500;
+      font-size: 0.875rem;
+      color: var(--moon-soft);
+    }
+
+    .user-details h4 {
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+
+    .user-details span {
+      font-size: 0.75rem;
+      color: var(--moon-faint);
+    }
+
+    /* ===== MAIN CONTENT ===== */
+    .main {
+      background: var(--void);
+      overflow-y: auto;
+      padding: 48px 56px;
+      max-width: 900px;
+    }
+
+    .main-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 48px;
+    }
+
+    .header-content h1 {
+      font-size: 1.875rem;
+      font-weight: 300;
+      letter-spacing: -0.01em;
+      margin-bottom: 8px;
+    }
+
+    .header-week {
+      font-size: 0.875rem;
+      color: var(--moon-dim);
+      font-weight: 300;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 20px;
+      background: var(--night-soft);
+      border: 1px solid var(--night-mist);
+      border-radius: 12px;
+      color: var(--moon-soft);
+      font-family: inherit;
+      font-size: 0.8125rem;
+      font-weight: 400;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+      border-color: var(--lantern);
+      color: var(--lantern);
+      background: var(--lantern-mist);
+    }
+
+    .btn svg {
+      width: 18px;
+      height: 18px;
+      opacity: 0.7;
+    }
+
+    /* Progress Stepper */
+    .stepper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 48px;
+    }
+
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      background: var(--night);
+      border: 1px solid var(--night-mist);
+      border-radius: 10px;
+      font-size: 0.8125rem;
+      color: var(--moon-dim);
+      transition: all 0.2s;
+    }
+
+    .step.active {
+      background: var(--lantern-soft);
+      border-color: var(--lantern);
+      color: var(--lantern);
+    }
+
+    .step.completed {
+      background: var(--zen-green-soft);
+      border-color: var(--zen-green);
+      color: var(--zen-green);
+    }
+
+    .step-number {
+      width: 24px;
+      height: 24px;
+      background: var(--night-mist);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .step.active .step-number {
+      background: var(--lantern);
+      color: var(--void);
+    }
+
+    .step.completed .step-number {
+      background: var(--zen-green);
+      color: var(--void);
+    }
+
+    .step-line {
+      flex: 1;
+      height: 1px;
+      background: var(--night-mist);
+      max-width: 40px;
+    }
+
+    /* Review Sections */
+    .review-section {
+      background: var(--night);
+      border: 1px solid var(--night-mist);
+      border-radius: 20px;
+      padding: 36px;
+      margin-bottom: 32px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 28px;
+    }
+
+    .section-title {
+      font-size: 1.125rem;
+      font-weight: 400;
+      margin-bottom: 6px;
+    }
+
+    .section-subtitle {
+      font-size: 0.8125rem;
+      color: var(--moon-faint);
+    }
+
+    .section-badge {
+      font-size: 0.6875rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 6px 12px;
+      background: var(--night-soft);
+      border-radius: 8px;
+      color: var(--moon-dim);
+    }
+
+    .section-badge.success {
+      background: var(--zen-green-soft);
+      color: var(--zen-green);
+    }
+
+    /* Week Summary Stats */
+    .week-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .week-stat {
+      background: var(--night-soft);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .week-stat-value {
+      font-size: 1.75rem;
+      font-weight: 300;
+      margin-bottom: 4px;
+    }
+
+    .week-stat-value.green { color: var(--zen-green); }
+    .week-stat-value.lantern { color: var(--lantern); }
+
+    .week-stat-label {
+      font-size: 0.6875rem;
+      color: var(--moon-faint);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    /* Completed Goals */
+    .goals-completed {
+      margin-bottom: 28px;
+    }
+
+    .goal-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--night-soft);
+    }
+
+    .goal-item:last-child {
+      border-bottom: none;
+    }
+
+    .goal-check {
+      width: 28px;
+      height: 28px;
+      background: var(--zen-green);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--void);
+    }
+
+    .goal-info {
+      flex: 1;
+    }
+
+    .goal-title {
+      font-size: 0.9375rem;
+      font-weight: 400;
+      margin-bottom: 4px;
+    }
+
+    .goal-meta {
+      font-size: 0.75rem;
+      color: var(--moon-faint);
+    }
+
+    .goal-points {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--lantern);
+    }
+
+    /* Reflection Questions */
+    .reflection-questions {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .question-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .question-label {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--moon-soft);
+    }
+
+    .question-textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 16px;
+      background: var(--night-soft);
+      border: 1px solid var(--night-mist);
+      border-radius: 12px;
+      color: var(--moon);
+      font-family: inherit;
+      font-size: 0.875rem;
+      line-height: 1.7;
+      resize: vertical;
+      transition: all 0.2s;
+    }
+
+    .question-textarea:focus {
+      outline: none;
+      border-color: var(--lantern);
+      background: var(--lantern-mist);
+    }
+
+    .question-textarea::placeholder {
+      color: var(--moon-faint);
+    }
+
+    /* Next Week Planning */
+    .next-week-goals {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .add-goal-input {
+      display: flex;
+      gap: 12px;
+    }
+
+    .goal-input {
+      flex: 1;
+      padding: 14px 18px;
+      background: var(--night-soft);
+      border: 1px solid var(--night-mist);
+      border-radius: 12px;
+      color: var(--moon);
+      font-family: inherit;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+    }
+
+    .goal-input:focus {
+      outline: none;
+      border-color: var(--lantern);
+    }
+
+    .goal-input::placeholder {
+      color: var(--moon-faint);
+    }
+
+    .add-btn {
+      padding: 14px 20px;
+      background: var(--lantern-soft);
+      border: 1px solid var(--lantern);
+      border-radius: 12px;
+      color: var(--lantern);
+      font-family: inherit;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .add-btn:hover {
+      background: var(--lantern);
+      color: var(--void);
+    }
+
+    .planned-goal {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px;
+      background: var(--night-soft);
+      border-radius: 12px;
+    }
+
+    .planned-goal-icon {
+      width: 24px;
+      height: 24px;
+      background: var(--night-mist);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--moon-dim);
+    }
+
+    .planned-goal-title {
+      flex: 1;
+      font-size: 0.9375rem;
+    }
+
+    .planned-goal-remove {
+      width: 28px;
+      height: 28px;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      color: var(--moon-faint);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .planned-goal-remove:hover {
+      background: var(--night-mist);
+      color: var(--moon-soft);
+    }
+
+    /* Kaizen Review */
+    .kaizen-review {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .kaizen-item {
+      background: var(--night-soft);
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .kaizen-icon {
+      font-size: 2rem;
+      margin-bottom: 12px;
+    }
+
+    .kaizen-name {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .kaizen-score {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .kaizen-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--night-mist);
+    }
+
+    .kaizen-dot.filled {
+      background: var(--zen-green);
+    }
+
+    .kaizen-dot.partial {
+      background: var(--lantern);
+    }
+
+    /* Navigation Buttons */
+    .review-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--night-mist);
+    }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 24px;
+      background: var(--night-soft);
+      border: 1px solid var(--night-mist);
+      border-radius: 12px;
+      color: var(--moon-soft);
+      font-family: inherit;
+      font-size: 0.875rem;
+      font-weight: 400;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .nav-btn:hover {
+      border-color: var(--lantern);
+      color: var(--lantern);
+    }
+
+    .nav-btn.primary {
+      background: var(--lantern);
+      border-color: var(--lantern);
+      color: var(--void);
+    }
+
+    .nav-btn.primary:hover {
+      background: var(--moon);
+      border-color: var(--moon);
+    }
+
+    .nav-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Mobile Nav */
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--night);
+      border-top: 1px solid var(--night-mist);
+      padding: 16px 32px;
+      z-index: 50;
+    }
+
+    .mobile-nav-items {
+      display: flex;
+      justify-content: space-around;
+    }
+
+    .mobile-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      color: var(--moon-faint);
+      text-decoration: none;
+      font-size: 0.625rem;
+      font-weight: 400;
+      letter-spacing: 0.05em;
+    }
+
+    .mobile-nav-item.active {
+      color: var(--lantern);
+    }
+
+    .mobile-nav-item svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    /* Responsive */
+    @media (max-width: 1100px) {
+      .week-stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .kaizen-review {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+      .main {
+        padding: 28px 24px;
+        padding-bottom: 100px;
+        max-width: 100%;
+      }
+
+      .main-header {
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .stepper {
+        flex-wrap: wrap;
+      }
+
+      .step-line {
+        display: none;
+      }
+
+      .week-stats {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .review-nav {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .nav-btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .mobile-nav {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">goalix<span>.</span></div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-group">
+          <a class="nav-item">
+            <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="m9 12 2 2 4-4"/>
+            </svg>
+            Today
+          </a>
+          <a class="nav-item active">
+            <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <path d="M16 2v4M8 2v4M3 10h18"/>
+            </svg>
+            Week
+          </a>
+          <a class="nav-item">
+            <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M12 8v4l3 3"/>
+              <circle cx="12" cy="12" r="10"/>
+            </svg>
+            Upcoming
+          </a>
+        </div>
+
+        <div class="nav-group">
+          <div class="nav-label">Vision</div>
+          <a class="nav-item">
+            <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            Dreams
+          </a>
+          <a class="nav-item">
+            <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+            Goals
+          </a>
+        </div>
+
+        <div class="nav-group">
+          <div class="nav-label">Reflect</div>
+          <a class="nav-item">
+            <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M3 3v18h18"/>
+              <path d="m19 9-5 5-4-4-3 3"/>
+            </svg>
+            Progress
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar-user">
+        <div class="user-block">
+          <div class="user-avatar">JD</div>
+          <div class="user-details">
+            <h4>John Doe</h4>
+            <span>Level 4</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+      <header class="main-header">
+        <div class="header-content">
+          <h1>Weekly Review</h1>
+          <p class="header-week">December 23 - 29, 2024</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn">
+            <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="m15 18-6-6 6-6"/>
+            </svg>
+            Previous Week
+          </button>
+        </div>
+      </header>
+
+      <!-- Progress Stepper -->
+      <div class="stepper">
+        <div class="step completed">
+          <span class="step-number">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M20 6 9 17l-5-5"/>
+            </svg>
+          </span>
+          Summary
+        </div>
+        <div class="step-line"></div>
+        <div class="step active">
+          <span class="step-number">2</span>
+          Reflect
+        </div>
+        <div class="step-line"></div>
+        <div class="step">
+          <span class="step-number">3</span>
+          Plan
+        </div>
+        <div class="step-line"></div>
+        <div class="step">
+          <span class="step-number">4</span>
+          Complete
+        </div>
+      </div>
+
+      <!-- Week Summary -->
+      <section class="review-section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Week Summary</h2>
+            <p class="section-subtitle">Here's how your week went</p>
+          </div>
+          <span class="section-badge success">Great Week!</span>
+        </div>
+
+        <div class="week-stats">
+          <div class="week-stat">
+            <div class="week-stat-value green">38</div>
+            <div class="week-stat-label">Tasks Done</div>
+          </div>
+          <div class="week-stat">
+            <div class="week-stat-value lantern">1,250</div>
+            <div class="week-stat-label">Points Earned</div>
+          </div>
+          <div class="week-stat">
+            <div class="week-stat-value">7/7</div>
+            <div class="week-stat-label">MIT Streak</div>
+          </div>
+          <div class="week-stat">
+            <div class="week-stat-value">67%</div>
+            <div class="week-stat-label">Goal Aligned</div>
+          </div>
+        </div>
+
+        <h3 style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--moon-faint); margin-bottom: 16px;">Goals Completed</h3>
+        <div class="goals-completed">
+          <div class="goal-item">
+            <div class="goal-check">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M20 6 9 17l-5-5"/>
+              </svg>
+            </div>
+            <div class="goal-info">
+              <div class="goal-title">Finish Q4 presentation deck</div>
+              <div class="goal-meta">Weekly Goal · Career</div>
+            </div>
+            <span class="goal-points">+200 pts</span>
+          </div>
+          <div class="goal-item">
+            <div class="goal-check">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M20 6 9 17l-5-5"/>
+              </svg>
+            </div>
+            <div class="goal-info">
+              <div class="goal-title">Run 15km total this week</div>
+              <div class="goal-meta">Weekly Goal · Health</div>
+            </div>
+            <span class="goal-points">+200 pts</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Reflection -->
+      <section class="review-section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Reflect</h2>
+            <p class="section-subtitle">Take a moment to think about your week</p>
+          </div>
+        </div>
+
+        <div class="reflection-questions">
+          <div class="question-group">
+            <label class="question-label">What went well this week?</label>
+            <textarea class="question-textarea" placeholder="Celebrate your wins, big and small..."></textarea>
+          </div>
+          <div class="question-group">
+            <label class="question-label">What could have gone better?</label>
+            <textarea class="question-textarea" placeholder="No judgment — just honest reflection..."></textarea>
+          </div>
+          <div class="question-group">
+            <label class="question-label">What did you learn?</label>
+            <textarea class="question-textarea" placeholder="Insights, realizations, discoveries..."></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- Kaizen Review -->
+      <section class="review-section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Life Balance</h2>
+            <p class="section-subtitle">Your Kaizen check-ins this week</p>
+          </div>
+        </div>
+
+        <div class="kaizen-review">
+          <div class="kaizen-item">
+            <div class="kaizen-icon">💪</div>
+            <div class="kaizen-name">Health</div>
+            <div class="kaizen-score">
+              <div class="kaizen-dot filled"></div>
+              <div class="kaizen-dot filled"></div>
+              <div class="kaizen-dot filled"></div>
+              <div class="kaizen-dot filled"></div>
+              <div class="kaizen-dot filled"></div>
+              <div class="kaizen-dot filled"></div>
+              <div class="kaizen-dot"></div>
+            </div>
+          </div>
+          <div class="kaizen-item">
+            <div class="kaizen-icon">❤️</div>
+            <div class="kaizen-name">Relationships</div>
+            <div class="kaizen-score">
+              <div class="kaizen-dot filled"></div>
+              <div class="kaizen-dot filled"></div>
+              <div class="kaizen-dot filled"></div>
+              <div class="kaizen-dot filled"></div>
+              <div class="kaizen-dot"></div>
+              <div class="kaizen-dot"></div>
+              <div class="kaizen-dot"></div>
+            </div>
+          </div>
+          <div class="kaizen-item">
+            <div class="kaizen-icon">💰</div>
+            <div class="kaizen-name">Wealth</div>
+            <div class="kaizen-score">
+              <div class="kaizen-dot filled"></div>
+              <div class="kaizen-dot filled"></div>
+              <div class="kaizen-dot filled"></div>
+              <div class="kaizen-dot filled"></div>
+              <div class="kaizen-dot filled"></div>
+              <div class="kaizen-dot"></div>
+              <div class="kaizen-dot"></div>
+            </div>
+          </div>
+          <div class="kaizen-item">
+            <div class="kaizen-icon">💼</div>
+            <div class="kaizen-name">Career</div>
+            <div class="kaizen-score">
+              <div class="kaizen-dot filled"></div>
+              <div class="kaizen-dot filled"></div>
+              <div class="kaizen-dot filled"></div>
+              <div class="kaizen-dot filled"></div>
+              <div class="kaizen-dot filled"></div>
+              <div class="kaizen-dot filled"></div>
+              <div class="kaizen-dot filled"></div>
+            </div>
+          </div>
+          <div class="kaizen-item">
+            <div class="kaizen-icon">📚</div>
+            <div class="kaizen-name">Growth</div>
+            <div class="kaizen-score">
+              <div class="kaizen-dot filled"></div>
+              <div class="kaizen-dot filled"></div>
+              <div class="kaizen-dot filled"></div>
+              <div class="kaizen-dot filled"></div>
+              <div class="kaizen-dot"></div>
+              <div class="kaizen-dot"></div>
+              <div class="kaizen-dot"></div>
+            </div>
+          </div>
+          <div class="kaizen-item">
+            <div class="kaizen-icon">🌿</div>
+            <div class="kaizen-name">Lifestyle</div>
+            <div class="kaizen-score">
+              <div class="kaizen-dot partial"></div>
+              <div class="kaizen-dot partial"></div>
+              <div class="kaizen-dot"></div>
+              <div class="kaizen-dot"></div>
+              <div class="kaizen-dot"></div>
+              <div class="kaizen-dot"></div>
+              <div class="kaizen-dot"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Next Week Planning -->
+      <section class="review-section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Plan Next Week</h2>
+            <p class="section-subtitle">Set your weekly goals for Dec 30 - Jan 5</p>
+          </div>
+        </div>
+
+        <div class="next-week-goals">
+          <div class="add-goal-input">
+            <input type="text" class="goal-input" placeholder="Add a weekly goal...">
+            <button class="add-btn">Add</button>
+          </div>
+
+          <div class="planned-goal">
+            <div class="planned-goal-icon">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"/>
+              </svg>
+            </div>
+            <span class="planned-goal-title">Complete 2025 annual planning</span>
+            <button class="planned-goal-remove">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path d="M18 6 6 18M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="planned-goal">
+            <div class="planned-goal-icon">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"/>
+              </svg>
+            </div>
+            <span class="planned-goal-title">Run 20km total</span>
+            <button class="planned-goal-remove">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path d="M18 6 6 18M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Navigation -->
+      <div class="review-nav">
+        <button class="nav-btn">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path d="m15 18-6-6 6-6"/>
+          </svg>
+          Back to Summary
+        </button>
+        <button class="nav-btn primary">
+          Continue to Plan
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path d="m9 18 6-6-6-6"/>
+          </svg>
+        </button>
+      </div>
+    </main>
+  </div>
+
+  <!-- Mobile Navigation -->
+  <nav class="mobile-nav">
+    <div class="mobile-nav-items">
+      <a href="#" class="mobile-nav-item">
+        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="m9 12 2 2 4-4"/>
+        </svg>
+        Today
+      </a>
+      <a href="#" class="mobile-nav-item">
+        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+        Dreams
+      </a>
+      <a href="#" class="mobile-nav-item active">
+        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path d="M3 3v18h18"/>
+          <path d="m19 9-5 5-4-4-3 3"/>
+        </svg>
+        Progress
+      </a>
+      <a href="#" class="mobile-nav-item">
+        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 1v6m0 6v6"/>
+        </svg>
+        Settings
+      </a>
+    </div>
+  </nav>
+</body>
+</html>

@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goalix - Todoist + Notion Blocks Style</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f7f6f3;
+      --bg-tertiary: #f1f1ef;
+      --bg-hover: rgba(55, 53, 47, 0.08);
+      --text-primary: #37352f;
+      --text-secondary: #6b6b6b;
+      --text-tertiary: #9b9a97;
+      --accent: #eb5757;
+      --accent-light: rgba(235, 87, 87, 0.1);
+      --border: rgba(55, 53, 47, 0.09);
+      --sidebar-bg: #f7f6f3;
+      --success: #4dab9a;
+      --warning: #f9cb40;
+      --primary-color: #2383e2;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+      --radius: 4px;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.5;
+      font-size: 14px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Layout */
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 240px;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      padding: 12px 8px;
+      display: none;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .sidebar-header {
+      padding: 4px 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sidebar-logo {
+      width: 24px;
+      height: 24px;
+      background: var(--text-primary);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .sidebar-title {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .nav-section {
+      margin-bottom: 16px;
+    }
+
+    .nav-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 8px 12px 4px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 12px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: background 0.15s;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .nav-item:hover {
+      background: var(--bg-hover);
+    }
+
+    .nav-item.active {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .nav-icon {
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .nav-badge {
+      margin-left: auto;
+      background: var(--accent-light);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 10px;
+    }
+
+    /* User Section */
+    .user-section {
+      margin-top: auto;
+      padding: 12px 8px;
+      border-top: 1px solid var(--border);
+    }
+
+    .user-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px;
+      border-radius: var(--radius);
+      cursor: pointer;
+    }
+
+    .user-card:hover {
+      background: var(--bg-hover);
+    }
+
+    .user-avatar {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, var(--primary-color), var(--accent));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 11px;
+    }
+
+    .user-info {
+      flex: 1;
+    }
+
+    .user-name {
+      font-weight: 500;
+      font-size: 13px;
+    }
+
+    .user-level {
+      font-size: 11px;
+      color: var(--text-tertiary);
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Mobile Header */
+    .mobile-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--bg-primary);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .menu-btn {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .menu-btn:hover {
+      background: var(--bg-hover);
+    }
+
+    .mobile-logo {
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    /* Page Content */
+    .page-content {
+      flex: 1;
+      max-width: 900px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 24px 16px 100px;
+    }
+
+    /* Stats Banner - Notion-style callout */
+    .stats-callout {
+      background: var(--bg-secondary);
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 32px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .callout-icon {
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .callout-content {
+      flex: 1;
+    }
+
+    .callout-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .stat-icon {
+      font-size: 14px;
+    }
+
+    .stat-value {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .stat-label {
+      color: var(--text-secondary);
+      font-size: 13px;
+    }
+
+    /* Level Progress */
+    .level-progress {
+      margin-top: 12px;
+    }
+
+    .level-bar-bg {
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .level-bar-fill {
+      height: 100%;
+      background: var(--primary-color);
+      border-radius: 3px;
+      width: 65%;
+    }
+
+    .level-text {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      margin-top: 4px;
+    }
+
+    /* Page Title */
+    .page-title {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      line-height: 1.2;
+    }
+
+    .page-subtitle {
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+
+    /* Block Container - Notion style */
+    .block-container {
+      margin-bottom: 32px;
+    }
+
+    .block-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding: 4px 0;
+    }
+
+    .block-icon {
+      font-size: 18px;
+    }
+
+    .block-title {
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .block-count {
+      color: var(--text-tertiary);
+      font-size: 13px;
+    }
+
+    /* Task Block - Notion database row style */
+    .task-block {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: background 0.15s;
+      border: 1px solid transparent;
+    }
+
+    .task-block:hover {
+      background: var(--bg-hover);
+    }
+
+    .task-block.mit {
+      background: var(--accent-light);
+      border-color: rgba(235, 87, 87, 0.2);
+    }
+
+    .task-block.mit:hover {
+      background: rgba(235, 87, 87, 0.15);
+    }
+
+    .task-checkbox {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--text-tertiary);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .task-checkbox:hover {
+      border-color: var(--text-secondary);
+    }
+
+    .task-block.mit .task-checkbox {
+      border-color: var(--accent);
+    }
+
+    .task-checkbox.checked {
+      background: var(--success);
+      border-color: var(--success);
+      color: white;
+      font-size: 12px;
+    }
+
+    .task-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .task-title {
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+
+    .task-block.completed .task-title {
+      text-decoration: line-through;
+      color: var(--text-tertiary);
+    }
+
+    /* Task Properties - Notion style */
+    .task-properties {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+
+    .property-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+    }
+
+    .property-tag.category-health {
+      background: rgba(77, 171, 154, 0.15);
+      color: #4dab9a;
+    }
+
+    .property-tag.category-wealth {
+      background: rgba(249, 203, 64, 0.15);
+      color: #cb8e00;
+    }
+
+    .property-tag.category-career {
+      background: rgba(35, 131, 226, 0.15);
+      color: #2383e2;
+    }
+
+    .property-tag.category-personal {
+      background: rgba(155, 89, 182, 0.15);
+      color: #9b59b6;
+    }
+
+    .property-tag.linked {
+      background: rgba(35, 131, 226, 0.1);
+      color: var(--primary-color);
+    }
+
+    .task-points {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Add Task Block */
+    .add-task-block {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      border-radius: var(--radius);
+      transition: all 0.15s;
+    }
+
+    .add-task-block:hover {
+      background: var(--bg-hover);
+      color: var(--text-secondary);
+    }
+
+    .add-icon {
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    /* Toggle/Collapse */
+    .toggle-header {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toggle-icon {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: var(--text-tertiary);
+      transition: transform 0.2s;
+    }
+
+    .toggle-icon.expanded {
+      transform: rotate(90deg);
+    }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 24px 0;
+    }
+
+    /* Quick Actions - Database style */
+    .quick-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .quick-action-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+      color: var(--text-secondary);
+    }
+
+    .quick-action-btn:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--text-tertiary);
+    }
+
+    /* Mobile Bottom Nav */
+    .bottom-nav {
+      display: flex;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg-primary);
+      border-top: 1px solid var(--border);
+      padding: 8px 0;
+      padding-bottom: calc(8px + env(safe-area-inset-bottom));
+    }
+
+    .bottom-nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: 6px;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+
+    .bottom-nav-item.active {
+      color: var(--text-primary);
+    }
+
+    .bottom-nav-icon {
+      font-size: 20px;
+    }
+
+    .bottom-nav-label {
+      font-size: 10px;
+      font-weight: 500;
+    }
+
+    /* Desktop Styles */
+    @media (min-width: 768px) {
+      .sidebar {
+        display: flex;
+      }
+
+      .main-content {
+        margin-left: 240px;
+      }
+
+      .mobile-header {
+        display: none;
+      }
+
+      .bottom-nav {
+        display: none;
+      }
+
+      .page-content {
+        padding: 40px 48px 48px;
+      }
+
+      .stats-callout {
+        padding: 20px 24px;
+      }
+
+      .stats-row {
+        gap: 32px;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .sidebar {
+        width: 260px;
+      }
+
+      .main-content {
+        margin-left: 260px;
+      }
+
+      .page-content {
+        max-width: 1000px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">G</div>
+        <span class="sidebar-title">Goalix</span>
+      </div>
+
+      <nav class="nav-section">
+        <a class="nav-item active">
+          <span class="nav-icon">📅</span>
+          <span>Today</span>
+          <span class="nav-badge">4</span>
+        </a>
+        <a class="nav-item">
+          <span class="nav-icon">📥</span>
+          <span>Inbox</span>
+        </a>
+        <a class="nav-item">
+          <span class="nav-icon">📆</span>
+          <span>Upcoming</span>
+        </a>
+      </nav>
+
+      <nav class="nav-section">
+        <div class="nav-section-title">Goals</div>
+        <a class="nav-item">
+          <span class="nav-icon">🌟</span>
+          <span>Dreams</span>
+        </a>
+        <a class="nav-item">
+          <span class="nav-icon">🎯</span>
+          <span>5-Year Goals</span>
+        </a>
+        <a class="nav-item">
+          <span class="nav-icon">📊</span>
+          <span>1-Year Goals</span>
+        </a>
+        <a class="nav-item">
+          <span class="nav-icon">📋</span>
+          <span>Monthly</span>
+        </a>
+        <a class="nav-item">
+          <span class="nav-icon">✨</span>
+          <span>Weekly</span>
+        </a>
+      </nav>
+
+      <nav class="nav-section">
+        <div class="nav-section-title">Categories</div>
+        <a class="nav-item">
+          <span class="nav-icon">💪</span>
+          <span>Health</span>
+        </a>
+        <a class="nav-item">
+          <span class="nav-icon">💰</span>
+          <span>Wealth</span>
+        </a>
+        <a class="nav-item">
+          <span class="nav-icon">💼</span>
+          <span>Career</span>
+        </a>
+        <a class="nav-item">
+          <span class="nav-icon">🌱</span>
+          <span>Personal Growth</span>
+        </a>
+      </nav>
+
+      <div class="user-section">
+        <div class="user-card">
+          <div class="user-avatar">JD</div>
+          <div class="user-info">
+            <div class="user-name">John Doe</div>
+            <div class="user-level">Level 4 · Go-Getter</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Mobile Header -->
+      <header class="mobile-header">
+        <button class="menu-btn">☰</button>
+        <span class="mobile-logo">Goalix</span>
+        <button class="menu-btn">⚙️</button>
+      </header>
+
+      <!-- Page Content -->
+      <div class="page-content">
+        <!-- Stats Callout -->
+        <div class="stats-callout">
+          <span class="callout-icon">🔥</span>
+          <div class="callout-content">
+            <div class="callout-title">You're on a roll!</div>
+            <div class="stats-row">
+              <div class="stat-item">
+                <span class="stat-icon">⭐</span>
+                <span class="stat-value">6,420</span>
+                <span class="stat-label">points</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-icon">🔥</span>
+                <span class="stat-value">12</span>
+                <span class="stat-label">day streak</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-icon">✅</span>
+                <span class="stat-value">87%</span>
+                <span class="stat-label">completion</span>
+              </div>
+            </div>
+            <div class="level-progress">
+              <div class="level-bar-bg">
+                <div class="level-bar-fill"></div>
+              </div>
+              <div class="level-text">1,420 / 5,000 XP to Level 5 (Performer)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Page Title -->
+        <h1 class="page-title">Today</h1>
+        <p class="page-subtitle">Sunday, December 29</p>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+          <button class="quick-action-btn">
+            <span>+ Add task</span>
+          </button>
+          <button class="quick-action-btn">
+            <span>🤖 AI Suggest</span>
+          </button>
+          <button class="quick-action-btn">
+            <span>📊 Filter</span>
+          </button>
+        </div>
+
+        <!-- MIT Block -->
+        <div class="block-container">
+          <div class="block-header">
+            <div class="toggle-header">
+              <span class="toggle-icon expanded">▶</span>
+              <span class="block-icon">🎯</span>
+              <span class="block-title">Most Important Task</span>
+            </div>
+            <span class="block-count">· 100 pts</span>
+          </div>
+
+          <div class="task-block mit">
+            <div class="task-checkbox"></div>
+            <div class="task-content">
+              <div class="task-title">Complete quarterly business review presentation</div>
+              <div class="task-properties">
+                <span class="property-tag category-career">💼 Career</span>
+                <span class="property-tag linked">🔗 Q1 Revenue Target</span>
+              </div>
+            </div>
+            <div class="task-points">
+              <span>⭐</span>
+              <span>100</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Primary Tasks Block -->
+        <div class="block-container">
+          <div class="block-header">
+            <div class="toggle-header">
+              <span class="toggle-icon expanded">▶</span>
+              <span class="block-icon">📌</span>
+              <span class="block-title">Primary Tasks</span>
+            </div>
+            <span class="block-count">1/3 · 150 pts</span>
+          </div>
+
+          <div class="task-block completed">
+            <div class="task-checkbox checked">✓</div>
+            <div class="task-content">
+              <div class="task-title">Morning workout - 30 min HIIT</div>
+              <div class="task-properties">
+                <span class="property-tag category-health">💪 Health</span>
+              </div>
+            </div>
+            <div class="task-points">
+              <span>⭐</span>
+              <span>50</span>
+            </div>
+          </div>
+
+          <div class="task-block">
+            <div class="task-checkbox"></div>
+            <div class="task-content">
+              <div class="task-title">Review investment portfolio performance</div>
+              <div class="task-properties">
+                <span class="property-tag category-wealth">💰 Wealth</span>
+                <span class="property-tag linked">🔗 Financial Freedom</span>
+              </div>
+            </div>
+            <div class="task-points">
+              <span>⭐</span>
+              <span>50</span>
+            </div>
+          </div>
+
+          <div class="task-block">
+            <div class="task-checkbox"></div>
+            <div class="task-content">
+              <div class="task-title">Read 20 pages of "The Millionaire Fastlane"</div>
+              <div class="task-properties">
+                <span class="property-tag category-personal">🌱 Growth</span>
+              </div>
+            </div>
+            <div class="task-points">
+              <span>⭐</span>
+              <span>50</span>
+            </div>
+          </div>
+
+          <div class="add-task-block">
+            <span class="add-icon">+</span>
+            <span>Add primary task</span>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Secondary Tasks Block -->
+        <div class="block-container">
+          <div class="block-header">
+            <div class="toggle-header">
+              <span class="toggle-icon expanded">▶</span>
+              <span class="block-icon">📝</span>
+              <span class="block-title">Secondary Tasks</span>
+            </div>
+            <span class="block-count">0/2 · 50 pts</span>
+          </div>
+
+          <div class="task-block">
+            <div class="task-checkbox"></div>
+            <div class="task-content">
+              <div class="task-title">Reply to team emails</div>
+              <div class="task-properties">
+                <span class="property-tag category-career">💼 Career</span>
+              </div>
+            </div>
+            <div class="task-points">
+              <span>⭐</span>
+              <span>25</span>
+            </div>
+          </div>
+
+          <div class="task-block">
+            <div class="task-checkbox"></div>
+            <div class="task-content">
+              <div class="task-title">Organize desk and workspace</div>
+              <div class="task-properties">
+                <span class="property-tag">🏠 Lifestyle</span>
+              </div>
+            </div>
+            <div class="task-points">
+              <span>⭐</span>
+              <span>25</span>
+            </div>
+          </div>
+
+          <div class="add-task-block">
+            <span class="add-icon">+</span>
+            <span>Add secondary task</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Bottom Nav -->
+      <nav class="bottom-nav">
+        <a class="bottom-nav-item active">
+          <span class="bottom-nav-icon">📅</span>
+          <span class="bottom-nav-label">Today</span>
+        </a>
+        <a class="bottom-nav-item">
+          <span class="bottom-nav-icon">🎯</span>
+          <span class="bottom-nav-label">Goals</span>
+        </a>
+        <a class="bottom-nav-item">
+          <span class="bottom-nav-icon">📊</span>
+          <span class="bottom-nav-label">Progress</span>
+        </a>
+        <a class="bottom-nav-item">
+          <span class="bottom-nav-icon">⚙️</span>
+          <span class="bottom-nav-label">Settings</span>
+        </a>
+      </nav>
+    </main>
+  </div>
+</body>
+</html>

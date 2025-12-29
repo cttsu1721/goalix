@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goalix - Todoist Dark</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #1e1e1e;
+      --surface: #282828;
+      --surface-hover: #363636;
+      --text: #eeeeee;
+      --text-secondary: #a1a1a1;
+      --text-tertiary: #6b6b6b;
+      --border: #3d3d3d;
+      --border-light: #333333;
+      --primary: #de483a;
+      --primary-hover: #c53929;
+      --primary-subtle: rgba(222, 72, 58, 0.15);
+      --success: #2ecc71;
+      --success-subtle: rgba(46, 204, 113, 0.15);
+      --warning: #f39c12;
+      --warning-subtle: rgba(243, 156, 18, 0.15);
+      --purple: #9b59b6;
+      --blue: #3498db;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* Layout */
+    .app-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      min-height: 100vh;
+    }
+
+    @media (min-width: 768px) {
+      .app-layout {
+        grid-template-columns: 260px 1fr;
+      }
+    }
+
+    @media (min-width: 1200px) {
+      .app-layout {
+        grid-template-columns: 280px 1fr 320px;
+      }
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: none;
+      flex-direction: column;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+    }
+
+    @media (min-width: 768px) {
+      .sidebar {
+        display: flex;
+      }
+    }
+
+    .sidebar-header {
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .sidebar-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+    }
+
+    .nav-group {
+      margin-bottom: 24px;
+    }
+
+    .nav-group-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-tertiary);
+      padding: 8px 12px 4px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .nav-item:hover {
+      background: var(--surface-hover);
+      color: var(--text);
+    }
+
+    .nav-item.active {
+      background: var(--primary-subtle);
+      color: var(--primary);
+    }
+
+    .nav-item svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .nav-item-label {
+      flex: 1;
+    }
+
+    .nav-item-count {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .goal-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .goal-dot.wealth { background: var(--warning); }
+    .goal-dot.health { background: var(--success); }
+    .goal-dot.career { background: var(--blue); }
+
+    /* Main Content */
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 24px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .menu-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .menu-btn:hover {
+      background: var(--surface-hover);
+      color: var(--text);
+    }
+
+    @media (min-width: 768px) {
+      .menu-btn {
+        display: none;
+      }
+    }
+
+    .page-header {
+      flex: 1;
+    }
+
+    .page-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .page-subtitle {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .icon-btn:hover {
+      background: var(--surface-hover);
+      color: var(--text);
+    }
+
+    .icon-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Content Area */
+    .content-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+    }
+
+    @media (min-width: 768px) {
+      .content-scroll {
+        padding: 32px 48px;
+      }
+    }
+
+    .content-inner {
+      max-width: 720px;
+    }
+
+    /* Section */
+    .section {
+      margin-bottom: 32px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .priority-indicator {
+      width: 4px;
+      height: 14px;
+      border-radius: 2px;
+    }
+
+    .priority-indicator.p1 { background: var(--primary); }
+    .priority-indicator.p2 { background: var(--warning); }
+    .priority-indicator.p3 { background: var(--blue); }
+
+    .section-meta {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    /* MIT Card */
+    .mit-card {
+      background: var(--primary-subtle);
+      border: 1px solid rgba(222, 72, 58, 0.3);
+      border-radius: 10px;
+      padding: 20px;
+    }
+
+    .task-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .checkbox {
+      width: 22px;
+      height: 22px;
+      border: 2px solid var(--primary);
+      border-radius: 50%;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .checkbox:hover {
+      background: rgba(222, 72, 58, 0.2);
+    }
+
+    .checkbox.checked {
+      background: var(--success);
+      border-color: var(--success);
+    }
+
+    .checkbox.checked::after {
+      content: '✓';
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .task-body {
+      flex: 1;
+    }
+
+    .task-title {
+      font-size: 15px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .task-title.done {
+      text-decoration: line-through;
+      color: var(--text-secondary);
+    }
+
+    .task-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .tag.wealth {
+      background: var(--warning-subtle);
+      color: var(--warning);
+    }
+
+    .tag.health {
+      background: var(--success-subtle);
+      color: var(--success);
+    }
+
+    .tag.career {
+      background: rgba(52, 152, 219, 0.15);
+      color: var(--blue);
+    }
+
+    .tag.points {
+      background: var(--primary-subtle);
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* Task List */
+    .task-list {
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .task-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 18px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.1s ease;
+    }
+
+    .task-item:last-child {
+      border-bottom: none;
+    }
+
+    .task-item:hover {
+      background: var(--surface-hover);
+    }
+
+    .task-item .checkbox {
+      border-color: var(--text-tertiary);
+    }
+
+    .task-item .checkbox.p1 { border-color: var(--primary); }
+    .task-item .checkbox.p2 { border-color: var(--warning); }
+    .task-item .checkbox.p3 { border-color: var(--blue); }
+
+    .task-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .task-content .task-title {
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    .task-points {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      white-space: nowrap;
+    }
+
+    .task-points.earned {
+      color: var(--success);
+    }
+
+    /* Add Task */
+    .add-task-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      background: var(--surface);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.1s ease;
+    }
+
+    .add-task-row:hover {
+      color: var(--primary);
+    }
+
+    .add-task-row svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    /* Right Panel - Stats */
+    .right-panel {
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      display: none;
+      flex-direction: column;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      overflow-y: auto;
+    }
+
+    @media (min-width: 1200px) {
+      .right-panel {
+        display: flex;
+      }
+    }
+
+    .panel-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .panel-title {
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+    }
+
+    .panel-content {
+      padding: 20px;
+    }
+
+    .stat-card {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .stat-card-title {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .stat-card-value {
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .stat-card-value.primary { color: var(--primary); }
+    .stat-card-value.warning { color: var(--warning); }
+    .stat-card-value.success { color: var(--success); }
+    .stat-card-value.purple { color: var(--purple); }
+
+    .level-section {
+      margin-top: 8px;
+    }
+
+    .level-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .level-name {
+      font-weight: 600;
+      color: var(--purple);
+    }
+
+    .level-xp {
+      color: var(--text-secondary);
+    }
+
+    .level-bar {
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .level-fill {
+      height: 100%;
+      width: 47%;
+      background: linear-gradient(90deg, var(--purple), #8e44ad);
+      border-radius: 3px;
+    }
+
+    /* Streak Display */
+    .streak-display {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .streak-icon {
+      font-size: 32px;
+    }
+
+    .streak-info {
+      flex: 1;
+    }
+
+    .streak-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--warning);
+    }
+
+    .streak-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    /* Badges Preview */
+    .badges-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .badge-item {
+      aspect-ratio: 1;
+      background: var(--bg);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      opacity: 0.3;
+    }
+
+    .badge-item.earned {
+      opacity: 1;
+    }
+
+    /* Mobile Bottom Nav */
+    .mobile-nav {
+      display: flex;
+      justify-content: space-around;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+    }
+
+    @media (min-width: 768px) {
+      .mobile-nav {
+        display: none;
+      }
+    }
+
+    .mobile-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 16px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 500;
+    }
+
+    .mobile-nav-item.active {
+      color: var(--primary);
+    }
+
+    .mobile-nav-item svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    /* FAB */
+    .fab {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      width: 56px;
+      height: 56px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(222, 72, 58, 0.4);
+      z-index: 90;
+    }
+
+    @media (min-width: 768px) {
+      .fab {
+        bottom: 32px;
+        right: 32px;
+      }
+    }
+
+    @media (min-width: 1200px) {
+      .fab {
+        display: none;
+      }
+    }
+
+    .fab svg {
+      width: 24px;
+      height: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <span class="logo">Goalix</span>
+      </div>
+      <div class="sidebar-content">
+        <div class="nav-group">
+          <a href="#" class="nav-item active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            <span class="nav-item-label">Today</span>
+            <span class="nav-item-count">6</span>
+          </a>
+          <a href="#" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span class="nav-item-label">Upcoming</span>
+            <span class="nav-item-count">12</span>
+          </a>
+          <a href="#" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+            <span class="nav-item-label">Goals</span>
+          </a>
+        </div>
+
+        <div class="nav-group">
+          <div class="nav-group-title">10-Year Dreams</div>
+          <a href="#" class="nav-item">
+            <span class="goal-dot wealth"></span>
+            <span class="nav-item-label">Financial Freedom</span>
+          </a>
+          <a href="#" class="nav-item">
+            <span class="goal-dot health"></span>
+            <span class="nav-item-label">Peak Health</span>
+          </a>
+          <a href="#" class="nav-item">
+            <span class="goal-dot career"></span>
+            <span class="nav-item-label">Career Mastery</span>
+          </a>
+        </div>
+
+        <div class="nav-group">
+          <div class="nav-group-title">Reviews</div>
+          <a href="#" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+            <span class="nav-item-label">Weekly Review</span>
+          </a>
+          <a href="#" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+            <span class="nav-item-label">Progress</span>
+          </a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="top-bar">
+        <button class="menu-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="page-header">
+          <h1 class="page-title">Today</h1>
+          <p class="page-subtitle">Monday, December 30 · 6 tasks</p>
+        </div>
+        <div class="header-actions">
+          <button class="icon-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
+          <button class="icon-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="content-scroll">
+        <div class="content-inner">
+          <!-- MIT -->
+          <section class="section">
+            <div class="section-header">
+              <h2 class="section-title">
+                <span class="priority-indicator p1"></span>
+                Most Important Task
+              </h2>
+              <span class="section-meta">+100 pts</span>
+            </div>
+            <div class="mit-card">
+              <div class="task-row">
+                <div class="checkbox"></div>
+                <div class="task-body">
+                  <h3 class="task-title">Complete quarterly financial review and update investment allocations</h3>
+                  <div class="task-meta">
+                    <span class="tag wealth">Wealth</span>
+                    <span>~45 min</span>
+                    <span class="tag points">100 pts</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Primary Tasks -->
+          <section class="section">
+            <div class="section-header">
+              <h2 class="section-title">
+                <span class="priority-indicator p2"></span>
+                Primary Tasks
+              </h2>
+              <span class="section-meta">2/3 complete</span>
+            </div>
+            <div class="task-list">
+              <div class="task-item">
+                <div class="checkbox p2 checked"></div>
+                <div class="task-content">
+                  <p class="task-title done">Morning workout - 30 min HIIT</p>
+                  <div class="task-meta">
+                    <span class="tag health">Health</span>
+                  </div>
+                </div>
+                <span class="task-points earned">+50</span>
+              </div>
+              <div class="task-item">
+                <div class="checkbox p2 checked"></div>
+                <div class="task-content">
+                  <p class="task-title done">Review client proposals</p>
+                  <div class="task-meta">
+                    <span class="tag career">Career</span>
+                  </div>
+                </div>
+                <span class="task-points earned">+50</span>
+              </div>
+              <div class="task-item">
+                <div class="checkbox p2"></div>
+                <div class="task-content">
+                  <p class="task-title">Read 20 pages of Fastlane book</p>
+                  <div class="task-meta">
+                    <span class="tag wealth">Wealth</span>
+                  </div>
+                </div>
+                <span class="task-points">50</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Secondary Tasks -->
+          <section class="section">
+            <div class="section-header">
+              <h2 class="section-title">
+                <span class="priority-indicator p3"></span>
+                Secondary Tasks
+              </h2>
+              <span class="section-meta">1/2 complete</span>
+            </div>
+            <div class="task-list">
+              <div class="task-item">
+                <div class="checkbox p3 checked"></div>
+                <div class="task-content">
+                  <p class="task-title done">Organize workspace</p>
+                  <div class="task-meta">
+                    <span style="color: var(--text-tertiary)">No goal linked</span>
+                  </div>
+                </div>
+                <span class="task-points earned">+25</span>
+              </div>
+              <div class="task-item">
+                <div class="checkbox p3"></div>
+                <div class="task-content">
+                  <p class="task-title">Schedule dentist appointment</p>
+                  <div class="task-meta">
+                    <span class="tag health">Health</span>
+                  </div>
+                </div>
+                <span class="task-points">25</span>
+              </div>
+              <div class="add-task-row">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                <span>Add task</span>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <!-- Right Panel -->
+    <aside class="right-panel">
+      <div class="panel-header">
+        <h2 class="panel-title">Today's Progress</h2>
+      </div>
+      <div class="panel-content">
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <span class="stat-card-title">Points Earned</span>
+          </div>
+          <div class="stat-card-value primary">175</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="streak-display">
+            <span class="streak-icon">🔥</span>
+            <div class="streak-info">
+              <div class="streak-value">7 days</div>
+              <div class="streak-label">Current streak</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <span class="stat-card-title">Tasks Completed</span>
+          </div>
+          <div class="stat-card-value success">4/6</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <span class="stat-card-title">Goal Alignment</span>
+          </div>
+          <div class="stat-card-value">67%</div>
+          <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">4 of 6 tasks linked to goals</p>
+        </div>
+
+        <div class="stat-card">
+          <div class="level-header">
+            <span class="level-name">Level 3 · Achiever</span>
+            <span class="level-xp">2,350 / 5,000</span>
+          </div>
+          <div class="level-bar">
+            <div class="level-fill"></div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-title" style="margin-bottom: 12px;">Badges</div>
+          <div class="badges-grid">
+            <div class="badge-item earned">🔥</div>
+            <div class="badge-item earned">⭐</div>
+            <div class="badge-item earned">🎯</div>
+            <div class="badge-item">🏆</div>
+            <div class="badge-item">💎</div>
+            <div class="badge-item">🚀</div>
+            <div class="badge-item">👑</div>
+            <div class="badge-item">⚡</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Mobile Nav -->
+  <nav class="mobile-nav">
+    <a href="#" class="mobile-nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Today
+    </a>
+    <a href="#" class="mobile-nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+      Goals
+    </a>
+    <a href="#" class="mobile-nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+      Stats
+    </a>
+    <a href="#" class="mobile-nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      Settings
+    </a>
+  </nav>
+
+  <button class="fab">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+  </button>
+</body>
+</html>

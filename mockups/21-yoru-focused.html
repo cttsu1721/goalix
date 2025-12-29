@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goalix - Yoru Focused</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --night-deep: #070709;
+      --night: #0b0b10;
+      --night-mid: #101016;
+      --night-soft: #16161f;
+      --night-lighter: #1e1e2a;
+      --moonlight: #f0f0f8;
+      --moonlight-dim: #a0a0b8;
+      --moonlight-faint: #606078;
+      --lantern: #e8a857;
+      --lantern-bright: #f4c078;
+      --lantern-soft: rgba(232, 168, 87, 0.12);
+      --lantern-glow: rgba(232, 168, 87, 0.06);
+      --border: rgba(255, 255, 255, 0.04);
+      --success: #4eca7a;
+    }
+
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--night);
+      color: var(--moonlight);
+      min-height: 100vh;
+      font-weight: 400;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Moon glow effect */
+    .moon-glow {
+      position: fixed;
+      top: -100px;
+      right: -100px;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(232, 230, 240, 0.04) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+
+    /* Layout */
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Mini Sidebar */
+    .mini-sidebar {
+      width: 64px;
+      background: var(--night-deep);
+      border-right: 1px solid var(--border);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px 0;
+      position: fixed;
+      height: 100vh;
+      z-index: 100;
+      transition: width 0.3s ease;
+    }
+
+    .mini-sidebar.expanded {
+      width: 240px;
+      align-items: flex-start;
+    }
+
+    .sidebar-toggle {
+      width: 40px;
+      height: 40px;
+      background: var(--night-soft);
+      border: none;
+      border-radius: 10px;
+      color: var(--moonlight-dim);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      margin-bottom: 24px;
+      transition: all 0.2s;
+    }
+
+    .mini-sidebar.expanded .sidebar-toggle {
+      margin-left: 12px;
+    }
+
+    .sidebar-toggle:hover {
+      background: var(--lantern-soft);
+      color: var(--lantern);
+    }
+
+    .mini-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      width: 100%;
+      padding: 0 12px;
+    }
+
+    .mini-nav-item {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      color: var(--moonlight-faint);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 1.125rem;
+      position: relative;
+    }
+
+    .mini-sidebar.expanded .mini-nav-item {
+      width: 100%;
+      justify-content: flex-start;
+      gap: 12px;
+      padding: 0 12px;
+    }
+
+    .mini-nav-item:hover {
+      background: var(--night-soft);
+      color: var(--moonlight-dim);
+    }
+
+    .mini-nav-item.active {
+      background: var(--lantern-soft);
+      color: var(--lantern);
+    }
+
+    .nav-label {
+      display: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+    }
+
+    .mini-sidebar.expanded .nav-label {
+      display: block;
+    }
+
+    .mini-user {
+      margin-top: auto;
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--lantern), #d08030);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--night);
+      cursor: pointer;
+    }
+
+    /* Main */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Mobile header */
+    .mobile-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      background: var(--night-deep);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .mobile-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .mobile-menu {
+      width: 36px;
+      height: 36px;
+      background: var(--night-soft);
+      border: none;
+      border-radius: 8px;
+      color: var(--moonlight-dim);
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    .mobile-title {
+      font-weight: 600;
+      font-size: 1.0625rem;
+    }
+
+    .mobile-streak {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--lantern-glow);
+      border: 1px solid rgba(232, 168, 87, 0.15);
+      border-radius: 20px;
+      font-size: 0.75rem;
+      color: var(--lantern);
+      font-weight: 500;
+    }
+
+    .streak-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--lantern);
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    /* Content */
+    .content {
+      flex: 1;
+      padding: 32px 20px 100px;
+      max-width: 720px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Focus Hero - MIT */
+    .focus-hero {
+      background: linear-gradient(135deg, var(--night-mid) 0%, var(--night-soft) 100%);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px 24px;
+      margin-bottom: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .focus-hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, var(--lantern-glow), transparent 60%);
+      pointer-events: none;
+    }
+
+    .focus-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .focus-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--lantern-soft);
+      border-radius: 8px;
+      font-size: 0.6875rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--lantern);
+    }
+
+    .focus-points {
+      margin-left: auto;
+      font-size: 0.875rem;
+      color: var(--lantern);
+      font-weight: 500;
+    }
+
+    .focus-task {
+      font-size: clamp(1.375rem, 4vw, 1.75rem);
+      font-weight: 500;
+      line-height: 1.4;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .focus-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .focus-tag {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--night-lighter);
+      border-radius: 8px;
+      font-size: 0.8125rem;
+      color: var(--moonlight-dim);
+    }
+
+    .focus-tag.category {
+      background: var(--lantern-glow);
+      color: var(--lantern);
+    }
+
+    /* Complete button */
+    .focus-complete {
+      margin-top: 28px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .complete-btn {
+      width: 56px;
+      height: 56px;
+      background: var(--night);
+      border: 2px solid var(--lantern);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .complete-btn::before {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border: 1px solid var(--lantern);
+      border-radius: 50%;
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+
+    .complete-btn:hover {
+      background: var(--lantern);
+      box-shadow: 0 0 30px var(--lantern-soft);
+    }
+
+    .complete-btn:hover::before {
+      opacity: 0.3;
+      inset: -10px;
+    }
+
+    .complete-btn svg {
+      width: 24px;
+      height: 24px;
+      stroke: var(--lantern);
+      stroke-width: 2;
+      fill: none;
+      transition: stroke 0.3s;
+    }
+
+    .complete-btn:hover svg {
+      stroke: var(--night);
+    }
+
+    .complete-text {
+      font-size: 0.875rem;
+      color: var(--moonlight-dim);
+    }
+
+    .complete-hint {
+      font-size: 0.75rem;
+      color: var(--moonlight-faint);
+      margin-top: 2px;
+    }
+
+    /* Other tasks */
+    .other-section {
+      margin-top: 16px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .section-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-icon {
+      font-size: 1rem;
+    }
+
+    .section-title {
+      font-size: 0.9375rem;
+      font-weight: 500;
+    }
+
+    .section-count {
+      font-size: 0.75rem;
+      color: var(--moonlight-faint);
+    }
+
+    .section-points {
+      font-size: 0.8125rem;
+      color: var(--moonlight-faint);
+    }
+
+    /* Compact task list */
+    .task-list {
+      background: var(--night-mid);
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .task-item:last-child {
+      border-bottom: none;
+    }
+
+    .task-item:hover {
+      background: var(--night-soft);
+    }
+
+    .task-checkbox {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--moonlight-faint);
+      border-radius: 5px;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .task-checkbox:hover {
+      border-color: var(--lantern);
+    }
+
+    .task-checkbox.checked {
+      background: var(--success);
+      border-color: var(--success);
+    }
+
+    .task-checkbox.checked::after {
+      content: '✓';
+      color: white;
+      font-size: 0.625rem;
+      font-weight: 700;
+    }
+
+    .task-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .task-title {
+      font-size: 0.875rem;
+      color: var(--moonlight);
+    }
+
+    .task-item.completed .task-title {
+      text-decoration: line-through;
+      color: var(--moonlight-faint);
+    }
+
+    .task-category {
+      font-size: 0.6875rem;
+      color: var(--moonlight-faint);
+      margin-top: 2px;
+    }
+
+    .task-points {
+      font-size: 0.75rem;
+      color: var(--moonlight-faint);
+      font-weight: 500;
+    }
+
+    /* Add task compact */
+    .add-task-compact {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: var(--moonlight-faint);
+      cursor: pointer;
+      transition: all 0.2s;
+      border-top: 1px solid var(--border);
+      font-size: 0.8125rem;
+    }
+
+    .add-task-compact:hover {
+      background: var(--night-soft);
+      color: var(--lantern);
+    }
+
+    /* Section divider */
+    .section-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 24px 0;
+    }
+
+    /* Stats bar mobile */
+    .stats-bar-mobile {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .stat-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--night-mid);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      flex-shrink: 0;
+    }
+
+    .stat-icon {
+      font-size: 1rem;
+    }
+
+    .stat-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-value {
+      font-size: 0.9375rem;
+      font-weight: 600;
+    }
+
+    .stat-label {
+      font-size: 0.625rem;
+      color: var(--moonlight-faint);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Bottom nav */
+    .bottom-nav {
+      display: flex;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--night-deep);
+      border-top: 1px solid var(--border);
+      padding: 10px 0;
+      padding-bottom: calc(10px + env(safe-area-inset-bottom));
+      z-index: 100;
+    }
+
+    .bottom-nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--moonlight-faint);
+      cursor: pointer;
+    }
+
+    .bottom-nav-item.active {
+      color: var(--lantern);
+    }
+
+    .bottom-nav-icon {
+      font-size: 1.25rem;
+    }
+
+    .bottom-nav-label {
+      font-size: 0.625rem;
+      font-weight: 500;
+    }
+
+    /* Desktop */
+    @media (min-width: 768px) {
+      .mini-sidebar {
+        display: flex;
+      }
+
+      .main {
+        margin-left: 64px;
+      }
+
+      .mini-sidebar.expanded + .main {
+        margin-left: 240px;
+      }
+
+      .mobile-header {
+        display: none;
+      }
+
+      .bottom-nav {
+        display: none;
+      }
+
+      .content {
+        padding: 48px 40px;
+        padding-bottom: 48px;
+      }
+
+      .stats-bar-mobile {
+        display: none;
+      }
+
+      .focus-hero {
+        padding: 40px 32px;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .content {
+        max-width: 800px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="moon-glow"></div>
+
+  <div class="app">
+    <!-- Mini Sidebar -->
+    <aside class="mini-sidebar" id="sidebar">
+      <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+
+      <nav class="mini-nav">
+        <a class="mini-nav-item active">
+          <span>📅</span>
+          <span class="nav-label">Today</span>
+        </a>
+        <a class="mini-nav-item">
+          <span>📥</span>
+          <span class="nav-label">Inbox</span>
+        </a>
+        <a class="mini-nav-item">
+          <span>🎯</span>
+          <span class="nav-label">Goals</span>
+        </a>
+        <a class="mini-nav-item">
+          <span>📊</span>
+          <span class="nav-label">Progress</span>
+        </a>
+        <a class="mini-nav-item">
+          <span>⚙️</span>
+          <span class="nav-label">Settings</span>
+        </a>
+      </nav>
+
+      <div class="mini-user">JD</div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+      <header class="mobile-header">
+        <div class="mobile-left">
+          <button class="mobile-menu">☰</button>
+          <span class="mobile-title">Today</span>
+        </div>
+        <div class="mobile-streak">
+          <span class="streak-dot"></span>
+          <span>12 day streak</span>
+        </div>
+      </header>
+
+      <div class="content">
+        <!-- Mobile stats -->
+        <div class="stats-bar-mobile">
+          <div class="stat-chip">
+            <span class="stat-icon">🔥</span>
+            <div class="stat-info">
+              <span class="stat-value">12</span>
+              <span class="stat-label">Streak</span>
+            </div>
+          </div>
+          <div class="stat-chip">
+            <span class="stat-icon">⭐</span>
+            <div class="stat-info">
+              <span class="stat-value">6,420</span>
+              <span class="stat-label">Points</span>
+            </div>
+          </div>
+          <div class="stat-chip">
+            <span class="stat-icon">🏅</span>
+            <div class="stat-info">
+              <span class="stat-value">Lv 4</span>
+              <span class="stat-label">Go-Getter</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Focus Hero -->
+        <div class="focus-hero">
+          <div class="focus-header">
+            <div class="focus-badge">
+              <span>🎯</span>
+              <span>Most Important</span>
+            </div>
+            <span class="focus-points">+100 pts</span>
+          </div>
+
+          <h1 class="focus-task">Complete quarterly business review presentation</h1>
+
+          <div class="focus-meta">
+            <span class="focus-tag category">💼 Career</span>
+            <span class="focus-tag">~2 hours</span>
+            <span class="focus-tag">🔗 Q1 Revenue</span>
+          </div>
+
+          <div class="focus-complete">
+            <button class="complete-btn">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            <div>
+              <div class="complete-text">Mark as complete</div>
+              <div class="complete-hint">Sunday, December 29</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Primary Tasks -->
+        <div class="other-section">
+          <div class="section-header">
+            <div class="section-left">
+              <span class="section-icon">📌</span>
+              <span class="section-title">Primary</span>
+              <span class="section-count">1/3</span>
+            </div>
+            <span class="section-points">150 pts</span>
+          </div>
+
+          <div class="task-list">
+            <div class="task-item completed">
+              <div class="task-checkbox checked"></div>
+              <div class="task-content">
+                <div class="task-title">Morning workout - 30 min HIIT</div>
+                <div class="task-category">💪 Health</div>
+              </div>
+              <span class="task-points">50</span>
+            </div>
+            <div class="task-item">
+              <div class="task-checkbox"></div>
+              <div class="task-content">
+                <div class="task-title">Review investment portfolio</div>
+                <div class="task-category">💰 Wealth</div>
+              </div>
+              <span class="task-points">50</span>
+            </div>
+            <div class="task-item">
+              <div class="task-checkbox"></div>
+              <div class="task-content">
+                <div class="task-title">Read 20 pages</div>
+                <div class="task-category">🌱 Growth</div>
+              </div>
+              <span class="task-points">50</span>
+            </div>
+            <div class="add-task-compact">
+              <span>+</span>
+              <span>Add task</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <!-- Secondary Tasks -->
+        <div class="other-section">
+          <div class="section-header">
+            <div class="section-left">
+              <span class="section-icon">📝</span>
+              <span class="section-title">Secondary</span>
+              <span class="section-count">0/2</span>
+            </div>
+            <span class="section-points">50 pts</span>
+          </div>
+
+          <div class="task-list">
+            <div class="task-item">
+              <div class="task-checkbox"></div>
+              <div class="task-content">
+                <div class="task-title">Reply to team emails</div>
+                <div class="task-category">💼 Career</div>
+              </div>
+              <span class="task-points">25</span>
+            </div>
+            <div class="task-item">
+              <div class="task-checkbox"></div>
+              <div class="task-content">
+                <div class="task-title">Organize workspace</div>
+                <div class="task-category">🏠 Lifestyle</div>
+              </div>
+              <span class="task-points">25</span>
+            </div>
+            <div class="add-task-compact">
+              <span>+</span>
+              <span>Add task</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Nav -->
+      <nav class="bottom-nav">
+        <a class="bottom-nav-item active">
+          <span class="bottom-nav-icon">📅</span>
+          <span class="bottom-nav-label">Today</span>
+        </a>
+        <a class="bottom-nav-item">
+          <span class="bottom-nav-icon">🎯</span>
+          <span class="bottom-nav-label">Goals</span>
+        </a>
+        <a class="bottom-nav-item">
+          <span class="bottom-nav-icon">📊</span>
+          <span class="bottom-nav-label">Progress</span>
+        </a>
+        <a class="bottom-nav-item">
+          <span class="bottom-nav-icon">⚙️</span>
+          <span class="bottom-nav-label">Settings</span>
+        </a>
+      </nav>
+    </main>
+  </div>
+
+  <script>
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('expanded');
+    }
+  </script>
+</body>
+</html>

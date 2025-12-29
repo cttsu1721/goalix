@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goalix - 旅館 Ryokan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Zen+Kaku+Gothic+New:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --tatami: #d4c5a9;
+      --tatami-dark: #b8a88a;
+      --wood: #8b7355;
+      --wood-dark: #5c4a3a;
+      --shoji: #f5f1e8;
+      --charcoal: #2d2a26;
+      --charcoal-soft: #4a4540;
+      --accent: #8b4513;
+    }
+
+    body {
+      font-family: 'Zen Kaku Gothic New', sans-serif;
+      background: var(--shoji);
+      color: var(--charcoal);
+      min-height: 100vh;
+      font-weight: 300;
+      line-height: 1.8;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Tatami texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(139,115,85,0.03) 2px, rgba(139,115,85,0.03) 4px);
+      pointer-events: none;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .container {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    /* Shoji-style header bar */
+    .header {
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--tatami);
+      animation: fadeUp 0.8s ease-out;
+    }
+
+    .logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.25rem;
+      font-weight: 300;
+      letter-spacing: 0.1em;
+      color: var(--wood-dark);
+    }
+
+    .streak-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: var(--tatami);
+      border-radius: 2px;
+      font-size: 0.6875rem;
+      color: var(--wood-dark);
+    }
+
+    /* Main with wood frame effect */
+    .main {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 48px 24px;
+      position: relative;
+    }
+
+    /* Left wood beam decoration */
+    .wood-beam {
+      display: none;
+    }
+
+    .content-area {
+      max-width: 520px;
+      margin: 0 auto;
+      width: 100%;
+      animation: slideIn 1s ease-out 0.2s both;
+    }
+
+    .date-block {
+      margin-bottom: 48px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--tatami);
+    }
+
+    .date-jp {
+      font-size: 0.625rem;
+      letter-spacing: 0.4em;
+      color: var(--tatami-dark);
+      margin-bottom: 4px;
+    }
+
+    .date-main {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.125rem;
+      color: var(--charcoal-soft);
+    }
+
+    /* MIT Section */
+    .focus-block {
+      background: rgba(212, 197, 169, 0.2);
+      padding: 32px 28px;
+      border-left: 3px solid var(--wood);
+      margin-bottom: 40px;
+    }
+
+    .focus-label {
+      font-size: 0.5625rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--wood);
+      margin-bottom: 20px;
+    }
+
+    .focus-task {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.5rem, 4.5vw, 2rem);
+      font-weight: 400;
+      line-height: 1.5;
+      color: var(--charcoal);
+      margin-bottom: 24px;
+    }
+
+    .focus-meta {
+      display: flex;
+      gap: 20px;
+      font-size: 0.75rem;
+      color: var(--charcoal-soft);
+    }
+
+    /* Complete action */
+    .complete-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid var(--tatami);
+    }
+
+    .complete-btn {
+      width: 44px;
+      height: 44px;
+      background: var(--shoji);
+      border: 1px solid var(--wood);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+
+    .complete-btn:hover {
+      background: var(--wood);
+    }
+
+    .complete-btn svg {
+      width: 18px;
+      height: 18px;
+      stroke: var(--wood);
+      stroke-width: 1.5;
+      fill: none;
+      transition: stroke 0.3s;
+    }
+
+    .complete-btn:hover svg {
+      stroke: var(--shoji);
+    }
+
+    .complete-text {
+      font-size: 0.6875rem;
+      color: var(--charcoal-soft);
+      letter-spacing: 0.05em;
+    }
+
+    /* Other tasks toggle */
+    .other-section {
+      margin-top: 48px;
+    }
+
+    .other-toggle {
+      font-family: inherit;
+      font-size: 0.625rem;
+      letter-spacing: 0.15em;
+      color: var(--tatami-dark);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px 0;
+      transition: color 0.3s;
+    }
+
+    .other-toggle:hover {
+      color: var(--wood);
+    }
+
+    .tasks-panel {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s ease;
+    }
+
+    .tasks-panel.open {
+      max-height: 350px;
+      margin-top: 20px;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--tatami);
+    }
+
+    .task-check {
+      width: 14px;
+      height: 14px;
+      border: 1px solid var(--tatami-dark);
+      cursor: pointer;
+    }
+
+    .task-check:hover {
+      border-color: var(--wood);
+    }
+
+    .task-name {
+      flex: 1;
+      font-size: 0.875rem;
+      color: var(--charcoal-soft);
+    }
+
+    .task-pts {
+      font-size: 0.625rem;
+      color: var(--tatami-dark);
+    }
+
+    /* Footer nav */
+    .footer {
+      padding: 20px 24px;
+      border-top: 1px solid var(--tatami);
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      animation: fadeUp 0.8s ease-out 0.5s both;
+    }
+
+    .nav-link {
+      font-size: 0.625rem;
+      letter-spacing: 0.15em;
+      color: var(--tatami-dark);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      color: var(--wood-dark);
+    }
+
+    /* Desktop */
+    @media (min-width: 768px) {
+      .header { padding: 24px 48px; }
+      .main { padding: 64px 48px; }
+      .footer { padding: 24px 48px; }
+    }
+
+    @media (min-width: 1024px) {
+      .main {
+        padding-left: 120px;
+      }
+
+      .wood-beam {
+        display: block;
+        position: fixed;
+        left: 48px;
+        top: 80px;
+        bottom: 80px;
+        width: 8px;
+        background: linear-gradient(180deg, var(--wood) 0%, var(--wood-dark) 100%);
+        border-radius: 1px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wood-beam"></div>
+
+  <div class="container">
+    <header class="header">
+      <div class="logo">Goalix</div>
+      <div class="streak-badge">
+        <span>🔥</span>
+        <span>12 days</span>
+      </div>
+    </header>
+
+    <main class="main">
+      <div class="content-area">
+        <div class="date-block">
+          <div class="date-jp">日曜日</div>
+          <div class="date-main">December 29, 2024</div>
+        </div>
+
+        <div class="focus-block">
+          <div class="focus-label">Today's Intention</div>
+          <h1 class="focus-task">Complete quarterly business review presentation</h1>
+          <div class="focus-meta">
+            <span>Career</span>
+            <span>·</span>
+            <span>~2 hours</span>
+            <span>·</span>
+            <span>100 pts</span>
+          </div>
+
+          <div class="complete-row">
+            <button class="complete-btn">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            <span class="complete-text">mark as complete</span>
+          </div>
+        </div>
+
+        <div class="other-section">
+          <button class="other-toggle" onclick="toggle()">+ 5 more tasks</button>
+          <div class="tasks-panel" id="panel">
+            <div class="task-item">
+              <div class="task-check"></div>
+              <span class="task-name">Morning workout</span>
+              <span class="task-pts">50</span>
+            </div>
+            <div class="task-item">
+              <div class="task-check"></div>
+              <span class="task-name">Review investments</span>
+              <span class="task-pts">50</span>
+            </div>
+            <div class="task-item">
+              <div class="task-check"></div>
+              <span class="task-name">Read 20 pages</span>
+              <span class="task-pts">50</span>
+            </div>
+            <div class="task-item">
+              <div class="task-check"></div>
+              <span class="task-name">Reply to emails</span>
+              <span class="task-pts">25</span>
+            </div>
+            <div class="task-item">
+              <div class="task-check"></div>
+              <span class="task-name">Organize workspace</span>
+              <span class="task-pts">25</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <a href="#" class="nav-link active">today</a>
+      <a href="#" class="nav-link">dreams</a>
+      <a href="#" class="nav-link">reflect</a>
+    </footer>
+  </div>
+
+  <script>
+    function toggle() {
+      const p = document.getElementById('panel');
+      const b = document.querySelector('.other-toggle');
+      p.classList.toggle('open');
+      b.textContent = p.classList.contains('open') ? '− hide tasks' : '+ 5 more tasks';
+    }
+  </script>
+</body>
+</html>

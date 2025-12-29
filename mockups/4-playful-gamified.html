@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goalix - Playful Gamified</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fef7ff;
+      --surface: #ffffff;
+      --text: #1e1b4b;
+      --text-secondary: #6b7280;
+      --primary: #8b5cf6;
+      --primary-light: #c4b5fd;
+      --secondary: #06b6d4;
+      --accent-pink: #ec4899;
+      --accent-orange: #f97316;
+      --accent-green: #10b981;
+      --accent-yellow: #fbbf24;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Fun Background Pattern */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image:
+        radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(6, 182, 212, 0.08) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 16px 16px 120px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .avatar-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .avatar {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, var(--primary), var(--accent-pink));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
+      border: 4px solid white;
+    }
+
+    .greeting {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .greeting span {
+      color: var(--primary);
+    }
+
+    .date-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      margin-top: 8px;
+    }
+
+    /* Stats Cards - Game Style */
+    .stats-container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+      padding: 4px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .stat-card {
+      flex: 0 0 auto;
+      width: 100px;
+      background: white;
+      border-radius: 20px;
+      padding: 16px 12px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      border: 3px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px) scale(1.02);
+    }
+
+    .stat-card.points {
+      border-color: var(--accent-yellow);
+      background: linear-gradient(to bottom, #fffbeb, white);
+    }
+
+    .stat-card.streak {
+      border-color: var(--accent-orange);
+      background: linear-gradient(to bottom, #fff7ed, white);
+    }
+
+    .stat-card.tasks {
+      border-color: var(--accent-green);
+      background: linear-gradient(to bottom, #ecfdf5, white);
+    }
+
+    .stat-card.level {
+      border-color: var(--primary);
+      background: linear-gradient(to bottom, #f5f3ff, white);
+    }
+
+    .stat-icon {
+      font-size: 28px;
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .stat-card.points .stat-value { color: #b45309; }
+    .stat-card.streak .stat-value { color: #c2410c; }
+    .stat-card.tasks .stat-value { color: #059669; }
+    .stat-card.level .stat-value { color: var(--primary); }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* Level Progress Bar - Game Style */
+    .level-progress {
+      background: white;
+      border-radius: 20px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      border: 3px solid var(--primary-light);
+    }
+
+    .level-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .level-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .level-badge .shield {
+      font-size: 24px;
+    }
+
+    .level-info {
+      font-family: 'Fredoka', sans-serif;
+    }
+
+    .level-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .level-tier {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .xp-text {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .progress-bar-bg {
+      height: 16px;
+      background: #f3f4f6;
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 47%;
+      background: linear-gradient(90deg, var(--primary), var(--accent-pink));
+      border-radius: 10px;
+      position: relative;
+    }
+
+    .progress-bar-fill::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 50%;
+      background: rgba(255,255,255,0.4);
+      border-radius: 10px 10px 0 0;
+    }
+
+    .progress-stars {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      padding: 0 4px;
+    }
+
+    .star {
+      font-size: 16px;
+      opacity: 0.3;
+    }
+
+    .star.filled {
+      opacity: 1;
+    }
+
+    /* MIT Card - Quest Style */
+    .mit-section {
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title .emoji {
+      font-size: 20px;
+    }
+
+    .mit-card {
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      border-radius: 24px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(251, 191, 36, 0.3);
+      border: 3px solid #fbbf24;
+    }
+
+    .mit-card::before {
+      content: '⚔️';
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      font-size: 40px;
+      opacity: 0.3;
+    }
+
+    .quest-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.7);
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #92400e;
+      margin-bottom: 12px;
+    }
+
+    .quest-label .crown {
+      font-size: 14px;
+    }
+
+    .reward-badge {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: #f59e0b;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-family: 'Fredoka', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+    }
+
+    .mit-title {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 1.4;
+      margin-bottom: 16px;
+      color: #78350f;
+      padding-right: 80px;
+    }
+
+    .mit-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .category-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(255,255,255,0.8);
+    }
+
+    .category-pill.wealth { color: #b45309; }
+    .category-pill.health { color: #059669; }
+    .category-pill.career { color: #4f46e5; }
+
+    .complete-btn {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border: 4px solid white;
+      box-shadow: 0 4px 12px rgba(217, 119, 6, 0.4);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .complete-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .complete-btn svg {
+      width: 28px;
+      height: 28px;
+      stroke: white;
+      stroke-width: 3;
+    }
+
+    /* Task List - Checklist Style */
+    .tasks-section {
+      margin-bottom: 20px;
+    }
+
+    .task-card {
+      background: white;
+      border-radius: 16px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      border: 2px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .task-card:hover {
+      border-color: var(--primary-light);
+      transform: translateX(4px);
+    }
+
+    .task-card.completed {
+      background: #f0fdf4;
+      border-color: #86efac;
+    }
+
+    .task-checkbox {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      border: 3px solid #e5e7eb;
+      flex-shrink: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      background: white;
+    }
+
+    .task-card.completed .task-checkbox {
+      background: var(--accent-green);
+      border-color: var(--accent-green);
+    }
+
+    .task-checkbox svg {
+      width: 18px;
+      height: 18px;
+      stroke: white;
+      stroke-width: 3;
+      opacity: 0;
+    }
+
+    .task-card.completed .task-checkbox svg {
+      opacity: 1;
+    }
+
+    .task-content {
+      flex: 1;
+    }
+
+    .task-title {
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+
+    .task-card.completed .task-title {
+      text-decoration: line-through;
+      color: var(--text-secondary);
+    }
+
+    .task-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .task-category {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .task-category.health {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .task-category.wealth {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .task-category.career {
+      background: #e0e7ff;
+      color: #3730a3;
+    }
+
+    .task-reward {
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .task-reward.pending {
+      color: var(--text-secondary);
+    }
+
+    .task-reward.earned {
+      color: var(--accent-green);
+    }
+
+    /* Achievement Toast */
+    .achievement-toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, var(--primary), var(--accent-pink));
+      color: white;
+      padding: 12px 24px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      box-shadow: 0 8px 30px rgba(139, 92, 246, 0.4);
+      z-index: 1000;
+      animation: slideDown 0.5s ease, pulse 2s ease infinite;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: translateX(-50%) scale(1); }
+      50% { transform: translateX(-50%) scale(1.02); }
+    }
+
+    .toast-icon {
+      font-size: 24px;
+    }
+
+    /* Add Task Button */
+    .add-task-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--secondary), #0891b2);
+      color: white;
+      border: none;
+      border-radius: 16px;
+      font-family: 'Fredoka', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 16px rgba(6, 182, 212, 0.4);
+      transition: all 0.2s ease;
+    }
+
+    .add-task-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(6, 182, 212, 0.5);
+    }
+
+    /* Bottom Nav */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      border-top-left-radius: 24px;
+      border-top-right-radius: 24px;
+      padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
+      display: flex;
+      justify-content: space-around;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 8px 20px;
+      border-radius: 16px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-item.active {
+      color: var(--primary);
+      background: #f5f3ff;
+    }
+
+    .nav-item .nav-icon {
+      font-size: 22px;
+    }
+
+    /* Floating Particles */
+    .particle {
+      position: fixed;
+      pointer-events: none;
+      z-index: 0;
+      font-size: 20px;
+      opacity: 0.15;
+      animation: float 20s ease infinite;
+    }
+
+    .particle:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
+    .particle:nth-child(2) { top: 20%; right: 15%; animation-delay: 3s; }
+    .particle:nth-child(3) { top: 60%; left: 5%; animation-delay: 6s; }
+    .particle:nth-child(4) { top: 80%; right: 10%; animation-delay: 9s; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(10deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="particle">⭐</div>
+  <div class="particle">🎯</div>
+  <div class="particle">💎</div>
+  <div class="particle">🏆</div>
+
+  <div class="achievement-toast">
+    <span class="toast-icon">🔥</span>
+    7 Day Streak! Keep it up!
+  </div>
+
+  <div class="container">
+    <header>
+      <div class="avatar-row">
+        <div class="avatar">👑</div>
+      </div>
+      <h1 class="greeting">Hey <span>Alex</span>! Let's crush it! 💪</h1>
+      <div class="date-badge">
+        <span>📅</span>
+        Monday, December 30
+      </div>
+    </header>
+
+    <div class="stats-container">
+      <div class="stat-card points">
+        <div class="stat-icon">⭐</div>
+        <div class="stat-value">175</div>
+        <div class="stat-label">Points</div>
+      </div>
+      <div class="stat-card streak">
+        <div class="stat-icon">🔥</div>
+        <div class="stat-value">7</div>
+        <div class="stat-label">Streak</div>
+      </div>
+      <div class="stat-card tasks">
+        <div class="stat-icon">✅</div>
+        <div class="stat-value">4/6</div>
+        <div class="stat-label">Done</div>
+      </div>
+      <div class="stat-card level">
+        <div class="stat-icon">🛡️</div>
+        <div class="stat-value">Lv.3</div>
+        <div class="stat-label">Rank</div>
+      </div>
+    </div>
+
+    <div class="level-progress">
+      <div class="level-header">
+        <div class="level-badge">
+          <span class="shield">🛡️</span>
+          <div class="level-info">
+            <div class="level-name">Achiever</div>
+            <div class="level-tier">Level 3</div>
+          </div>
+        </div>
+        <span class="xp-text">2,350 / 5,000 XP</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill"></div>
+      </div>
+      <div class="progress-stars">
+        <span class="star filled">⭐</span>
+        <span class="star filled">⭐</span>
+        <span class="star filled">⭐</span>
+        <span class="star">⭐</span>
+        <span class="star">⭐</span>
+      </div>
+    </div>
+
+    <section class="mit-section">
+      <h2 class="section-title">
+        <span class="emoji">⚔️</span>
+        Today's Epic Quest
+      </h2>
+      <div class="mit-card">
+        <div class="quest-label">
+          <span class="crown">👑</span>
+          MOST IMPORTANT TASK
+        </div>
+        <div class="reward-badge">+100 ⭐</div>
+        <h3 class="mit-title">Complete quarterly financial review and update investment allocations</h3>
+        <div class="mit-footer">
+          <span class="category-pill wealth">💰 Wealth</span>
+          <button class="complete-btn">
+            <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="tasks-section">
+      <h2 class="section-title">
+        <span class="emoji">📋</span>
+        Primary Quests (+50 ⭐)
+      </h2>
+
+      <div class="task-card completed">
+        <div class="task-checkbox">
+          <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="task-content">
+          <p class="task-title">Morning workout - 30 min HIIT</p>
+          <div class="task-meta">
+            <span class="task-category health">💚 Health</span>
+            <span class="task-reward earned">+50 ⭐</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-card completed">
+        <div class="task-checkbox">
+          <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="task-content">
+          <p class="task-title">Review client proposals</p>
+          <div class="task-meta">
+            <span class="task-category career">💼 Career</span>
+            <span class="task-reward earned">+50 ⭐</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-card">
+        <div class="task-checkbox"></div>
+        <div class="task-content">
+          <p class="task-title">Read 20 pages - Fastlane book</p>
+          <div class="task-meta">
+            <span class="task-category wealth">💰 Wealth</span>
+            <span class="task-reward pending">50 ⭐</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="tasks-section">
+      <h2 class="section-title">
+        <span class="emoji">✨</span>
+        Side Quests (+25 ⭐)
+      </h2>
+
+      <div class="task-card completed">
+        <div class="task-checkbox">
+          <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="task-content">
+          <p class="task-title">Organize workspace</p>
+          <div class="task-meta">
+            <span class="task-reward earned">+25 ⭐</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="add-task-btn">
+        <span>➕</span>
+        Add New Quest
+      </button>
+    </section>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="#" class="nav-item active">
+      <span class="nav-icon">🏠</span>
+      Today
+    </a>
+    <a href="#" class="nav-item">
+      <span class="nav-icon">🎯</span>
+      Goals
+    </a>
+    <a href="#" class="nav-item">
+      <span class="nav-icon">🏆</span>
+      Badges
+    </a>
+    <a href="#" class="nav-item">
+      <span class="nav-icon">⚙️</span>
+      More
+    </a>
+  </nav>
+</body>
+</html>

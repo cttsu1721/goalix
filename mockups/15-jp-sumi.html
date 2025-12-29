@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goalix - 墨絵 Sumi-e</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Noto+Serif+JP:wght@200;300;400&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --ink: #1a1a1a;
+      --ink-light: #3d3d3d;
+      --ink-wash: #6b6b6b;
+      --rice-paper: #f9f6f0;
+      --rice-paper-dark: #ebe7de;
+      --vermillion: #c41e3a;
+      --vermillion-soft: rgba(196, 30, 58, 0.08);
+    }
+
+    body {
+      font-family: 'Noto Serif JP', serif;
+      background: var(--rice-paper);
+      color: var(--ink);
+      min-height: 100vh;
+      font-weight: 300;
+      line-height: 1.9;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Rice paper texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+    }
+
+    @keyframes brushStroke {
+      from { clip-path: inset(0 100% 0 0); }
+      to { clip-path: inset(0 0 0 0); }
+    }
+
+    @keyframes inkDrop {
+      0% { transform: scale(0) rotate(-10deg); opacity: 0; }
+      60% { transform: scale(1.1) rotate(2deg); }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Brushstroke decoration */
+    .brush-accent {
+      position: absolute;
+      top: -20px;
+      right: -40px;
+      width: 200px;
+      height: 100px;
+      background: linear-gradient(135deg, var(--ink) 0%, transparent 60%);
+      opacity: 0.03;
+      transform: rotate(-15deg);
+      border-radius: 50%;
+    }
+
+    /* Header */
+    .header {
+      padding: 32px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      animation: fadeIn 1s ease-out;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .logo {
+      font-family: 'EB Garamond', serif;
+      font-size: 1.375rem;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      color: var(--ink);
+    }
+
+    .logo-kanji {
+      font-size: 0.6875rem;
+      letter-spacing: 0.3em;
+      color: var(--ink-wash);
+    }
+
+    /* Hanko seal */
+    .hanko {
+      width: 40px;
+      height: 40px;
+      background: var(--vermillion);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: inkDrop 0.8s ease-out 0.6s both;
+      position: relative;
+    }
+
+    .hanko::after {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      border: 1px solid rgba(255,255,255,0.25);
+    }
+
+    .hanko-text {
+      color: var(--rice-paper);
+      font-size: 0.6875rem;
+      font-weight: 400;
+    }
+
+    /* Main */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 32px 28px 64px;
+    }
+
+    .content {
+      max-width: 540px;
+      animation: fadeIn 1.2s ease-out 0.3s both;
+    }
+
+    /* Date with brush line */
+    .date-area {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 56px;
+    }
+
+    .brush-line {
+      width: 48px;
+      height: 3px;
+      background: var(--ink);
+      animation: brushStroke 0.8s ease-out 0.8s both;
+    }
+
+    .date-text {
+      font-size: 0.8125rem;
+      color: var(--ink-wash);
+      letter-spacing: 0.05em;
+    }
+
+    /* MIT - Calligraphic focus */
+    .focus-area {
+      position: relative;
+    }
+
+    .focus-label {
+      font-size: 0.5625rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--ink-wash);
+      margin-bottom: 20px;
+    }
+
+    .focus-task {
+      font-family: 'EB Garamond', serif;
+      font-size: clamp(1.75rem, 5.5vw, 2.5rem);
+      font-weight: 400;
+      line-height: 1.45;
+      color: var(--ink);
+      margin-bottom: 28px;
+      letter-spacing: 0.01em;
+    }
+
+    .focus-meta {
+      display: flex;
+      gap: 20px;
+      font-size: 0.75rem;
+      color: var(--ink-light);
+    }
+
+    .meta-sep {
+      color: var(--rice-paper-dark);
+    }
+
+    /* Complete - Circle brush stroke */
+    .complete-section {
+      margin-top: 48px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .complete-btn {
+      width: 60px;
+      height: 60px;
+      background: transparent;
+      border: 2px solid var(--ink);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.4s ease;
+      position: relative;
+    }
+
+    .complete-btn::before {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border: 1px solid var(--ink);
+      border-radius: 50%;
+      opacity: 0;
+      transition: all 0.4s ease;
+    }
+
+    .complete-btn:hover {
+      background: var(--ink);
+    }
+
+    .complete-btn:hover::before {
+      opacity: 0.2;
+      inset: -10px;
+    }
+
+    .complete-btn svg {
+      width: 22px;
+      height: 22px;
+      stroke: var(--ink);
+      stroke-width: 1.5;
+      fill: none;
+      transition: stroke 0.4s;
+    }
+
+    .complete-btn:hover svg {
+      stroke: var(--rice-paper);
+    }
+
+    .complete-text {
+      font-size: 0.6875rem;
+      color: var(--ink-wash);
+      letter-spacing: 0.08em;
+    }
+
+    /* Other tasks */
+    .other-area {
+      margin-top: 72px;
+    }
+
+    .other-toggle {
+      font-family: inherit;
+      font-size: 0.625rem;
+      letter-spacing: 0.2em;
+      color: var(--ink-wash);
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: color 0.3s;
+    }
+
+    .other-toggle:hover {
+      color: var(--ink);
+    }
+
+    .toggle-brush {
+      width: 24px;
+      height: 2px;
+      background: var(--ink-wash);
+      transition: all 0.3s;
+    }
+
+    .other-toggle:hover .toggle-brush {
+      width: 40px;
+      background: var(--ink);
+    }
+
+    .tasks-list {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s ease;
+    }
+
+    .tasks-list.open {
+      max-height: 350px;
+      margin-top: 24px;
+    }
+
+    .task-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--rice-paper-dark);
+    }
+
+    .task-circle {
+      width: 14px;
+      height: 14px;
+      border: 1.5px solid var(--ink-wash);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .task-circle:hover {
+      border-color: var(--vermillion);
+      background: var(--vermillion-soft);
+    }
+
+    .task-title {
+      flex: 1;
+      font-size: 0.875rem;
+      color: var(--ink-light);
+    }
+
+    .task-pts {
+      font-size: 0.625rem;
+      color: var(--ink-wash);
+    }
+
+    /* Footer */
+    .footer {
+      padding: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: fadeIn 1s ease-out 0.8s both;
+    }
+
+    .footer-nav {
+      display: flex;
+      gap: 32px;
+    }
+
+    .nav-link {
+      font-size: 0.625rem;
+      letter-spacing: 0.15em;
+      color: var(--ink-wash);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      color: var(--ink);
+    }
+
+    .whisper {
+      font-size: 0.5625rem;
+      color: var(--rice-paper-dark);
+    }
+
+    @media (min-width: 768px) {
+      .header { padding: 40px 56px; }
+      .main { padding: 56px; }
+      .footer { padding: 40px 56px; }
+      .brush-accent { width: 300px; height: 150px; }
+    }
+
+    @media (min-width: 1024px) {
+      .content { max-width: 600px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="brush-accent"></div>
+
+  <div class="container">
+    <header class="header">
+      <div class="brand">
+        <div class="logo">Goalix</div>
+        <div class="logo-kanji">目標</div>
+      </div>
+      <div class="hanko">
+        <span class="hanko-text">12</span>
+      </div>
+    </header>
+
+    <main class="main">
+      <div class="content">
+        <div class="date-area">
+          <div class="brush-line"></div>
+          <span class="date-text">Sunday, December 29</span>
+        </div>
+
+        <div class="focus-area">
+          <div class="focus-label">Your Focus</div>
+          <h1 class="focus-task">Complete quarterly business review presentation</h1>
+          <div class="focus-meta">
+            <span>Career</span>
+            <span class="meta-sep">—</span>
+            <span>~2 hours</span>
+            <span class="meta-sep">—</span>
+            <span>100 pts</span>
+          </div>
+        </div>
+
+        <div class="complete-section">
+          <button class="complete-btn">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>
+          <span class="complete-text">complete</span>
+        </div>
+
+        <div class="other-area">
+          <button class="other-toggle" onclick="toggleTasks()">
+            <span class="toggle-brush"></span>
+            <span id="toggleText">5 remaining</span>
+          </button>
+
+          <div class="tasks-list" id="tasksList">
+            <div class="task-row">
+              <div class="task-circle"></div>
+              <span class="task-title">Morning workout</span>
+              <span class="task-pts">50</span>
+            </div>
+            <div class="task-row">
+              <div class="task-circle"></div>
+              <span class="task-title">Review investments</span>
+              <span class="task-pts">50</span>
+            </div>
+            <div class="task-row">
+              <div class="task-circle"></div>
+              <span class="task-title">Read 20 pages</span>
+              <span class="task-pts">50</span>
+            </div>
+            <div class="task-row">
+              <div class="task-circle"></div>
+              <span class="task-title">Reply to emails</span>
+              <span class="task-pts">25</span>
+            </div>
+            <div class="task-row">
+              <div class="task-circle"></div>
+              <span class="task-title">Organize workspace</span>
+              <span class="task-pts">25</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <nav class="footer-nav">
+        <a href="#" class="nav-link active">today</a>
+        <a href="#" class="nav-link">dreams</a>
+        <a href="#" class="nav-link">reflect</a>
+      </nav>
+      <span class="whisper">6,420 pts · level 4</span>
+    </footer>
+  </div>
+
+  <script>
+    function toggleTasks() {
+      const list = document.getElementById('tasksList');
+      const text = document.getElementById('toggleText');
+      list.classList.toggle('open');
+      text.textContent = list.classList.contains('open') ? 'hide' : '5 remaining';
+    }
+  </script>
+</body>
+</html>

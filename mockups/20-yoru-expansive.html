@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goalix - Yoru Expansive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --night-deep: #08080c;
+      --night: #0c0c12;
+      --night-mid: #111118;
+      --night-soft: #181822;
+      --night-lighter: #22222e;
+      --moonlight: #eeeef4;
+      --moonlight-dim: #9898ac;
+      --moonlight-faint: #5c5c70;
+      --lantern: #e8a857;
+      --lantern-bright: #f0b86a;
+      --lantern-soft: rgba(232, 168, 87, 0.12);
+      --lantern-glow: rgba(232, 168, 87, 0.06);
+      --border: rgba(255, 255, 255, 0.05);
+      --success: #5cb87a;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--night);
+      color: var(--moonlight);
+      min-height: 100vh;
+      font-weight: 400;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Ambient moon glow */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 60%;
+      height: 40%;
+      background: radial-gradient(ellipse at 80% 0%, rgba(232, 230, 240, 0.025), transparent 50%);
+      pointer-events: none;
+    }
+
+    /* Layout - 3 column */
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Icon Sidebar */
+    .icon-sidebar {
+      width: 72px;
+      background: var(--night-deep);
+      border-right: 1px solid var(--border);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px 0;
+      position: fixed;
+      height: 100vh;
+      z-index: 100;
+    }
+
+    .icon-logo {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, var(--lantern), #d4883a);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.125rem;
+      color: var(--night);
+      margin-bottom: 32px;
+    }
+
+    .icon-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .icon-nav-item {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      color: var(--moonlight-faint);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 1.25rem;
+      position: relative;
+    }
+
+    .icon-nav-item:hover {
+      background: var(--night-soft);
+      color: var(--moonlight-dim);
+    }
+
+    .icon-nav-item.active {
+      background: var(--lantern-soft);
+      color: var(--lantern);
+    }
+
+    .icon-nav-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 20px;
+      background: var(--lantern);
+      border-radius: 0 2px 2px 0;
+    }
+
+    .icon-nav-badge {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 8px;
+      height: 8px;
+      background: var(--lantern);
+      border-radius: 50%;
+    }
+
+    .icon-user {
+      width: 36px;
+      height: 36px;
+      background: var(--night-soft);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8125rem;
+      color: var(--moonlight-dim);
+      cursor: pointer;
+      margin-top: auto;
+    }
+
+    /* Main content */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Mobile header */
+    .mobile-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: var(--night-deep);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .mobile-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mobile-logo {
+      width: 32px;
+      height: 32px;
+      background: var(--lantern);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.875rem;
+      color: var(--night);
+    }
+
+    .mobile-title {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .mobile-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .mobile-btn {
+      width: 36px;
+      height: 36px;
+      background: var(--night-soft);
+      border: none;
+      border-radius: 10px;
+      color: var(--moonlight-dim);
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    /* Content wrapper */
+    .content-wrapper {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* Task area */
+    .task-area {
+      flex: 1;
+      padding: 24px 20px 100px;
+      overflow-y: auto;
+    }
+
+    /* Page header */
+    .page-header {
+      margin-bottom: 32px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+
+    .page-header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .page-title {
+      font-size: 1.75rem;
+      font-weight: 600;
+    }
+
+    .page-date {
+      font-size: 0.875rem;
+      color: var(--moonlight-faint);
+    }
+
+    .ai-btn {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: var(--lantern-soft);
+      border: 1px solid rgba(232, 168, 87, 0.2);
+      border-radius: 10px;
+      color: var(--lantern);
+      font-family: inherit;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .ai-btn:hover {
+      background: rgba(232, 168, 87, 0.18);
+    }
+
+    /* Task sections */
+    .task-section {
+      margin-bottom: 32px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--night-soft);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9375rem;
+    }
+
+    .section-icon.mit {
+      background: var(--lantern-soft);
+    }
+
+    .section-info {
+      flex: 1;
+    }
+
+    .section-title {
+      font-size: 0.9375rem;
+      font-weight: 500;
+    }
+
+    .section-subtitle {
+      font-size: 0.75rem;
+      color: var(--moonlight-faint);
+    }
+
+    .section-points {
+      font-size: 0.8125rem;
+      color: var(--lantern);
+      font-weight: 500;
+    }
+
+    /* Task items */
+    .task-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 16px;
+      background: var(--night-mid);
+      border-radius: 12px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+
+    .task-item:hover {
+      background: var(--night-soft);
+      border-color: var(--border);
+    }
+
+    .task-item.mit {
+      background: var(--lantern-glow);
+      border: 1px solid rgba(232, 168, 87, 0.15);
+    }
+
+    .task-item.mit:hover {
+      background: var(--lantern-soft);
+    }
+
+    .task-checkbox {
+      width: 22px;
+      height: 22px;
+      border: 2px solid var(--moonlight-faint);
+      border-radius: 6px;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+    }
+
+    .task-checkbox:hover {
+      border-color: var(--lantern);
+      box-shadow: 0 0 16px var(--lantern-glow);
+    }
+
+    .task-item.mit .task-checkbox {
+      border-color: var(--lantern);
+      border-radius: 50%;
+    }
+
+    .task-checkbox.checked {
+      background: var(--success);
+      border-color: var(--success);
+    }
+
+    .task-checkbox.checked::after {
+      content: '✓';
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .task-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .task-title {
+      font-size: 0.9375rem;
+      font-weight: 500;
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+
+    .task-item.completed .task-title {
+      text-decoration: line-through;
+      color: var(--moonlight-faint);
+    }
+
+    .task-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .task-tag {
+      font-size: 0.6875rem;
+      padding: 3px 10px;
+      background: var(--night-lighter);
+      border-radius: 6px;
+      color: var(--moonlight-dim);
+    }
+
+    .task-tag.category {
+      background: var(--lantern-glow);
+      color: var(--lantern);
+    }
+
+    .task-points {
+      margin-left: auto;
+      font-size: 0.8125rem;
+      color: var(--moonlight-faint);
+      font-weight: 500;
+    }
+
+    .task-item.mit .task-points {
+      color: var(--lantern);
+    }
+
+    /* Add task */
+    .add-task {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      background: none;
+      border: 1px dashed var(--night-lighter);
+      border-radius: 12px;
+      color: var(--moonlight-faint);
+      font-family: inherit;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+    }
+
+    .add-task:hover {
+      border-color: var(--lantern);
+      color: var(--lantern);
+      background: var(--lantern-glow);
+    }
+
+    /* Stats panel (right) */
+    .stats-panel {
+      width: 280px;
+      background: var(--night-deep);
+      border-left: 1px solid var(--border);
+      padding: 24px;
+      display: none;
+      flex-direction: column;
+      gap: 24px;
+      overflow-y: auto;
+    }
+
+    .stats-card {
+      background: var(--night-mid);
+      border-radius: 16px;
+      padding: 20px;
+    }
+
+    .stats-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .stats-card-icon {
+      font-size: 1.25rem;
+    }
+
+    .stats-card-title {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--moonlight-dim);
+    }
+
+    .stats-value {
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .stats-label {
+      font-size: 0.75rem;
+      color: var(--moonlight-faint);
+    }
+
+    /* Streak card special */
+    .streak-card .stats-value {
+      color: var(--lantern);
+    }
+
+    /* Level progress */
+    .level-progress {
+      margin-top: 16px;
+    }
+
+    .level-bar {
+      height: 6px;
+      background: var(--night-lighter);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .level-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--lantern), var(--lantern-bright));
+      border-radius: 3px;
+      width: 65%;
+    }
+
+    .level-text {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.6875rem;
+      color: var(--moonlight-faint);
+      margin-top: 8px;
+    }
+
+    /* Today progress */
+    .today-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .today-stat {
+      text-align: center;
+      padding: 12px;
+      background: var(--night-soft);
+      border-radius: 10px;
+    }
+
+    .today-stat-value {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .today-stat-label {
+      font-size: 0.625rem;
+      color: var(--moonlight-faint);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Bottom nav */
+    .bottom-nav {
+      display: flex;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--night-deep);
+      border-top: 1px solid var(--border);
+      padding: 10px 0;
+      padding-bottom: calc(10px + env(safe-area-inset-bottom));
+      z-index: 100;
+    }
+
+    .bottom-nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--moonlight-faint);
+      cursor: pointer;
+    }
+
+    .bottom-nav-item.active {
+      color: var(--lantern);
+    }
+
+    .bottom-nav-icon {
+      font-size: 1.25rem;
+    }
+
+    .bottom-nav-label {
+      font-size: 0.625rem;
+      font-weight: 500;
+    }
+
+    /* Desktop */
+    @media (min-width: 768px) {
+      .icon-sidebar {
+        display: flex;
+      }
+
+      .main {
+        margin-left: 72px;
+      }
+
+      .mobile-header {
+        display: none;
+      }
+
+      .bottom-nav {
+        display: none;
+      }
+
+      .task-area {
+        padding: 40px;
+        padding-bottom: 40px;
+      }
+
+      .ai-btn {
+        display: flex;
+      }
+    }
+
+    @media (min-width: 1200px) {
+      .stats-panel {
+        display: flex;
+      }
+
+      .task-area {
+        padding: 48px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Icon Sidebar -->
+    <aside class="icon-sidebar">
+      <div class="icon-logo">G</div>
+
+      <nav class="icon-nav">
+        <a class="icon-nav-item active">
+          <span>📅</span>
+          <span class="icon-nav-badge"></span>
+        </a>
+        <a class="icon-nav-item">
+          <span>📥</span>
+        </a>
+        <a class="icon-nav-item">
+          <span>🎯</span>
+        </a>
+        <a class="icon-nav-item">
+          <span>📊</span>
+        </a>
+        <a class="icon-nav-item">
+          <span>🏆</span>
+        </a>
+      </nav>
+
+      <div class="icon-user">JD</div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+      <header class="mobile-header">
+        <div class="mobile-brand">
+          <div class="mobile-logo">G</div>
+          <span class="mobile-title">Today</span>
+        </div>
+        <div class="mobile-actions">
+          <button class="mobile-btn">🤖</button>
+          <button class="mobile-btn">⚙️</button>
+        </div>
+      </header>
+
+      <div class="content-wrapper">
+        <div class="task-area">
+          <div class="page-header">
+            <div class="page-header-left">
+              <h1 class="page-title">Today</h1>
+              <p class="page-date">Sunday, December 29 · 6 tasks</p>
+            </div>
+            <button class="ai-btn">
+              <span>🤖</span>
+              <span>AI Suggest</span>
+            </button>
+          </div>
+
+          <!-- MIT -->
+          <div class="task-section">
+            <div class="section-header">
+              <div class="section-icon mit">🎯</div>
+              <div class="section-info">
+                <div class="section-title">Most Important Task</div>
+                <div class="section-subtitle">Your #1 priority today</div>
+              </div>
+              <span class="section-points">100 pts</span>
+            </div>
+
+            <div class="task-item mit">
+              <div class="task-checkbox"></div>
+              <div class="task-content">
+                <div class="task-title">Complete quarterly business review presentation</div>
+                <div class="task-meta">
+                  <span class="task-tag category">💼 Career</span>
+                  <span class="task-tag">~2 hours</span>
+                  <span class="task-tag">🔗 Q1 Revenue</span>
+                </div>
+              </div>
+              <span class="task-points">100</span>
+            </div>
+          </div>
+
+          <!-- Primary -->
+          <div class="task-section">
+            <div class="section-header">
+              <div class="section-icon">📌</div>
+              <div class="section-info">
+                <div class="section-title">Primary Tasks</div>
+                <div class="section-subtitle">1 of 3 completed</div>
+              </div>
+              <span class="section-points">150 pts</span>
+            </div>
+
+            <div class="task-item completed">
+              <div class="task-checkbox checked"></div>
+              <div class="task-content">
+                <div class="task-title">Morning workout - 30 min HIIT</div>
+                <div class="task-meta">
+                  <span class="task-tag category">💪 Health</span>
+                </div>
+              </div>
+              <span class="task-points">50</span>
+            </div>
+
+            <div class="task-item">
+              <div class="task-checkbox"></div>
+              <div class="task-content">
+                <div class="task-title">Review investment portfolio performance</div>
+                <div class="task-meta">
+                  <span class="task-tag category">💰 Wealth</span>
+                  <span class="task-tag">~45 min</span>
+                </div>
+              </div>
+              <span class="task-points">50</span>
+            </div>
+
+            <div class="task-item">
+              <div class="task-checkbox"></div>
+              <div class="task-content">
+                <div class="task-title">Read 20 pages of "The Millionaire Fastlane"</div>
+                <div class="task-meta">
+                  <span class="task-tag category">🌱 Growth</span>
+                  <span class="task-tag">~30 min</span>
+                </div>
+              </div>
+              <span class="task-points">50</span>
+            </div>
+
+            <button class="add-task">
+              <span>+</span>
+              <span>Add primary task</span>
+            </button>
+          </div>
+
+          <!-- Secondary -->
+          <div class="task-section">
+            <div class="section-header">
+              <div class="section-icon">📝</div>
+              <div class="section-info">
+                <div class="section-title">Secondary Tasks</div>
+                <div class="section-subtitle">0 of 2 completed</div>
+              </div>
+              <span class="section-points">50 pts</span>
+            </div>
+
+            <div class="task-item">
+              <div class="task-checkbox"></div>
+              <div class="task-content">
+                <div class="task-title">Reply to team emails</div>
+                <div class="task-meta">
+                  <span class="task-tag category">💼 Career</span>
+                </div>
+              </div>
+              <span class="task-points">25</span>
+            </div>
+
+            <div class="task-item">
+              <div class="task-checkbox"></div>
+              <div class="task-content">
+                <div class="task-title">Organize workspace</div>
+                <div class="task-meta">
+                  <span class="task-tag">🏠 Lifestyle</span>
+                </div>
+              </div>
+              <span class="task-points">25</span>
+            </div>
+
+            <button class="add-task">
+              <span>+</span>
+              <span>Add secondary task</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Stats Panel -->
+        <aside class="stats-panel">
+          <div class="stats-card streak-card">
+            <div class="stats-card-header">
+              <span class="stats-card-icon">🔥</span>
+              <span class="stats-card-title">Current Streak</span>
+            </div>
+            <div class="stats-value">12</div>
+            <div class="stats-label">consecutive days</div>
+          </div>
+
+          <div class="stats-card">
+            <div class="stats-card-header">
+              <span class="stats-card-icon">⭐</span>
+              <span class="stats-card-title">Total Points</span>
+            </div>
+            <div class="stats-value">6,420</div>
+            <div class="stats-label">lifetime earned</div>
+
+            <div class="level-progress">
+              <div class="level-bar">
+                <div class="level-fill"></div>
+              </div>
+              <div class="level-text">
+                <span>Level 4 · Go-Getter</span>
+                <span>1,420 / 5,000</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="stats-card">
+            <div class="stats-card-header">
+              <span class="stats-card-icon">📊</span>
+              <span class="stats-card-title">Today's Progress</span>
+            </div>
+            <div class="today-stats">
+              <div class="today-stat">
+                <div class="today-stat-value">1/6</div>
+                <div class="today-stat-label">Tasks</div>
+              </div>
+              <div class="today-stat">
+                <div class="today-stat-value">50</div>
+                <div class="today-stat-label">Points</div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Bottom Nav -->
+      <nav class="bottom-nav">
+        <a class="bottom-nav-item active">
+          <span class="bottom-nav-icon">📅</span>
+          <span class="bottom-nav-label">Today</span>
+        </a>
+        <a class="bottom-nav-item">
+          <span class="bottom-nav-icon">🎯</span>
+          <span class="bottom-nav-label">Goals</span>
+        </a>
+        <a class="bottom-nav-item">
+          <span class="bottom-nav-icon">📊</span>
+          <span class="bottom-nav-label">Progress</span>
+        </a>
+        <a class="bottom-nav-item">
+          <span class="bottom-nav-icon">⚙️</span>
+          <span class="bottom-nav-label">Settings</span>
+        </a>
+      </nav>
+    </main>
+  </div>
+</body>
+</html>

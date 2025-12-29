@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goalix - Bold Vibrant</title>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fffbeb;
+      --surface: #ffffff;
+      --text: #0f172a;
+      --text-secondary: #64748b;
+      --primary: #f97316;
+      --primary-dark: #ea580c;
+      --secondary: #0ea5e9;
+      --accent-purple: #a855f7;
+      --accent-green: #22c55e;
+      --success: #22c55e;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 20px 16px 120px;
+      position: relative;
+    }
+
+    /* Decorative Elements */
+    .bg-shape {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.4;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .bg-shape.orange {
+      width: 300px;
+      height: 300px;
+      background: var(--primary);
+      top: -100px;
+      right: -100px;
+    }
+
+    .bg-shape.blue {
+      width: 200px;
+      height: 200px;
+      background: var(--secondary);
+      bottom: 200px;
+      left: -80px;
+    }
+
+    /* Header */
+    header {
+      position: relative;
+      z-index: 1;
+      margin-bottom: 24px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .logo {
+      font-family: 'Archivo Black', sans-serif;
+      font-size: 24px;
+      color: var(--primary);
+      letter-spacing: -0.02em;
+    }
+
+    .streak-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 8px 14px;
+      border-radius: 24px;
+      font-weight: 600;
+      font-size: 14px;
+      box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);
+    }
+
+    .streak-badge svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .greeting {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .date-title {
+      font-family: 'Archivo Black', sans-serif;
+      font-size: 36px;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 28px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      border: 2px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+
+    .stat-card.highlight {
+      background: linear-gradient(135deg, var(--primary), #fb923c);
+      color: white;
+      border: none;
+    }
+
+    .stat-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      background: rgba(15, 23, 42, 0.06);
+    }
+
+    .stat-card.highlight .stat-icon {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .stat-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .stat-value {
+      font-family: 'Archivo Black', sans-serif;
+      font-size: 28px;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 500;
+    }
+
+    .stat-card.highlight .stat-label {
+      color: rgba(255,255,255,0.8);
+    }
+
+    /* Level Progress */
+    .level-section {
+      background: var(--surface);
+      border-radius: 20px;
+      padding: 18px;
+      margin-bottom: 28px;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .level-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .level-title {
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    .level-badge {
+      background: var(--accent-purple);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .level-bar-container {
+      background: #f1f5f9;
+      border-radius: 10px;
+      height: 12px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .level-bar-fill {
+      height: 100%;
+      width: 47%;
+      background: linear-gradient(90deg, var(--accent-purple), #c084fc);
+      border-radius: 10px;
+      position: relative;
+      transition: width 0.5s ease;
+    }
+
+    .level-bar-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 50%;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.3), transparent);
+      border-radius: 10px 10px 0 0;
+    }
+
+    .level-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 8px;
+    }
+
+    /* MIT Section */
+    .mit-section {
+      margin-bottom: 28px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-family: 'Archivo Black', sans-serif;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title svg {
+      color: var(--primary);
+    }
+
+    .points-indicator {
+      background: #fef3c7;
+      color: #d97706;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .mit-card {
+      background: var(--surface);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      border: 3px solid var(--primary);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mit-card::before {
+      content: '⚡';
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 48px;
+      opacity: 0.15;
+    }
+
+    .mit-category {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-bottom: 12px;
+    }
+
+    .mit-category.wealth {
+      background: #fef3c7;
+      color: #b45309;
+    }
+
+    .mit-category.health {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .mit-category.career {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .mit-title {
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 16px;
+      padding-right: 40px;
+    }
+
+    .mit-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .mit-time {
+      font-size: 13px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mit-checkbox {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 3px solid var(--primary);
+      background: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .mit-checkbox:hover {
+      background: var(--primary);
+      transform: scale(1.05);
+    }
+
+    .mit-checkbox:hover svg {
+      stroke: white;
+    }
+
+    .mit-checkbox svg {
+      width: 24px;
+      height: 24px;
+      stroke: var(--primary);
+      stroke-width: 3;
+    }
+
+    /* Tasks Section */
+    .tasks-section {
+      margin-bottom: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .task-item {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      transition: all 0.2s ease;
+    }
+
+    .task-item:hover {
+      transform: translateX(4px);
+    }
+
+    .task-checkbox {
+      width: 28px;
+      height: 28px;
+      border-radius: 10px;
+      border: 2px solid #e2e8f0;
+      flex-shrink: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .task-checkbox:hover {
+      border-color: var(--success);
+    }
+
+    .task-checkbox.checked {
+      background: var(--success);
+      border-color: var(--success);
+    }
+
+    .task-checkbox.checked svg {
+      display: block;
+    }
+
+    .task-checkbox svg {
+      width: 16px;
+      height: 16px;
+      stroke: white;
+      stroke-width: 3;
+      display: none;
+    }
+
+    .task-content {
+      flex: 1;
+    }
+
+    .task-title {
+      font-weight: 600;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+
+    .task-title.completed {
+      text-decoration: line-through;
+      color: var(--text-secondary);
+    }
+
+    .task-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .task-category {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+
+    .task-category.health {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .task-category.wealth {
+      background: #fef3c7;
+      color: #b45309;
+    }
+
+    .task-category.career {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .task-points {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .task-points.earned {
+      color: var(--success);
+    }
+
+    /* Add Button */
+    .add-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--secondary), #38bdf8);
+      color: white;
+      border: none;
+      border-radius: 16px;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 16px rgba(14, 165, 233, 0.4);
+      transition: all 0.2s ease;
+    }
+
+    .add-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(14, 165, 233, 0.5);
+    }
+
+    /* Bottom Nav */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      padding: 12px 24px calc(12px + env(safe-area-inset-bottom));
+      display: flex;
+      justify-content: space-around;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 16px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-item.active {
+      color: var(--primary);
+      background: #fff7ed;
+    }
+
+    .nav-item svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* Animations */
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .mit-card {
+      animation: slideUp 0.5s ease;
+    }
+
+    .stat-card:nth-child(1) { animation: slideUp 0.4s ease 0.1s backwards; }
+    .stat-card:nth-child(2) { animation: slideUp 0.4s ease 0.2s backwards; }
+
+    .streak-badge {
+      animation: pulse 2s ease infinite;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-shape orange"></div>
+  <div class="bg-shape blue"></div>
+
+  <div class="container">
+    <header>
+      <div class="top-bar">
+        <div class="logo">GOALIX</div>
+        <div class="streak-badge">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c-4 4-6 8-6 11a6 6 0 1012 0c0-3-2-7-6-11zm0 17a4 4 0 01-4-4c0-2 1.5-5 4-8 2.5 3 4 6 4 8a4 4 0 01-4 4z"/></svg>
+          7 Day Streak!
+        </div>
+      </div>
+      <p class="greeting">Good morning, Alex!</p>
+      <h1 class="date-title">Monday<br/>December 30</h1>
+    </header>
+
+    <div class="stats-grid">
+      <div class="stat-card highlight">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <div class="stat-value">175</div>
+        <div class="stat-label">Points Today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div class="stat-value">4/6</div>
+        <div class="stat-label">Tasks Done</div>
+      </div>
+    </div>
+
+    <div class="level-section">
+      <div class="level-header">
+        <span class="level-title">Level 3 - Achiever</span>
+        <span class="level-badge">2,350 XP</span>
+      </div>
+      <div class="level-bar-container">
+        <div class="level-bar-fill"></div>
+      </div>
+      <div class="level-info">
+        <span>Go-Getter unlocks at 5,000 XP</span>
+        <span>2,650 to go</span>
+      </div>
+    </div>
+
+    <section class="mit-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M13 3v2.5l-2.5 2.5L13 10.5V13l-5-5 5-5zm-2 18v-2.5l2.5-2.5L11 13.5V11l5 5-5 5z"/></svg>
+          Most Important Task
+        </h2>
+        <span class="points-indicator">+100 pts</span>
+      </div>
+      <div class="mit-card">
+        <span class="mit-category wealth">💰 Wealth</span>
+        <h3 class="mit-title">Complete quarterly financial review and update investment allocations</h3>
+        <div class="mit-footer">
+          <span class="mit-time">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            ~45 min
+          </span>
+          <div class="mit-checkbox">
+            <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="tasks-section">
+      <div class="section-header">
+        <h2 class="section-title">Primary Tasks</h2>
+        <span class="points-indicator">+50 each</span>
+      </div>
+
+      <div class="task-item">
+        <div class="task-checkbox checked">
+          <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="task-content">
+          <p class="task-title completed">Morning workout - 30 min HIIT session</p>
+          <div class="task-meta">
+            <span class="task-category health">Health</span>
+            <span class="task-points earned">+50 pts</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-item">
+        <div class="task-checkbox checked">
+          <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="task-content">
+          <p class="task-title completed">Review and respond to client proposals</p>
+          <div class="task-meta">
+            <span class="task-category career">Career</span>
+            <span class="task-points earned">+50 pts</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-item">
+        <div class="task-checkbox"></div>
+        <div class="task-content">
+          <p class="task-title">Read 20 pages of business book</p>
+          <div class="task-meta">
+            <span class="task-category wealth">Wealth</span>
+            <span class="task-points">50 pts</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="tasks-section">
+      <div class="section-header">
+        <h2 class="section-title">Secondary Tasks</h2>
+        <span class="points-indicator">+25 each</span>
+      </div>
+
+      <div class="task-item">
+        <div class="task-checkbox checked">
+          <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="task-content">
+          <p class="task-title completed">Organize desk workspace</p>
+          <div class="task-meta">
+            <span class="task-points earned">+25 pts</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="add-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add New Task
+      </button>
+    </section>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="#" class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+      Today
+    </a>
+    <a href="#" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+      Goals
+    </a>
+    <a href="#" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+      Stats
+    </a>
+    <a href="#" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      Settings
+    </a>
+  </nav>
+</body>
+</html>

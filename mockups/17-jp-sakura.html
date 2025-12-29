@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goalix - 桜 Sakura</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Quicksand:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --blossom: #f8d7da;
+      --blossom-soft: #fdf2f4;
+      --blossom-deep: #e8a5ad;
+      --petal: #f4c2c7;
+      --branch: #8b7d7a;
+      --branch-soft: #a89e9b;
+      --sky: #fefefe;
+      --text: #5a5252;
+      --text-soft: #8a8080;
+    }
+
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background: var(--sky);
+      color: var(--text);
+      min-height: 100vh;
+      font-weight: 400;
+      line-height: 1.8;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(5deg); }
+    }
+
+    @keyframes drift {
+      0% { transform: translateX(-10px) translateY(0) rotate(0deg); opacity: 0; }
+      10% { opacity: 0.7; }
+      90% { opacity: 0.7; }
+      100% { transform: translateX(100vw) translateY(100vh) rotate(360deg); opacity: 0; }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Floating petals */
+    .petal {
+      position: fixed;
+      width: 12px;
+      height: 12px;
+      background: var(--petal);
+      border-radius: 50% 0 50% 50%;
+      opacity: 0;
+      pointer-events: none;
+      animation: drift 15s linear infinite;
+    }
+
+    .petal:nth-child(1) { top: 10%; left: 5%; animation-delay: 0s; animation-duration: 18s; }
+    .petal:nth-child(2) { top: 20%; left: 15%; animation-delay: 3s; animation-duration: 15s; width: 8px; height: 8px; }
+    .petal:nth-child(3) { top: 5%; left: 30%; animation-delay: 6s; animation-duration: 20s; }
+    .petal:nth-child(4) { top: 15%; left: 50%; animation-delay: 9s; animation-duration: 16s; width: 10px; height: 10px; }
+    .petal:nth-child(5) { top: 8%; left: 70%; animation-delay: 2s; animation-duration: 17s; }
+
+    .container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header */
+    .header {
+      padding: 28px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: fadeUp 1s ease-out;
+    }
+
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.375rem;
+      font-weight: 400;
+      color: var(--branch);
+      letter-spacing: 0.05em;
+    }
+
+    .streak-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: var(--blossom-soft);
+      border-radius: 24px;
+    }
+
+    .streak-icon {
+      font-size: 14px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .streak-text {
+      font-size: 0.6875rem;
+      color: var(--blossom-deep);
+      font-weight: 500;
+    }
+
+    /* Main */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 40px 24px;
+      max-width: 520px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .content {
+      animation: fadeUp 1s ease-out 0.2s both;
+    }
+
+    /* Date */
+    .date-block {
+      margin-bottom: 48px;
+      text-align: center;
+    }
+
+    .date-kanji {
+      font-size: 0.625rem;
+      letter-spacing: 0.5em;
+      color: var(--blossom-deep);
+      margin-bottom: 4px;
+    }
+
+    .date-main {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      color: var(--branch-soft);
+    }
+
+    /* Focus card */
+    .focus-card {
+      background: var(--blossom-soft);
+      border-radius: 24px;
+      padding: 36px 28px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Decorative branch */
+    .focus-card::before {
+      content: '';
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      width: 100px;
+      height: 100px;
+      background: radial-gradient(circle at 70% 30%, var(--petal) 0%, transparent 50%);
+      opacity: 0.5;
+    }
+
+    .focus-label {
+      font-size: 0.5625rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--blossom-deep);
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    .focus-task {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.375rem, 4.5vw, 1.875rem);
+      font-weight: 400;
+      line-height: 1.5;
+      color: var(--text);
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    .focus-meta {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      font-size: 0.75rem;
+      color: var(--text-soft);
+    }
+
+    .meta-dot {
+      color: var(--blossom-deep);
+    }
+
+    /* Complete */
+    .complete-area {
+      margin-top: 32px;
+      padding-top: 28px;
+      border-top: 1px solid var(--blossom);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .complete-btn {
+      width: 52px;
+      height: 52px;
+      background: white;
+      border: 2px solid var(--blossom-deep);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .complete-btn:hover {
+      background: var(--blossom-deep);
+      transform: scale(1.05);
+    }
+
+    .complete-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--blossom-deep);
+      stroke-width: 2;
+      fill: none;
+      transition: stroke 0.3s;
+    }
+
+    .complete-btn:hover svg {
+      stroke: white;
+    }
+
+    .complete-text {
+      font-size: 0.6875rem;
+      color: var(--text-soft);
+    }
+
+    /* Other tasks */
+    .other-section {
+      margin-top: 48px;
+      text-align: center;
+    }
+
+    .other-toggle {
+      font-family: inherit;
+      font-size: 0.6875rem;
+      letter-spacing: 0.1em;
+      color: var(--text-soft);
+      background: white;
+      border: 1px solid var(--blossom);
+      padding: 10px 24px;
+      border-radius: 24px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .other-toggle:hover {
+      border-color: var(--blossom-deep);
+      color: var(--text);
+    }
+
+    .tasks-list {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s ease;
+      text-align: left;
+    }
+
+    .tasks-list.open {
+      max-height: 350px;
+      margin-top: 24px;
+    }
+
+    .task-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--blossom-soft);
+    }
+
+    .task-circle {
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid var(--blossom-deep);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .task-circle:hover {
+      background: var(--blossom-soft);
+    }
+
+    .task-title {
+      flex: 1;
+      font-size: 0.875rem;
+      color: var(--text-soft);
+    }
+
+    .task-pts {
+      font-size: 0.625rem;
+      color: var(--blossom-deep);
+    }
+
+    /* Footer */
+    .footer {
+      padding: 28px 24px;
+      display: flex;
+      justify-content: center;
+      gap: 36px;
+      animation: fadeUp 1s ease-out 0.6s both;
+    }
+
+    .nav-link {
+      font-size: 0.6875rem;
+      letter-spacing: 0.1em;
+      color: var(--text-soft);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      color: var(--blossom-deep);
+    }
+
+    /* Whisper */
+    .whisper {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      font-size: 0.5rem;
+      color: var(--blossom);
+      letter-spacing: 0.1em;
+    }
+
+    @media (min-width: 768px) {
+      .header { padding: 40px 56px; }
+      .main { padding: 56px 40px; }
+      .footer { padding: 40px 56px; }
+      .whisper { left: 56px; bottom: 40px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Floating petals -->
+  <div class="petal"></div>
+  <div class="petal"></div>
+  <div class="petal"></div>
+  <div class="petal"></div>
+  <div class="petal"></div>
+
+  <div class="container">
+    <header class="header">
+      <div class="logo">Goalix</div>
+      <div class="streak-pill">
+        <span class="streak-icon">🌸</span>
+        <span class="streak-text">12 days</span>
+      </div>
+    </header>
+
+    <main class="main">
+      <div class="content">
+        <div class="date-block">
+          <div class="date-kanji">日曜日</div>
+          <div class="date-main">December 29, 2024</div>
+        </div>
+
+        <div class="focus-card">
+          <div class="focus-label">Today's Intention</div>
+          <h1 class="focus-task">Complete quarterly business review presentation</h1>
+          <div class="focus-meta">
+            <span>Career</span>
+            <span class="meta-dot">·</span>
+            <span>~2 hours</span>
+            <span class="meta-dot">·</span>
+            <span>100 pts</span>
+          </div>
+
+          <div class="complete-area">
+            <button class="complete-btn">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            <span class="complete-text">complete</span>
+          </div>
+        </div>
+
+        <div class="other-section">
+          <button class="other-toggle" onclick="toggle()">+ 5 more</button>
+
+          <div class="tasks-list" id="list">
+            <div class="task-row">
+              <div class="task-circle"></div>
+              <span class="task-title">Morning workout</span>
+              <span class="task-pts">50</span>
+            </div>
+            <div class="task-row">
+              <div class="task-circle"></div>
+              <span class="task-title">Review investments</span>
+              <span class="task-pts">50</span>
+            </div>
+            <div class="task-row">
+              <div class="task-circle"></div>
+              <span class="task-title">Read 20 pages</span>
+              <span class="task-pts">50</span>
+            </div>
+            <div class="task-row">
+              <div class="task-circle"></div>
+              <span class="task-title">Reply to emails</span>
+              <span class="task-pts">25</span>
+            </div>
+            <div class="task-row">
+              <div class="task-circle"></div>
+              <span class="task-title">Organize workspace</span>
+              <span class="task-pts">25</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <a href="#" class="nav-link active">today</a>
+      <a href="#" class="nav-link">dreams</a>
+      <a href="#" class="nav-link">reflect</a>
+    </footer>
+
+    <div class="whisper">6,420 pts · level 4</div>
+  </div>
+
+  <script>
+    function toggle() {
+      const l = document.getElementById('list');
+      const b = document.querySelector('.other-toggle');
+      l.classList.toggle('open');
+      b.textContent = l.classList.contains('open') ? '− hide' : '+ 5 more';
+    }
+  </script>
+</body>
+</html>

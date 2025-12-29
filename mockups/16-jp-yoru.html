@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goalix - 夜 Yoru</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400&family=Outfit:wght@200;300;400&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --night: #0d0d14;
+      --night-mid: #151520;
+      --night-soft: #1e1e2d;
+      --moonlight: #e8e6f0;
+      --moonlight-dim: #8888a0;
+      --moonlight-faint: #4a4a5c;
+      --lantern: #e8a857;
+      --lantern-glow: rgba(232, 168, 87, 0.12);
+      --lantern-soft: rgba(232, 168, 87, 0.06);
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--night);
+      color: var(--moonlight);
+      min-height: 100vh;
+      font-weight: 300;
+      line-height: 1.8;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Moonlight gradient */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 50% 30% at 80% 10%, rgba(232, 230, 240, 0.03), transparent),
+        radial-gradient(ellipse 40% 40% at 20% 80%, rgba(232, 168, 87, 0.02), transparent);
+      pointer-events: none;
+    }
+
+    @keyframes moonrise {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes glow {
+      0%, 100% { opacity: 0.6; filter: blur(20px); }
+      50% { opacity: 1; filter: blur(25px); }
+    }
+
+    @keyframes flicker {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.85; }
+    }
+
+    .container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Moon decoration */
+    .moon {
+      position: fixed;
+      top: 60px;
+      right: 40px;
+      width: 80px;
+      height: 80px;
+      background: radial-gradient(circle, var(--moonlight) 0%, rgba(232,230,240,0.1) 60%, transparent 70%);
+      border-radius: 50%;
+      opacity: 0.15;
+      animation: moonrise 2s ease-out;
+    }
+
+    .moon::after {
+      content: '';
+      position: absolute;
+      inset: -20px;
+      background: radial-gradient(circle, rgba(232,230,240,0.1), transparent 70%);
+      border-radius: 50%;
+      animation: glow 4s ease-in-out infinite;
+    }
+
+    /* Header */
+    .header {
+      padding: 28px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: moonrise 1s ease-out;
+    }
+
+    .logo {
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.375rem;
+      font-weight: 300;
+      letter-spacing: 0.12em;
+      color: var(--moonlight);
+    }
+
+    /* Lantern streak indicator */
+    .lantern-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      background: var(--lantern-soft);
+      border: 1px solid var(--lantern-glow);
+      border-radius: 24px;
+    }
+
+    .lantern-icon {
+      font-size: 14px;
+      animation: flicker 3s ease-in-out infinite;
+    }
+
+    .lantern-text {
+      font-size: 0.6875rem;
+      color: var(--lantern);
+      letter-spacing: 0.05em;
+    }
+
+    /* Main */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 48px 24px;
+      text-align: center;
+    }
+
+    .content {
+      max-width: 480px;
+      animation: moonrise 1.2s ease-out 0.2s both;
+    }
+
+    /* Date */
+    .date-section {
+      margin-bottom: 56px;
+    }
+
+    .date-label {
+      font-size: 0.5625rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--moonlight-faint);
+      margin-bottom: 6px;
+    }
+
+    .date-value {
+      font-family: 'Crimson Pro', serif;
+      font-size: 1rem;
+      color: var(--moonlight-dim);
+      letter-spacing: 0.03em;
+    }
+
+    /* Focus */
+    .focus-section {
+      padding: 40px 0;
+      border-top: 1px solid var(--night-soft);
+      border-bottom: 1px solid var(--night-soft);
+    }
+
+    .focus-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.5625rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--lantern);
+      margin-bottom: 28px;
+      padding: 6px 14px;
+      background: var(--lantern-glow);
+      border-radius: 16px;
+    }
+
+    .focus-dot {
+      width: 4px;
+      height: 4px;
+      background: var(--lantern);
+      border-radius: 50%;
+      animation: flicker 2s ease-in-out infinite;
+    }
+
+    .focus-task {
+      font-family: 'Crimson Pro', serif;
+      font-size: clamp(1.5rem, 5vw, 2.125rem);
+      font-weight: 300;
+      line-height: 1.5;
+      color: var(--moonlight);
+      margin-bottom: 28px;
+      letter-spacing: 0.02em;
+    }
+
+    .focus-meta {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      font-size: 0.75rem;
+      color: var(--moonlight-faint);
+    }
+
+    /* Complete */
+    .complete-section {
+      margin-top: 48px;
+      animation: moonrise 1.2s ease-out 0.5s both;
+    }
+
+    .complete-btn {
+      width: 64px;
+      height: 64px;
+      background: transparent;
+      border: 1px solid var(--moonlight-faint);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.4s ease;
+      position: relative;
+      margin: 0 auto;
+    }
+
+    .complete-btn::before {
+      content: '';
+      position: absolute;
+      inset: -8px;
+      border: 1px solid var(--moonlight-faint);
+      border-radius: 50%;
+      opacity: 0;
+      transition: all 0.4s ease;
+    }
+
+    .complete-btn:hover {
+      border-color: var(--lantern);
+      box-shadow: 0 0 30px var(--lantern-glow);
+    }
+
+    .complete-btn:hover::before {
+      opacity: 0.3;
+      border-color: var(--lantern);
+    }
+
+    .complete-btn svg {
+      width: 22px;
+      height: 22px;
+      stroke: var(--moonlight-faint);
+      stroke-width: 1.5;
+      fill: none;
+      transition: stroke 0.4s;
+    }
+
+    .complete-btn:hover svg {
+      stroke: var(--lantern);
+    }
+
+    .complete-text {
+      margin-top: 16px;
+      font-size: 0.625rem;
+      letter-spacing: 0.2em;
+      color: var(--moonlight-faint);
+    }
+
+    /* Other tasks */
+    .other-section {
+      margin-top: 64px;
+      animation: moonrise 1.2s ease-out 0.7s both;
+    }
+
+    .other-toggle {
+      font-family: inherit;
+      font-size: 0.6875rem;
+      letter-spacing: 0.1em;
+      color: var(--moonlight-faint);
+      background: var(--night-mid);
+      border: 1px solid var(--night-soft);
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .other-toggle:hover {
+      border-color: var(--moonlight-faint);
+      color: var(--moonlight-dim);
+    }
+
+    .tasks-list {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s ease;
+      text-align: left;
+    }
+
+    .tasks-list.open {
+      max-height: 350px;
+      margin-top: 24px;
+    }
+
+    .task-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--night-soft);
+    }
+
+    .task-circle {
+      width: 14px;
+      height: 14px;
+      border: 1px solid var(--moonlight-faint);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .task-circle:hover {
+      border-color: var(--lantern);
+      box-shadow: 0 0 10px var(--lantern-glow);
+    }
+
+    .task-title {
+      flex: 1;
+      font-size: 0.875rem;
+      color: var(--moonlight-dim);
+    }
+
+    .task-pts {
+      font-size: 0.625rem;
+      color: var(--moonlight-faint);
+    }
+
+    /* Footer */
+    .footer {
+      padding: 28px 24px;
+      display: flex;
+      justify-content: center;
+      gap: 36px;
+      animation: moonrise 1s ease-out 1s both;
+    }
+
+    .nav-link {
+      font-size: 0.625rem;
+      letter-spacing: 0.15em;
+      color: var(--moonlight-faint);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      color: var(--moonlight);
+    }
+
+    /* Points whisper */
+    .whisper {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      font-size: 0.5rem;
+      color: var(--night-soft);
+      letter-spacing: 0.1em;
+    }
+
+    @media (min-width: 768px) {
+      .header { padding: 40px 56px; }
+      .main { padding: 64px 56px; }
+      .footer { padding: 40px 56px; }
+      .moon { width: 120px; height: 120px; right: 80px; }
+      .whisper { right: 56px; bottom: 40px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="moon"></div>
+
+  <div class="container">
+    <header class="header">
+      <div class="logo">Goalix</div>
+      <div class="lantern-badge">
+        <span class="lantern-icon">🏮</span>
+        <span class="lantern-text">12 days</span>
+      </div>
+    </header>
+
+    <main class="main">
+      <div class="content">
+        <div class="date-section">
+          <div class="date-label">Tonight</div>
+          <div class="date-value">Sunday, December 29</div>
+        </div>
+
+        <div class="focus-section">
+          <div class="focus-label">
+            <span class="focus-dot"></span>
+            <span>Evening Focus</span>
+          </div>
+          <h1 class="focus-task">Complete quarterly business review presentation</h1>
+          <div class="focus-meta">
+            <span>Career</span>
+            <span>·</span>
+            <span>~2 hours</span>
+            <span>·</span>
+            <span>100 pts</span>
+          </div>
+        </div>
+
+        <div class="complete-section">
+          <button class="complete-btn">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>
+          <div class="complete-text">tap to complete</div>
+        </div>
+
+        <div class="other-section">
+          <button class="other-toggle" onclick="toggle()">5 more tasks</button>
+
+          <div class="tasks-list" id="list">
+            <div class="task-row">
+              <div class="task-circle"></div>
+              <span class="task-title">Morning workout</span>
+              <span class="task-pts">50</span>
+            </div>
+            <div class="task-row">
+              <div class="task-circle"></div>
+              <span class="task-title">Review investments</span>
+              <span class="task-pts">50</span>
+            </div>
+            <div class="task-row">
+              <div class="task-circle"></div>
+              <span class="task-title">Read 20 pages</span>
+              <span class="task-pts">50</span>
+            </div>
+            <div class="task-row">
+              <div class="task-circle"></div>
+              <span class="task-title">Reply to emails</span>
+              <span class="task-pts">25</span>
+            </div>
+            <div class="task-row">
+              <div class="task-circle"></div>
+              <span class="task-title">Organize workspace</span>
+              <span class="task-pts">25</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <a href="#" class="nav-link active">tonight</a>
+      <a href="#" class="nav-link">dreams</a>
+      <a href="#" class="nav-link">reflect</a>
+    </footer>
+
+    <div class="whisper">6,420 · level 4</div>
+  </div>
+
+  <script>
+    function toggle() {
+      const l = document.getElementById('list');
+      const b = document.querySelector('.other-toggle');
+      l.classList.toggle('open');
+      b.textContent = l.classList.contains('open') ? 'hide' : '5 more tasks';
+    }
+  </script>
+</body>
+</html>

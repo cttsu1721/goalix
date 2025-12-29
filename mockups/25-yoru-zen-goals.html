@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goalix - Goals | Yoru Zen</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --void: #08080c;
+      --night: #0c0c12;
+      --night-soft: #12121a;
+      --night-mist: #1a1a24;
+      --night-glow: #242430;
+      --lantern: #e8a857;
+      --lantern-soft: rgba(232, 168, 87, 0.08);
+      --lantern-mist: rgba(232, 168, 87, 0.04);
+      --moon: #f0eef8;
+      --moon-soft: #c4c2d0;
+      --moon-dim: #8a889a;
+      --moon-faint: #5a5868;
+      --zen-green: #7dd3a8;
+      --zen-green-soft: rgba(125, 211, 168, 0.1);
+      --zen-blue: #7db8d3;
+      --zen-purple: #a87dd3;
+    }
+
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--void);
+      color: var(--moon);
+      min-height: 100vh;
+      font-weight: 400;
+      line-height: 1.7;
+      letter-spacing: 0.01em;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      background: var(--night);
+      border-right: 1px solid var(--night-mist);
+      display: flex;
+      flex-direction: column;
+      padding: 40px 0;
+    }
+
+    .sidebar-header {
+      padding: 0 28px 40px;
+    }
+
+    .logo {
+      font-size: 1.375rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--moon);
+    }
+
+    .logo span {
+      color: var(--lantern);
+      font-weight: 300;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 0 16px;
+    }
+
+    .nav-group {
+      margin-bottom: 40px;
+    }
+
+    .nav-label {
+      font-size: 0.625rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--moon-faint);
+      padding: 0 16px;
+      margin-bottom: 16px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      color: var(--moon-dim);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      margin-bottom: 4px;
+    }
+
+    .nav-item:hover {
+      background: var(--night-soft);
+      color: var(--moon-soft);
+    }
+
+    .nav-item.active {
+      background: var(--lantern-soft);
+      color: var(--lantern);
+    }
+
+    .nav-icon {
+      width: 20px;
+      height: 20px;
+      opacity: 0.7;
+    }
+
+    .nav-item.active .nav-icon {
+      opacity: 1;
+    }
+
+    .sidebar-user {
+      padding: 28px;
+      margin-top: auto;
+    }
+
+    .user-block {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .user-avatar {
+      width: 44px;
+      height: 44px;
+      background: var(--night-mist);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 500;
+      font-size: 0.875rem;
+      color: var(--moon-soft);
+    }
+
+    .user-details h4 {
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+
+    .user-details span {
+      font-size: 0.75rem;
+      color: var(--moon-faint);
+    }
+
+    /* ===== MAIN CONTENT ===== */
+    .main {
+      background: var(--void);
+      overflow-y: auto;
+      padding: 48px 56px;
+    }
+
+    .main-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 48px;
+    }
+
+    .header-title {
+      font-size: 1.875rem;
+      font-weight: 300;
+      letter-spacing: -0.01em;
+      margin-bottom: 8px;
+    }
+
+    .header-subtitle {
+      font-size: 0.875rem;
+      color: var(--moon-dim);
+      font-weight: 300;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 20px;
+      background: var(--night-soft);
+      border: 1px solid var(--night-mist);
+      border-radius: 12px;
+      color: var(--moon-soft);
+      font-family: inherit;
+      font-size: 0.8125rem;
+      font-weight: 400;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+      border-color: var(--lantern);
+      color: var(--lantern);
+      background: var(--lantern-mist);
+    }
+
+    .btn svg {
+      width: 18px;
+      height: 18px;
+      opacity: 0.7;
+    }
+
+    .btn-primary {
+      background: var(--lantern-soft);
+      border-color: var(--lantern);
+      color: var(--lantern);
+    }
+
+    /* Breadcrumb */
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 32px;
+      font-size: 0.8125rem;
+    }
+
+    .breadcrumb a {
+      color: var(--moon-faint);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .breadcrumb a:hover {
+      color: var(--lantern);
+    }
+
+    .breadcrumb .separator {
+      color: var(--moon-faint);
+    }
+
+    .breadcrumb .current {
+      color: var(--moon-soft);
+    }
+
+    /* View Tabs */
+    .view-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 40px;
+      padding: 4px;
+      background: var(--night);
+      border-radius: 12px;
+      width: fit-content;
+    }
+
+    .view-tab {
+      padding: 10px 20px;
+      background: transparent;
+      border: none;
+      border-radius: 10px;
+      color: var(--moon-dim);
+      font-family: inherit;
+      font-size: 0.8125rem;
+      font-weight: 400;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .view-tab:hover {
+      color: var(--moon-soft);
+    }
+
+    .view-tab.active {
+      background: var(--night-soft);
+      color: var(--moon);
+    }
+
+    /* Goals Grid */
+    .goals-section {
+      margin-bottom: 56px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-title h2 {
+      font-size: 0.6875rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--moon-faint);
+    }
+
+    .section-badge {
+      font-size: 0.6875rem;
+      padding: 4px 10px;
+      background: var(--night-soft);
+      border-radius: 8px;
+      color: var(--moon-dim);
+    }
+
+    .goals-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 20px;
+    }
+
+    /* Goal Card */
+    .goal-card {
+      background: var(--night);
+      border: 1px solid var(--night-mist);
+      border-radius: 20px;
+      padding: 28px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .goal-card:hover {
+      border-color: var(--night-glow);
+      transform: translateY(-2px);
+    }
+
+    .goal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+
+    .goal-category {
+      font-size: 0.625rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      padding: 5px 10px;
+      border-radius: 6px;
+      background: var(--night-soft);
+      color: var(--moon-dim);
+    }
+
+    .goal-category.health { background: rgba(125, 211, 168, 0.1); color: var(--zen-green); }
+    .goal-category.wealth { background: rgba(232, 168, 87, 0.1); color: var(--lantern); }
+    .goal-category.career { background: rgba(125, 184, 211, 0.1); color: var(--zen-blue); }
+    .goal-category.growth { background: rgba(168, 125, 211, 0.1); color: var(--zen-purple); }
+
+    .goal-menu {
+      width: 28px;
+      height: 28px;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      color: var(--moon-faint);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .goal-menu:hover {
+      background: var(--night-soft);
+      color: var(--moon-soft);
+    }
+
+    .goal-title {
+      font-size: 1.125rem;
+      font-weight: 400;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .goal-progress {
+      margin-bottom: 20px;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .progress-label {
+      font-size: 0.75rem;
+      color: var(--moon-faint);
+    }
+
+    .progress-value {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--zen-green);
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: var(--night-mist);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--lantern), var(--zen-green));
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+
+    .goal-meta {
+      display: flex;
+      gap: 20px;
+      font-size: 0.75rem;
+      color: var(--moon-faint);
+    }
+
+    .goal-meta span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Dream Card - Special Styling */
+    .dream-card {
+      background: linear-gradient(135deg, var(--night) 0%, var(--night-soft) 100%);
+      border: 1px solid var(--lantern-soft);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dream-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--lantern), transparent);
+    }
+
+    .dream-label {
+      font-size: 0.5625rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.25em;
+      color: var(--lantern);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dream-title {
+      font-size: 1.375rem;
+      font-weight: 300;
+      line-height: 1.4;
+      margin-bottom: 16px;
+    }
+
+    .dream-children {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--night-mist);
+    }
+
+    .child-link {
+      font-size: 0.75rem;
+      color: var(--moon-dim);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--night-soft);
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .child-link:hover {
+      color: var(--lantern);
+      background: var(--lantern-mist);
+    }
+
+    /* Add Goal Card */
+    .add-goal-card {
+      background: transparent;
+      border: 2px dashed var(--night-mist);
+      border-radius: 20px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      min-height: 200px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .add-goal-card:hover {
+      border-color: var(--lantern);
+      background: var(--lantern-mist);
+    }
+
+    .add-icon-circle {
+      width: 48px;
+      height: 48px;
+      border: 1.5px dashed var(--moon-faint);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+
+    .add-goal-card:hover .add-icon-circle {
+      border-color: var(--lantern);
+      border-style: solid;
+    }
+
+    .add-goal-card svg {
+      width: 20px;
+      height: 20px;
+      color: var(--moon-faint);
+      transition: color 0.3s;
+    }
+
+    .add-goal-card:hover svg {
+      color: var(--lantern);
+    }
+
+    .add-goal-text {
+      font-size: 0.875rem;
+      color: var(--moon-faint);
+      transition: color 0.3s;
+    }
+
+    .add-goal-card:hover .add-goal-text {
+      color: var(--lantern);
+    }
+
+    /* Timeline View */
+    .timeline {
+      position: relative;
+      padding-left: 40px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 12px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg, var(--lantern), var(--night-mist));
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 32px;
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: -40px;
+      top: 6px;
+      width: 24px;
+      height: 24px;
+      background: var(--night);
+      border: 2px solid var(--lantern);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .timeline-dot svg {
+      width: 12px;
+      height: 12px;
+      color: var(--lantern);
+    }
+
+    .timeline-dot.completed {
+      background: var(--zen-green);
+      border-color: var(--zen-green);
+    }
+
+    .timeline-dot.completed svg {
+      color: var(--void);
+    }
+
+    .timeline-content {
+      background: var(--night);
+      border: 1px solid var(--night-mist);
+      border-radius: 16px;
+      padding: 24px;
+    }
+
+    .timeline-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .timeline-level {
+      font-size: 0.625rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--moon-faint);
+    }
+
+    .timeline-date {
+      font-size: 0.75rem;
+      color: var(--moon-faint);
+    }
+
+    .timeline-title {
+      font-size: 1rem;
+      font-weight: 400;
+      margin-bottom: 12px;
+    }
+
+    /* Mobile Nav */
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--night);
+      border-top: 1px solid var(--night-mist);
+      padding: 16px 32px;
+      z-index: 50;
+    }
+
+    .mobile-nav-items {
+      display: flex;
+      justify-content: space-around;
+    }
+
+    .mobile-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      color: var(--moon-faint);
+      text-decoration: none;
+      font-size: 0.625rem;
+      font-weight: 400;
+      letter-spacing: 0.05em;
+    }
+
+    .mobile-nav-item.active {
+      color: var(--lantern);
+    }
+
+    .mobile-nav-item svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .goals-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+      .main {
+        padding: 28px 24px;
+        padding-bottom: 100px;
+      }
+
+      .main-header {
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .header-actions {
+        width: 100%;
+      }
+
+      .btn {
+        flex: 1;
+        justify-content: center;
+      }
+
+      .view-tabs {
+        width: 100%;
+      }
+
+      .view-tab {
+        flex: 1;
+        text-align: center;
+      }
+
+      .mobile-nav {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">goalix<span>.</span></div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-group">
+          <a class="nav-item">
+            <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="m9 12 2 2 4-4"/>
+            </svg>
+            Today
+          </a>
+          <a class="nav-item">
+            <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <path d="M16 2v4M8 2v4M3 10h18"/>
+            </svg>
+            Week
+          </a>
+          <a class="nav-item">
+            <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M12 8v4l3 3"/>
+              <circle cx="12" cy="12" r="10"/>
+            </svg>
+            Upcoming
+          </a>
+        </div>
+
+        <div class="nav-group">
+          <div class="nav-label">Vision</div>
+          <a class="nav-item active">
+            <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            Dreams
+          </a>
+          <a class="nav-item">
+            <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+            Goals
+          </a>
+        </div>
+
+        <div class="nav-group">
+          <div class="nav-label">Reflect</div>
+          <a class="nav-item">
+            <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M3 3v18h18"/>
+              <path d="m19 9-5 5-4-4-3 3"/>
+            </svg>
+            Progress
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar-user">
+        <div class="user-block">
+          <div class="user-avatar">JD</div>
+          <div class="user-details">
+            <h4>John Doe</h4>
+            <span>Level 4</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+      <header class="main-header">
+        <div>
+          <h1 class="header-title">Dreams & Goals</h1>
+          <p class="header-subtitle">Your 10-year visions cascading to daily action</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn">
+            <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M12 2a5 5 0 0 1 5 5v3a5 5 0 0 1-10 0V7a5 5 0 0 1 5-5Z"/>
+              <path d="M12 18v4"/>
+            </svg>
+            AI Sharpen
+          </button>
+          <button class="btn btn-primary">
+            <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            New Dream
+          </button>
+        </div>
+      </header>
+
+      <!-- View Tabs -->
+      <div class="view-tabs">
+        <button class="view-tab active">Grid</button>
+        <button class="view-tab">Timeline</button>
+        <button class="view-tab">Hierarchy</button>
+      </div>
+
+      <!-- Dreams Section -->
+      <section class="goals-section">
+        <div class="section-header">
+          <div class="section-title">
+            <h2>10-Year Dreams</h2>
+            <span class="section-badge">3 active</span>
+          </div>
+        </div>
+
+        <div class="goals-grid">
+          <!-- Dream Card 1 -->
+          <div class="goal-card dream-card">
+            <div class="dream-label">
+              <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              10-Year Dream
+            </div>
+            <div class="goal-header">
+              <span class="goal-category wealth">Wealth</span>
+              <button class="goal-menu">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="6" r="2"/>
+                  <circle cx="12" cy="12" r="2"/>
+                  <circle cx="12" cy="18" r="2"/>
+                </svg>
+              </button>
+            </div>
+            <h3 class="dream-title">Achieve complete financial independence with $2M net worth</h3>
+            <div class="goal-progress">
+              <div class="progress-header">
+                <span class="progress-label">Overall Progress</span>
+                <span class="progress-value">24%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 24%"></div>
+              </div>
+            </div>
+            <div class="goal-meta">
+              <span>
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <rect x="3" y="4" width="18" height="18" rx="2"/>
+                  <path d="M16 2v4M8 2v4M3 10h18"/>
+                </svg>
+                Dec 2034
+              </span>
+              <span>3 sub-goals</span>
+            </div>
+            <div class="dream-children">
+              <span class="child-link">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path d="m9 18 6-6-6-6"/>
+                </svg>
+                5-Year Goals (2)
+              </span>
+              <span class="child-link">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path d="m9 18 6-6-6-6"/>
+                </svg>
+                1-Year Goals (3)
+              </span>
+            </div>
+          </div>
+
+          <!-- Dream Card 2 -->
+          <div class="goal-card dream-card">
+            <div class="dream-label">
+              <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              10-Year Dream
+            </div>
+            <div class="goal-header">
+              <span class="goal-category health">Health</span>
+              <button class="goal-menu">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="6" r="2"/>
+                  <circle cx="12" cy="12" r="2"/>
+                  <circle cx="12" cy="18" r="2"/>
+                </svg>
+              </button>
+            </div>
+            <h3 class="dream-title">Maintain peak physical health and run a marathon</h3>
+            <div class="goal-progress">
+              <div class="progress-header">
+                <span class="progress-label">Overall Progress</span>
+                <span class="progress-value">45%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 45%"></div>
+              </div>
+            </div>
+            <div class="goal-meta">
+              <span>
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <rect x="3" y="4" width="18" height="18" rx="2"/>
+                  <path d="M16 2v4M8 2v4M3 10h18"/>
+                </svg>
+                Dec 2034
+              </span>
+              <span>2 sub-goals</span>
+            </div>
+            <div class="dream-children">
+              <span class="child-link">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path d="m9 18 6-6-6-6"/>
+                </svg>
+                5-Year Goals (1)
+              </span>
+            </div>
+          </div>
+
+          <!-- Dream Card 3 -->
+          <div class="goal-card dream-card">
+            <div class="dream-label">
+              <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              10-Year Dream
+            </div>
+            <div class="goal-header">
+              <span class="goal-category career">Career</span>
+              <button class="goal-menu">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="6" r="2"/>
+                  <circle cx="12" cy="12" r="2"/>
+                  <circle cx="12" cy="18" r="2"/>
+                </svg>
+              </button>
+            </div>
+            <h3 class="dream-title">Build and sell a successful SaaS business</h3>
+            <div class="goal-progress">
+              <div class="progress-header">
+                <span class="progress-label">Overall Progress</span>
+                <span class="progress-value">18%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 18%"></div>
+              </div>
+            </div>
+            <div class="goal-meta">
+              <span>
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <rect x="3" y="4" width="18" height="18" rx="2"/>
+                  <path d="M16 2v4M8 2v4M3 10h18"/>
+                </svg>
+                Dec 2034
+              </span>
+              <span>4 sub-goals</span>
+            </div>
+            <div class="dream-children">
+              <span class="child-link">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path d="m9 18 6-6-6-6"/>
+                </svg>
+                5-Year Goals (2)
+              </span>
+            </div>
+          </div>
+
+          <!-- Add Dream Card -->
+          <div class="add-goal-card">
+            <div class="add-icon-circle">
+              <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+            </div>
+            <span class="add-goal-text">Add new dream</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5-Year Goals Section -->
+      <section class="goals-section">
+        <div class="section-header">
+          <div class="section-title">
+            <h2>5-Year Goals</h2>
+            <span class="section-badge">5 active</span>
+          </div>
+        </div>
+
+        <div class="goals-grid">
+          <!-- 5-Year Goal Card -->
+          <div class="goal-card">
+            <div class="goal-header">
+              <span class="goal-category wealth">Wealth</span>
+              <button class="goal-menu">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="6" r="2"/>
+                  <circle cx="12" cy="12" r="2"/>
+                  <circle cx="12" cy="18" r="2"/>
+                </svg>
+              </button>
+            </div>
+            <h3 class="goal-title">Reach $500K investment portfolio</h3>
+            <div class="goal-progress">
+              <div class="progress-header">
+                <span class="progress-label">Progress</span>
+                <span class="progress-value">38%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 38%"></div>
+              </div>
+            </div>
+            <div class="goal-meta">
+              <span>
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <rect x="3" y="4" width="18" height="18" rx="2"/>
+                  <path d="M16 2v4M8 2v4M3 10h18"/>
+                </svg>
+                Dec 2029
+              </span>
+              <span>2 yearly goals</span>
+            </div>
+          </div>
+
+          <!-- Another 5-Year Goal -->
+          <div class="goal-card">
+            <div class="goal-header">
+              <span class="goal-category health">Health</span>
+              <button class="goal-menu">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="6" r="2"/>
+                  <circle cx="12" cy="12" r="2"/>
+                  <circle cx="12" cy="18" r="2"/>
+                </svg>
+              </button>
+            </div>
+            <h3 class="goal-title">Complete a half marathon under 2 hours</h3>
+            <div class="goal-progress">
+              <div class="progress-header">
+                <span class="progress-label">Progress</span>
+                <span class="progress-value">60%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 60%"></div>
+              </div>
+            </div>
+            <div class="goal-meta">
+              <span>
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <rect x="3" y="4" width="18" height="18" rx="2"/>
+                  <path d="M16 2v4M8 2v4M3 10h18"/>
+                </svg>
+                Jun 2029
+              </span>
+              <span>1 yearly goal</span>
+            </div>
+          </div>
+
+          <!-- Add Goal Card -->
+          <div class="add-goal-card">
+            <div class="add-icon-circle">
+              <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+            </div>
+            <span class="add-goal-text">Add 5-year goal</span>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Mobile Navigation -->
+  <nav class="mobile-nav">
+    <div class="mobile-nav-items">
+      <a href="#" class="mobile-nav-item">
+        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="m9 12 2 2 4-4"/>
+        </svg>
+        Today
+      </a>
+      <a href="#" class="mobile-nav-item active">
+        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+        Dreams
+      </a>
+      <a href="#" class="mobile-nav-item">
+        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path d="M3 3v18h18"/>
+          <path d="m19 9-5 5-4-4-3 3"/>
+        </svg>
+        Progress
+      </a>
+      <a href="#" class="mobile-nav-item">
+        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 1v6m0 6v6"/>
+        </svg>
+        Settings
+      </a>
+    </div>
+  </nav>
+</body>
+</html>

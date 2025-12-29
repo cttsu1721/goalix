@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goalix - 金継ぎ Kintsugi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@400;500&family=Assistant:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --clay: #2a2622;
+      --clay-mid: #3d3833;
+      --clay-light: #4f4940;
+      --stone: #6b6560;
+      --stone-soft: #8a847d;
+      --gold: #d4a853;
+      --gold-bright: #e8c06a;
+      --gold-glow: rgba(212, 168, 83, 0.15);
+      --cream: #f5f2ed;
+    }
+
+    body {
+      font-family: 'Assistant', sans-serif;
+      background: var(--clay);
+      color: var(--cream);
+      min-height: 100vh;
+      font-weight: 300;
+      line-height: 1.8;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Kintsugi crack pattern */
+    .crack-pattern {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    .crack {
+      position: absolute;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      height: 1px;
+      transform-origin: left;
+    }
+
+    .crack-1 { top: 15%; left: 0; width: 30%; transform: rotate(3deg); }
+    .crack-2 { top: 45%; right: 0; width: 25%; transform: rotate(-2deg); }
+    .crack-3 { bottom: 25%; left: 10%; width: 20%; transform: rotate(5deg); }
+    .crack-v {
+      position: absolute;
+      background: linear-gradient(180deg, transparent, var(--gold), transparent);
+      width: 1px;
+      height: 15%;
+    }
+    .crack-v-1 { top: 15%; left: 30%; }
+    .crack-v-2 { bottom: 25%; left: calc(10% + 20%); }
+
+    @keyframes shimmer {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 0.8; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header */
+    .header {
+      padding: 28px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: fadeIn 1s ease-out;
+    }
+
+    .logo {
+      font-family: 'Bodoni Moda', serif;
+      font-size: 1.375rem;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      color: var(--cream);
+    }
+
+    .streak-gold {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border: 1px solid var(--gold);
+      background: var(--gold-glow);
+    }
+
+    .gold-icon {
+      color: var(--gold);
+      font-size: 12px;
+      animation: shimmer 3s ease-in-out infinite;
+    }
+
+    .streak-num {
+      font-size: 0.75rem;
+      color: var(--gold);
+      font-weight: 400;
+      letter-spacing: 0.1em;
+    }
+
+    /* Main */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 48px 24px;
+      max-width: 560px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .content {
+      animation: fadeIn 1s ease-out 0.2s both;
+    }
+
+    /* Date */
+    .date-section {
+      margin-bottom: 48px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .gold-line {
+      width: 40px;
+      height: 1px;
+      background: var(--gold);
+    }
+
+    .date-text {
+      font-size: 0.8125rem;
+      color: var(--stone-soft);
+      letter-spacing: 0.05em;
+    }
+
+    /* Focus area */
+    .focus-area {
+      position: relative;
+      padding: 40px 0;
+    }
+
+    /* Gold accent line */
+    .focus-area::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg, transparent, var(--gold), transparent);
+    }
+
+    .focus-inner {
+      padding-left: 28px;
+    }
+
+    .focus-label {
+      font-size: 0.5625rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 20px;
+    }
+
+    .focus-task {
+      font-family: 'Bodoni Moda', serif;
+      font-size: clamp(1.5rem, 5vw, 2.125rem);
+      font-weight: 400;
+      line-height: 1.45;
+      color: var(--cream);
+      margin-bottom: 28px;
+      letter-spacing: 0.01em;
+    }
+
+    .focus-meta {
+      display: flex;
+      gap: 20px;
+      font-size: 0.75rem;
+      color: var(--stone);
+    }
+
+    .meta-gold {
+      color: var(--gold);
+    }
+
+    /* Complete */
+    .complete-section {
+      margin-top: 48px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding-left: 28px;
+    }
+
+    .complete-btn {
+      width: 56px;
+      height: 56px;
+      background: transparent;
+      border: 1px solid var(--stone);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.4s ease;
+      position: relative;
+    }
+
+    /* Kintsugi corner accents */
+    .complete-btn::before,
+    .complete-btn::after {
+      content: '';
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border: 1px solid var(--gold);
+      opacity: 0;
+      transition: all 0.4s ease;
+    }
+
+    .complete-btn::before {
+      top: -4px;
+      left: -4px;
+      border-right: none;
+      border-bottom: none;
+    }
+
+    .complete-btn::after {
+      bottom: -4px;
+      right: -4px;
+      border-left: none;
+      border-top: none;
+    }
+
+    .complete-btn:hover {
+      border-color: var(--gold);
+      background: var(--gold-glow);
+    }
+
+    .complete-btn:hover::before,
+    .complete-btn:hover::after {
+      opacity: 1;
+    }
+
+    .complete-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--stone);
+      stroke-width: 1.5;
+      fill: none;
+      transition: stroke 0.4s;
+    }
+
+    .complete-btn:hover svg {
+      stroke: var(--gold);
+    }
+
+    .complete-text {
+      font-size: 0.6875rem;
+      color: var(--stone);
+      letter-spacing: 0.08em;
+    }
+
+    /* Other tasks */
+    .other-section {
+      margin-top: 64px;
+      padding-left: 28px;
+    }
+
+    .other-toggle {
+      font-family: inherit;
+      font-size: 0.625rem;
+      letter-spacing: 0.2em;
+      color: var(--stone);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: color 0.3s;
+    }
+
+    .other-toggle:hover {
+      color: var(--gold);
+    }
+
+    .toggle-bar {
+      width: 24px;
+      height: 1px;
+      background: var(--stone);
+      transition: all 0.3s;
+    }
+
+    .other-toggle:hover .toggle-bar {
+      background: var(--gold);
+      width: 40px;
+    }
+
+    .tasks-list {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s ease;
+    }
+
+    .tasks-list.open {
+      max-height: 350px;
+      margin-top: 24px;
+    }
+
+    .task-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--clay-mid);
+    }
+
+    .task-diamond {
+      width: 10px;
+      height: 10px;
+      border: 1px solid var(--stone);
+      transform: rotate(45deg);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .task-diamond:hover {
+      border-color: var(--gold);
+      background: var(--gold-glow);
+    }
+
+    .task-title {
+      flex: 1;
+      font-size: 0.875rem;
+      color: var(--stone-soft);
+    }
+
+    .task-pts {
+      font-size: 0.625rem;
+      color: var(--clay-light);
+    }
+
+    /* Footer */
+    .footer {
+      padding: 28px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: fadeIn 1s ease-out 0.8s both;
+    }
+
+    .footer-nav {
+      display: flex;
+      gap: 32px;
+    }
+
+    .nav-link {
+      font-size: 0.625rem;
+      letter-spacing: 0.15em;
+      color: var(--stone);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      color: var(--gold);
+    }
+
+    .whisper {
+      font-size: 0.5rem;
+      color: var(--clay-light);
+      letter-spacing: 0.1em;
+    }
+
+    @media (min-width: 768px) {
+      .header { padding: 40px 56px; }
+      .main { padding: 64px 56px; max-width: 640px; }
+      .footer { padding: 40px 56px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Kintsugi crack pattern -->
+  <div class="crack-pattern">
+    <div class="crack crack-1"></div>
+    <div class="crack crack-2"></div>
+    <div class="crack crack-3"></div>
+    <div class="crack-v crack-v-1"></div>
+    <div class="crack-v crack-v-2"></div>
+  </div>
+
+  <div class="container">
+    <header class="header">
+      <div class="logo">Goalix</div>
+      <div class="streak-gold">
+        <span class="gold-icon">◆</span>
+        <span class="streak-num">12</span>
+      </div>
+    </header>
+
+    <main class="main">
+      <div class="content">
+        <div class="date-section">
+          <div class="gold-line"></div>
+          <span class="date-text">Sunday, December 29</span>
+        </div>
+
+        <div class="focus-area">
+          <div class="focus-inner">
+            <div class="focus-label">Today's Purpose</div>
+            <h1 class="focus-task">Complete quarterly business review presentation</h1>
+            <div class="focus-meta">
+              <span>Career</span>
+              <span>·</span>
+              <span>~2 hours</span>
+              <span>·</span>
+              <span class="meta-gold">100 pts</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="complete-section">
+          <button class="complete-btn">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>
+          <span class="complete-text">mark complete</span>
+        </div>
+
+        <div class="other-section">
+          <button class="other-toggle" onclick="toggle()">
+            <span class="toggle-bar"></span>
+            <span id="toggleText">5 remaining</span>
+          </button>
+
+          <div class="tasks-list" id="list">
+            <div class="task-row">
+              <div class="task-diamond"></div>
+              <span class="task-title">Morning workout</span>
+              <span class="task-pts">50</span>
+            </div>
+            <div class="task-row">
+              <div class="task-diamond"></div>
+              <span class="task-title">Review investments</span>
+              <span class="task-pts">50</span>
+            </div>
+            <div class="task-row">
+              <div class="task-diamond"></div>
+              <span class="task-title">Read 20 pages</span>
+              <span class="task-pts">50</span>
+            </div>
+            <div class="task-row">
+              <div class="task-diamond"></div>
+              <span class="task-title">Reply to emails</span>
+              <span class="task-pts">25</span>
+            </div>
+            <div class="task-row">
+              <div class="task-diamond"></div>
+              <span class="task-title">Organize workspace</span>
+              <span class="task-pts">25</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <nav class="footer-nav">
+        <a href="#" class="nav-link active">today</a>
+        <a href="#" class="nav-link">dreams</a>
+        <a href="#" class="nav-link">reflect</a>
+      </nav>
+      <span class="whisper">6,420 · level 4</span>
+    </footer>
+  </div>
+
+  <script>
+    function toggle() {
+      const l = document.getElementById('list');
+      const t = document.getElementById('toggleText');
+      l.classList.toggle('open');
+      t.textContent = l.classList.contains('open') ? 'hide' : '5 remaining';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goalix - Zen Dark</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@200;300;400;500&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-deep: #0a0a0c;
+      --bg: #111114;
+      --bg-elevated: #18181c;
+      --text: #e8e8ec;
+      --text-dim: #6e6e78;
+      --text-muted: #3a3a42;
+      --accent: #e8c47c;
+      --accent-glow: rgba(232, 196, 124, 0.1);
+      --border: rgba(255, 255, 255, 0.06);
+    }
+
+    html {
+      font-size: 16px;
+    }
+
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      font-weight: 300;
+    }
+
+    /* Subtle gradient background */
+    .bg-gradient {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(232, 196, 124, 0.03), transparent),
+        radial-gradient(ellipse 60% 40% at 100% 100%, rgba(232, 196, 124, 0.02), transparent);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.1); }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    /* Container */
+    .container {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .header {
+      padding: 28px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: fadeUp 1s ease-out;
+    }
+
+    .logo {
+      font-size: 0.875rem;
+      font-weight: 400;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .streak-indicator {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .streak-ring {
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .streak-ring::before {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+      opacity: 0.5;
+    }
+
+    .streak-number {
+      font-size: 0.6875rem;
+      font-weight: 400;
+      color: var(--accent);
+    }
+
+    /* Main */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 24px;
+      text-align: center;
+    }
+
+    /* Time greeting */
+    .greeting {
+      font-size: 0.6875rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 48px;
+      animation: fadeUp 1s ease-out 0.1s both;
+    }
+
+    /* Focus Section */
+    .focus-section {
+      animation: fadeUp 1s ease-out 0.2s both;
+      max-width: 480px;
+    }
+
+    .focus-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.625rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 32px;
+      padding: 8px 16px;
+      background: var(--accent-glow);
+      border-radius: 20px;
+    }
+
+    .focus-dot {
+      width: 4px;
+      height: 4px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 2.5s ease-in-out infinite;
+    }
+
+    .focus-task {
+      font-size: clamp(1.5rem, 4.5vw, 2rem);
+      font-weight: 200;
+      line-height: 1.5;
+      color: var(--text);
+      margin-bottom: 40px;
+      letter-spacing: 0.02em;
+    }
+
+    .focus-details {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      letter-spacing: 0.05em;
+    }
+
+    .focus-detail {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .detail-icon {
+      width: 14px;
+      height: 14px;
+      opacity: 0.5;
+    }
+
+    /* Complete Action */
+    .complete-action {
+      margin-top: 64px;
+      animation: fadeUp 1s ease-out 0.4s both;
+    }
+
+    .complete-ring {
+      width: 72px;
+      height: 72px;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.4s ease;
+      position: relative;
+    }
+
+    .complete-ring::before {
+      content: '';
+      position: absolute;
+      inset: 8px;
+      border: 1px solid var(--text-muted);
+      border-radius: 50%;
+      transition: all 0.4s ease;
+    }
+
+    .complete-ring:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 40px var(--accent-glow);
+    }
+
+    .complete-ring:hover::before {
+      border-color: var(--accent);
+      inset: 4px;
+    }
+
+    .complete-ring svg {
+      width: 24px;
+      height: 24px;
+      stroke: var(--text-muted);
+      stroke-width: 1;
+      fill: none;
+      transition: stroke 0.4s ease;
+    }
+
+    .complete-ring:hover svg {
+      stroke: var(--accent);
+    }
+
+    .complete-hint {
+      margin-top: 16px;
+      font-size: 0.625rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    /* Remaining Tasks - Expandable */
+    .remaining {
+      margin-top: 80px;
+      animation: fadeUp 1s ease-out 0.5s both;
+    }
+
+    .remaining-toggle {
+      font-family: inherit;
+      font-size: 0.6875rem;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      background: none;
+      border: 1px solid var(--border);
+      padding: 10px 20px;
+      border-radius: 24px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .remaining-toggle:hover {
+      border-color: var(--text-dim);
+      color: var(--text-dim);
+    }
+
+    .remaining-panel {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.6s ease;
+    }
+
+    .remaining-panel.open {
+      max-height: 500px;
+      margin-top: 32px;
+    }
+
+    .task-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      max-width: 360px;
+      margin: 0 auto;
+    }
+
+    .task-check {
+      width: 16px;
+      height: 16px;
+      border: 1px solid var(--text-muted);
+      border-radius: 50%;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: border-color 0.3s;
+    }
+
+    .task-check:hover {
+      border-color: var(--text-dim);
+    }
+
+    .task-text {
+      flex: 1;
+      font-size: 0.875rem;
+      font-weight: 300;
+      color: var(--text-dim);
+    }
+
+    .task-pts {
+      font-size: 0.6875rem;
+      color: var(--text-muted);
+    }
+
+    .task-type {
+      font-size: 0.5625rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 24px;
+      margin-bottom: 8px;
+      text-align: left;
+      max-width: 360px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Bottom Bar */
+    .bottom-bar {
+      padding: 24px;
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      animation: fadeUp 1s ease-out 0.6s both;
+    }
+
+    .nav-link {
+      font-size: 0.625rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.3s;
+      position: relative;
+    }
+
+    .nav-link:hover {
+      color: var(--text-dim);
+    }
+
+    .nav-link.active {
+      color: var(--text);
+    }
+
+    .nav-link.active::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 3px;
+      height: 3px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+
+    /* Points whisper */
+    .points-whisper {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      font-size: 0.5625rem;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+    }
+
+    .points-value {
+      color: var(--text-dim);
+    }
+
+    /* Responsive */
+    @media (min-width: 768px) {
+      .header {
+        padding: 40px 56px;
+      }
+
+      .main {
+        padding: 56px;
+      }
+
+      .bottom-bar {
+        padding: 40px 56px;
+      }
+
+      .points-whisper {
+        bottom: 40px;
+        left: 56px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-gradient"></div>
+
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">Goalix</div>
+      <div class="streak-indicator">
+        <div class="streak-ring">
+          <span class="streak-number">12</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main -->
+    <main class="main">
+      <div class="greeting">sunday evening</div>
+
+      <div class="focus-section">
+        <div class="focus-label">
+          <span class="focus-dot"></span>
+          <span>current focus</span>
+        </div>
+
+        <h1 class="focus-task">Complete quarterly business review presentation</h1>
+
+        <div class="focus-details">
+          <span class="focus-detail">
+            <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+            </svg>
+            career
+          </span>
+          <span class="focus-detail">
+            <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            ~2 hours
+          </span>
+          <span class="focus-detail">
+            <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+            100 pts
+          </span>
+        </div>
+      </div>
+
+      <div class="complete-action">
+        <button class="complete-ring" aria-label="Complete task">
+          <svg viewBox="0 0 24 24">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </button>
+        <div class="complete-hint">tap to complete</div>
+      </div>
+
+      <div class="remaining">
+        <button class="remaining-toggle" onclick="toggleRemaining()">
+          5 more tasks waiting
+        </button>
+
+        <div class="remaining-panel" id="remainingPanel">
+          <div class="task-type">Primary</div>
+          <div class="task-row">
+            <div class="task-check"></div>
+            <span class="task-text">Morning workout - 30 min HIIT</span>
+            <span class="task-pts">50</span>
+          </div>
+          <div class="task-row">
+            <div class="task-check"></div>
+            <span class="task-text">Review investment portfolio</span>
+            <span class="task-pts">50</span>
+          </div>
+          <div class="task-row">
+            <div class="task-check"></div>
+            <span class="task-text">Read 20 pages</span>
+            <span class="task-pts">50</span>
+          </div>
+
+          <div class="task-type">Secondary</div>
+          <div class="task-row">
+            <div class="task-check"></div>
+            <span class="task-text">Reply to emails</span>
+            <span class="task-pts">25</span>
+          </div>
+          <div class="task-row">
+            <div class="task-check"></div>
+            <span class="task-text">Organize workspace</span>
+            <span class="task-pts">25</span>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-bar">
+      <a href="#" class="nav-link active">today</a>
+      <a href="#" class="nav-link">dreams</a>
+      <a href="#" class="nav-link">journey</a>
+    </nav>
+
+    <!-- Points Whisper -->
+    <div class="points-whisper">
+      <span class="points-value">6,420</span> total points · level 4
+    </div>
+  </div>
+
+  <script>
+    function toggleRemaining() {
+      const panel = document.getElementById('remainingPanel');
+      const btn = document.querySelector('.remaining-toggle');
+      panel.classList.toggle('open');
+      btn.textContent = panel.classList.contains('open') ? 'hide remaining' : '5 more tasks waiting';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goalix - Dark Neon</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --surface-light: #1a1a26;
+      --text: #e4e4e7;
+      --text-secondary: #71717a;
+      --neon-cyan: #22d3ee;
+      --neon-pink: #f472b6;
+      --neon-purple: #a78bfa;
+      --neon-green: #4ade80;
+      --neon-orange: #fb923c;
+      --glow-cyan: rgba(34, 211, 238, 0.4);
+      --glow-pink: rgba(244, 114, 182, 0.4);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Rajdhani', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Grid Background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background:
+        linear-gradient(rgba(34, 211, 238, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(34, 211, 238, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 20px 16px 120px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header */
+    header {
+      margin-bottom: 28px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .logo {
+      font-family: 'Orbitron', monospace;
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 30px var(--glow-cyan);
+    }
+
+    .streak-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid rgba(244, 114, 182, 0.3);
+      padding: 8px 14px;
+      border-radius: 8px;
+      box-shadow: 0 0 20px rgba(244, 114, 182, 0.2);
+    }
+
+    .streak-fire {
+      font-size: 18px;
+      animation: flicker 1.5s ease infinite;
+    }
+
+    @keyframes flicker {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.1); }
+    }
+
+    .streak-text {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--neon-pink);
+    }
+
+    .date-section h1 {
+      font-family: 'Orbitron', monospace;
+      font-size: 42px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    .date-section p {
+      color: var(--text-secondary);
+      font-size: 14px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    /* Stats Row */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .stat-box {
+      background: var(--surface);
+      border: 1px solid rgba(34, 211, 238, 0.2);
+      border-radius: 12px;
+      padding: 16px 12px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .stat-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .stat-box:hover::before {
+      opacity: 1;
+    }
+
+    .stat-box:hover {
+      border-color: rgba(34, 211, 238, 0.5);
+      box-shadow: 0 0 30px rgba(34, 211, 238, 0.15);
+    }
+
+    .stat-value {
+      font-family: 'Orbitron', monospace;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--neon-cyan);
+      text-shadow: 0 0 20px var(--glow-cyan);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-top: 6px;
+    }
+
+    /* Level Section */
+    .level-section {
+      background: var(--surface);
+      border: 1px solid rgba(167, 139, 250, 0.2);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 28px;
+      position: relative;
+    }
+
+    .level-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .level-name {
+      font-family: 'Orbitron', monospace;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--neon-purple);
+      text-shadow: 0 0 15px rgba(167, 139, 250, 0.5);
+    }
+
+    .level-xp {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .level-xp span {
+      color: var(--neon-purple);
+      font-weight: 700;
+    }
+
+    .level-bar {
+      height: 8px;
+      background: var(--surface-light);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .level-fill {
+      height: 100%;
+      width: 47%;
+      background: linear-gradient(90deg, var(--neon-purple), var(--neon-pink));
+      border-radius: 4px;
+      position: relative;
+      box-shadow: 0 0 20px rgba(167, 139, 250, 0.5);
+    }
+
+    .level-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      animation: shine 2s infinite;
+    }
+
+    @keyframes shine {
+      to { left: 100%; }
+    }
+
+    /* Section Headers */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-title .icon {
+      color: var(--neon-orange);
+      font-size: 18px;
+    }
+
+    .points-badge {
+      font-family: 'Orbitron', monospace;
+      font-size: 12px;
+      color: var(--neon-green);
+      border: 1px solid rgba(74, 222, 128, 0.3);
+      padding: 4px 10px;
+      border-radius: 4px;
+      text-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+    }
+
+    /* MIT Card */
+    .mit-section {
+      margin-bottom: 28px;
+    }
+
+    .mit-card {
+      background: var(--surface);
+      border: 2px solid var(--neon-orange);
+      border-radius: 16px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      box-shadow:
+        0 0 40px rgba(251, 146, 60, 0.2),
+        inset 0 0 60px rgba(251, 146, 60, 0.05);
+    }
+
+    .mit-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(from 0deg, transparent, var(--neon-orange), transparent);
+      opacity: 0.1;
+      animation: rotate 10s linear infinite;
+    }
+
+    @keyframes rotate {
+      to { transform: rotate(360deg); }
+    }
+
+    .mit-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .mit-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Orbitron', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--neon-orange);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 12px;
+      text-shadow: 0 0 15px rgba(251, 146, 60, 0.5);
+    }
+
+    .mit-title {
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.4;
+      margin-bottom: 16px;
+    }
+
+    .mit-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .mit-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .category-chip {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px solid;
+    }
+
+    .category-chip.wealth {
+      color: var(--neon-orange);
+      border-color: rgba(251, 146, 60, 0.3);
+      background: rgba(251, 146, 60, 0.1);
+    }
+
+    .category-chip.health {
+      color: var(--neon-green);
+      border-color: rgba(74, 222, 128, 0.3);
+      background: rgba(74, 222, 128, 0.1);
+    }
+
+    .category-chip.career {
+      color: var(--neon-cyan);
+      border-color: rgba(34, 211, 238, 0.3);
+      background: rgba(34, 211, 238, 0.1);
+    }
+
+    .time-estimate {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .mit-checkbox {
+      width: 52px;
+      height: 52px;
+      border: 2px solid var(--neon-orange);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: transparent;
+    }
+
+    .mit-checkbox:hover {
+      background: var(--neon-orange);
+      box-shadow: 0 0 30px var(--neon-orange);
+    }
+
+    .mit-checkbox svg {
+      width: 28px;
+      height: 28px;
+      stroke: var(--neon-orange);
+      stroke-width: 3;
+      transition: stroke 0.3s ease;
+    }
+
+    .mit-checkbox:hover svg {
+      stroke: var(--bg);
+    }
+
+    /* Task List */
+    .tasks-section {
+      margin-bottom: 24px;
+    }
+
+    .task-item {
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .task-item:hover {
+      border-color: rgba(34, 211, 238, 0.3);
+      background: var(--surface-light);
+    }
+
+    .task-checkbox {
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--text-secondary);
+      border-radius: 6px;
+      flex-shrink: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .task-checkbox.checked {
+      background: var(--neon-green);
+      border-color: var(--neon-green);
+      box-shadow: 0 0 15px rgba(74, 222, 128, 0.5);
+    }
+
+    .task-checkbox svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--bg);
+      stroke-width: 3;
+      opacity: 0;
+    }
+
+    .task-checkbox.checked svg {
+      opacity: 1;
+    }
+
+    .task-content {
+      flex: 1;
+    }
+
+    .task-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .task-title.completed {
+      text-decoration: line-through;
+      color: var(--text-secondary);
+    }
+
+    .task-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+    }
+
+    .task-points {
+      color: var(--text-secondary);
+    }
+
+    .task-points.earned {
+      color: var(--neon-green);
+      text-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+    }
+
+    /* Add Button */
+    .add-btn {
+      width: 100%;
+      padding: 16px;
+      background: transparent;
+      border: 1px dashed rgba(34, 211, 238, 0.3);
+      border-radius: 12px;
+      color: var(--neon-cyan);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .add-btn:hover {
+      background: rgba(34, 211, 238, 0.1);
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 20px rgba(34, 211, 238, 0.2);
+    }
+
+    /* Bottom Nav */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+      display: flex;
+      justify-content: space-around;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-item.active {
+      color: var(--neon-cyan);
+      background: rgba(34, 211, 238, 0.1);
+    }
+
+    .nav-item svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .mit-card { animation: fadeInUp 0.5s ease 0.1s backwards; }
+    .stat-box:nth-child(1) { animation: fadeInUp 0.4s ease 0.2s backwards; }
+    .stat-box:nth-child(2) { animation: fadeInUp 0.4s ease 0.3s backwards; }
+    .stat-box:nth-child(3) { animation: fadeInUp 0.4s ease 0.4s backwards; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="top-bar">
+        <div class="logo">GOALIX</div>
+        <div class="streak-container">
+          <span class="streak-fire">🔥</span>
+          <span class="streak-text">7 DAYS</span>
+        </div>
+      </div>
+      <div class="date-section">
+        <h1>Today</h1>
+        <p>Monday · December 30, 2024</p>
+      </div>
+    </header>
+
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-value">175</div>
+        <div class="stat-label">Points</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value">4/6</div>
+        <div class="stat-label">Tasks</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value">67%</div>
+        <div class="stat-label">Aligned</div>
+      </div>
+    </div>
+
+    <div class="level-section">
+      <div class="level-header">
+        <span class="level-name">// LEVEL 3: ACHIEVER</span>
+        <span class="level-xp"><span>2,350</span> / 5,000 XP</span>
+      </div>
+      <div class="level-bar">
+        <div class="level-fill"></div>
+      </div>
+    </div>
+
+    <section class="mit-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span class="icon">⚡</span>
+          Mission Critical
+        </h2>
+        <span class="points-badge">+100 XP</span>
+      </div>
+      <div class="mit-card">
+        <div class="mit-content">
+          <div class="mit-label">
+            <span>◆</span> MOST IMPORTANT TASK
+          </div>
+          <h3 class="mit-title">Complete quarterly financial review and update investment allocations</h3>
+          <div class="mit-footer">
+            <div class="mit-meta">
+              <span class="category-chip wealth">WEALTH</span>
+              <span class="time-estimate">~45 min</span>
+            </div>
+            <div class="mit-checkbox">
+              <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="tasks-section">
+      <div class="section-header">
+        <h2 class="section-title">Primary Objectives</h2>
+        <span class="points-badge">+50 XP each</span>
+      </div>
+
+      <div class="task-item">
+        <div class="task-checkbox checked">
+          <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="task-content">
+          <p class="task-title completed">Morning workout - 30 min HIIT session</p>
+          <div class="task-meta">
+            <span class="category-chip health">HEALTH</span>
+            <span class="task-points earned">+50 XP</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-item">
+        <div class="task-checkbox checked">
+          <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="task-content">
+          <p class="task-title completed">Review client proposals</p>
+          <div class="task-meta">
+            <span class="category-chip career">CAREER</span>
+            <span class="task-points earned">+50 XP</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-item">
+        <div class="task-checkbox">
+          <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="task-content">
+          <p class="task-title">Read 20 pages - Millionaire Fastlane</p>
+          <div class="task-meta">
+            <span class="category-chip wealth">WEALTH</span>
+            <span class="task-points">50 XP</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="tasks-section">
+      <div class="section-header">
+        <h2 class="section-title">Secondary</h2>
+        <span class="points-badge">+25 XP each</span>
+      </div>
+
+      <div class="task-item">
+        <div class="task-checkbox checked">
+          <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="task-content">
+          <p class="task-title completed">Organize workspace</p>
+          <div class="task-meta">
+            <span class="task-points earned">+25 XP</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="add-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        NEW OBJECTIVE
+      </button>
+    </section>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="#" class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Today
+    </a>
+    <a href="#" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+      Goals
+    </a>
+    <a href="#" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+      Stats
+    </a>
+    <a href="#" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      Review
+    </a>
+  </nav>
+</body>
+</html>

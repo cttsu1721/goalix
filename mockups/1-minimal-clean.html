@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goalix - Minimal Clean</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fafaf9;
+      --surface: #ffffff;
+      --text: #1c1917;
+      --text-secondary: #78716c;
+      --accent: #0f172a;
+      --accent-light: #e2e8f0;
+      --success: #16a34a;
+      --amber: #d97706;
+      --health: #10b981;
+      --wealth: #f59e0b;
+      --career: #6366f1;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 24px 20px 100px;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 48px;
+      padding-top: 12px;
+    }
+
+    .date-section h1 {
+      font-family: 'Instrument Serif', serif;
+      font-size: 32px;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+    }
+
+    .date-section p {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 20px;
+      text-align: right;
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 600;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 4px;
+    }
+
+    /* Level Progress */
+    .level-bar {
+      background: var(--accent-light);
+      height: 3px;
+      border-radius: 2px;
+      margin-bottom: 48px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .level-bar::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 35%;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    .level-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 8px;
+    }
+
+    /* Section Headers */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-family: 'Instrument Serif', serif;
+      font-size: 18px;
+      font-weight: 400;
+    }
+
+    .section-meta {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    /* MIT Card */
+    .mit-section {
+      margin-bottom: 48px;
+    }
+
+    .mit-card {
+      background: var(--surface);
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 16px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mit-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--amber);
+    }
+
+    .mit-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #fef3c7;
+      color: var(--amber);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-bottom: 12px;
+    }
+
+    .mit-badge svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .mit-title {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .mit-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .category-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .category-tag.health {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .category-tag.wealth {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .category-tag.career {
+      background: #e0e7ff;
+      color: #3730a3;
+    }
+
+    .mit-checkbox {
+      position: absolute;
+      right: 24px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 28px;
+      height: 28px;
+      border: 2px solid var(--accent-light);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .mit-checkbox:hover {
+      border-color: var(--accent);
+    }
+
+    /* Tasks List */
+    .tasks-section {
+      margin-bottom: 40px;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.04);
+    }
+
+    .task-item:last-child {
+      border-bottom: none;
+    }
+
+    .task-checkbox {
+      width: 20px;
+      height: 20px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 6px;
+      flex-shrink: 0;
+      margin-top: 2px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .task-checkbox:hover {
+      border-color: var(--accent);
+    }
+
+    .task-checkbox.checked {
+      background: var(--success);
+      border-color: var(--success);
+      position: relative;
+    }
+
+    .task-checkbox.checked::after {
+      content: '✓';
+      position: absolute;
+      color: white;
+      font-size: 12px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .task-content {
+      flex: 1;
+    }
+
+    .task-title {
+      font-size: 15px;
+      font-weight: 450;
+      margin-bottom: 4px;
+    }
+
+    .task-title.completed {
+      text-decoration: line-through;
+      color: var(--text-secondary);
+    }
+
+    .task-details {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .points-badge {
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 32px 20px;
+      color: var(--text-secondary);
+    }
+
+    .empty-state p {
+      font-size: 14px;
+    }
+
+    /* Add Button */
+    .add-task-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 14px;
+      background: transparent;
+      border: 1px dashed #d1d5db;
+      border-radius: 12px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: 8px;
+    }
+
+    .add-task-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(15, 23, 42, 0.02);
+    }
+
+    /* Bottom Nav */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border-top: 1px solid rgba(0,0,0,0.06);
+      padding: 12px 0 calc(12px + env(safe-area-inset-bottom));
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 24px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 11px;
+      border-radius: 12px;
+      transition: all 0.15s ease;
+    }
+
+    .nav-item.active {
+      color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    .nav-item svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .mit-card, .task-item {
+      animation: fadeIn 0.4s ease backwards;
+    }
+
+    .task-item:nth-child(1) { animation-delay: 0.1s; }
+    .task-item:nth-child(2) { animation-delay: 0.15s; }
+    .task-item:nth-child(3) { animation-delay: 0.2s; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="date-section">
+        <h1>Today</h1>
+        <p>Monday, December 30</p>
+      </div>
+      <div class="stats-row">
+        <div class="stat">
+          <span class="stat-value">175</span>
+          <span class="stat-label">Points</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">7</span>
+          <span class="stat-label">Streak</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="level-bar"></div>
+    <div class="level-info">
+      <span>Level 3 · Achiever</span>
+      <span>2,350 / 5,000 pts</span>
+    </div>
+
+    <section class="mit-section">
+      <div class="section-header">
+        <h2 class="section-title">Most Important</h2>
+        <span class="section-meta">100 pts</span>
+      </div>
+      <div class="mit-card">
+        <div class="mit-badge">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 3v2.5l-2.5 2.5L13 10.5V13l-5-5 5-5zm-2 18v-2.5l2.5-2.5L11 13.5V11l5 5-5 5z"/></svg>
+          MIT
+        </div>
+        <h3 class="mit-title">Complete quarterly financial review and update investment allocations</h3>
+        <div class="mit-meta">
+          <span class="category-tag wealth">Wealth</span>
+          <span>~45 min</span>
+        </div>
+        <div class="mit-checkbox"></div>
+      </div>
+    </section>
+
+    <section class="tasks-section">
+      <div class="section-header">
+        <h2 class="section-title">Primary Tasks</h2>
+        <span class="section-meta">2/3 · 100 pts</span>
+      </div>
+
+      <div class="task-item">
+        <div class="task-checkbox checked"></div>
+        <div class="task-content">
+          <p class="task-title completed">Morning workout - 30 min HIIT session</p>
+          <div class="task-details">
+            <span class="category-tag health">Health</span>
+            <span class="points-badge">+50 pts</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-item">
+        <div class="task-checkbox checked"></div>
+        <div class="task-content">
+          <p class="task-title completed">Review and respond to client proposals</p>
+          <div class="task-details">
+            <span class="category-tag career">Career</span>
+            <span class="points-badge">+50 pts</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-item">
+        <div class="task-checkbox"></div>
+        <div class="task-content">
+          <p class="task-title">Read 20 pages of "The Millionaire Fastlane"</p>
+          <div class="task-details">
+            <span class="category-tag wealth">Wealth</span>
+            <span>50 pts</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="tasks-section">
+      <div class="section-header">
+        <h2 class="section-title">Secondary</h2>
+        <span class="section-meta">1/2 · 25 pts</span>
+      </div>
+
+      <div class="task-item">
+        <div class="task-checkbox checked"></div>
+        <div class="task-content">
+          <p class="task-title completed">Organize desk and workspace</p>
+          <div class="task-details">
+            <span class="points-badge">+25 pts</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-item">
+        <div class="task-checkbox"></div>
+        <div class="task-content">
+          <p class="task-title">Schedule dentist appointment</p>
+          <div class="task-details">
+            <span class="category-tag health">Health</span>
+            <span>25 pts</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="add-task-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add secondary task
+      </button>
+    </section>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="#" class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+      Today
+    </a>
+    <a href="#" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+      Goals
+    </a>
+    <a href="#" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      Progress
+    </a>
+  </nav>
+</body>
+</html>

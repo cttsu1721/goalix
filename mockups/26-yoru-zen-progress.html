@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goalix - Progress | Yoru Zen</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --void: #08080c;
+      --night: #0c0c12;
+      --night-soft: #12121a;
+      --night-mist: #1a1a24;
+      --night-glow: #242430;
+      --lantern: #e8a857;
+      --lantern-soft: rgba(232, 168, 87, 0.08);
+      --lantern-mist: rgba(232, 168, 87, 0.04);
+      --moon: #f0eef8;
+      --moon-soft: #c4c2d0;
+      --moon-dim: #8a889a;
+      --moon-faint: #5a5868;
+      --zen-green: #7dd3a8;
+      --zen-green-soft: rgba(125, 211, 168, 0.1);
+      --zen-blue: #7db8d3;
+      --zen-purple: #a87dd3;
+      --zen-red: #d37d7d;
+    }
+
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--void);
+      color: var(--moon);
+      min-height: 100vh;
+      font-weight: 400;
+      line-height: 1.7;
+      letter-spacing: 0.01em;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      background: var(--night);
+      border-right: 1px solid var(--night-mist);
+      display: flex;
+      flex-direction: column;
+      padding: 40px 0;
+    }
+
+    .sidebar-header {
+      padding: 0 28px 40px;
+    }
+
+    .logo {
+      font-size: 1.375rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--moon);
+    }
+
+    .logo span {
+      color: var(--lantern);
+      font-weight: 300;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 0 16px;
+    }
+
+    .nav-group {
+      margin-bottom: 40px;
+    }
+
+    .nav-label {
+      font-size: 0.625rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--moon-faint);
+      padding: 0 16px;
+      margin-bottom: 16px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      color: var(--moon-dim);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      margin-bottom: 4px;
+    }
+
+    .nav-item:hover {
+      background: var(--night-soft);
+      color: var(--moon-soft);
+    }
+
+    .nav-item.active {
+      background: var(--lantern-soft);
+      color: var(--lantern);
+    }
+
+    .nav-icon {
+      width: 20px;
+      height: 20px;
+      opacity: 0.7;
+    }
+
+    .nav-item.active .nav-icon {
+      opacity: 1;
+    }
+
+    .sidebar-user {
+      padding: 28px;
+      margin-top: auto;
+    }
+
+    .user-block {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .user-avatar {
+      width: 44px;
+      height: 44px;
+      background: var(--night-mist);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 500;
+      font-size: 0.875rem;
+      color: var(--moon-soft);
+    }
+
+    .user-details h4 {
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+
+    .user-details span {
+      font-size: 0.75rem;
+      color: var(--moon-faint);
+    }
+
+    /* ===== MAIN CONTENT ===== */
+    .main {
+      background: var(--void);
+      overflow-y: auto;
+      padding: 48px 56px;
+    }
+
+    .main-header {
+      margin-bottom: 48px;
+    }
+
+    .header-title {
+      font-size: 1.875rem;
+      font-weight: 300;
+      letter-spacing: -0.01em;
+      margin-bottom: 8px;
+    }
+
+    .header-subtitle {
+      font-size: 0.875rem;
+      color: var(--moon-dim);
+      font-weight: 300;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 48px;
+    }
+
+    .stat-card {
+      background: var(--night);
+      border: 1px solid var(--night-mist);
+      border-radius: 20px;
+      padding: 28px;
+    }
+
+    .stat-label {
+      font-size: 0.6875rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--moon-faint);
+      margin-bottom: 16px;
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 300;
+      color: var(--moon);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .stat-value.lantern { color: var(--lantern); }
+    .stat-value.green { color: var(--zen-green); }
+    .stat-value.blue { color: var(--zen-blue); }
+    .stat-value.purple { color: var(--zen-purple); }
+
+    .stat-desc {
+      font-size: 0.75rem;
+      color: var(--moon-faint);
+    }
+
+    .stat-trend {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      margin-top: 12px;
+    }
+
+    .trend-up { color: var(--zen-green); }
+    .trend-down { color: var(--zen-red); }
+
+    /* Level Card - Special */
+    .level-card {
+      grid-column: span 2;
+      display: flex;
+      gap: 32px;
+      align-items: center;
+    }
+
+    .level-visual {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      flex-shrink: 0;
+    }
+
+    .level-ring {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: conic-gradient(
+        var(--lantern) 0deg 230deg,
+        var(--night-mist) 230deg 360deg
+      );
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .level-inner {
+      width: 100px;
+      height: 100px;
+      background: var(--night);
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .level-number {
+      font-size: 2rem;
+      font-weight: 300;
+      color: var(--lantern);
+    }
+
+    .level-text {
+      font-size: 0.625rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--moon-faint);
+    }
+
+    .level-info {
+      flex: 1;
+    }
+
+    .level-name {
+      font-size: 1.5rem;
+      font-weight: 400;
+      margin-bottom: 8px;
+    }
+
+    .level-progress-text {
+      font-size: 0.875rem;
+      color: var(--moon-dim);
+      margin-bottom: 16px;
+    }
+
+    .level-bar {
+      height: 8px;
+      background: var(--night-mist);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .level-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--lantern), var(--zen-green));
+      border-radius: 4px;
+    }
+
+    .level-xp {
+      font-size: 0.75rem;
+      color: var(--moon-faint);
+    }
+
+    /* Streak Calendar */
+    .section {
+      margin-bottom: 48px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .section-title {
+      font-size: 0.6875rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--moon-faint);
+    }
+
+    .section-nav {
+      display: flex;
+      gap: 8px;
+    }
+
+    .nav-btn {
+      width: 32px;
+      height: 32px;
+      background: var(--night-soft);
+      border: 1px solid var(--night-mist);
+      border-radius: 8px;
+      color: var(--moon-dim);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .nav-btn:hover {
+      border-color: var(--lantern);
+      color: var(--lantern);
+    }
+
+    .calendar-card {
+      background: var(--night);
+      border: 1px solid var(--night-mist);
+      border-radius: 20px;
+      padding: 32px;
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .calendar-month {
+      font-size: 1.125rem;
+      font-weight: 400;
+    }
+
+    .calendar-legend {
+      display: flex;
+      gap: 16px;
+      font-size: 0.75rem;
+      color: var(--moon-faint);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+    }
+
+    .legend-dot.empty { background: var(--night-mist); }
+    .legend-dot.partial { background: var(--lantern-soft); border: 1px solid var(--lantern); }
+    .legend-dot.complete { background: var(--zen-green); }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+    }
+
+    .calendar-day-label {
+      text-align: center;
+      font-size: 0.625rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--moon-faint);
+      padding-bottom: 12px;
+    }
+
+    .calendar-day {
+      aspect-ratio: 1;
+      background: var(--night-mist);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      color: var(--moon-dim);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .calendar-day:hover {
+      background: var(--night-glow);
+    }
+
+    .calendar-day.partial {
+      background: var(--lantern-soft);
+      border: 1px solid var(--lantern);
+      color: var(--lantern);
+    }
+
+    .calendar-day.complete {
+      background: var(--zen-green);
+      color: var(--void);
+      font-weight: 500;
+    }
+
+    .calendar-day.today {
+      box-shadow: 0 0 0 2px var(--moon-dim);
+    }
+
+    .calendar-day.future {
+      opacity: 0.3;
+      cursor: default;
+    }
+
+    /* Badges Section */
+    .badges-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 16px;
+    }
+
+    .badge-card {
+      background: var(--night);
+      border: 1px solid var(--night-mist);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .badge-card:hover {
+      border-color: var(--night-glow);
+      transform: translateY(-2px);
+    }
+
+    .badge-card.locked {
+      opacity: 0.4;
+    }
+
+    .badge-icon {
+      font-size: 2.5rem;
+      margin-bottom: 12px;
+    }
+
+    .badge-card.locked .badge-icon {
+      filter: grayscale(1);
+    }
+
+    .badge-name {
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .badge-desc {
+      font-size: 0.6875rem;
+      color: var(--moon-faint);
+      line-height: 1.5;
+    }
+
+    .badge-earned {
+      font-size: 0.625rem;
+      color: var(--zen-green);
+      margin-top: 8px;
+    }
+
+    /* Weekly Trends */
+    .trends-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .trend-card {
+      background: var(--night);
+      border: 1px solid var(--night-mist);
+      border-radius: 20px;
+      padding: 28px;
+    }
+
+    .trend-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .trend-title {
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .trend-value {
+      font-size: 1.25rem;
+      font-weight: 400;
+      color: var(--lantern);
+    }
+
+    .trend-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      height: 80px;
+    }
+
+    .trend-bar {
+      flex: 1;
+      background: var(--night-mist);
+      border-radius: 4px 4px 0 0;
+      position: relative;
+      transition: all 0.3s;
+    }
+
+    .trend-bar:hover {
+      background: var(--lantern-soft);
+    }
+
+    .trend-bar-fill {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(180deg, var(--lantern), var(--lantern-soft));
+      border-radius: 4px 4px 0 0;
+    }
+
+    .trend-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 12px;
+    }
+
+    .trend-label {
+      font-size: 0.625rem;
+      color: var(--moon-faint);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Kaizen Summary */
+    .kaizen-summary {
+      background: var(--night);
+      border: 1px solid var(--night-mist);
+      border-radius: 20px;
+      padding: 32px;
+    }
+
+    .kaizen-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+
+    .kaizen-title {
+      font-size: 1.125rem;
+      font-weight: 400;
+    }
+
+    .kaizen-week {
+      font-size: 0.75rem;
+      color: var(--moon-faint);
+    }
+
+    .kaizen-areas {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 16px;
+    }
+
+    .kaizen-area {
+      text-align: center;
+    }
+
+    .kaizen-ring {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 12px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .kaizen-ring.high {
+      background: var(--zen-green-soft);
+      border: 2px solid var(--zen-green);
+    }
+
+    .kaizen-ring.medium {
+      background: var(--lantern-soft);
+      border: 2px solid var(--lantern);
+    }
+
+    .kaizen-ring.low {
+      background: var(--night-mist);
+      border: 2px solid var(--moon-faint);
+    }
+
+    .kaizen-area-name {
+      font-size: 0.6875rem;
+      color: var(--moon-dim);
+      margin-bottom: 4px;
+    }
+
+    .kaizen-area-score {
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .kaizen-ring.high + .kaizen-area-name + .kaizen-area-score { color: var(--zen-green); }
+    .kaizen-ring.medium ~ .kaizen-area-score { color: var(--lantern); }
+
+    /* Mobile Nav */
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--night);
+      border-top: 1px solid var(--night-mist);
+      padding: 16px 32px;
+      z-index: 50;
+    }
+
+    .mobile-nav-items {
+      display: flex;
+      justify-content: space-around;
+    }
+
+    .mobile-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      color: var(--moon-faint);
+      text-decoration: none;
+      font-size: 0.625rem;
+      font-weight: 400;
+      letter-spacing: 0.05em;
+    }
+
+    .mobile-nav-item.active {
+      color: var(--lantern);
+    }
+
+    .mobile-nav-item svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .level-card {
+        grid-column: span 2;
+      }
+
+      .kaizen-areas {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+      .main {
+        padding: 28px 24px;
+        padding-bottom: 100px;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .level-card {
+        grid-column: span 2;
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .trends-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .kaizen-areas {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .badges-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .mobile-nav {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">goalix<span>.</span></div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-group">
+          <a class="nav-item">
+            <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="m9 12 2 2 4-4"/>
+            </svg>
+            Today
+          </a>
+          <a class="nav-item">
+            <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <path d="M16 2v4M8 2v4M3 10h18"/>
+            </svg>
+            Week
+          </a>
+          <a class="nav-item">
+            <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M12 8v4l3 3"/>
+              <circle cx="12" cy="12" r="10"/>
+            </svg>
+            Upcoming
+          </a>
+        </div>
+
+        <div class="nav-group">
+          <div class="nav-label">Vision</div>
+          <a class="nav-item">
+            <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            Dreams
+          </a>
+          <a class="nav-item">
+            <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+            Goals
+          </a>
+        </div>
+
+        <div class="nav-group">
+          <div class="nav-label">Reflect</div>
+          <a class="nav-item active">
+            <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M3 3v18h18"/>
+              <path d="m19 9-5 5-4-4-3 3"/>
+            </svg>
+            Progress
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar-user">
+        <div class="user-block">
+          <div class="user-avatar">JD</div>
+          <div class="user-details">
+            <h4>John Doe</h4>
+            <span>Level 4</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+      <header class="main-header">
+        <h1 class="header-title">Your Progress</h1>
+        <p class="header-subtitle">Track your journey toward your dreams</p>
+      </header>
+
+      <!-- Stats Overview -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Current Streak</div>
+          <div class="stat-value lantern">12</div>
+          <div class="stat-desc">days in a row</div>
+          <div class="stat-trend trend-up">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="m18 15-6-6-6 6"/>
+            </svg>
+            Best: 28 days
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">Total Points</div>
+          <div class="stat-value">6,420</div>
+          <div class="stat-desc">lifetime earned</div>
+          <div class="stat-trend trend-up">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="m18 15-6-6-6 6"/>
+            </svg>
+            +340 this week
+          </div>
+        </div>
+
+        <div class="stat-card level-card">
+          <div class="level-visual">
+            <div class="level-ring">
+              <div class="level-inner">
+                <span class="level-number">4</span>
+                <span class="level-text">Level</span>
+              </div>
+            </div>
+          </div>
+          <div class="level-info">
+            <h3 class="level-name">Go-Getter</h3>
+            <p class="level-progress-text">3,580 XP to reach Level 5 (Performer)</p>
+            <div class="level-bar">
+              <div class="level-fill" style="width: 64%"></div>
+            </div>
+            <span class="level-xp">6,420 / 10,000 XP</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Streak Calendar -->
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">Streak Calendar</h2>
+          <div class="section-nav">
+            <button class="nav-btn">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path d="m15 18-6-6 6-6"/>
+              </svg>
+            </button>
+            <button class="nav-btn">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path d="m9 18 6-6-6-6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="calendar-card">
+          <div class="calendar-header">
+            <h3 class="calendar-month">December 2024</h3>
+            <div class="calendar-legend">
+              <div class="legend-item">
+                <div class="legend-dot empty"></div>
+                <span>No activity</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot partial"></div>
+                <span>Partial</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot complete"></div>
+                <span>Complete</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="calendar-grid">
+            <div class="calendar-day-label">Sun</div>
+            <div class="calendar-day-label">Mon</div>
+            <div class="calendar-day-label">Tue</div>
+            <div class="calendar-day-label">Wed</div>
+            <div class="calendar-day-label">Thu</div>
+            <div class="calendar-day-label">Fri</div>
+            <div class="calendar-day-label">Sat</div>
+
+            <div class="calendar-day complete">1</div>
+            <div class="calendar-day complete">2</div>
+            <div class="calendar-day complete">3</div>
+            <div class="calendar-day complete">4</div>
+            <div class="calendar-day partial">5</div>
+            <div class="calendar-day complete">6</div>
+            <div class="calendar-day complete">7</div>
+
+            <div class="calendar-day complete">8</div>
+            <div class="calendar-day complete">9</div>
+            <div class="calendar-day complete">10</div>
+            <div class="calendar-day partial">11</div>
+            <div class="calendar-day complete">12</div>
+            <div class="calendar-day complete">13</div>
+            <div class="calendar-day complete">14</div>
+
+            <div class="calendar-day complete">15</div>
+            <div class="calendar-day complete">16</div>
+            <div class="calendar-day">17</div>
+            <div class="calendar-day complete">18</div>
+            <div class="calendar-day complete">19</div>
+            <div class="calendar-day complete">20</div>
+            <div class="calendar-day complete">21</div>
+
+            <div class="calendar-day complete">22</div>
+            <div class="calendar-day complete">23</div>
+            <div class="calendar-day complete">24</div>
+            <div class="calendar-day complete">25</div>
+            <div class="calendar-day complete">26</div>
+            <div class="calendar-day complete">27</div>
+            <div class="calendar-day complete">28</div>
+
+            <div class="calendar-day today partial">29</div>
+            <div class="calendar-day future">30</div>
+            <div class="calendar-day future">31</div>
+            <div class="calendar-day future"></div>
+            <div class="calendar-day future"></div>
+            <div class="calendar-day future"></div>
+            <div class="calendar-day future"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Weekly Trends -->
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">Weekly Trends</h2>
+        </div>
+
+        <div class="trends-grid">
+          <div class="trend-card">
+            <div class="trend-header">
+              <span class="trend-title">Tasks Completed</span>
+              <span class="trend-value">38</span>
+            </div>
+            <div class="trend-chart">
+              <div class="trend-bar" style="height: 100%"><div class="trend-bar-fill" style="height: 60%"></div></div>
+              <div class="trend-bar" style="height: 100%"><div class="trend-bar-fill" style="height: 80%"></div></div>
+              <div class="trend-bar" style="height: 100%"><div class="trend-bar-fill" style="height: 45%"></div></div>
+              <div class="trend-bar" style="height: 100%"><div class="trend-bar-fill" style="height: 90%"></div></div>
+              <div class="trend-bar" style="height: 100%"><div class="trend-bar-fill" style="height: 70%"></div></div>
+              <div class="trend-bar" style="height: 100%"><div class="trend-bar-fill" style="height: 85%"></div></div>
+              <div class="trend-bar" style="height: 100%"><div class="trend-bar-fill" style="height: 40%"></div></div>
+            </div>
+            <div class="trend-labels">
+              <span class="trend-label">Mon</span>
+              <span class="trend-label">Tue</span>
+              <span class="trend-label">Wed</span>
+              <span class="trend-label">Thu</span>
+              <span class="trend-label">Fri</span>
+              <span class="trend-label">Sat</span>
+              <span class="trend-label">Sun</span>
+            </div>
+          </div>
+
+          <div class="trend-card">
+            <div class="trend-header">
+              <span class="trend-title">Points Earned</span>
+              <span class="trend-value">1,250</span>
+            </div>
+            <div class="trend-chart">
+              <div class="trend-bar" style="height: 100%"><div class="trend-bar-fill" style="height: 55%"></div></div>
+              <div class="trend-bar" style="height: 100%"><div class="trend-bar-fill" style="height: 75%"></div></div>
+              <div class="trend-bar" style="height: 100%"><div class="trend-bar-fill" style="height: 50%"></div></div>
+              <div class="trend-bar" style="height: 100%"><div class="trend-bar-fill" style="height: 95%"></div></div>
+              <div class="trend-bar" style="height: 100%"><div class="trend-bar-fill" style="height: 65%"></div></div>
+              <div class="trend-bar" style="height: 100%"><div class="trend-bar-fill" style="height: 80%"></div></div>
+              <div class="trend-bar" style="height: 100%"><div class="trend-bar-fill" style="height: 35%"></div></div>
+            </div>
+            <div class="trend-labels">
+              <span class="trend-label">Mon</span>
+              <span class="trend-label">Tue</span>
+              <span class="trend-label">Wed</span>
+              <span class="trend-label">Thu</span>
+              <span class="trend-label">Fri</span>
+              <span class="trend-label">Sat</span>
+              <span class="trend-label">Sun</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Kaizen Summary -->
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">Life Balance (Kaizen)</h2>
+        </div>
+
+        <div class="kaizen-summary">
+          <div class="kaizen-header">
+            <h3 class="kaizen-title">This Week's Reflections</h3>
+            <span class="kaizen-week">Dec 23 - 29, 2024</span>
+          </div>
+          <div class="kaizen-areas">
+            <div class="kaizen-area">
+              <div class="kaizen-ring high">💪</div>
+              <div class="kaizen-area-name">Health</div>
+              <div class="kaizen-area-score">6/7</div>
+            </div>
+            <div class="kaizen-area">
+              <div class="kaizen-ring medium">❤️</div>
+              <div class="kaizen-area-name">Relationships</div>
+              <div class="kaizen-area-score">4/7</div>
+            </div>
+            <div class="kaizen-area">
+              <div class="kaizen-ring high">💰</div>
+              <div class="kaizen-area-name">Wealth</div>
+              <div class="kaizen-area-score">5/7</div>
+            </div>
+            <div class="kaizen-area">
+              <div class="kaizen-ring high">💼</div>
+              <div class="kaizen-area-name">Career</div>
+              <div class="kaizen-area-score">7/7</div>
+            </div>
+            <div class="kaizen-area">
+              <div class="kaizen-ring medium">📚</div>
+              <div class="kaizen-area-name">Growth</div>
+              <div class="kaizen-area-score">4/7</div>
+            </div>
+            <div class="kaizen-area">
+              <div class="kaizen-ring low">🌿</div>
+              <div class="kaizen-area-name">Lifestyle</div>
+              <div class="kaizen-area-score">2/7</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Badges -->
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">Badges Earned</h2>
+        </div>
+
+        <div class="badges-grid">
+          <div class="badge-card">
+            <div class="badge-icon">⚔️</div>
+            <div class="badge-name">First Blood</div>
+            <div class="badge-desc">Complete your first task</div>
+            <div class="badge-earned">Earned Dec 1, 2024</div>
+          </div>
+          <div class="badge-card">
+            <div class="badge-icon">🔥</div>
+            <div class="badge-name">On Fire</div>
+            <div class="badge-desc">7-day streak</div>
+            <div class="badge-earned">Earned Dec 8, 2024</div>
+          </div>
+          <div class="badge-card">
+            <div class="badge-icon">📋</div>
+            <div class="badge-name">Planner Pro</div>
+            <div class="badge-desc">Complete daily planning 7 days</div>
+            <div class="badge-earned">Earned Dec 12, 2024</div>
+          </div>
+          <div class="badge-card">
+            <div class="badge-icon">💯</div>
+            <div class="badge-name">Century Club</div>
+            <div class="badge-desc">Earn 100+ points in one day</div>
+            <div class="badge-earned">Earned Dec 15, 2024</div>
+          </div>
+          <div class="badge-card">
+            <div class="badge-icon">⭐</div>
+            <div class="badge-name">Dream Starter</div>
+            <div class="badge-desc">Create your first dream</div>
+            <div class="badge-earned">Earned Dec 1, 2024</div>
+          </div>
+          <div class="badge-card locked">
+            <div class="badge-icon">🏆</div>
+            <div class="badge-name">Rockstar</div>
+            <div class="badge-desc">80+ consecutive days</div>
+          </div>
+          <div class="badge-card locked">
+            <div class="badge-icon">🎯</div>
+            <div class="badge-name">Visionary</div>
+            <div class="badge-desc">Active goals at all 5 levels</div>
+          </div>
+          <div class="badge-card locked">
+            <div class="badge-icon">🌟</div>
+            <div class="badge-name">Fastlaner</div>
+            <div class="badge-desc">Reach Level 10</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Mobile Navigation -->
+  <nav class="mobile-nav">
+    <div class="mobile-nav-items">
+      <a href="#" class="mobile-nav-item">
+        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="m9 12 2 2 4-4"/>
+        </svg>
+        Today
+      </a>
+      <a href="#" class="mobile-nav-item">
+        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+        Dreams
+      </a>
+      <a href="#" class="mobile-nav-item active">
+        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path d="M3 3v18h18"/>
+          <path d="m19 9-5 5-4-4-3 3"/>
+        </svg>
+        Progress
+      </a>
+      <a href="#" class="mobile-nav-item">
+        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 1v6m0 6v6"/>
+        </svg>
+        Settings
+      </a>
+    </div>
+  </nav>
+</body>
+</html>

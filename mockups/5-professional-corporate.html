@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goalix - Professional Corporate</title>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --text: #0f172a;
+      --text-secondary: #64748b;
+      --border: #e2e8f0;
+      --primary: #0f172a;
+      --primary-light: #334155;
+      --accent: #0284c7;
+      --accent-light: #e0f2fe;
+      --success: #059669;
+      --success-light: #d1fae5;
+      --warning: #d97706;
+      --warning-light: #fef3c7;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'IBM Plex Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 0 0 80px;
+    }
+
+    /* Header */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .logo {
+      font-family: 'Source Serif 4', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: -0.02em;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .icon-btn:hover {
+      background: var(--bg);
+      border-color: var(--primary-light);
+    }
+
+    .icon-btn svg {
+      width: 18px;
+      height: 18px;
+      color: var(--text-secondary);
+    }
+
+    .date-nav {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .nav-arrow {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .nav-arrow:hover {
+      background: var(--bg);
+    }
+
+    .nav-arrow svg {
+      width: 16px;
+      height: 16px;
+      color: var(--text-secondary);
+    }
+
+    .current-date {
+      text-align: center;
+    }
+
+    .current-date h1 {
+      font-family: 'Source Serif 4', serif;
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .current-date p {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    /* Main Content */
+    main {
+      padding: 20px;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .stat-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 12px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-value.accent { color: var(--accent); }
+    .stat-value.success { color: var(--success); }
+    .stat-value.warning { color: var(--warning); }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 500;
+    }
+
+    /* Progress Overview */
+    .progress-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin-bottom: 24px;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .progress-title {
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--text-secondary);
+    }
+
+    .progress-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 13px;
+    }
+
+    .progress-meta span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .progress-meta .level {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .progress-bar-container {
+      height: 6px;
+      background: var(--bg);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 47%;
+      background: var(--accent);
+      border-radius: 3px;
+    }
+
+    .progress-footer {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 8px;
+    }
+
+    /* Section */
+    .section {
+      margin-bottom: 24px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title .indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+    }
+
+    .section-title .indicator.critical { background: var(--warning); }
+    .section-title .indicator.primary { background: var(--accent); }
+    .section-title .indicator.secondary { background: var(--text-secondary); }
+
+    .section-action {
+      font-size: 12px;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .section-action:hover {
+      text-decoration: underline;
+    }
+
+    /* MIT Card */
+    .mit-card {
+      background: var(--warning-light);
+      border: 1px solid #fcd34d;
+      border-radius: 10px;
+      padding: 18px 20px;
+    }
+
+    .mit-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .mit-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--warning);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .mit-points {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--warning);
+    }
+
+    .mit-content h3 {
+      font-family: 'Source Serif 4', serif;
+      font-size: 17px;
+      font-weight: 600;
+      line-height: 1.4;
+      margin-bottom: 12px;
+      color: #78350f;
+    }
+
+    .mit-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .mit-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      color: #92400e;
+    }
+
+    .category-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .category-badge.wealth {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fcd34d;
+    }
+
+    .category-badge.health {
+      background: var(--success-light);
+      color: #065f46;
+      border: 1px solid #86efac;
+    }
+
+    .category-badge.career {
+      background: var(--accent-light);
+      color: #075985;
+      border: 1px solid #7dd3fc;
+    }
+
+    .action-btn {
+      padding: 10px 20px;
+      background: var(--warning);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .action-btn:hover {
+      background: #b45309;
+    }
+
+    /* Task List */
+    .task-list {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s ease;
+    }
+
+    .task-item:last-child {
+      border-bottom: none;
+    }
+
+    .task-item:hover {
+      background: var(--bg);
+    }
+
+    .task-checkbox {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border);
+      border-radius: 4px;
+      flex-shrink: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+
+    .task-checkbox:hover {
+      border-color: var(--accent);
+    }
+
+    .task-checkbox.checked {
+      background: var(--success);
+      border-color: var(--success);
+    }
+
+    .task-checkbox svg {
+      width: 12px;
+      height: 12px;
+      stroke: white;
+      stroke-width: 3;
+      opacity: 0;
+    }
+
+    .task-checkbox.checked svg {
+      opacity: 1;
+    }
+
+    .task-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .task-title {
+      font-weight: 500;
+      font-size: 14px;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .task-title.completed {
+      text-decoration: line-through;
+      color: var(--text-secondary);
+    }
+
+    .task-details {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .task-points {
+      font-weight: 600;
+    }
+
+    .task-points.earned {
+      color: var(--success);
+    }
+
+    /* Add Task Row */
+    .add-task-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 18px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .add-task-row:hover {
+      background: var(--bg);
+      color: var(--accent);
+    }
+
+    .add-task-row svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .add-task-row span {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    /* Bottom Nav */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 8px 20px calc(8px + env(safe-area-inset-bottom));
+      display: flex;
+      justify-content: space-around;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .nav-item.active {
+      color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    .nav-item svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Alignment Indicator */
+    .alignment-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .alignment-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .alignment-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: var(--accent-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .alignment-icon svg {
+      width: 20px;
+      height: 20px;
+      color: var(--accent);
+    }
+
+    .alignment-text h4 {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .alignment-text p {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .alignment-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    main {
+      animation: fadeIn 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-top">
+        <div class="logo">Goalix</div>
+        <div class="header-actions">
+          <button class="icon-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
+          <button class="icon-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="date-nav">
+        <button class="nav-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="current-date">
+          <h1>Monday, December 30</h1>
+          <p>Week 1 · Q1 2025</p>
+        </div>
+        <button class="nav-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value accent">175</div>
+          <div class="stat-label">Points</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value success">4/6</div>
+          <div class="stat-label">Tasks</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value warning">7</div>
+          <div class="stat-label">Streak</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">67%</div>
+          <div class="stat-label">Aligned</div>
+        </div>
+      </div>
+
+      <div class="progress-card">
+        <div class="progress-header">
+          <span class="progress-title">Level Progress</span>
+          <div class="progress-meta">
+            <span class="level">Level 3 · Achiever</span>
+          </div>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar"></div>
+        </div>
+        <div class="progress-footer">
+          <span>2,350 XP</span>
+          <span>5,000 XP to Level 4</span>
+        </div>
+      </div>
+
+      <div class="alignment-card">
+        <div class="alignment-info">
+          <div class="alignment-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          </div>
+          <div class="alignment-text">
+            <h4>Goal Alignment</h4>
+            <p>4 of 6 tasks linked to goals</p>
+          </div>
+        </div>
+        <div class="alignment-value">67%</div>
+      </div>
+
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span class="indicator critical"></span>
+            Most Important Task
+          </h2>
+          <span class="section-action">100 pts</span>
+        </div>
+        <div class="mit-card">
+          <div class="mit-header">
+            <span class="mit-label">MIT</span>
+            <span class="mit-points">+100 pts</span>
+          </div>
+          <div class="mit-content">
+            <h3>Complete quarterly financial review and update investment allocations</h3>
+          </div>
+          <div class="mit-footer">
+            <div class="mit-meta">
+              <span class="category-badge wealth">Wealth</span>
+              <span>Est. 45 min</span>
+            </div>
+            <button class="action-btn">Mark Complete</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span class="indicator primary"></span>
+            Primary Tasks
+          </h2>
+          <span class="section-action">2/3 complete</span>
+        </div>
+        <div class="task-list">
+          <div class="task-item">
+            <div class="task-checkbox checked">
+              <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="task-content">
+              <p class="task-title completed">Morning workout - 30 min HIIT session</p>
+              <div class="task-details">
+                <span class="category-badge health">Health</span>
+                <span class="task-points earned">+50 pts</span>
+              </div>
+            </div>
+          </div>
+          <div class="task-item">
+            <div class="task-checkbox checked">
+              <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="task-content">
+              <p class="task-title completed">Review and respond to client proposals</p>
+              <div class="task-details">
+                <span class="category-badge career">Career</span>
+                <span class="task-points earned">+50 pts</span>
+              </div>
+            </div>
+          </div>
+          <div class="task-item">
+            <div class="task-checkbox"></div>
+            <div class="task-content">
+              <p class="task-title">Read 20 pages of "The Millionaire Fastlane"</p>
+              <div class="task-details">
+                <span class="category-badge wealth">Wealth</span>
+                <span class="task-points">50 pts</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span class="indicator secondary"></span>
+            Secondary Tasks
+          </h2>
+          <span class="section-action">1/2 complete</span>
+        </div>
+        <div class="task-list">
+          <div class="task-item">
+            <div class="task-checkbox checked">
+              <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="task-content">
+              <p class="task-title completed">Organize desk and workspace</p>
+              <div class="task-details">
+                <span class="task-points earned">+25 pts</span>
+              </div>
+            </div>
+          </div>
+          <div class="task-item">
+            <div class="task-checkbox"></div>
+            <div class="task-content">
+              <p class="task-title">Schedule dentist appointment</p>
+              <div class="task-details">
+                <span class="category-badge health">Health</span>
+                <span class="task-points">25 pts</span>
+              </div>
+            </div>
+          </div>
+          <div class="add-task-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>Add task</span>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="#" class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Today
+    </a>
+    <a href="#" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+      Goals
+    </a>
+    <a href="#" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Review
+    </a>
+    <a href="#" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+      Stats
+    </a>
+    <a href="#" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      Settings
+    </a>
+  </nav>
+</body>
+</html>

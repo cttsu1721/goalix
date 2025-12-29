@@ -1,26 +1,328 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* Color mappings for Tailwind utilities */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Yoru Zen custom colors for Tailwind utilities */
+  --color-void: var(--void);
+  --color-night: var(--night);
+  --color-night-soft: var(--night-soft);
+  --color-night-mist: var(--night-mist);
+  --color-night-glow: var(--night-glow);
+  --color-lantern: var(--lantern);
+  --color-lantern-soft: var(--lantern-soft);
+  --color-lantern-mist: var(--lantern-mist);
+  --color-moon: var(--moon);
+  --color-moon-soft: var(--moon-soft);
+  --color-moon-dim: var(--moon-dim);
+  --color-moon-faint: var(--moon-faint);
+  --color-zen-green: var(--zen-green);
+  --color-zen-green-soft: var(--zen-green-soft);
+  --color-zen-blue: var(--zen-blue);
+  --color-zen-purple: var(--zen-purple);
+  --color-zen-red: var(--zen-red);
+  --color-zen-red-soft: var(--zen-red-soft);
+
+  /* Sidebar colors */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Chart colors */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Font */
+  --font-sans: var(--font-sora), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
+
+  /* Border radius */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ============================================
+   YORU ZEN DESIGN SYSTEM
+   Japanese-inspired dark theme with warm accents
+   ============================================ */
+
+:root {
+  /* Base radius */
+  --radius: 0.75rem; /* 12px */
+
+  /* ========== YORU ZEN PALETTE ========== */
+
+  /* Backgrounds - Deep night tones */
+  --void: oklch(0.07 0.01 270);        /* #08080c - Deepest background */
+  --night: oklch(0.10 0.01 270);       /* #0c0c12 - Primary surface */
+  --night-soft: oklch(0.13 0.01 270);  /* #12121a - Elevated surface */
+  --night-mist: oklch(0.17 0.01 270);  /* #1a1a24 - Borders, dividers */
+  --night-glow: oklch(0.21 0.01 270);  /* #242430 - Hover states */
+
+  /* Accent - Lantern (warm amber) */
+  --lantern: oklch(0.78 0.14 65);               /* #e8a857 - Primary accent */
+  --lantern-soft: oklch(0.78 0.14 65 / 0.08);   /* Accent background */
+  --lantern-mist: oklch(0.78 0.14 65 / 0.04);   /* Subtle accent */
+
+  /* Text - Moonlight */
+  --moon: oklch(0.95 0.01 280);        /* #f0eef8 - Primary text */
+  --moon-soft: oklch(0.80 0.02 280);   /* #c4c2d0 - Secondary text */
+  --moon-dim: oklch(0.58 0.02 280);    /* #8a889a - Tertiary text */
+  --moon-faint: oklch(0.42 0.02 280);  /* #5a5868 - Muted text */
+
+  /* Semantic colors */
+  --zen-green: oklch(0.78 0.12 160);             /* #7dd3a8 - Success */
+  --zen-green-soft: oklch(0.78 0.12 160 / 0.10); /* Success background */
+  --zen-blue: oklch(0.75 0.10 220);              /* #7db8d3 - Info */
+  --zen-purple: oklch(0.68 0.12 300);            /* #a87dd3 - Growth */
+  --zen-red: oklch(0.68 0.12 20);                /* #d37d7d - Destructive */
+  --zen-red-soft: oklch(0.68 0.12 20 / 0.10);   /* Destructive background */
+
+  /* ========== SHADCN SEMANTIC MAPPINGS ========== */
+
+  /* Core */
+  --background: var(--void);
+  --foreground: var(--moon);
+
+  /* Cards & Surfaces */
+  --card: var(--night);
+  --card-foreground: var(--moon);
+  --popover: var(--night-soft);
+  --popover-foreground: var(--moon);
+
+  /* Primary - Lantern accent */
+  --primary: var(--lantern);
+  --primary-foreground: var(--void);
+
+  /* Secondary */
+  --secondary: var(--night-soft);
+  --secondary-foreground: var(--moon-soft);
+
+  /* Muted */
+  --muted: var(--night-mist);
+  --muted-foreground: var(--moon-dim);
+
+  /* Accent - Lantern glow */
+  --accent: var(--lantern-soft);
+  --accent-foreground: var(--lantern);
+
+  /* Destructive */
+  --destructive: var(--zen-red);
+
+  /* Form elements */
+  --border: var(--night-mist);
+  --input: var(--night-soft);
+  --ring: var(--lantern);
+
+  /* Sidebar */
+  --sidebar: var(--night);
+  --sidebar-foreground: var(--moon);
+  --sidebar-primary: var(--lantern);
+  --sidebar-primary-foreground: var(--void);
+  --sidebar-accent: var(--lantern-soft);
+  --sidebar-accent-foreground: var(--lantern);
+  --sidebar-border: var(--night-mist);
+  --sidebar-ring: var(--lantern);
+
+  /* Charts - Yoru Zen palette */
+  --chart-1: var(--lantern);
+  --chart-2: var(--zen-green);
+  --chart-3: var(--zen-blue);
+  --chart-4: var(--zen-purple);
+  --chart-5: var(--zen-red);
+
+  /* ========== LAYOUT TOKENS ========== */
+  --sidebar-width: 260px;
+  --stats-panel-width: 320px;
+}
+
+/* Dark mode is the default - keep for compatibility */
+.dark {
+  /* Yoru Zen is already dark, no changes needed */
+}
+
+/* ========== BASE STYLES ========== */
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+
+  /* Focus ring */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ========== GOAL CATEGORY COLORS ========== */
+
+.category-health {
+  --category-color: var(--zen-green);
+  --category-bg: var(--zen-green-soft);
+}
+
+.category-wealth {
+  --category-color: var(--lantern);
+  --category-bg: var(--lantern-soft);
+}
+
+.category-relationships {
+  --category-color: oklch(0.72 0.15 350); /* Pink-red */
+  --category-bg: oklch(0.72 0.15 350 / 0.10);
+}
+
+.category-career {
+  --category-color: var(--zen-blue);
+  --category-bg: oklch(0.75 0.10 220 / 0.10);
+}
+
+.category-personal-growth {
+  --category-color: var(--zen-purple);
+  --category-bg: oklch(0.68 0.12 300 / 0.10);
+}
+
+.category-lifestyle {
+  --category-color: oklch(0.75 0.12 35); /* Warm orange */
+  --category-bg: oklch(0.75 0.12 35 / 0.10);
+}
+
+.category-other {
+  --category-color: var(--moon-dim);
+  --category-bg: var(--night-soft);
+}
+
+/* ========== TASK PRIORITY COLORS ========== */
+
+.priority-mit {
+  --priority-color: var(--lantern);
+  --priority-bg: var(--lantern-soft);
+}
+
+.priority-primary {
+  --priority-color: var(--moon);
+  --priority-bg: var(--night-soft);
+}
+
+.priority-secondary {
+  --priority-color: var(--moon-dim);
+  --priority-bg: var(--night-mist);
+}
+
+/* ========== ANIMATIONS ========== */
+
+@keyframes gentle-pulse {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.animate-gentle-pulse {
+  animation: gentle-pulse 3s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-fade-in-delay-1 {
+  animation: fade-in 0.8s ease-out 0.1s forwards;
+  opacity: 0;
+}
+
+.animate-fade-in-delay-2 {
+  animation: fade-in 0.8s ease-out 0.2s forwards;
+  opacity: 0;
+}
+
+.animate-fade-in-delay-3 {
+  animation: fade-in 0.8s ease-out 0.3s forwards;
+  opacity: 0;
+}
+
+.animate-fade-in-delay-4 {
+  animation: fade-in 0.8s ease-out 0.4s forwards;
+  opacity: 0;
+}
+
+.animate-fade-in-delay-5 {
+  animation: fade-in 0.8s ease-out 0.5s forwards;
+  opacity: 0;
+}
+
+/* ========== UTILITY CLASSES ========== */
+
+/* Glass effect for cards */
+.glass {
+  background: oklch(0.10 0.01 270 / 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--night-mist);
+}
+
+/* Gradient text */
+.text-gradient-lantern {
+  background: linear-gradient(135deg, var(--lantern), var(--zen-green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Progress bar gradient */
+.progress-gradient {
+  background: linear-gradient(90deg, var(--lantern), var(--zen-green));
 }

@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goalix - Todoist Kanban Board Style</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #1a1a2e;
+      --bg-secondary: #16213e;
+      --bg-card: #1f2544;
+      --bg-card-hover: #252b4d;
+      --text-primary: #ffffff;
+      --text-secondary: #a0a3bd;
+      --text-tertiary: #6e7191;
+      --accent-red: #ff6b6b;
+      --accent-orange: #ffa726;
+      --accent-green: #4ecdc4;
+      --accent-blue: #5c7cfa;
+      --accent-purple: #9775fa;
+      --border: rgba(255, 255, 255, 0.08);
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.5;
+      font-size: 14px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Layout */
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 72px;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px 0;
+      position: fixed;
+      height: 100vh;
+    }
+
+    .sidebar-logo {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, var(--accent-red), var(--accent-orange));
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 18px;
+      margin-bottom: 32px;
+    }
+
+    .nav-icons {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .nav-icon-btn {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 20px;
+      color: var(--text-tertiary);
+      position: relative;
+    }
+
+    .nav-icon-btn:hover {
+      background: var(--bg-card);
+      color: var(--text-secondary);
+    }
+
+    .nav-icon-btn.active {
+      background: var(--bg-card);
+      color: var(--text-primary);
+    }
+
+    .nav-icon-btn.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 24px;
+      background: var(--accent-red);
+      border-radius: 0 3px 3px 0;
+    }
+
+    .nav-badge {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 18px;
+      height: 18px;
+      background: var(--accent-red);
+      border-radius: 50%;
+      font-size: 10px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* User Avatar in Sidebar */
+    .sidebar-user {
+      margin-top: auto;
+    }
+
+    .user-avatar-sidebar {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .main-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .menu-btn {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 18px;
+      color: var(--text-secondary);
+    }
+
+    .header-title {
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .header-date {
+      color: var(--text-tertiary);
+      font-size: 13px;
+      display: none;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-btn {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 16px;
+      color: var(--text-secondary);
+      transition: all 0.2s;
+    }
+
+    .header-btn:hover {
+      background: var(--bg-card);
+      color: var(--text-primary);
+    }
+
+    /* Stats Bar */
+    .stats-bar {
+      display: flex;
+      gap: 16px;
+      padding: 16px 20px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .stat-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .stat-icon.points {
+      background: rgba(255, 167, 38, 0.15);
+    }
+
+    .stat-icon.streak {
+      background: rgba(255, 107, 107, 0.15);
+    }
+
+    .stat-icon.level {
+      background: rgba(92, 124, 250, 0.15);
+    }
+
+    .stat-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-value {
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Kanban Board */
+    .kanban-container {
+      flex: 1;
+      padding: 20px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .kanban-board {
+      display: flex;
+      gap: 16px;
+      min-height: calc(100vh - 200px);
+    }
+
+    /* Kanban Column */
+    .kanban-column {
+      flex: 0 0 300px;
+      min-width: 280px;
+      background: var(--bg-secondary);
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      max-height: calc(100vh - 220px);
+    }
+
+    .column-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .column-title-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .column-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .column-icon.mit {
+      background: rgba(255, 107, 107, 0.2);
+    }
+
+    .column-icon.primary {
+      background: rgba(255, 167, 38, 0.2);
+    }
+
+    .column-icon.secondary {
+      background: rgba(78, 205, 196, 0.2);
+    }
+
+    .column-icon.completed {
+      background: rgba(92, 124, 250, 0.2);
+    }
+
+    .column-title {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .column-count {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .column-points {
+      font-size: 12px;
+      color: var(--accent-orange);
+      font-weight: 600;
+    }
+
+    .column-body {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* Task Card */
+    .task-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      cursor: grab;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+
+    .task-card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .task-card.mit-card {
+      border-left: 3px solid var(--accent-red);
+    }
+
+    .task-card.primary-card {
+      border-left: 3px solid var(--accent-orange);
+    }
+
+    .task-card.secondary-card {
+      border-left: 3px solid var(--accent-green);
+    }
+
+    .task-card.completed-card {
+      opacity: 0.7;
+    }
+
+    .task-card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .task-checkbox {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--text-tertiary);
+      border-radius: 50%;
+      flex-shrink: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      margin-top: 2px;
+    }
+
+    .task-checkbox:hover {
+      border-color: var(--accent-green);
+    }
+
+    .task-checkbox.checked {
+      background: var(--accent-green);
+      border-color: var(--accent-green);
+      color: white;
+      font-size: 10px;
+    }
+
+    .task-title {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    .task-card.completed-card .task-title {
+      text-decoration: line-through;
+      color: var(--text-tertiary);
+    }
+
+    .task-card-body {
+      margin-left: 28px;
+    }
+
+    .task-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .task-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .task-tag.health {
+      background: rgba(78, 205, 196, 0.15);
+      color: var(--accent-green);
+    }
+
+    .task-tag.wealth {
+      background: rgba(255, 167, 38, 0.15);
+      color: var(--accent-orange);
+    }
+
+    .task-tag.career {
+      background: rgba(92, 124, 250, 0.15);
+      color: var(--accent-blue);
+    }
+
+    .task-tag.personal {
+      background: rgba(151, 117, 250, 0.15);
+      color: var(--accent-purple);
+    }
+
+    .task-tag.linked {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-secondary);
+    }
+
+    .task-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-left: 28px;
+    }
+
+    .task-time {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .task-points-badge {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      color: var(--accent-orange);
+      font-weight: 600;
+    }
+
+    /* Add Card Button */
+    .add-card-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 12px;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      transition: all 0.2s;
+      font-size: 13px;
+      border: 1px dashed var(--border);
+    }
+
+    .add-card-btn:hover {
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      border-style: solid;
+    }
+
+    /* Mobile Bottom Nav */
+    .bottom-nav {
+      display: flex;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      padding: 8px 0;
+      padding-bottom: calc(8px + env(safe-area-inset-bottom));
+    }
+
+    .bottom-nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: 6px;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+
+    .bottom-nav-item.active {
+      color: var(--accent-red);
+    }
+
+    .bottom-nav-icon {
+      font-size: 20px;
+    }
+
+    .bottom-nav-label {
+      font-size: 10px;
+      font-weight: 500;
+    }
+
+    /* Mobile: Stack columns vertically */
+    @media (max-width: 767px) {
+      .kanban-board {
+        flex-direction: column;
+        min-height: auto;
+        padding-bottom: 80px;
+      }
+
+      .kanban-column {
+        flex: none;
+        min-width: 100%;
+        max-height: none;
+      }
+
+      .column-body {
+        max-height: 300px;
+      }
+
+      .stats-bar {
+        gap: 10px;
+      }
+
+      .stat-card {
+        padding: 10px 12px;
+      }
+    }
+
+    /* Desktop Styles */
+    @media (min-width: 768px) {
+      .sidebar {
+        display: flex;
+      }
+
+      .main-content {
+        margin-left: 72px;
+      }
+
+      .menu-btn {
+        display: none;
+      }
+
+      .header-date {
+        display: block;
+      }
+
+      .bottom-nav {
+        display: none;
+      }
+
+      .kanban-container {
+        padding: 24px;
+      }
+    }
+
+    @media (min-width: 1200px) {
+      .kanban-column {
+        flex: 1;
+        max-width: 350px;
+      }
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-tertiary);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">G</div>
+
+      <nav class="nav-icons">
+        <button class="nav-icon-btn active">
+          <span>📅</span>
+          <span class="nav-badge">4</span>
+        </button>
+        <button class="nav-icon-btn">
+          <span>📥</span>
+        </button>
+        <button class="nav-icon-btn">
+          <span>🎯</span>
+        </button>
+        <button class="nav-icon-btn">
+          <span>📊</span>
+        </button>
+        <button class="nav-icon-btn">
+          <span>🏆</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-user">
+        <div class="user-avatar-sidebar">JD</div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="main-header">
+        <div class="header-left">
+          <button class="menu-btn">☰</button>
+          <h1 class="header-title">Today's Board</h1>
+          <span class="header-date">Sunday, December 29</span>
+        </div>
+        <div class="header-right">
+          <button class="header-btn">🤖</button>
+          <button class="header-btn">🔍</button>
+          <button class="header-btn">⚙️</button>
+        </div>
+      </header>
+
+      <!-- Stats Bar -->
+      <div class="stats-bar">
+        <div class="stat-card">
+          <div class="stat-icon points">⭐</div>
+          <div class="stat-info">
+            <span class="stat-value">6,420</span>
+            <span class="stat-label">Points</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon streak">🔥</div>
+          <div class="stat-info">
+            <span class="stat-value">12 Days</span>
+            <span class="stat-label">Streak</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon level">🏅</div>
+          <div class="stat-info">
+            <span class="stat-value">Level 4</span>
+            <span class="stat-label">Go-Getter</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kanban Board -->
+      <div class="kanban-container">
+        <div class="kanban-board">
+          <!-- MIT Column -->
+          <div class="kanban-column">
+            <div class="column-header">
+              <div class="column-title-group">
+                <div class="column-icon mit">🎯</div>
+                <div>
+                  <div class="column-title">MIT</div>
+                  <div class="column-count">Most Important Task</div>
+                </div>
+              </div>
+              <span class="column-points">100 pts</span>
+            </div>
+            <div class="column-body">
+              <div class="task-card mit-card">
+                <div class="task-card-header">
+                  <div class="task-checkbox"></div>
+                  <div class="task-title">Complete quarterly business review presentation</div>
+                </div>
+                <div class="task-card-body">
+                  <div class="task-tags">
+                    <span class="task-tag career">💼 Career</span>
+                    <span class="task-tag linked">🔗 Q1 Revenue</span>
+                  </div>
+                  <div class="task-card-footer">
+                    <span class="task-time">⏱️ ~2 hours</span>
+                    <span class="task-points-badge">⭐ 100</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Primary Tasks Column -->
+          <div class="kanban-column">
+            <div class="column-header">
+              <div class="column-title-group">
+                <div class="column-icon primary">📌</div>
+                <div>
+                  <div class="column-title">Primary</div>
+                  <div class="column-count">2 of 3 tasks</div>
+                </div>
+              </div>
+              <span class="column-points">100 pts</span>
+            </div>
+            <div class="column-body">
+              <div class="task-card primary-card">
+                <div class="task-card-header">
+                  <div class="task-checkbox"></div>
+                  <div class="task-title">Review investment portfolio performance</div>
+                </div>
+                <div class="task-card-body">
+                  <div class="task-tags">
+                    <span class="task-tag wealth">💰 Wealth</span>
+                    <span class="task-tag linked">🔗 Financial Freedom</span>
+                  </div>
+                  <div class="task-card-footer">
+                    <span class="task-time">⏱️ ~45 min</span>
+                    <span class="task-points-badge">⭐ 50</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="task-card primary-card">
+                <div class="task-card-header">
+                  <div class="task-checkbox"></div>
+                  <div class="task-title">Read 20 pages of "The Millionaire Fastlane"</div>
+                </div>
+                <div class="task-card-body">
+                  <div class="task-tags">
+                    <span class="task-tag personal">🌱 Growth</span>
+                  </div>
+                  <div class="task-card-footer">
+                    <span class="task-time">⏱️ ~30 min</span>
+                    <span class="task-points-badge">⭐ 50</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="add-card-btn">
+                <span>+</span>
+                <span>Add task</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Secondary Tasks Column -->
+          <div class="kanban-column">
+            <div class="column-header">
+              <div class="column-title-group">
+                <div class="column-icon secondary">📝</div>
+                <div>
+                  <div class="column-title">Secondary</div>
+                  <div class="column-count">2 tasks</div>
+                </div>
+              </div>
+              <span class="column-points">50 pts</span>
+            </div>
+            <div class="column-body">
+              <div class="task-card secondary-card">
+                <div class="task-card-header">
+                  <div class="task-checkbox"></div>
+                  <div class="task-title">Reply to team emails</div>
+                </div>
+                <div class="task-card-body">
+                  <div class="task-tags">
+                    <span class="task-tag career">💼 Career</span>
+                  </div>
+                  <div class="task-card-footer">
+                    <span class="task-time">⏱️ ~20 min</span>
+                    <span class="task-points-badge">⭐ 25</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="task-card secondary-card">
+                <div class="task-card-header">
+                  <div class="task-checkbox"></div>
+                  <div class="task-title">Organize desk and workspace</div>
+                </div>
+                <div class="task-card-body">
+                  <div class="task-tags">
+                    <span class="task-tag">🏠 Lifestyle</span>
+                  </div>
+                  <div class="task-card-footer">
+                    <span class="task-time">⏱️ ~15 min</span>
+                    <span class="task-points-badge">⭐ 25</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="add-card-btn">
+                <span>+</span>
+                <span>Add task</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Completed Column -->
+          <div class="kanban-column">
+            <div class="column-header">
+              <div class="column-title-group">
+                <div class="column-icon completed">✅</div>
+                <div>
+                  <div class="column-title">Completed</div>
+                  <div class="column-count">1 task done</div>
+                </div>
+              </div>
+              <span class="column-points">+50 pts</span>
+            </div>
+            <div class="column-body">
+              <div class="task-card completed-card">
+                <div class="task-card-header">
+                  <div class="task-checkbox checked">✓</div>
+                  <div class="task-title">Morning workout - 30 min HIIT</div>
+                </div>
+                <div class="task-card-body">
+                  <div class="task-tags">
+                    <span class="task-tag health">💪 Health</span>
+                  </div>
+                  <div class="task-card-footer">
+                    <span class="task-time">✓ Done at 7:30 AM</span>
+                    <span class="task-points-badge">⭐ 50</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Bottom Nav -->
+      <nav class="bottom-nav">
+        <a class="bottom-nav-item active">
+          <span class="bottom-nav-icon">📅</span>
+          <span class="bottom-nav-label">Today</span>
+        </a>
+        <a class="bottom-nav-item">
+          <span class="bottom-nav-icon">🎯</span>
+          <span class="bottom-nav-label">Goals</span>
+        </a>
+        <a class="bottom-nav-item">
+          <span class="bottom-nav-icon">📊</span>
+          <span class="bottom-nav-label">Progress</span>
+        </a>
+        <a class="bottom-nav-item">
+          <span class="bottom-nav-icon">⚙️</span>
+          <span class="bottom-nav-label">Settings</span>
+        </a>
+      </nav>
+    </main>
+  </div>
+</body>
+</html>

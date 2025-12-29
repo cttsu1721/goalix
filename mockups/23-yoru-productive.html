@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goalix - Yoru Productive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --night-deep: #0a0a0f;
+      --night-base: #0f0f16;
+      --night-surface: #16161f;
+      --night-elevated: #1c1c28;
+      --night-border: #2a2a3a;
+      --lantern: #e8a857;
+      --lantern-dim: #c9923d;
+      --lantern-glow: rgba(232, 168, 87, 0.12);
+      --moonlight: #e8e6f0;
+      --moonlight-soft: #b8b6c4;
+      --moonlight-dim: #7a7888;
+      --success: #4ade80;
+      --success-glow: rgba(74, 222, 128, 0.15);
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--night-deep);
+      color: var(--moonlight);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    /* Desktop Layout */
+    .app {
+      display: grid;
+      grid-template-columns: 250px 1fr 300px;
+      min-height: 100vh;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      background: var(--night-base);
+      border-right: 1px solid var(--night-border);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 0;
+    }
+
+    .sidebar-header {
+      padding: 0 20px 24px;
+      border-bottom: 1px solid var(--night-border);
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--moonlight);
+    }
+
+    .logo span {
+      color: var(--lantern);
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 20px 12px;
+    }
+
+    .nav-section {
+      margin-bottom: 28px;
+    }
+
+    .nav-section-label {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--moonlight-dim);
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 8px;
+      color: var(--moonlight-soft);
+      text-decoration: none;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+
+    .nav-item:hover {
+      background: var(--night-elevated);
+      color: var(--moonlight);
+    }
+
+    .nav-item.active {
+      background: var(--lantern-glow);
+      color: var(--lantern);
+    }
+
+    .nav-icon {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-badge {
+      margin-left: auto;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      background: var(--night-elevated);
+      border-radius: 10px;
+      color: var(--moonlight-dim);
+    }
+
+    .nav-item.active .nav-badge {
+      background: var(--lantern);
+      color: var(--night-deep);
+    }
+
+    /* User section */
+    .sidebar-user {
+      padding: 20px;
+      border-top: 1px solid var(--night-border);
+    }
+
+    .user-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: var(--night-elevated);
+      border-radius: 10px;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--lantern), var(--lantern-dim));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: var(--night-deep);
+    }
+
+    .user-info {
+      flex: 1;
+    }
+
+    .user-name {
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+
+    .user-level {
+      font-size: 0.75rem;
+      color: var(--moonlight-dim);
+    }
+
+    /* ===== MAIN CONTENT ===== */
+    .main {
+      background: var(--night-deep);
+      overflow-y: auto;
+      padding: 32px;
+    }
+
+    .main-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+
+    .header-left h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+    }
+
+    .header-date {
+      font-size: 0.875rem;
+      color: var(--moonlight-dim);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .ai-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 20px;
+      background: linear-gradient(135deg, var(--lantern), var(--lantern-dim));
+      border: none;
+      border-radius: 10px;
+      color: var(--night-deep);
+      font-family: inherit;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .ai-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px var(--lantern-glow);
+    }
+
+    .ai-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .ai-counter {
+      padding: 4px 8px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 6px;
+      font-size: 0.75rem;
+    }
+
+    /* MIT Hero Card */
+    .mit-section {
+      margin-bottom: 40px;
+    }
+
+    .mit-card {
+      background: var(--night-surface);
+      border: 2px solid var(--lantern);
+      border-radius: 16px;
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mit-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--lantern), var(--lantern-dim));
+    }
+
+    .mit-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .mit-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: var(--lantern);
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--night-deep);
+    }
+
+    .mit-points {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--lantern);
+    }
+
+    .mit-content {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .mit-checkbox {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--night-border);
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .mit-checkbox:hover {
+      border-color: var(--lantern);
+      background: var(--lantern-glow);
+    }
+
+    .mit-checkbox svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--lantern);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .mit-checkbox.checked {
+      background: var(--lantern);
+      border-color: var(--lantern);
+    }
+
+    .mit-checkbox.checked svg {
+      opacity: 1;
+      stroke: var(--night-deep);
+    }
+
+    .mit-details {
+      flex: 1;
+    }
+
+    .mit-title {
+      font-size: 1.375rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .mit-meta {
+      display: flex;
+      gap: 16px;
+      font-size: 0.8125rem;
+      color: var(--moonlight-dim);
+    }
+
+    .mit-meta span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .goal-link {
+      color: var(--lantern);
+      text-decoration: none;
+    }
+
+    .goal-link:hover {
+      text-decoration: underline;
+    }
+
+    .mit-ai-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: var(--night-elevated);
+      border: 1px solid var(--night-border);
+      border-radius: 8px;
+      color: var(--moonlight-soft);
+      font-family: inherit;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .mit-ai-btn:hover {
+      border-color: var(--lantern);
+      color: var(--lantern);
+    }
+
+    /* Tasks Section */
+    .tasks-section {
+      margin-bottom: 32px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--moonlight-dim);
+    }
+
+    .section-count {
+      font-size: 0.75rem;
+      color: var(--moonlight-dim);
+      padding: 4px 10px;
+      background: var(--night-surface);
+      border-radius: 6px;
+    }
+
+    .tasks-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px;
+      background: var(--night-surface);
+      border-radius: 10px;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+
+    .task-item:hover {
+      background: var(--night-elevated);
+    }
+
+    .task-checkbox {
+      width: 22px;
+      height: 22px;
+      border: 2px solid var(--night-border);
+      border-radius: 6px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+
+    .task-item:hover .task-checkbox {
+      border-color: var(--lantern);
+    }
+
+    .task-checkbox svg {
+      width: 14px;
+      height: 14px;
+      stroke: transparent;
+    }
+
+    .task-checkbox.checked {
+      background: var(--success);
+      border-color: var(--success);
+    }
+
+    .task-checkbox.checked svg {
+      stroke: var(--night-deep);
+    }
+
+    .task-content {
+      flex: 1;
+    }
+
+    .task-title {
+      font-size: 0.9375rem;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+
+    .task-item.completed .task-title {
+      text-decoration: line-through;
+      color: var(--moonlight-dim);
+    }
+
+    .task-category {
+      font-size: 0.75rem;
+      color: var(--moonlight-dim);
+    }
+
+    .task-points {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--moonlight-dim);
+      padding: 4px 10px;
+      background: var(--night-elevated);
+      border-radius: 6px;
+    }
+
+    .task-item:hover .task-points {
+      color: var(--lantern);
+    }
+
+    /* Add Task */
+    .add-task-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 14px 16px;
+      background: transparent;
+      border: 2px dashed var(--night-border);
+      border-radius: 10px;
+      color: var(--moonlight-dim);
+      font-family: inherit;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      margin-top: 8px;
+    }
+
+    .add-task-btn:hover {
+      border-color: var(--lantern);
+      color: var(--lantern);
+      background: var(--lantern-glow);
+    }
+
+    /* ===== STATS PANEL ===== */
+    .stats-panel {
+      background: var(--night-base);
+      border-left: 1px solid var(--night-border);
+      padding: 24px;
+      overflow-y: auto;
+    }
+
+    .stats-header {
+      margin-bottom: 24px;
+    }
+
+    .stats-header h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--moonlight-soft);
+    }
+
+    .stat-card {
+      background: var(--night-surface);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--moonlight-dim);
+    }
+
+    /* Streak */
+    .streak-display {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .streak-flame {
+      font-size: 2rem;
+      animation: flicker 1.5s ease-in-out infinite;
+    }
+
+    @keyframes flicker {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .streak-number {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--lantern);
+    }
+
+    .streak-text {
+      font-size: 0.875rem;
+      color: var(--moonlight-dim);
+    }
+
+    /* Level Progress */
+    .level-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 10px;
+    }
+
+    .level-current {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .level-next {
+      font-size: 0.8125rem;
+      color: var(--moonlight-dim);
+    }
+
+    .progress-bar {
+      height: 10px;
+      background: var(--night-elevated);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--lantern), var(--lantern-dim));
+      border-radius: 5px;
+      transition: width 0.5s ease;
+    }
+
+    .progress-text {
+      font-size: 0.75rem;
+      color: var(--moonlight-dim);
+      margin-top: 8px;
+    }
+
+    /* Today's Progress */
+    .today-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .today-stat {
+      text-align: center;
+      padding: 14px;
+      background: var(--night-elevated);
+      border-radius: 10px;
+    }
+
+    .today-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--moonlight);
+    }
+
+    .today-label {
+      font-size: 0.75rem;
+      color: var(--moonlight-dim);
+      margin-top: 4px;
+    }
+
+    /* Goal Alignment */
+    .alignment-circle {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 12px;
+      position: relative;
+    }
+
+    .alignment-ring {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 6px solid var(--night-elevated);
+      position: relative;
+    }
+
+    .alignment-ring::before {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 6px solid transparent;
+      border-top-color: var(--success);
+      border-right-color: var(--success);
+      transform: rotate(45deg);
+    }
+
+    .alignment-value {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--success);
+    }
+
+    .alignment-text {
+      font-size: 0.8125rem;
+      color: var(--moonlight-dim);
+      text-align: center;
+    }
+
+    /* Badges */
+    .badges-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      width: 44px;
+      height: 44px;
+      background: var(--night-elevated);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .badge:hover {
+      transform: scale(1.1);
+      background: var(--lantern-glow);
+    }
+
+    .badge.locked {
+      opacity: 0.4;
+      filter: grayscale(1);
+    }
+
+    /* Floating Kaizen Button */
+    .kaizen-fab {
+      position: fixed;
+      bottom: 32px;
+      right: 340px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 24px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border: none;
+      border-radius: 50px;
+      color: white;
+      font-family: inherit;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 8px 32px rgba(99, 102, 241, 0.4);
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+
+    .kaizen-fab:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(99, 102, 241, 0.5);
+    }
+
+    .kaizen-fab svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Kaizen Modal Overlay */
+    .kaizen-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 10, 15, 0.9);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .kaizen-modal.open {
+      display: flex;
+    }
+
+    .kaizen-content {
+      background: var(--night-surface);
+      border: 1px solid var(--night-border);
+      border-radius: 20px;
+      padding: 32px;
+      width: 100%;
+      max-width: 480px;
+      margin: 20px;
+    }
+
+    .kaizen-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .kaizen-header h3 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .kaizen-header p {
+      font-size: 0.9375rem;
+      color: var(--moonlight-dim);
+    }
+
+    .kaizen-areas {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .kaizen-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: var(--night-elevated);
+      border: 2px solid var(--night-border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .kaizen-area:hover {
+      border-color: var(--moonlight-dim);
+    }
+
+    .kaizen-area.checked {
+      border-color: var(--success);
+      background: var(--success-glow);
+    }
+
+    .kaizen-check {
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--night-border);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+
+    .kaizen-area.checked .kaizen-check {
+      background: var(--success);
+      border-color: var(--success);
+      color: var(--night-deep);
+    }
+
+    .kaizen-area-name {
+      font-weight: 500;
+    }
+
+    .kaizen-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .kaizen-cancel {
+      flex: 1;
+      padding: 14px;
+      background: var(--night-elevated);
+      border: 1px solid var(--night-border);
+      border-radius: 10px;
+      color: var(--moonlight-soft);
+      font-family: inherit;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .kaizen-cancel:hover {
+      background: var(--night-border);
+    }
+
+    .kaizen-save {
+      flex: 2;
+      padding: 14px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-family: inherit;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .kaizen-save:hover {
+      transform: translateY(-2px);
+    }
+
+    .kaizen-points-hint {
+      text-align: center;
+      font-size: 0.8125rem;
+      color: var(--moonlight-dim);
+      margin-top: 16px;
+    }
+
+    /* Mobile Bottom Nav */
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--night-base);
+      border-top: 1px solid var(--night-border);
+      padding: 12px 24px;
+      z-index: 50;
+    }
+
+    .mobile-nav-items {
+      display: flex;
+      justify-content: space-around;
+    }
+
+    .mobile-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--moonlight-dim);
+      text-decoration: none;
+      font-size: 0.6875rem;
+      font-weight: 500;
+    }
+
+    .mobile-nav-item.active {
+      color: var(--lantern);
+    }
+
+    .mobile-nav-item svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .app {
+        grid-template-columns: 250px 1fr;
+      }
+
+      .stats-panel {
+        display: none;
+      }
+
+      .kaizen-fab {
+        right: 32px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+      .main {
+        padding: 20px;
+        padding-bottom: 100px;
+      }
+
+      .main-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+
+      .header-actions {
+        width: 100%;
+      }
+
+      .ai-btn {
+        flex: 1;
+        justify-content: center;
+      }
+
+      .mit-content {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .mit-ai-btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .mobile-nav {
+        display: block;
+      }
+
+      .kaizen-fab {
+        bottom: 90px;
+        right: 20px;
+        padding: 12px 20px;
+      }
+
+      .kaizen-content {
+        margin: 16px;
+      }
+
+      .kaizen-areas {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">Goal<span>ix</span></div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <a class="nav-item active">
+            <span class="nav-icon">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="m9 12 2 2 4-4"/>
+              </svg>
+            </span>
+            Today
+            <span class="nav-badge">6</span>
+          </a>
+          <a class="nav-item">
+            <span class="nav-icon">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="18" rx="2"/>
+                <path d="M16 2v4M8 2v4M3 10h18"/>
+              </svg>
+            </span>
+            This Week
+          </a>
+          <a class="nav-item">
+            <span class="nav-icon">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M12 8v4l3 3"/>
+                <circle cx="12" cy="12" r="10"/>
+              </svg>
+            </span>
+            Upcoming
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-label">Goals</div>
+          <a class="nav-item">
+            <span class="nav-icon">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+            </span>
+            Dreams
+          </a>
+          <a class="nav-item">
+            <span class="nav-icon">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <path d="m9 11 3 3L22 4"/>
+              </svg>
+            </span>
+            All Goals
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-label">Review</div>
+          <a class="nav-item">
+            <span class="nav-icon">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M3 3v18h18"/>
+                <path d="m19 9-5 5-4-4-3 3"/>
+              </svg>
+            </span>
+            Progress
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar-user">
+        <div class="user-card">
+          <div class="user-avatar">JD</div>
+          <div class="user-info">
+            <div class="user-name">John Doe</div>
+            <div class="user-level">Level 4 · Go-Getter</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+      <header class="main-header">
+        <div class="header-left">
+          <h1>Today's Focus</h1>
+          <div class="header-date">Sunday, December 29, 2024</div>
+        </div>
+        <div class="header-actions">
+          <button class="ai-btn">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M12 2a5 5 0 0 1 5 5v3a5 5 0 0 1-10 0V7a5 5 0 0 1 5-5Z"/>
+              <path d="M17 10c0 4-3 8-5 8s-5-4-5-8"/>
+              <path d="M12 18v4"/>
+            </svg>
+            AI Suggest
+            <span class="ai-counter">3/5</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- MIT Section -->
+      <section class="mit-section">
+        <div class="mit-card">
+          <div class="mit-header">
+            <span class="mit-label">
+              <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              Most Important Task
+            </span>
+            <span class="mit-points">+100 pts</span>
+          </div>
+          <div class="mit-content">
+            <div class="mit-checkbox" onclick="this.classList.toggle('checked')">
+              <svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                <path d="M20 6 9 17l-5-5"/>
+              </svg>
+            </div>
+            <div class="mit-details">
+              <div class="mit-title">Complete quarterly business review presentation</div>
+              <div class="mit-meta">
+                <span>
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M12 8v4l3 3"/>
+                    <circle cx="12" cy="12" r="10"/>
+                  </svg>
+                  ~2 hours
+                </span>
+                <span>Career</span>
+                <span>
+                  <a href="#" class="goal-link">Q4 Review Goal</a>
+                </span>
+              </div>
+            </div>
+            <button class="mit-ai-btn">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M12 2a5 5 0 0 1 5 5v3a5 5 0 0 1-10 0V7a5 5 0 0 1 5-5Z"/>
+                <path d="M12 18v4"/>
+              </svg>
+              Suggest MIT
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Primary Tasks -->
+      <section class="tasks-section">
+        <div class="section-header">
+          <h2 class="section-title">Primary Tasks</h2>
+          <span class="section-count">1/3</span>
+        </div>
+        <div class="tasks-list">
+          <div class="task-item completed">
+            <div class="task-checkbox checked">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M20 6 9 17l-5-5"/>
+              </svg>
+            </div>
+            <div class="task-content">
+              <div class="task-title">Morning workout - 30 min cardio</div>
+              <div class="task-category">Health</div>
+            </div>
+            <span class="task-points">+50</span>
+          </div>
+          <div class="task-item">
+            <div class="task-checkbox"></div>
+            <div class="task-content">
+              <div class="task-title">Review monthly investment portfolio</div>
+              <div class="task-category">Wealth</div>
+            </div>
+            <span class="task-points">50</span>
+          </div>
+          <div class="task-item">
+            <div class="task-checkbox"></div>
+            <div class="task-content">
+              <div class="task-title">Read 20 pages of "The Millionaire Fastlane"</div>
+              <div class="task-category">Personal Growth</div>
+            </div>
+            <span class="task-points">50</span>
+          </div>
+        </div>
+        <button class="add-task-btn">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          Add primary task
+        </button>
+      </section>
+
+      <!-- Secondary Tasks -->
+      <section class="tasks-section">
+        <div class="section-header">
+          <h2 class="section-title">Secondary Tasks</h2>
+          <span class="section-count">0/2</span>
+        </div>
+        <div class="tasks-list">
+          <div class="task-item">
+            <div class="task-checkbox"></div>
+            <div class="task-content">
+              <div class="task-title">Reply to pending emails</div>
+              <div class="task-category">Career</div>
+            </div>
+            <span class="task-points">25</span>
+          </div>
+          <div class="task-item">
+            <div class="task-checkbox"></div>
+            <div class="task-content">
+              <div class="task-title">Organize home office workspace</div>
+              <div class="task-category">Lifestyle</div>
+            </div>
+            <span class="task-points">25</span>
+          </div>
+        </div>
+        <button class="add-task-btn">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          Add secondary task
+        </button>
+      </section>
+    </main>
+
+    <!-- Stats Panel -->
+    <aside class="stats-panel">
+      <div class="stats-header">
+        <h2>Your Progress</h2>
+      </div>
+
+      <!-- Streak -->
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <span class="stat-label">Current Streak</span>
+        </div>
+        <div class="streak-display">
+          <span class="streak-flame">🔥</span>
+          <div>
+            <div class="streak-number">12</div>
+            <div class="streak-text">days in a row</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Level -->
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <span class="stat-label">Level Progress</span>
+        </div>
+        <div class="level-info">
+          <span class="level-current">Level 4</span>
+          <span class="level-next">580 to Level 5</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 68%"></div>
+        </div>
+        <div class="progress-text">6,420 / 10,000 XP</div>
+      </div>
+
+      <!-- Today's Progress -->
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <span class="stat-label">Today</span>
+        </div>
+        <div class="today-stats">
+          <div class="today-stat">
+            <div class="today-value">1/6</div>
+            <div class="today-label">Tasks Done</div>
+          </div>
+          <div class="today-stat">
+            <div class="today-value">50</div>
+            <div class="today-label">Points Earned</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Goal Alignment -->
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <span class="stat-label">Goal Alignment</span>
+        </div>
+        <div class="alignment-circle">
+          <div class="alignment-ring"></div>
+          <div class="alignment-value">67%</div>
+        </div>
+        <div class="alignment-text">of tasks linked to goals this week</div>
+      </div>
+
+      <!-- Badges -->
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <span class="stat-label">Recent Badges</span>
+        </div>
+        <div class="badges-row">
+          <div class="badge" title="First Blood">⚔️</div>
+          <div class="badge" title="On Fire">🔥</div>
+          <div class="badge" title="Planner Pro">📋</div>
+          <div class="badge locked" title="Locked">🔒</div>
+          <div class="badge locked" title="Locked">🔒</div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Floating Kaizen Button -->
+  <button class="kaizen-fab" onclick="openKaizen()">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M12 16v-4M12 8h.01"/>
+    </svg>
+    Reflect on Your Day
+  </button>
+
+  <!-- Kaizen Modal -->
+  <div class="kaizen-modal" id="kaizenModal">
+    <div class="kaizen-content">
+      <div class="kaizen-header">
+        <h3>Daily Reflection</h3>
+        <p>How did you show up in these areas today?</p>
+      </div>
+      <div class="kaizen-areas">
+        <div class="kaizen-area checked" onclick="this.classList.toggle('checked')">
+          <div class="kaizen-check">✓</div>
+          <span class="kaizen-area-name">Health</span>
+        </div>
+        <div class="kaizen-area" onclick="this.classList.toggle('checked')">
+          <div class="kaizen-check">✓</div>
+          <span class="kaizen-area-name">Relationships</span>
+        </div>
+        <div class="kaizen-area" onclick="this.classList.toggle('checked')">
+          <div class="kaizen-check">✓</div>
+          <span class="kaizen-area-name">Wealth</span>
+        </div>
+        <div class="kaizen-area" onclick="this.classList.toggle('checked')">
+          <div class="kaizen-check">✓</div>
+          <span class="kaizen-area-name">Career</span>
+        </div>
+        <div class="kaizen-area" onclick="this.classList.toggle('checked')">
+          <div class="kaizen-check">✓</div>
+          <span class="kaizen-area-name">Growth</span>
+        </div>
+        <div class="kaizen-area" onclick="this.classList.toggle('checked')">
+          <div class="kaizen-check">✓</div>
+          <span class="kaizen-area-name">Lifestyle</span>
+        </div>
+      </div>
+      <div class="kaizen-actions">
+        <button class="kaizen-cancel" onclick="closeKaizen()">Cancel</button>
+        <button class="kaizen-save" onclick="saveKaizen()">Save Reflection</button>
+      </div>
+      <div class="kaizen-points-hint">+10 pts · Check all 6 for +25 bonus</div>
+    </div>
+  </div>
+
+  <!-- Mobile Navigation -->
+  <nav class="mobile-nav">
+    <div class="mobile-nav-items">
+      <a href="#" class="mobile-nav-item active">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="m9 12 2 2 4-4"/>
+        </svg>
+        Today
+      </a>
+      <a href="#" class="mobile-nav-item">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+        Dreams
+      </a>
+      <a href="#" class="mobile-nav-item">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M3 3v18h18"/>
+          <path d="m19 9-5 5-4-4-3 3"/>
+        </svg>
+        Progress
+      </a>
+      <a href="#" class="mobile-nav-item">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 1v6m0 6v6"/>
+        </svg>
+        Settings
+      </a>
+    </div>
+  </nav>
+
+  <script>
+    function openKaizen() {
+      document.getElementById('kaizenModal').classList.add('open');
+    }
+
+    function closeKaizen() {
+      document.getElementById('kaizenModal').classList.remove('open');
+    }
+
+    function saveKaizen() {
+      const checked = document.querySelectorAll('.kaizen-area.checked').length;
+      let points = checked > 0 ? 10 : 0;
+      if (checked === 6) points += 25;
+      alert(`Saved! You earned ${points} points for your reflection.`);
+      closeKaizen();
+    }
+
+    // Close modal on backdrop click
+    document.getElementById('kaizenModal').addEventListener('click', function(e) {
+      if (e.target === this) closeKaizen();
+    });
+
+    // Task checkbox toggle
+    document.querySelectorAll('.task-checkbox').forEach(cb => {
+      cb.addEventListener('click', function() {
+        this.classList.toggle('checked');
+        this.closest('.task-item').classList.toggle('completed');
+      });
+    });
+  </script>
+</body>
+</html>

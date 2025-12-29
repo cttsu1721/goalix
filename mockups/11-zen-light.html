@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goalix - Zen Light</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Karla:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #faf9f7;
+      --bg-paper: #ffffff;
+      --text: #2c2c2c;
+      --text-light: #8a8a8a;
+      --text-muted: #b5b5b5;
+      --accent: #c9a87c;
+      --accent-soft: rgba(201, 168, 124, 0.15);
+      --border: #e8e6e3;
+      --shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    html {
+      font-size: 16px;
+    }
+
+    body {
+      font-family: 'Karla', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      letter-spacing: 0.01em;
+    }
+
+    /* Fade in animation */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes breathe {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+
+    /* Container */
+    .container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Minimal Header */
+    .header {
+      padding: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    .logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.25rem;
+      font-weight: 400;
+      letter-spacing: 0.15em;
+      text-transform: lowercase;
+      color: var(--text-light);
+    }
+
+    .header-stats {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+    }
+
+    .streak {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .streak-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: breathe 3s ease-in-out infinite;
+    }
+
+    /* Main Content */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+      max-width: 600px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Date */
+    .date-section {
+      text-align: center;
+      margin-bottom: 60px;
+      animation: fadeIn 0.8s ease-out 0.1s both;
+    }
+
+    .date-day {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.875rem;
+      font-weight: 300;
+      color: var(--text-muted);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .date-full {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.125rem;
+      font-weight: 400;
+      color: var(--text-light);
+      letter-spacing: 0.05em;
+    }
+
+    /* MIT - The Hero */
+    .mit-section {
+      text-align: center;
+      width: 100%;
+      animation: fadeIn 0.8s ease-out 0.2s both;
+    }
+
+    .mit-label {
+      font-size: 0.625rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .mit-task {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.75rem, 5vw, 2.5rem);
+      font-weight: 400;
+      line-height: 1.3;
+      color: var(--text);
+      margin-bottom: 32px;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .mit-task:hover {
+      color: var(--text-light);
+    }
+
+    .mit-meta {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+    }
+
+    .mit-category {
+      color: var(--accent);
+    }
+
+    /* Complete Button */
+    .complete-btn {
+      margin-top: 48px;
+      width: 56px;
+      height: 56px;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      background: var(--bg-paper);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow);
+    }
+
+    .complete-btn:hover {
+      border-color: var(--accent);
+      transform: scale(1.05);
+    }
+
+    .complete-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--text-muted);
+      stroke-width: 1.5;
+      fill: none;
+      transition: stroke 0.3s ease;
+    }
+
+    .complete-btn:hover svg {
+      stroke: var(--accent);
+    }
+
+    /* Other Tasks - Subtle Toggle */
+    .other-tasks {
+      margin-top: 80px;
+      text-align: center;
+      width: 100%;
+      animation: fadeIn 0.8s ease-out 0.4s both;
+    }
+
+    .toggle-tasks {
+      font-size: 0.6875rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 12px 24px;
+      transition: color 0.3s ease;
+      background: none;
+      border: none;
+      font-family: inherit;
+    }
+
+    .toggle-tasks:hover {
+      color: var(--text-light);
+    }
+
+    /* Hidden Tasks Panel */
+    .tasks-panel {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s ease, opacity 0.3s ease;
+      opacity: 0;
+    }
+
+    .tasks-panel.open {
+      max-height: 400px;
+      opacity: 1;
+      margin-top: 24px;
+    }
+
+    .task-group {
+      margin-bottom: 24px;
+    }
+
+    .task-group-label {
+      font-size: 0.5625rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .task-item:hover {
+      opacity: 0.7;
+    }
+
+    .task-checkbox {
+      width: 14px;
+      height: 14px;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .task-title {
+      font-size: 0.875rem;
+      color: var(--text-light);
+      font-weight: 300;
+    }
+
+    .task-points {
+      margin-left: auto;
+      font-size: 0.6875rem;
+      color: var(--text-muted);
+    }
+
+    /* Footer - Subtle Nav */
+    .footer {
+      padding: 24px;
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      animation: fadeIn 0.8s ease-out 0.5s both;
+    }
+
+    .footer-link {
+      font-size: 0.625rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .footer-link:hover {
+      color: var(--text-light);
+    }
+
+    .footer-link.active {
+      color: var(--text);
+    }
+
+    /* Level indicator - very subtle */
+    .level-whisper {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      font-size: 0.5625rem;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    /* Responsive */
+    @media (min-width: 768px) {
+      .header {
+        padding: 32px 48px;
+      }
+
+      .main {
+        padding: 48px;
+      }
+
+      .footer {
+        padding: 32px 48px;
+      }
+
+      .level-whisper {
+        bottom: 32px;
+        right: 48px;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .mit-task {
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Minimal Header -->
+    <header class="header">
+      <div class="logo">goalix</div>
+      <div class="header-stats">
+        <div class="streak">
+          <span class="streak-dot"></span>
+          <span>12 days</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+      <!-- Date -->
+      <div class="date-section">
+        <div class="date-day">Sunday</div>
+        <div class="date-full">December 29, 2024</div>
+      </div>
+
+      <!-- MIT - The Hero -->
+      <div class="mit-section">
+        <div class="mit-label">your focus</div>
+        <h1 class="mit-task">Complete quarterly business review presentation</h1>
+        <div class="mit-meta">
+          <span class="mit-category">career</span>
+          <span>~2 hours</span>
+        </div>
+
+        <button class="complete-btn" aria-label="Mark complete">
+          <svg viewBox="0 0 24 24">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Other Tasks - Hidden by Default -->
+      <div class="other-tasks">
+        <button class="toggle-tasks" onclick="toggleTasks()">
+          + 5 more tasks
+        </button>
+
+        <div class="tasks-panel" id="tasksPanel">
+          <div class="task-group">
+            <div class="task-group-label">Primary</div>
+            <div class="task-item">
+              <div class="task-checkbox"></div>
+              <span class="task-title">Morning workout - 30 min HIIT</span>
+              <span class="task-points">50</span>
+            </div>
+            <div class="task-item">
+              <div class="task-checkbox"></div>
+              <span class="task-title">Review investment portfolio</span>
+              <span class="task-points">50</span>
+            </div>
+            <div class="task-item">
+              <div class="task-checkbox"></div>
+              <span class="task-title">Read 20 pages</span>
+              <span class="task-points">50</span>
+            </div>
+          </div>
+
+          <div class="task-group">
+            <div class="task-group-label">Secondary</div>
+            <div class="task-item">
+              <div class="task-checkbox"></div>
+              <span class="task-title">Reply to emails</span>
+              <span class="task-points">25</span>
+            </div>
+            <div class="task-item">
+              <div class="task-checkbox"></div>
+              <span class="task-title">Organize workspace</span>
+              <span class="task-points">25</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Subtle Footer Nav -->
+    <footer class="footer">
+      <a href="#" class="footer-link active">today</a>
+      <a href="#" class="footer-link">goals</a>
+      <a href="#" class="footer-link">reflect</a>
+    </footer>
+
+    <!-- Level Whisper -->
+    <div class="level-whisper">level 4 · 6,420 pts</div>
+  </div>
+
+  <script>
+    function toggleTasks() {
+      const panel = document.getElementById('tasksPanel');
+      const btn = document.querySelector('.toggle-tasks');
+      panel.classList.toggle('open');
+      btn.textContent = panel.classList.contains('open') ? '− hide tasks' : '+ 5 more tasks';
+    }
+  </script>
+</body>
+</html>
