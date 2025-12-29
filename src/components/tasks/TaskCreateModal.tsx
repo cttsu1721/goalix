@@ -1,0 +1,314 @@
+"use client";
+
+import { useState } from "react";
+import { useCreateTask, useGoals } from "@/hooks";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import { Loader2, Sparkles, Clock, Target, AlertCircle } from "lucide-react";
+import type { TaskPriority } from "@prisma/client";
+
+interface TaskCreateModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  defaultPriority?: TaskPriority;
+  scheduledDate?: string;
+}
+
+const PRIORITY_CONFIG: Record<
+  TaskPriority,
+  { label: string; description: string; points: number; color: string }
+> = {
+  MIT: {
+    label: "MIT",
+    description: "Most Important Task (1 per day)",
+    points: 100,
+    color: "text-lantern",
+  },
+  PRIMARY: {
+    label: "Primary",
+    description: "Core tasks for the day (max 3)",
+    points: 50,
+    color: "text-zen-green",
+  },
+  SECONDARY: {
+    label: "Secondary",
+    description: "Bonus/supporting tasks",
+    points: 25,
+    color: "text-moon-soft",
+  },
+};
+
+const ESTIMATED_TIME_OPTIONS = [
+  { value: "15", label: "15 min" },
+  { value: "30", label: "30 min" },
+  { value: "45", label: "45 min" },
+  { value: "60", label: "1 hour" },
+  { value: "90", label: "1.5 hours" },
+  { value: "120", label: "2 hours" },
+  { value: "180", label: "3 hours" },
+  { value: "240", label: "4 hours" },
+];
+
+export function TaskCreateModal({
+  open,
+  onOpenChange,
+  defaultPriority = "SECONDARY",
+  scheduledDate,
+}: TaskCreateModalProps) {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [priority, setPriority] = useState<TaskPriority>(defaultPriority);
+  const [estimatedMinutes, setEstimatedMinutes] = useState<string>("");
+  const [weeklyGoalId, setWeeklyGoalId] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
+
+  const createTask = useCreateTask();
+  const { data: weeklyGoalsData } = useGoals("weekly");
+
+  const weeklyGoals = (weeklyGoalsData?.goals || []) as Array<{ id: string; title: string }>;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (!title.trim()) {
+      setError("Task title is required");
+      return;
+    }
+
+    const date = scheduledDate || new Date().toISOString().split("T")[0];
+
+    try {
+      await createTask.mutateAsync({
+        title: title.trim(),
+        description: description.trim() || undefined,
+        priority,
+        scheduledDate: date,
+        estimatedMinutes: estimatedMinutes ? parseInt(estimatedMinutes) : undefined,
+        weeklyGoalId: weeklyGoalId || undefined,
+      });
+
+      // Reset form and close modal
+      resetForm();
+      onOpenChange(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create task");
+    }
+  };
+
+  const resetForm = () => {
+    setTitle("");
+    setDescription("");
+    setPriority(defaultPriority);
+    setEstimatedMinutes("");
+    setWeeklyGoalId("");
+    setError(null);
+  };
+
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      resetForm();
+    }
+    onOpenChange(newOpen);
+  };
+
+  const selectedPriorityConfig = PRIORITY_CONFIG[priority];
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="bg-night border-night-mist sm:max-w-[480px]">
+        <DialogHeader>
+          <DialogTitle className="text-moon text-xl font-medium">
+            Create Task
+          </DialogTitle>
+          <DialogDescription className="text-moon-dim">
+            Add a new task to your daily focus
+          </DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-6 mt-4">
+          {/* Error message */}
+          {error && (
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              {error}
+            </div>
+          )}
+
+          {/* Title */}
+          <div className="space-y-2">
+            <Label htmlFor="title" className="text-moon-soft text-sm">
+              Task Title <span className="text-lantern">*</span>
+            </Label>
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="What do you need to do?"
+              className="bg-night-soft border-night-mist text-moon placeholder:text-moon-faint focus:border-lantern focus:ring-lantern/20"
+              autoFocus
+            />
+          </div>
+
+          {/* Priority */}
+          <div className="space-y-2">
+            <Label className="text-moon-soft text-sm">Priority</Label>
+            <div className="grid grid-cols-3 gap-2">
+              {(Object.keys(PRIORITY_CONFIG) as TaskPriority[]).map((p) => {
+                const config = PRIORITY_CONFIG[p];
+                const isSelected = priority === p;
+                return (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setPriority(p)}
+                    className={cn(
+                      "flex flex-col items-center gap-1 p-3 rounded-xl border transition-all",
+                      isSelected
+                        ? "border-lantern bg-lantern/10"
+                        : "border-night-mist bg-night-soft hover:border-night-glow"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "text-sm font-medium",
+                        isSelected ? "text-lantern" : config.color
+                      )}
+                    >
+                      {config.label}
+                    </span>
+                    <span className="text-[10px] text-moon-faint">
+                      +{config.points} pts
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-xs text-moon-faint mt-1">
+              {selectedPriorityConfig.description}
+            </p>
+          </div>
+
+          {/* Description */}
+          <div className="space-y-2">
+            <Label htmlFor="description" className="text-moon-soft text-sm">
+              Description{" "}
+              <span className="text-moon-faint font-normal">(optional)</span>
+            </Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Add details or notes..."
+              rows={3}
+              className="bg-night-soft border-night-mist text-moon placeholder:text-moon-faint focus:border-lantern focus:ring-lantern/20 resize-none"
+            />
+          </div>
+
+          {/* Estimated Time & Weekly Goal */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Estimated Time */}
+            <div className="space-y-2">
+              <Label className="text-moon-soft text-sm flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5" />
+                Time Estimate
+              </Label>
+              <Select value={estimatedMinutes} onValueChange={setEstimatedMinutes}>
+                <SelectTrigger className="bg-night-soft border-night-mist text-moon focus:ring-lantern/20">
+                  <SelectValue placeholder="Select time" />
+                </SelectTrigger>
+                <SelectContent className="bg-night border-night-mist">
+                  {ESTIMATED_TIME_OPTIONS.map((option) => (
+                    <SelectItem
+                      key={option.value}
+                      value={option.value}
+                      className="text-moon-soft focus:bg-night-mist focus:text-moon"
+                    >
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Weekly Goal Link */}
+            <div className="space-y-2">
+              <Label className="text-moon-soft text-sm flex items-center gap-1.5">
+                <Target className="w-3.5 h-3.5" />
+                Link to Goal
+              </Label>
+              <Select value={weeklyGoalId} onValueChange={setWeeklyGoalId}>
+                <SelectTrigger className="bg-night-soft border-night-mist text-moon focus:ring-lantern/20">
+                  <SelectValue placeholder="Select goal" />
+                </SelectTrigger>
+                <SelectContent className="bg-night border-night-mist max-h-48">
+                  <SelectItem
+                    value="none"
+                    className="text-moon-faint focus:bg-night-mist focus:text-moon"
+                  >
+                    No goal
+                  </SelectItem>
+                  {weeklyGoals.map((goal) => (
+                    <SelectItem
+                      key={goal.id}
+                      value={goal.id}
+                      className="text-moon-soft focus:bg-night-mist focus:text-moon"
+                    >
+                      {goal.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => handleOpenChange(false)}
+              className="bg-transparent border-night-mist text-moon-soft hover:bg-night-soft hover:text-moon"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={createTask.isPending || !title.trim()}
+              className="bg-lantern hover:bg-lantern-soft text-void font-medium"
+            >
+              {createTask.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Create Task
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}

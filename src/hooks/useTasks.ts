@@ -1,0 +1,176 @@
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import type { DailyTask, TaskPriority, TaskStatus } from "@prisma/client";
+
+interface TaskWithGoal extends DailyTask {
+  weeklyGoal: {
+    id: string;
+    title: string;
+    category: string;
+  } | null;
+}
+
+interface TasksResponse {
+  tasks: TaskWithGoal[];
+  date: string;
+  stats: {
+    total: number;
+    completed: number;
+    mit: TaskWithGoal | null;
+    primaryCount: number;
+    secondaryCount: number;
+  };
+}
+
+interface CreateTaskInput {
+  title: string;
+  description?: string;
+  priority: TaskPriority;
+  scheduledDate: string;
+  estimatedMinutes?: number;
+  weeklyGoalId?: string;
+}
+
+interface UpdateTaskInput {
+  title?: string;
+  description?: string;
+  priority?: TaskPriority;
+  status?: TaskStatus;
+  scheduledDate?: string;
+  estimatedMinutes?: number;
+  weeklyGoalId?: string;
+}
+
+interface CompleteTaskResponse {
+  task: TaskWithGoal;
+  points: {
+    earned: number;
+    base: number;
+    streakBonus: number;
+    newTotal: number;
+  };
+  leveledUp: boolean;
+  newLevel?: number;
+}
+
+// Fetch tasks for a specific date
+export function useTasks(date?: string) {
+  const dateParam = date || new Date().toISOString().split("T")[0];
+
+  return useQuery<TasksResponse>({
+    queryKey: ["tasks", dateParam],
+    queryFn: async () => {
+      const res = await fetch(`/api/tasks?date=${dateParam}`);
+      if (!res.ok) {
+        throw new Error("Failed to fetch tasks");
+      }
+      return res.json();
+    },
+  });
+}
+
+// Fetch a single task
+export function useTask(id: string) {
+  return useQuery<{ task: TaskWithGoal }>({
+    queryKey: ["task", id],
+    queryFn: async () => {
+      const res = await fetch(`/api/tasks/${id}`);
+      if (!res.ok) {
+        throw new Error("Failed to fetch task");
+      }
+      return res.json();
+    },
+    enabled: !!id,
+  });
+}
+
+// Create a new task
+export function useCreateTask() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: CreateTaskInput) => {
+      const res = await fetch("/api/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to create task");
+      }
+      return res.json();
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["tasks", variables.scheduledDate] });
+      queryClient.invalidateQueries({ queryKey: ["user", "stats"] });
+    },
+  });
+}
+
+// Update a task
+export function useUpdateTask() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, ...input }: UpdateTaskInput & { id: string }) => {
+      const res = await fetch(`/api/tasks/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to update task");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["task"] });
+    },
+  });
+}
+
+// Delete a task
+export function useDeleteTask() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/tasks/${id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to delete task");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    },
+  });
+}
+
+// Complete a task
+export function useCompleteTask() {
+  const queryClient = useQueryClient();
+
+  return useMutation<CompleteTaskResponse, Error, string>({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/tasks/${id}/complete`, {
+        method: "POST",
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to complete task");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["user", "stats"] });
+      queryClient.invalidateQueries({ queryKey: ["user", "streaks"] });
+    },
+  });
+}
