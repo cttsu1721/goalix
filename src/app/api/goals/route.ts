@@ -101,9 +101,7 @@ export async function GET(request: NextRequest) {
       case "weekly":
         goals = await prisma.weeklyGoal.findMany({
           where: {
-            monthlyGoal: {
-              oneYearGoal: { fiveYearGoal: { dream: { userId: session.user.id } } },
-            },
+            userId: session.user.id,
             ...(parentId && { monthlyGoalId: parentId }),
             ...where,
           },
@@ -252,30 +250,28 @@ export async function POST(request: NextRequest) {
         break;
 
       case "weekly":
-        if (!parentId) {
-          return NextResponse.json(
-            { error: "parentId (monthlyGoalId) is required for weekly goals" },
-            { status: 400 }
-          );
-        }
         if (!weekStart) {
           return NextResponse.json(
             { error: "weekStart is required for weekly goals" },
             { status: 400 }
           );
         }
-        const monthlyGoal = await prisma.monthlyGoal.findFirst({
-          where: {
-            id: parentId,
-            oneYearGoal: { fiveYearGoal: { dream: { userId: session.user.id } } },
-          },
-        });
-        if (!monthlyGoal) {
-          return NextResponse.json({ error: "Parent monthly goal not found" }, { status: 404 });
+        // If parentId provided, verify it belongs to user
+        if (parentId) {
+          const monthlyGoal = await prisma.monthlyGoal.findFirst({
+            where: {
+              id: parentId,
+              oneYearGoal: { fiveYearGoal: { dream: { userId: session.user.id } } },
+            },
+          });
+          if (!monthlyGoal) {
+            return NextResponse.json({ error: "Parent monthly goal not found" }, { status: 404 });
+          }
         }
         goal = await prisma.weeklyGoal.create({
           data: {
-            monthlyGoalId: parentId,
+            userId: session.user.id,
+            monthlyGoalId: parentId || null,
             title,
             description: description || null,
             category: category as GoalCategory,
