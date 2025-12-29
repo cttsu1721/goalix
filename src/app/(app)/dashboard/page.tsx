@@ -6,18 +6,24 @@ import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { MitCard, TaskList, TaskCreateModal, TaskEditModal, PlanDayModal } from "@/components/tasks";
 import { StatsPanel } from "@/components/gamification/StatsPanel";
+import { TaskSuggestModal } from "@/components/ai";
 import {
   useTasks,
+  useCreateTask,
   useTaskCompletion,
   useUserStats,
   useKaizenCheckin,
   useSaveKaizenCheckin,
+  useGoals,
 } from "@/hooks";
+import { useAIUsage } from "@/hooks/useAI";
 import { LEVELS } from "@/types/gamification";
 import { TASK_PRIORITY_POINTS } from "@/types/tasks";
 import { Loader2, Sparkles, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import type { TaskPriority } from "@prisma/client";
+import type { SuggestedTask } from "@/lib/ai/schemas";
 
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -57,15 +63,29 @@ export default function DashboardPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [isPlanDayModalOpen, setIsPlanDayModalOpen] = useState(false);
+  const [isTaskSuggestModalOpen, setIsTaskSuggestModalOpen] = useState(false);
+  const [selectedWeeklyGoal, setSelectedWeeklyGoal] = useState<{
+    id?: string;
+    title: string;
+    description?: string;
+  } | null>(null);
 
   // Fetch data
   const { data: tasksData, isLoading: tasksLoading, refetch: refetchTasks } = useTasks(today);
   const { data: statsData, isLoading: statsLoading } = useUserStats();
   const { data: kaizenData } = useKaizenCheckin(today);
+  const { data: goalsData } = useGoals("weekly");
+  const { data: aiUsage } = useAIUsage();
+
+  // Weekly goals for task suggestions
+  const weeklyGoals = (goalsData?.goals || []) as Array<{ id: string; title: string; description?: string }>;
+  const aiRemaining = aiUsage?.remaining ?? 5;
+  const aiLimit = aiUsage?.limit ?? 5;
 
   // Mutations
   const { complete: completeTask, isPending: isCompleting } = useTaskCompletion();
   const saveKaizen = useSaveKaizenCheckin();
+  const createTask = useCreateTask();
 
   // Open create modal with specific priority
   const openCreateModal = (priority: TaskPriority) => {
@@ -137,6 +157,41 @@ export default function DashboardPage() {
     const task = secondaryTasks.find((t) => t.id === taskId);
     if (task && task.status !== "COMPLETED" && !isCompleting) {
       completeTask(taskId, false);
+    }
+  };
+
+  // Handle AI task suggestions
+  const handleOpenTaskSuggest = () => {
+    if (weeklyGoals.length === 0) {
+      toast.error("Create a weekly goal first to get AI task suggestions");
+      return;
+    }
+    // Default to first weekly goal, user can change in modal
+    const firstGoal = weeklyGoals[0];
+    setSelectedWeeklyGoal({
+      id: firstGoal.id,
+      title: firstGoal.title,
+      description: firstGoal.description,
+    });
+    setIsTaskSuggestModalOpen(true);
+  };
+
+  const handleApplySuggestedTasks = async (suggestedTasks: SuggestedTask[]) => {
+    try {
+      // Create tasks sequentially to maintain order
+      for (const task of suggestedTasks) {
+        await createTask.mutateAsync({
+          title: task.title,
+          priority: task.priority,
+          scheduledDate: today,
+          estimatedMinutes: task.estimated_minutes,
+          weeklyGoalId: selectedWeeklyGoal?.id,
+        });
+      }
+      toast.success(`Added ${suggestedTasks.length} tasks to your day!`);
+      refetchTasks();
+    } catch (error) {
+      toast.error("Failed to create some tasks");
     }
   };
 
@@ -231,9 +286,9 @@ export default function DashboardPage() {
         title="Today's Focus"
         subtitle={formatDate()}
         showAiButton
-        aiUsesRemaining={3}
-        aiUsesTotal={5}
-        onAiClick={() => setIsPlanDayModalOpen(true)}
+        aiUsesRemaining={aiRemaining}
+        aiUsesTotal={aiLimit}
+        onAiClick={handleOpenTaskSuggest}
       />
 
       {/* Empty State - No tasks planned */}
@@ -246,20 +301,30 @@ export default function DashboardPage() {
           <p className="text-moon-dim text-center mb-8 max-w-sm">
             Start your day with intention. Plan your MIT and key tasks to stay focused and productive.
           </p>
-          <Button
-            onClick={() => setIsPlanDayModalOpen(true)}
-            className="bg-lantern text-void hover:bg-lantern/90 h-12 px-8"
-          >
-            <Sparkles className="w-4 h-4 mr-2" />
-            Plan Your Day
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              onClick={() => setIsPlanDayModalOpen(true)}
+              variant="outline"
+              className="border-night-glow text-moon hover:bg-night-soft h-12 px-6"
+            >
+              <CalendarDays className="w-4 h-4 mr-2" />
+              Plan Manually
+            </Button>
+            <Button
+              onClick={handleOpenTaskSuggest}
+              className="bg-zen-purple text-void hover:bg-zen-purple/90 h-12 px-6"
+            >
+              <Sparkles className="w-4 h-4 mr-2" />
+              AI Suggest Tasks
+            </Button>
+          </div>
         </div>
       ) : (
         <>
           <MitCard
             task={mit}
             onToggle={handleToggleMit}
-            onAiSuggest={() => openCreateModal("MIT")}
+            onAiSuggest={handleOpenTaskSuggest}
           />
 
           <TaskList
@@ -305,6 +370,18 @@ export default function DashboardPage() {
         date={today}
         onComplete={() => refetchTasks()}
       />
+
+      {/* AI Task Suggester Modal */}
+      {selectedWeeklyGoal && (
+        <TaskSuggestModal
+          open={isTaskSuggestModalOpen}
+          onOpenChange={setIsTaskSuggestModalOpen}
+          weeklyGoalId={selectedWeeklyGoal.id}
+          weeklyGoalTitle={selectedWeeklyGoal.title}
+          weeklyGoalDescription={selectedWeeklyGoal.description}
+          onApply={handleApplySuggestedTasks}
+        />
+      )}
     </AppShell>
   );
 }
