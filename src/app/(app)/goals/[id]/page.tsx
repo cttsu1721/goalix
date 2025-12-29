@@ -157,7 +157,7 @@ export default function GoalDetailPage() {
   }
 
   const config = LEVEL_CONFIG[level];
-  const children = getChildren(goal, level);
+  const children = getChildren(goal, level) as Array<Record<string, unknown>>;
   const status = (goal.status as GoalStatus) || "ACTIVE";
   const progress = (goal.progress as number) || 0;
 
@@ -222,7 +222,7 @@ export default function GoalDetailPage() {
             <h1 className="text-2xl font-medium text-moon mb-2">
               {goal.title as string}
             </h1>
-            {goal.description && (
+            {(goal.description as string) && (
               <p className="text-moon-dim leading-relaxed">
                 {goal.description as string}
               </p>
@@ -327,7 +327,7 @@ export default function GoalDetailPage() {
         <div className="flex items-center justify-between mt-3 text-xs text-moon-faint">
           <span>{children.length} {config.childLabel}</span>
           <span>
-            {children.filter((c: Record<string, unknown>) => c.status === "COMPLETED").length} completed
+            {children.filter((c) => c.status === "COMPLETED").length} completed
           </span>
         </div>
       </div>
@@ -362,7 +362,7 @@ export default function GoalDetailPage() {
             </div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2">
-              {children.map((child: Record<string, unknown>) => (
+              {children.map((child) => (
                 <GoalCard
                   key={child.id as string}
                   {...transformChild(child)}
@@ -389,7 +389,7 @@ export default function GoalDetailPage() {
             </div>
           ) : (
             <div className="space-y-2">
-              {children.map((task: Record<string, unknown>) => (
+              {children.map((task) => (
                 <div
                   key={task.id as string}
                   className={cn(

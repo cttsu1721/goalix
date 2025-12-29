@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { BADGE_DEFINITIONS, type BadgeSlug } from "@/types/gamification";
+import type { GoalCategory } from "@prisma/client";
 
 // Badge icons mapping
 export const BADGE_ICONS: Record<BadgeSlug, string> = {
@@ -199,9 +200,9 @@ export async function checkGoalGetter(userId: string): Promise<BadgeCheckResult 
   // Check any goal at any level is completed
   const completedGoals = await prisma.$transaction([
     prisma.weeklyGoal.count({ where: { userId, status: "COMPLETED" } }),
-    prisma.monthlyGoal.count({ where: { userId, status: "COMPLETED" } }),
-    prisma.oneYearGoal.count({ where: { userId, status: "COMPLETED" } }),
-    prisma.fiveYearGoal.count({ where: { userId, status: "COMPLETED" } }),
+    prisma.monthlyGoal.count({ where: { oneYearGoal: { fiveYearGoal: { dream: { userId } } }, status: "COMPLETED" } }),
+    prisma.oneYearGoal.count({ where: { fiveYearGoal: { dream: { userId } }, status: "COMPLETED" } }),
+    prisma.fiveYearGoal.count({ where: { dream: { userId }, status: "COMPLETED" } }),
     prisma.dream.count({ where: { userId, status: "COMPLETED" } }),
   ]);
 
@@ -251,9 +252,9 @@ export async function checkVisionary(userId: string): Promise<BadgeCheckResult |
 
   const [dreams, fiveYear, oneYear, monthly, weekly] = await prisma.$transaction([
     prisma.dream.count({ where: { userId, status: "ACTIVE" } }),
-    prisma.fiveYearGoal.count({ where: { userId, status: "ACTIVE" } }),
-    prisma.oneYearGoal.count({ where: { userId, status: "ACTIVE" } }),
-    prisma.monthlyGoal.count({ where: { userId, status: "ACTIVE" } }),
+    prisma.fiveYearGoal.count({ where: { dream: { userId }, status: "ACTIVE" } }),
+    prisma.oneYearGoal.count({ where: { fiveYearGoal: { dream: { userId } }, status: "ACTIVE" } }),
+    prisma.monthlyGoal.count({ where: { oneYearGoal: { fiveYearGoal: { dream: { userId } } }, status: "ACTIVE" } }),
     prisma.weeklyGoal.count({ where: { userId, status: "ACTIVE" } }),
   ]);
 
@@ -287,12 +288,14 @@ export async function checkCategoryBadges(
   const hasIt = await hasBadge(userId, badgeSlug);
   if (hasIt) return null;
 
-  // Count completed tasks in this category
+  // Count completed tasks in this category (through weeklyGoal relation)
   const count = await prisma.dailyTask.count({
     where: {
       userId,
       status: "COMPLETED",
-      category,
+      weeklyGoal: {
+        category: category as GoalCategory,
+      },
     },
   });
 
@@ -365,7 +368,6 @@ export async function getAllBadgesWithStatus(userId: string) {
   const earnedSlugs = new Set(earnedBadges.map((eb) => eb.badge.slug));
 
   return Object.entries(BADGE_DEFINITIONS).map(([slug, definition]) => ({
-    slug,
     ...definition,
     icon: BADGE_ICONS[slug as BadgeSlug],
     earned: earnedSlugs.has(slug),

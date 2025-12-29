@@ -124,18 +124,26 @@ export async function POST(request: NextRequest) {
 
     // Validate weeklyGoalId if provided
     if (weeklyGoalId) {
+      // Check for standalone weekly goal (with userId) or hierarchy-based weekly goal
       const weeklyGoal = await prisma.weeklyGoal.findFirst({
         where: {
           id: weeklyGoalId,
-          monthlyGoal: {
-            oneYearGoal: {
-              fiveYearGoal: {
-                dream: {
-                  userId: session.user.id,
+          OR: [
+            // Standalone weekly goal (directly owned by user)
+            { userId: session.user.id },
+            // Hierarchy-based weekly goal (owned through goal hierarchy)
+            {
+              monthlyGoal: {
+                oneYearGoal: {
+                  fiveYearGoal: {
+                    dream: {
+                      userId: session.user.id,
+                    },
+                  },
                 },
               },
             },
-          },
+          ],
         },
       });
 

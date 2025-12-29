@@ -178,17 +178,47 @@ export default function DashboardPage() {
 
   const handleApplySuggestedTasks = async (suggestedTasks: SuggestedTask[]) => {
     try {
+      // Check current task limits
+      const hasMit = tasks.some((t) => t.priority === "MIT");
+      const primaryCount = tasks.filter((t) => t.priority === "PRIMARY").length;
+
+      let addedCount = 0;
+      let primaryAdded = primaryCount;
+
       // Create tasks sequentially to maintain order
       for (const task of suggestedTasks) {
+        let priority = task.priority;
+
+        // Handle priority conflicts
+        if (priority === "MIT" && hasMit) {
+          // Already have a MIT, try to add as PRIMARY
+          if (primaryAdded < 3) {
+            priority = "PRIMARY";
+            primaryAdded++;
+          } else {
+            priority = "SECONDARY";
+          }
+        } else if (priority === "PRIMARY" && primaryAdded >= 3) {
+          priority = "SECONDARY";
+        } else if (priority === "PRIMARY") {
+          primaryAdded++;
+        }
+
         await createTask.mutateAsync({
           title: task.title,
-          priority: task.priority,
+          priority,
           scheduledDate: today,
           estimatedMinutes: task.estimated_minutes,
           weeklyGoalId: selectedWeeklyGoal?.id,
         });
+        addedCount++;
       }
-      toast.success(`Added ${suggestedTasks.length} tasks to your day!`);
+
+      if (hasMit && suggestedTasks.some((t) => t.priority === "MIT")) {
+        toast.success(`Added ${addedCount} tasks (MIT → Primary since you already have one)`);
+      } else {
+        toast.success(`Added ${addedCount} tasks to your day!`);
+      }
       refetchTasks();
     } catch (error) {
       toast.error("Failed to create some tasks");

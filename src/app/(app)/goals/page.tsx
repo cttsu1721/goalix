@@ -139,7 +139,7 @@ interface DisplayGoal {
 function transformGoals(goals: unknown[], level: GoalLevel): DisplayGoal[] {
   if (!Array.isArray(goals)) return [];
 
-  return goals.map((goal: Record<string, unknown>) => {
+  return (goals as Array<Record<string, unknown>>).map((goal) => {
     // Calculate children count based on level
     let childrenCount = 0;
     let completedChildren = 0;
