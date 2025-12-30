@@ -4,6 +4,7 @@ import { useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
+import { useWeeklyReview, formatAreaName, useUserStreaks } from "@/hooks";
 import {
   Calendar,
   CheckCircle2,
@@ -15,27 +16,35 @@ import {
   Sparkles,
   FileText,
   Award,
+  Star,
+  Link2,
+  Link2Off,
+  Loader2,
+  Heart,
+  Users,
+  Wallet,
+  Briefcase,
+  Brain,
+  Palmtree,
 } from "lucide-react";
 
-// Mock data - will be replaced with real data from API
-const mockWeekStats = {
-  tasksCompleted: 18,
-  tasksTotal: 24,
-  goalsProgressed: 4,
-  pointsEarned: 875,
-  streakDays: 12,
-  mitCompletionRate: 85,
+const AREA_ICONS: Record<string, React.ElementType> = {
+  health: Heart,
+  relationships: Users,
+  wealth: Wallet,
+  career: Briefcase,
+  personalGrowth: Brain,
+  lifestyle: Palmtree,
 };
 
-const mockDailyBreakdown = [
-  { day: "Mon", completed: 4, total: 5, mit: true },
-  { day: "Tue", completed: 3, total: 4, mit: true },
-  { day: "Wed", completed: 2, total: 3, mit: false },
-  { day: "Thu", completed: 3, total: 4, mit: true },
-  { day: "Fri", completed: 4, total: 4, mit: true },
-  { day: "Sat", completed: 1, total: 2, mit: true },
-  { day: "Sun", completed: 1, total: 2, mit: true },
-];
+const AREA_COLORS: Record<string, string> = {
+  health: "text-zen-red",
+  relationships: "text-pink-400",
+  wealth: "text-zen-green",
+  career: "text-zen-blue",
+  personalGrowth: "text-zen-purple",
+  lifestyle: "text-lantern",
+};
 
 const reviewSteps = [
   { id: 1, title: "Week Stats", description: "Review your performance" },
@@ -73,31 +82,31 @@ function StatCard({
   );
 }
 
-function WeeklyCalendar() {
+function WeeklyCalendar({ dailyBreakdown }: { dailyBreakdown: Array<{ dayOfWeek: string; completed: number; total: number; mitCompleted: boolean }> }) {
   return (
     <div className="bg-night border border-night-mist rounded-2xl p-6">
       <h3 className="text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-moon-faint mb-4">
         Daily Breakdown
       </h3>
       <div className="grid grid-cols-7 gap-2">
-        {mockDailyBreakdown.map((day) => {
-          const completionRate = (day.completed / day.total) * 100;
+        {dailyBreakdown.map((day) => {
+          const completionRate = day.total > 0 ? (day.completed / day.total) * 100 : 0;
 
           return (
-            <div key={day.day} className="text-center">
-              <span className="text-xs text-moon-faint block mb-2">{day.day}</span>
+            <div key={day.dayOfWeek} className="text-center">
+              <span className="text-xs text-moon-faint block mb-2">{day.dayOfWeek}</span>
               <div
                 className={`
                   w-full aspect-square rounded-lg flex flex-col items-center justify-center
-                  ${completionRate === 100 ? "bg-zen-green-soft border border-zen-green/30" : "bg-night-soft border border-night-mist"}
+                  ${completionRate === 100 && day.total > 0 ? "bg-zen-green-soft border border-zen-green/30" : "bg-night-soft border border-night-mist"}
                 `}
               >
-                <span className={`text-lg font-semibold ${completionRate === 100 ? "text-zen-green" : "text-moon"}`}>
+                <span className={`text-lg font-semibold ${completionRate === 100 && day.total > 0 ? "text-zen-green" : "text-moon"}`}>
                   {day.completed}
                 </span>
                 <span className="text-[0.625rem] text-moon-faint">/{day.total}</span>
               </div>
-              {day.mit && (
+              {day.mitCompleted && (
                 <div className="mt-1 flex justify-center">
                   <div className="w-1.5 h-1.5 rounded-full bg-lantern" title="MIT completed" />
                 </div>
@@ -120,7 +129,162 @@ function WeeklyCalendar() {
   );
 }
 
-function ReviewWizard() {
+function GoalAlignmentCard({ goalAlignment }: {
+  goalAlignment: {
+    linkedCompleted: number;
+    unlinkedCompleted: number;
+    alignmentRate: number;
+    totalLinked: number;
+    totalUnlinked: number;
+  }
+}) {
+  return (
+    <div className="bg-night border border-night-mist rounded-2xl p-6">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-10 h-10 rounded-xl bg-zen-blue/10 flex items-center justify-center">
+          <Target className="w-5 h-5 text-zen-blue" />
+        </div>
+        <div>
+          <h3 className="text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-moon-faint">
+            Goal Alignment
+          </h3>
+          <p className="text-lg font-semibold text-moon">{goalAlignment.alignmentRate}% Aligned</p>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <div className="flex items-center justify-between p-3 bg-night-soft rounded-lg">
+          <div className="flex items-center gap-2">
+            <Link2 className="w-4 h-4 text-zen-green" />
+            <span className="text-sm text-moon-soft">Goal-linked tasks</span>
+          </div>
+          <span className="text-sm font-medium text-moon">
+            {goalAlignment.linkedCompleted} / {goalAlignment.totalLinked}
+          </span>
+        </div>
+
+        <div className="flex items-center justify-between p-3 bg-night-soft rounded-lg">
+          <div className="flex items-center gap-2">
+            <Link2Off className="w-4 h-4 text-moon-faint" />
+            <span className="text-sm text-moon-soft">Unlinked tasks</span>
+          </div>
+          <span className="text-sm font-medium text-moon">
+            {goalAlignment.unlinkedCompleted} / {goalAlignment.totalUnlinked}
+          </span>
+        </div>
+      </div>
+
+      {goalAlignment.alignmentRate < 70 && (
+        <p className="mt-4 text-xs text-moon-faint">
+          Tip: Link more tasks to your weekly goals to stay focused on what matters.
+        </p>
+      )}
+    </div>
+  );
+}
+
+function KaizenWeeklyCard({ kaizen }: {
+  kaizen: {
+    checkinsCompleted: number;
+    checkinsTotal: number;
+    balancedDays: number;
+    areaBreakdown: Record<string, number>;
+    dailyCheckins: Array<{ day: string; areasChecked: number; areas: string[] }>;
+    strongestArea: { area: string; count: number } | null;
+    weakestArea: { area: string; count: number } | null;
+  }
+}) {
+  return (
+    <div className="bg-night border border-night-mist rounded-2xl p-6">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-10 h-10 rounded-xl bg-zen-green/10 flex items-center justify-center">
+          <Star className="w-5 h-5 text-zen-green" />
+        </div>
+        <div>
+          <h3 className="text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-moon-faint">
+            Kaizen Reflections
+          </h3>
+          <p className="text-lg font-semibold text-moon">
+            {kaizen.checkinsCompleted} / {kaizen.checkinsTotal} Days
+          </p>
+        </div>
+      </div>
+
+      {/* Daily visual */}
+      <div className="grid grid-cols-7 gap-2 mb-4">
+        {kaizen.dailyCheckins.map((day) => (
+          <div key={day.day} className="text-center">
+            <span className="text-xs text-moon-faint block mb-1">{day.day}</span>
+            <div
+              className={`
+                w-full aspect-square rounded-lg flex items-center justify-center
+                ${day.areasChecked === 6 ? "bg-zen-green/20 border border-zen-green/30" :
+                  day.areasChecked > 0 ? "bg-lantern/20 border border-lantern/30" :
+                  "bg-night-soft border border-night-mist"}
+              `}
+            >
+              <span className={`text-sm font-medium ${
+                day.areasChecked === 6 ? "text-zen-green" :
+                day.areasChecked > 0 ? "text-lantern" : "text-moon-faint"
+              }`}>
+                {day.areasChecked}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Area breakdown */}
+      <div className="space-y-2 mb-4">
+        {Object.entries(kaizen.areaBreakdown).map(([area, count]) => {
+          const Icon = AREA_ICONS[area] || Star;
+          const color = AREA_COLORS[area] || "text-moon-soft";
+          const percentage = Math.round((count / 7) * 100);
+
+          return (
+            <div key={area} className="flex items-center gap-2">
+              <Icon className={`w-4 h-4 ${color}`} />
+              <span className="text-xs text-moon-soft flex-1">{formatAreaName(area)}</span>
+              <div className="w-20 h-1.5 bg-night-mist rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full ${count === 7 ? "bg-zen-green" : "bg-lantern"}`}
+                  style={{ width: `${percentage}%` }}
+                />
+              </div>
+              <span className="text-xs text-moon-faint w-8 text-right">{count}/7</span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Insights */}
+      <div className="space-y-2 pt-4 border-t border-night-mist">
+        {kaizen.strongestArea && (
+          <p className="text-xs text-moon-soft">
+            <span className="text-zen-green">Strongest:</span>{" "}
+            {formatAreaName(kaizen.strongestArea.area)} ({kaizen.strongestArea.count} days)
+          </p>
+        )}
+        {kaizen.weakestArea && kaizen.weakestArea.count < kaizen.checkinsCompleted && (
+          <p className="text-xs text-moon-soft">
+            <span className="text-amber-400">Needs attention:</span>{" "}
+            {formatAreaName(kaizen.weakestArea.area)} ({kaizen.weakestArea.count} days)
+          </p>
+        )}
+        {kaizen.balancedDays > 0 && (
+          <p className="text-xs text-moon-soft">
+            <span className="text-zen-purple">Balanced days:</span> {kaizen.balancedDays} (all 6 areas)
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ReviewWizard({ weekData, streaks }: {
+  weekData: ReturnType<typeof useWeeklyReview>["data"];
+  streaks: Array<{ type: string; currentCount: number }>;
+}) {
   const [currentStep, setCurrentStep] = useState(1);
   const [wins, setWins] = useState("");
   const [challenges, setChallenges] = useState("");
@@ -136,8 +300,10 @@ function ReviewWizard() {
 
   const handleSubmit = () => {
     console.log("Review submitted:", { wins, challenges, nextWeekFocus });
-    // Will submit to API
+    // TODO: Submit to API
   };
+
+  const currentStreak = streaks.find((s) => s.type === "WEEKLY_REVIEW")?.currentCount || 0;
 
   return (
     <div className="bg-night border border-night-mist rounded-2xl overflow-hidden">
@@ -180,7 +346,7 @@ function ReviewWizard() {
 
       {/* Step Content */}
       <div className="p-6">
-        {currentStep === 1 && (
+        {currentStep === 1 && weekData && (
           <div className="space-y-4">
             <div className="text-center mb-6">
               <h3 className="text-lg font-medium text-moon mb-2">Week in Review</h3>
@@ -192,28 +358,60 @@ function ReviewWizard() {
               <StatCard
                 icon={CheckCircle2}
                 label="Tasks Completed"
-                value={`${mockWeekStats.tasksCompleted}/${mockWeekStats.tasksTotal}`}
-                subvalue={`${Math.round((mockWeekStats.tasksCompleted / mockWeekStats.tasksTotal) * 100)}%`}
+                value={`${weekData.stats.tasksCompleted}/${weekData.stats.totalTasks}`}
+                subvalue={`${weekData.stats.completionRate}%`}
                 iconColor="text-zen-green"
               />
               <StatCard
                 icon={Target}
                 label="Goals Progressed"
-                value={mockWeekStats.goalsProgressed}
+                value={weekData.stats.goalsProgressed}
                 iconColor="text-zen-blue"
               />
               <StatCard
                 icon={TrendingUp}
                 label="Points Earned"
-                value={mockWeekStats.pointsEarned}
+                value={weekData.stats.pointsEarned}
                 iconColor="text-lantern"
               />
               <StatCard
                 icon={Flame}
                 label="MIT Rate"
-                value={`${mockWeekStats.mitCompletionRate}%`}
+                value={`${weekData.stats.mitCompletionRate}%`}
                 iconColor="text-zen-red"
               />
+            </div>
+
+            {/* Goal Alignment Summary */}
+            <div className="mt-4 p-4 bg-night-soft rounded-xl">
+              <div className="flex items-center gap-2 mb-2">
+                <Target className="w-4 h-4 text-zen-blue" />
+                <span className="text-sm font-medium text-moon">Goal Alignment</span>
+              </div>
+              <p className="text-sm text-moon-soft">
+                {weekData.goalAlignment.alignmentRate}% of your completed tasks were linked to goals.
+                {weekData.goalAlignment.unlinkedCompleted > 0 && (
+                  <span className="text-moon-faint">
+                    {" "}({weekData.goalAlignment.unlinkedCompleted} unlinked tasks completed)
+                  </span>
+                )}
+              </p>
+            </div>
+
+            {/* Kaizen Summary */}
+            <div className="mt-4 p-4 bg-night-soft rounded-xl">
+              <div className="flex items-center gap-2 mb-2">
+                <Star className="w-4 h-4 text-zen-green" />
+                <span className="text-sm font-medium text-moon">Kaizen Reflections</span>
+              </div>
+              <p className="text-sm text-moon-soft">
+                You reflected on {weekData.kaizen.checkinsCompleted} of 7 days.
+                {weekData.kaizen.strongestArea && (
+                  <span className="text-moon-faint">
+                    {" "}Strongest area: {formatAreaName(weekData.kaizen.strongestArea.area)}
+                  </span>
+                )}
+              </p>
             </div>
           </div>
         )}
@@ -334,8 +532,18 @@ function EmptyReviewState({ onStartReview }: { onStartReview: () => void }) {
   );
 }
 
+function LoadingState() {
+  return (
+    <div className="flex items-center justify-center py-16">
+      <Loader2 className="w-8 h-8 animate-spin text-lantern" />
+    </div>
+  );
+}
+
 export default function WeeklyReviewPage() {
   const [isReviewing, setIsReviewing] = useState(false);
+  const { data: weekData, isLoading } = useWeeklyReview(0);
+  const { data: streaksData } = useUserStreaks();
 
   const handleStartReview = () => {
     setIsReviewing(true);
@@ -343,17 +551,52 @@ export default function WeeklyReviewPage() {
 
   // Get current week date range
   const getWeekRange = () => {
+    if (weekData?.weekRange) {
+      const start = new Date(weekData.weekRange.start);
+      const end = new Date(weekData.weekRange.end);
+
+      const formatDate = (date: Date) =>
+        date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+      return `${formatDate(start)} – ${formatDate(end)}`;
+    }
+
     const now = new Date();
     const start = new Date(now);
-    start.setDate(now.getDate() - now.getDay() + 1); // Monday
+    start.setDate(now.getDate() - now.getDay() + 1);
     const end = new Date(start);
-    end.setDate(start.getDate() + 6); // Sunday
+    end.setDate(start.getDate() + 6);
 
     const formatDate = (date: Date) =>
       date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
     return `${formatDate(start)} – ${formatDate(end)}`;
   };
+
+  if (isLoading) {
+    return (
+      <AppShell>
+        <PageHeader
+          title="Weekly Review"
+          subtitle={`Week of ${getWeekRange()}`}
+        />
+        <LoadingState />
+      </AppShell>
+    );
+  }
+
+  const stats = weekData?.stats || {
+    tasksCompleted: 0,
+    totalTasks: 0,
+    completionRate: 0,
+    mitCompletionRate: 0,
+    goalsProgressed: 0,
+    pointsEarned: 0,
+  };
+
+  const currentStreak = streaksData?.streaks.find(
+    (s) => s.type === "MIT_COMPLETION"
+  )?.currentCount || 0;
 
   return (
     <AppShell>
@@ -367,37 +610,49 @@ export default function WeeklyReviewPage() {
         <StatCard
           icon={CheckCircle2}
           label="Tasks Completed"
-          value={mockWeekStats.tasksCompleted}
+          value={stats.tasksCompleted}
           iconColor="text-zen-green"
         />
         <StatCard
           icon={Target}
           label="Goals Progressed"
-          value={mockWeekStats.goalsProgressed}
+          value={stats.goalsProgressed}
           iconColor="text-zen-blue"
         />
         <StatCard
           icon={TrendingUp}
           label="Points Earned"
-          value={mockWeekStats.pointsEarned}
+          value={stats.pointsEarned}
           iconColor="text-lantern"
         />
         <StatCard
           icon={Flame}
           label="Day Streak"
-          value={mockWeekStats.streakDays}
+          value={currentStreak}
           iconColor="text-zen-red"
         />
       </div>
 
       {/* Daily Breakdown */}
-      <div className="mb-6">
-        <WeeklyCalendar />
+      {weekData?.dailyBreakdown && (
+        <div className="mb-6">
+          <WeeklyCalendar dailyBreakdown={weekData.dailyBreakdown} />
+        </div>
+      )}
+
+      {/* Goal Alignment & Kaizen */}
+      <div className="grid lg:grid-cols-2 gap-6 mb-6">
+        {weekData?.goalAlignment && (
+          <GoalAlignmentCard goalAlignment={weekData.goalAlignment} />
+        )}
+        {weekData?.kaizen && (
+          <KaizenWeeklyCard kaizen={weekData.kaizen} />
+        )}
       </div>
 
       {/* Review Wizard or Empty State */}
       {isReviewing ? (
-        <ReviewWizard />
+        <ReviewWizard weekData={weekData} streaks={streaksData?.streaks || []} />
       ) : (
         <EmptyReviewState onStartReview={handleStartReview} />
       )}

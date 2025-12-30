@@ -68,6 +68,34 @@ export function useTasks(date?: string) {
   });
 }
 
+interface WeekTasksResponse {
+  tasks: TaskWithGoal[];
+  tasksByDate: Record<string, TaskWithGoal[]>;
+  startDate: string;
+  endDate: string;
+  stats: {
+    total: number;
+    completed: number;
+    mit: TaskWithGoal | null;
+    primaryCount: number;
+    secondaryCount: number;
+  };
+}
+
+// Fetch tasks for a date range (week view)
+export function useWeekTasks(startDate: string, endDate: string) {
+  return useQuery<WeekTasksResponse>({
+    queryKey: ["tasks", "week", startDate, endDate],
+    queryFn: async () => {
+      const res = await fetch(`/api/tasks?startDate=${startDate}&endDate=${endDate}`);
+      if (!res.ok) {
+        throw new Error("Failed to fetch week tasks");
+      }
+      return res.json();
+    },
+  });
+}
+
 // Fetch a single task
 export function useTask(id: string) {
   return useQuery<{ task: TaskWithGoal }>({
@@ -100,8 +128,9 @@ export function useCreateTask() {
       }
       return res.json();
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["tasks", variables.scheduledDate] });
+    onSuccess: () => {
+      // Invalidate all task queries (daily and weekly views)
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["user", "stats"] });
     },
   });

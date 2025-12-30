@@ -95,13 +95,13 @@ function SidebarContent({ className }: SidebarProps) {
       const hrefView = hrefParams.get("view");
       const currentView = searchParams.get("view");
 
-      // Dreams tab active when view=dreams or no view (default)
+      // Dreams tab active ONLY when view=dreams
       if (hrefView === "dreams") {
-        return currentView === "dreams" || !currentView;
+        return currentView === "dreams";
       }
-      // Goals tab active when view=goals
+      // Goals tab active when view=goals, any goal level, or no view (default)
       if (hrefView === "goals") {
-        return currentView === "goals";
+        return currentView !== "dreams";
       }
     }
 

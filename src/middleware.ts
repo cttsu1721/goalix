@@ -8,6 +8,7 @@ const protectedRoutes = [
   "/progress",
   "/review",
   "/settings",
+  "/week",
 ];
 
 // Routes that should redirect to dashboard if already authenticated

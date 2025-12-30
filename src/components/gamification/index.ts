@@ -7,3 +7,5 @@ export { BadgeGrid } from "./BadgeGrid";
 export { StatsPanel } from "./StatsPanel";
 export { LevelUpModal } from "./LevelUpModal";
 export { BadgeEarnedModal } from "./BadgeEarnedModal";
+export { LifestyleInsight } from "./LifestyleInsight";
+export { KaizenHeatmap } from "./KaizenHeatmap";

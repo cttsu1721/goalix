@@ -1,6 +1,7 @@
 // Task hooks
 export {
   useTasks,
+  useWeekTasks,
   useTask,
   useCreateTask,
   useUpdateTask,
@@ -37,3 +38,9 @@ export {
 
 // Dream Builder hook
 export { useDreamBuilder, type DreamBuilderStep, type GoalPath } from "./useDreamBuilder";
+
+// Weekly Review hook
+export { useWeeklyReview, formatAreaName } from "./useWeeklyReview";
+
+// Monthly Review hook
+export { useMonthlyReview } from "./useMonthlyReview";

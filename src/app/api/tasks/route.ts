@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 import { TaskPriority } from "@prisma/client";
 import { TASK_PRIORITY_LIMITS } from "@/types/tasks";
 
-// GET /api/tasks - List tasks for a specific date
+// GET /api/tasks - List tasks for a specific date or date range
 export async function GET(request: NextRequest) {
   try {
     const session = await auth();
@@ -14,21 +14,33 @@ export async function GET(request: NextRequest) {
 
     const searchParams = request.nextUrl.searchParams;
     const dateParam = searchParams.get("date");
+    const startDateParam = searchParams.get("startDate");
+    const endDateParam = searchParams.get("endDate");
 
-    // Default to today if no date provided
-    const date = dateParam ? new Date(dateParam) : new Date();
-    const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
+    let startOfRange: Date;
+    let endOfRange: Date;
 
-    const endOfDay = new Date(date);
-    endOfDay.setHours(23, 59, 59, 999);
+    // Support date range queries for week/month views
+    if (startDateParam && endDateParam) {
+      startOfRange = new Date(startDateParam);
+      startOfRange.setHours(0, 0, 0, 0);
+      endOfRange = new Date(endDateParam);
+      endOfRange.setHours(23, 59, 59, 999);
+    } else {
+      // Default to single day (today if no date provided)
+      const date = dateParam ? new Date(dateParam) : new Date();
+      startOfRange = new Date(date);
+      startOfRange.setHours(0, 0, 0, 0);
+      endOfRange = new Date(date);
+      endOfRange.setHours(23, 59, 59, 999);
+    }
 
     const tasks = await prisma.dailyTask.findMany({
       where: {
         userId: session.user.id,
         scheduledDate: {
-          gte: startOfDay,
-          lte: endOfDay,
+          gte: startOfRange,
+          lte: endOfRange,
         },
       },
       include: {
@@ -41,6 +53,7 @@ export async function GET(request: NextRequest) {
         },
       },
       orderBy: [
+        { scheduledDate: "asc" },
         { priority: "asc" }, // MIT first, then PRIMARY, then SECONDARY
         { createdAt: "asc" },
       ],
@@ -52,9 +65,21 @@ export async function GET(request: NextRequest) {
     const primaryCount = tasks.filter((t) => t.priority === "PRIMARY").length;
     const secondaryCount = tasks.filter((t) => t.priority === "SECONDARY").length;
 
+    // Group tasks by date for range queries
+    const tasksByDate: Record<string, typeof tasks> = {};
+    tasks.forEach((task) => {
+      const dateKey = new Date(task.scheduledDate).toISOString().split("T")[0];
+      if (!tasksByDate[dateKey]) {
+        tasksByDate[dateKey] = [];
+      }
+      tasksByDate[dateKey].push(task);
+    });
+
     return NextResponse.json({
       tasks,
-      date: startOfDay.toISOString().split("T")[0],
+      tasksByDate,
+      startDate: startOfRange.toISOString().split("T")[0],
+      endDate: endOfRange.toISOString().split("T")[0],
       stats: {
         total: tasks.length,
         completed,

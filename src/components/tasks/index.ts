@@ -5,3 +5,4 @@ export { AddTaskButton } from "./AddTaskButton";
 export { TaskCreateModal } from "./TaskCreateModal";
 export { TaskEditModal } from "./TaskEditModal";
 export { PlanDayModal } from "./PlanDayModal";
+export { DecisionCompassDialog } from "./DecisionCompassDialog";

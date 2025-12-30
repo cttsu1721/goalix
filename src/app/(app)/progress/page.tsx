@@ -2,6 +2,7 @@
 
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { LifestyleInsight, KaizenHeatmap } from "@/components/gamification";
 import { useUserStats, useUserStreaks, useUserBadges } from "@/hooks/useGamification";
 import { LEVELS, STREAK_TYPE_LABELS } from "@/types/gamification";
 import {
@@ -399,6 +400,11 @@ export default function ProgressPage() {
         />
       </div>
 
+      {/* Lifestyle Insight (only shows if user has milestone-worthy streaks) */}
+      <div className="mb-6">
+        <LifestyleInsight streaks={streaks} />
+      </div>
+
       {/* Level and Streaks */}
       <div className="grid lg:grid-cols-2 gap-6 mb-6">
         <LevelProgressCard
@@ -409,6 +415,11 @@ export default function ProgressPage() {
           pointsToNextLevel={pointsToNextLevel}
         />
         <StreaksCard streaks={streaks} />
+      </div>
+
+      {/* Kaizen Heatmap */}
+      <div className="mb-6">
+        <KaizenHeatmap days={91} />
       </div>
 
       {/* Badges */}

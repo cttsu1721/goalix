@@ -18,9 +18,11 @@ import {
   CheckCircle2,
   Loader2,
   Wand2,
+  Star,
 } from "lucide-react";
 
 type UIGoalLevel = "dreams" | "5-year" | "1-year" | "monthly" | "weekly";
+type GoalsOnlyLevel = Exclude<UIGoalLevel, "dreams">;
 
 const levelConfig: Record<
   UIGoalLevel,
@@ -99,11 +101,14 @@ function EmptyState({ onCreateDream, onDreamBuilder }: { onCreateDream: () => vo
 function LevelTabs({
   activeLevel,
   onLevelChange,
+  hideDreams = false,
 }: {
   activeLevel: UIGoalLevel;
   onLevelChange: (level: UIGoalLevel) => void;
+  hideDreams?: boolean;
 }) {
-  const levels: UIGoalLevel[] = ["dreams", "5-year", "1-year", "monthly", "weekly"];
+  const allLevels: UIGoalLevel[] = ["dreams", "5-year", "1-year", "monthly", "weekly"];
+  const levels = hideDreams ? allLevels.filter((l) => l !== "dreams") : allLevels;
 
   return (
     <div className="flex gap-2 overflow-x-auto pb-2 -mx-2 px-2 scrollbar-hide">
@@ -202,32 +207,123 @@ function transformGoals(goals: unknown[], level: GoalLevel): DisplayGoal[] {
   });
 }
 
-function GoalsPageContent() {
+// Dreams Page - Inspirational, no tabs
+function DreamsPageContent() {
+  const router = useRouter();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isDreamBuilderOpen, setIsDreamBuilderOpen] = useState(false);
+
+  const { data, isLoading, refetch } = useDreams();
+  const dreams = transformGoals(data?.goals || [], "dream");
+
+  const handleDreamClick = (id: string) => {
+    router.push(`/goals/${id}`);
+  };
+
+  return (
+    <AppShell>
+      {/* Hero Header */}
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-lantern/20 to-lantern/5 border border-lantern/20 flex items-center justify-center">
+            <Star className="w-5 h-5 text-lantern" />
+          </div>
+          <h1 className="text-2xl font-semibold text-moon tracking-tight">
+            Your 10-Year Vision
+          </h1>
+        </div>
+        <p className="text-moon-dim ml-[52px]">
+          Dream big. These are the destinations that shape your journey.
+        </p>
+      </div>
+
+      {/* Action Bar */}
+      <div className="flex items-center justify-between mb-8">
+        <span className="text-moon-faint text-sm">
+          {dreams.length} {dreams.length === 1 ? "dream" : "dreams"}
+        </span>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={() => setIsDreamBuilderOpen(true)}
+            className="bg-gradient-to-r from-lantern to-lantern/80 text-void hover:from-lantern/90 hover:to-lantern/70 font-medium rounded-xl h-10 shadow-lg shadow-lantern/20"
+          >
+            <Wand2 className="w-4 h-4 mr-2" />
+            Dream Builder
+          </Button>
+          <Button
+            onClick={() => setIsCreateModalOpen(true)}
+            variant="outline"
+            className="border-night-mist bg-night-soft text-moon hover:border-lantern hover:text-lantern hover:bg-lantern/5 rounded-xl h-10"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Dream
+          </Button>
+        </div>
+      </div>
+
+      {/* Content */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="w-8 h-8 animate-spin text-lantern" />
+        </div>
+      ) : dreams.length === 0 ? (
+        <EmptyState
+          onCreateDream={() => setIsCreateModalOpen(true)}
+          onDreamBuilder={() => setIsDreamBuilderOpen(true)}
+        />
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2">
+          {dreams.map((dream) => (
+            <DreamCard
+              key={dream.id}
+              {...dream}
+              onClick={() => handleDreamClick(dream.id)}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Create Dream Modal */}
+      <GoalCreateModal
+        open={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
+        level="dream"
+        onSuccess={() => refetch()}
+      />
+
+      {/* Dream Builder Modal */}
+      <DreamBuilderModal
+        open={isDreamBuilderOpen}
+        onOpenChange={setIsDreamBuilderOpen}
+      />
+    </AppShell>
+  );
+}
+
+// Goals Page - Operational, 4 tabs
+function GoalsOnlyPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const viewParam = searchParams.get("view");
 
-  // Map URL param to valid UIGoalLevel
-  const getInitialLevel = (): UIGoalLevel => {
-    const validLevels: UIGoalLevel[] = ["dreams", "5-year", "1-year", "monthly", "weekly"];
-    if (viewParam && validLevels.includes(viewParam as UIGoalLevel)) {
-      return viewParam as UIGoalLevel;
+  // Get initial level from URL or default to 1-year
+  const getInitialLevel = (): GoalsOnlyLevel => {
+    const validLevels: GoalsOnlyLevel[] = ["5-year", "1-year", "monthly", "weekly"];
+    if (viewParam && validLevels.includes(viewParam as GoalsOnlyLevel)) {
+      return viewParam as GoalsOnlyLevel;
     }
-    // Default to first non-dreams tab if coming from "Goals" sidebar item
-    if (viewParam === "goals") {
-      return "5-year";
-    }
-    return "dreams";
+    return "1-year"; // Default to 1-year (most actionable)
   };
 
-  const [activeLevel, setActiveLevel] = useState<UIGoalLevel>(getInitialLevel);
+  const [activeLevel, setActiveLevel] = useState<GoalsOnlyLevel>(getInitialLevel);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isDreamBuilderOpen, setIsDreamBuilderOpen] = useState(false);
 
   // Update active level when URL changes
   useEffect(() => {
     const newLevel = getInitialLevel();
-    setActiveLevel(newLevel);
+    if (newLevel !== activeLevel) {
+      setActiveLevel(newLevel);
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewParam]);
 
@@ -235,29 +331,26 @@ function GoalsPageContent() {
 
   // Fetch goals for the current level
   const { data, isLoading, refetch } = useGoals(apiLevel);
-  const { data: dreamsData } = useDreams();
-
   const goals = transformGoals(data?.goals || [], apiLevel);
-  const hasDreams = (dreamsData?.goals?.length || 0) > 0;
 
   const handleGoalClick = (id: string) => {
     router.push(`/goals/${id}`);
   };
 
-  const handleCreateGoal = () => {
-    setIsCreateModalOpen(true);
-  };
-
   return (
     <AppShell>
       <PageHeader
-        title="Goal Hierarchy"
-        subtitle="Your 1/5/10 cascade from dreams to daily tasks"
+        title="Goals"
+        subtitle="Your milestones from 5-year targets to weekly actions"
       />
 
-      {/* Level Tabs */}
+      {/* Level Tabs (without Dreams) */}
       <div className="mb-6">
-        <LevelTabs activeLevel={activeLevel} onLevelChange={setActiveLevel} />
+        <LevelTabs
+          activeLevel={activeLevel}
+          onLevelChange={(level) => setActiveLevel(level as GoalsOnlyLevel)}
+          hideDreams
+        />
       </div>
 
       {/* Action Bar */}
@@ -269,25 +362,14 @@ function GoalsPageContent() {
           </h2>
           <span className="text-moon-faint text-sm">({goals.length})</span>
         </div>
-        <div className="flex items-center gap-2">
-          {activeLevel === "dreams" && (
-            <Button
-              onClick={() => setIsDreamBuilderOpen(true)}
-              className="bg-gradient-to-r from-lantern to-lantern/80 text-void hover:from-lantern/90 hover:to-lantern/70 font-medium rounded-xl h-10 shadow-lg shadow-lantern/20"
-            >
-              <Wand2 className="w-4 h-4 mr-2" />
-              Dream Builder
-            </Button>
-          )}
-          <Button
-            onClick={handleCreateGoal}
-            variant="outline"
-            className="border-night-mist bg-night-soft text-moon hover:border-lantern hover:text-lantern hover:bg-lantern/5 rounded-xl h-10"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            New {activeLevel === "dreams" ? "Dream" : "Goal"}
-          </Button>
-        </div>
+        <Button
+          onClick={() => setIsCreateModalOpen(true)}
+          variant="outline"
+          className="border-night-mist bg-night-soft text-moon hover:border-lantern hover:text-lantern hover:bg-lantern/5 rounded-xl h-10"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          New Goal
+        </Button>
       </div>
 
       {/* Content */}
@@ -295,15 +377,13 @@ function GoalsPageContent() {
         <div className="flex items-center justify-center py-16">
           <Loader2 className="w-8 h-8 animate-spin text-lantern" />
         </div>
-      ) : !hasDreams && activeLevel === "dreams" ? (
-        <EmptyState onCreateDream={handleCreateGoal} onDreamBuilder={() => setIsDreamBuilderOpen(true)} />
       ) : goals.length === 0 ? (
         <div className="bg-night border border-night-mist rounded-2xl p-8 text-center">
           <p className="text-moon-dim">
             No {levelConfig[activeLevel].label.toLowerCase()} yet.
           </p>
           <Button
-            onClick={handleCreateGoal}
+            onClick={() => setIsCreateModalOpen(true)}
             variant="link"
             className="text-lantern hover:text-lantern/80 mt-2"
           >
@@ -312,26 +392,18 @@ function GoalsPageContent() {
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
-          {goals.map((goal) =>
-            activeLevel === "dreams" ? (
-              <DreamCard
-                key={goal.id}
-                {...goal}
-                onClick={() => handleGoalClick(goal.id)}
-              />
-            ) : (
-              <GoalCard
-                key={goal.id}
-                {...goal}
-                onClick={() => handleGoalClick(goal.id)}
-              />
-            )
-          )}
+          {goals.map((goal) => (
+            <GoalCard
+              key={goal.id}
+              {...goal}
+              onClick={() => handleGoalClick(goal.id)}
+            />
+          ))}
         </div>
       )}
 
-      {/* Cascade Visualization Hint */}
-      {hasDreams && goals.length > 0 && (
+      {/* Cascade Tip */}
+      {goals.length > 0 && (
         <div className="mt-8 p-4 bg-night-soft border border-night-mist rounded-xl">
           <div className="flex items-start gap-3">
             <Layers className="w-5 h-5 text-lantern flex-shrink-0 mt-0.5" />
@@ -352,14 +424,21 @@ function GoalsPageContent() {
         level={apiLevel}
         onSuccess={() => refetch()}
       />
-
-      {/* Dream Builder Modal */}
-      <DreamBuilderModal
-        open={isDreamBuilderOpen}
-        onOpenChange={setIsDreamBuilderOpen}
-      />
     </AppShell>
   );
+}
+
+// Router - decides which view to show based on URL
+function GoalsPageContent() {
+  const searchParams = useSearchParams();
+  const viewParam = searchParams.get("view");
+
+  // Show Dreams page for view=dreams, Goals page for everything else
+  if (viewParam === "dreams") {
+    return <DreamsPageContent />;
+  }
+
+  return <GoalsOnlyPageContent />;
 }
 
 function GoalsPageFallback() {

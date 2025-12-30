@@ -125,10 +125,35 @@ src/
 
 ## Key Features
 
-- **Goal Hierarchy:** Dream > 5-Year > 1-Year > Monthly > Weekly > Daily Tasks
-- **Gamification:** Points, streaks, badges, levels (10 levels up to "Fastlaner")
-- **AI Features:** Goal Sharpener (SMART goals), Task Suggester
-- **PWA:** Installable, offline-capable
+### Core Functionality
+- **Goal Hierarchy:** Dream → 5-Year → 1-Year → Monthly → Weekly → Daily Tasks
+- **Daily Planning:** MIT (Most Important Task) + Primary + Secondary task priorities
+- **Decision Compass:** Friction dialog for unlinked tasks to prevent "action faking"
+
+### Gamification System
+- **Points:** Earn points for completing tasks (MIT: 100, Primary: 50, Secondary: 25)
+- **Streaks:** Track daily planning, MIT completion, reviews, and Kaizen check-ins
+- **Badges:** Achievement badges for milestones and consistent behavior
+- **Levels:** 10 levels from "Beginner" to "Fastlaner" (150,000 points)
+- **Lifestyle Insights:** Motivational messages at streak milestones (7/14/30/60/90 days)
+
+### Kaizen Daily Check-in
+- **6 Life Areas:** Health, Relationships, Wealth, Career, Personal Growth, Lifestyle
+- **Kaizen Heatmap:** GitHub-style contribution grid showing check-in history
+- **Balance Tracking:** Bonus points for checking all 6 areas in a day
+
+### Reviews
+- **Weekly Review:** Task completion stats, MIT performance, goal alignment, Kaizen summary
+- **Monthly Review:** Weekly breakdowns, goal progress, Kaizen insights, reflection wizard
+
+### AI Features
+- **Goal Sharpener:** Transform vague goals into SMART format
+- **Task Suggester:** Generate daily tasks from weekly goals
+- **Dream Builder:** AI-guided flow for creating 10-year visions
+
+### Technical
+- **PWA:** Installable, offline-capable progressive web app
+- **Dark Theme:** YORU ZEN design system with lantern accent colors
 
 ## Documentation
 
