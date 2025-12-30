@@ -101,17 +101,17 @@ function GoalNode({
   };
 
   return (
-    <div className={cn("relative", depth > 0 && "ml-6")}>
+    <div className={cn("relative", depth > 0 && "ml-4")}>
       {/* Connection line */}
       {depth > 0 && (
-        <div className="absolute left-0 top-0 bottom-0 -ml-3 w-px bg-night-mist/30" />
+        <div className="absolute left-0 top-0 bottom-0 -ml-2 w-px bg-night-mist/30" />
       )}
 
       {/* Node content */}
       <div className="relative group">
         {/* Horizontal connector */}
         {depth > 0 && (
-          <div className="absolute left-0 top-5 -ml-3 w-3 h-px bg-night-mist/30" />
+          <div className="absolute left-0 top-5 -ml-2 w-2 h-px bg-night-mist/30" />
         )}
 
         <div
@@ -193,8 +193,8 @@ function GoalNode({
                       {style.label}
                     </span>
                   </div>
-                  <p className="text-sm font-medium text-moon truncate">{title}</p>
-                  <p className="text-xs text-moon-dim line-clamp-2 mt-0.5">{description}</p>
+                  <p className="text-sm font-medium text-moon break-words">{title}</p>
+                  <p className="text-xs text-moon-dim line-clamp-2 mt-0.5 break-words">{description}</p>
                 </>
               )}
             </div>
@@ -239,7 +239,7 @@ export function DreamBuilderPreview({
   onRemoveOneYear,
 }: DreamBuilderPreviewProps) {
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 overflow-hidden">
       {/* Dream */}
       <GoalNode
         level="dream"

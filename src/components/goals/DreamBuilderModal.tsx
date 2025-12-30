@@ -100,7 +100,7 @@ export function DreamBuilderModal({ open, onOpenChange }: DreamBuilderModalProps
       <DialogContent
         className={cn(
           "bg-night border-night-mist/50 p-0 overflow-hidden shadow-2xl shadow-black/50",
-          step === "preview" || step === "creating" ? "max-w-3xl max-h-[85vh]" : "max-w-lg"
+          step === "preview" || step === "creating" ? "max-w-4xl w-[95vw] max-h-[85vh]" : "max-w-lg"
         )}
       >
         {/* Header */}
