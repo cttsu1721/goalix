@@ -294,24 +294,131 @@ free -m
 
 ---
 
-## Rollback
+## Rollback & Recovery Procedures
 
-If a deployment fails:
+### Quick Rollback (< 5 minutes)
+
+Use this when a deployment fails and you need to restore service quickly:
 
 ```bash
+ssh root@170.64.137.4
 cd /opt/apps/goalix
 
-# Find previous commit
-git log --oneline -5
+# 1. Find the last working commit
+git log --oneline -10
 
-# Rollback to specific commit
+# 2. Rollback to specific commit (replace <hash> with commit hash)
 git reset --hard <commit-hash>
 
-# Rebuild and restart
-docker-compose down
-docker-compose build --no-cache
-docker-compose up -d
+# 3. Rebuild and restart (required to pick up code changes)
+docker compose down
+docker compose build --no-cache
+docker compose up -d
+
+# 4. Verify app is healthy
+sleep 15
+curl -s https://goal.quantumdigitalplus.com/api/health | jq
 ```
+
+### Rollback Scenarios
+
+#### Scenario 1: App Won't Start (Container Crashes)
+
+```bash
+# Check what went wrong
+docker compose logs app --tail=100
+
+# Common fixes:
+# A) Missing env var - check .env exists and has all required vars
+cat .env | grep -E "^(DATABASE|REDIS|NEXTAUTH)"
+
+# B) Database connection failed - verify container is accessible
+docker exec sqm_postgres pg_isready -U goalix_user -d goalix_db
+
+# C) Build issue - rollback to last working commit
+git log --oneline -5
+git reset --hard <last-working-hash>
+docker compose build --no-cache
+docker compose up -d
+```
+
+#### Scenario 2: App Starts but Returns Errors (500s)
+
+```bash
+# Check runtime errors in logs
+docker compose logs app --tail=200 | grep -i error
+
+# Check if it's a database schema mismatch
+docker compose exec app npx prisma migrate status
+
+# If migrations are out of sync:
+# Option A: Apply pending migrations
+docker compose exec app npx prisma migrate deploy
+
+# Option B: Rollback code and keep old schema
+git reset --hard <commit-before-schema-change>
+docker compose build --no-cache
+docker compose up -d
+```
+
+#### Scenario 3: Environment Configuration Issue
+
+```bash
+# Validate current environment
+grep -E "localhost|127\.0\.0\.1" .env  # Should return nothing in production
+
+# Check for missing required vars
+for VAR in DATABASE_URL REDIS_URL NEXTAUTH_SECRET NEXTAUTH_URL; do
+  grep -q "^${VAR}=" .env || echo "MISSING: $VAR"
+done
+
+# If .env is corrupted, restore from template
+cp .env.production.template .env
+nano .env  # Fill in production values
+docker compose down
+docker compose up -d
+```
+
+#### Scenario 4: Database Migration Gone Wrong
+
+**CAUTION: These operations can cause data loss**
+
+```bash
+# Check current migration status
+docker compose exec app npx prisma migrate status
+
+# If you need to rollback a migration:
+# 1. First, backup the database
+docker exec sqm_postgres pg_dump -U goalix_user goalix_db > /tmp/goalix_backup_$(date +%Y%m%d_%H%M%S).sql
+
+# 2. Manually revert the database changes (requires knowing what the migration did)
+# 3. Mark migration as rolled back in _prisma_migrations table
+docker exec sqm_postgres psql -U goalix_user -d goalix_db \
+  -c "DELETE FROM _prisma_migrations WHERE migration_name = 'YYYYMMDDHHMMSS_migration_name';"
+
+# 4. Rollback code to before the migration
+git reset --hard <commit-before-migration>
+docker compose build --no-cache
+docker compose up -d
+```
+
+### Recovery Checklist
+
+After any rollback, verify these:
+
+- [ ] `curl https://goal.quantumdigitalplus.com/api/health` returns `{"status":"ok"}`
+- [ ] Landing page loads: `curl -I https://goal.quantumdigitalplus.com`
+- [ ] Can log in with magic link
+- [ ] Database connection works
+- [ ] Redis connection works
+
+### Emergency Contacts
+
+If all else fails:
+1. Check Docker status: `docker compose ps`
+2. Check system resources: `free -m && df -h`
+3. Check container logs: `docker compose logs --tail=500`
+4. Restart everything: `docker compose down && docker compose up -d`
 
 ---
 

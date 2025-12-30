@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { signOut } from "next-auth/react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -16,8 +17,8 @@ import {
   Check,
   AlertTriangle,
   Moon,
-  Sun,
   Globe,
+  LogOut,
 } from "lucide-react";
 
 // Mock user data
@@ -343,6 +344,24 @@ export default function SettingsPage() {
               Magic link authentication means no passwords to remember or
               compromise. Each link expires after 24 hours.
             </p>
+            <div className="pt-4 border-t border-night-mist">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-moon">Sign Out</p>
+                  <p className="text-xs text-moon-faint mt-0.5">
+                    Sign out of your account on this device
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                  className="border-night-mist bg-night-soft text-moon hover:bg-night-mist hover:border-moon-dim rounded-xl"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </Button>
+              </div>
+            </div>
           </div>
         </SettingsSection>
 

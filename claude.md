@@ -772,7 +772,7 @@ npx prisma migrate deploy
 npx prisma generate
 
 # Docker build and deploy
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 ---
@@ -807,7 +807,8 @@ ANTHROPIC_API_KEY=
 
 ### Pre-Deploy
 - [ ] `npm run build` succeeds locally
-- [ ] `docker-compose build` succeeds
+- [ ] `npm run lint` passes (CI will fail otherwise)
+- [ ] `docker compose build` succeeds
 - [ ] Health endpoint returns 200
 - [ ] Database created on VPS
 - [ ] DNS A record for goal.quantumdigitalplus.com → 170.64.137.4
@@ -823,9 +824,24 @@ cd /opt/apps/goalix
 git clone [repo] .
 cp .env.example .env
 nano .env  # Fill production values
-docker-compose up -d --build
-docker-compose exec app npx prisma migrate deploy
+docker compose up -d --build
 ```
+
+### Database Migrations (Production)
+
+Migrations are run manually for control over schema changes. The production container
+uses Next.js standalone mode (no node_modules), so we run migrations separately:
+
+```bash
+# Run from VPS after docker compose up
+docker run --rm --network n8n-docker-caddy_n8n_network \
+  -v /opt/apps/goalix/prisma:/app/prisma -w /app \
+  -e DATABASE_URL="postgresql://goalix_user:PASSWORD@sqm_postgres:5432/goalix_db" \
+  node:22-alpine sh -c "npm i prisma@6.19.1 && npx prisma migrate deploy"
+```
+
+**Important:** Always pin Prisma to 6.x — the project is not yet compatible with Prisma 7.x
+which has breaking changes (connection URL config moved to `prisma.config.ts`).
 
 ### Caddy Configuration
 Add to `/opt/n8n-docker-caddy/caddy_config/Caddyfile`:

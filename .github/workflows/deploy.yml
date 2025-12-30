@@ -11,10 +11,76 @@ env:
   APP_DIR: /opt/apps/goalix
 
 jobs:
+  preflight:
+    name: Pre-flight Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Verify SSH connectivity
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ env.VPS_HOST }}
+          username: ${{ env.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            echo "SSH connection successful"
+            echo "Host: $(hostname)"
+            echo "Date: $(date)"
+
+      - name: Validate production environment
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ env.VPS_HOST }}
+          username: ${{ env.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            echo "=== Checking production environment ==="
+
+            # Check app directory exists
+            if [ ! -d "${{ env.APP_DIR }}" ]; then
+              echo "ERROR: App directory ${{ env.APP_DIR }} does not exist"
+              exit 1
+            fi
+
+            # Check .env file exists
+            if [ ! -f "${{ env.APP_DIR }}/.env" ]; then
+              echo "ERROR: .env file not found at ${{ env.APP_DIR }}/.env"
+              echo "Please create the .env file with production credentials"
+              exit 1
+            fi
+
+            # Validate required environment variables in .env
+            cd ${{ env.APP_DIR }}
+            REQUIRED_VARS="DATABASE_URL REDIS_URL NEXTAUTH_SECRET NEXTAUTH_URL"
+            MISSING_VARS=""
+
+            for VAR in $REQUIRED_VARS; do
+              if ! grep -q "^${VAR}=" .env; then
+                MISSING_VARS="$MISSING_VARS $VAR"
+              fi
+            done
+
+            if [ -n "$MISSING_VARS" ]; then
+              echo "ERROR: Missing required environment variables in .env:$MISSING_VARS"
+              exit 1
+            fi
+
+            # Check for localhost in production URLs (common mistake)
+            if grep -E "^(DATABASE_URL|REDIS_URL|NEXTAUTH_URL)=.*localhost" .env; then
+              echo "ERROR: Found 'localhost' in production URLs - this will fail in Docker"
+              exit 1
+            fi
+
+            echo "=== All pre-flight checks passed ==="
+
   deploy:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    # Only deploy if CI passes (implicitly via push trigger after PR merge)
+    needs: preflight
 
     steps:
       - name: Checkout code

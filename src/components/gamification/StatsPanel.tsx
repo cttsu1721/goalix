@@ -22,6 +22,12 @@ interface StatsPanelProps {
   };
   goalAlignment?: number;
   kaizenComplete?: boolean;
+  kaizenAreas?: Array<{
+    id: string;
+    name: string;
+    icon: string;
+    checked: boolean;
+  }>;
   badges?: Array<{
     id: string;
     icon: string;
@@ -38,6 +44,7 @@ export function StatsPanel({
   today = { tasksCompleted: 0, tasksTotal: 0, pointsEarned: 0 },
   goalAlignment = 0,
   kaizenComplete = false,
+  kaizenAreas,
   badges = [],
   onKaizenSave,
   className,
@@ -65,6 +72,7 @@ export function StatsPanel({
       <GoalAlignment percentage={goalAlignment} />
 
       <KaizenCheckin
+        areas={kaizenAreas}
         isComplete={kaizenComplete}
         onSave={onKaizenSave}
       />

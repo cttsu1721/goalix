@@ -326,6 +326,7 @@ export default function DashboardPage() {
       }}
       goalAlignment={goalAlignment}
       kaizenComplete={kaizenComplete}
+      kaizenAreas={kaizenAreas}
       badges={badges}
       onKaizenSave={handleKaizenSave}
     />

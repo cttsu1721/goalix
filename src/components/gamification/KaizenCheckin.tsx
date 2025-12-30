@@ -23,7 +23,7 @@ const defaultAreas: KaizenArea[] = [
   { id: "relationships", name: "Relations", icon: "❤️", checked: false },
   { id: "wealth", name: "Wealth", icon: "💰", checked: false },
   { id: "career", name: "Career", icon: "💼", checked: false },
-  { id: "growth", name: "Growth", icon: "📚", checked: false },
+  { id: "personalGrowth", name: "Growth", icon: "📚", checked: false },
   { id: "lifestyle", name: "Lifestyle", icon: "🌿", checked: false },
 ];
 
