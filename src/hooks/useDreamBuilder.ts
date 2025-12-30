@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { GoalCategory } from "@prisma/client";
 import type { DreamBuilderResponse, DreamBuilderFiveYearGoal, DreamBuilderOneYearGoal } from "@/lib/ai";
@@ -54,6 +54,10 @@ export function useDreamBuilder() {
   const [hierarchy, setHierarchy] = useState<DreamBuilderResponse | null>(null);
   const [createdDreamId, setCreatedDreamId] = useState<string | null>(null);
 
+  // Refs to store mutation reset functions for stable callbacks
+  const generateMutationResetRef = useRef<() => void>(() => {});
+  const createMutationResetRef = useRef<() => void>(() => {});
+
   // Generate hierarchy from AI
   const generateMutation = useMutation({
     mutationFn: async (input: GenerateHierarchyInput): Promise<GenerateHierarchyResponse> => {
@@ -96,6 +100,10 @@ export function useDreamBuilder() {
       queryClient.invalidateQueries({ queryKey: ["user", "stats"] });
     },
   });
+
+  // Keep refs updated with mutation reset functions
+  generateMutationResetRef.current = generateMutation.reset;
+  createMutationResetRef.current = createMutation.reset;
 
   // Generate hierarchy
   const generateHierarchy = useCallback(() => {
@@ -200,16 +208,16 @@ export function useDreamBuilder() {
     [hierarchy]
   );
 
-  // Reset to start over
+  // Reset to start over (uses refs to avoid unstable dependencies)
   const reset = useCallback(() => {
     setStep("input");
     setIdea("");
     setCategory("");
     setHierarchy(null);
     setCreatedDreamId(null);
-    generateMutation.reset();
-    createMutation.reset();
-  }, [generateMutation, createMutation]);
+    generateMutationResetRef.current();
+    createMutationResetRef.current();
+  }, []);
 
   // Go back to input step
   const goBackToInput = useCallback(() => {
