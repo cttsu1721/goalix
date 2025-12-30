@@ -147,13 +147,6 @@ export function PlanDayModal({
     }, 200);
   };
 
-  // Get current step's priority for task input
-  const getCurrentPriority = (): TaskPriority => {
-    if (step === 1) return "MIT";
-    if (step === 2) return "PRIMARY";
-    return "SECONDARY";
-  };
-
   // Render task input form (inline to avoid component recreation)
   const renderTaskInput = (priority: TaskPriority) => (
     <div className="space-y-4">

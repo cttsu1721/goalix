@@ -122,7 +122,7 @@ export function LevelUpModal({
               showContent ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
             )}
           >
-            You've reached <span className="text-lantern font-medium">{newLevelName}</span>!
+            You&apos;ve reached <span className="text-lantern font-medium">{newLevelName}</span>!
             <br />
             Keep pushing towards your goals.
           </p>
