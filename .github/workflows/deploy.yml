@@ -49,12 +49,12 @@ jobs:
             #   -e DATABASE_URL="$DATABASE_URL" \
             #   node:22-alpine sh -c "npm i prisma@6.19.1 && npx prisma migrate deploy"
 
-            # Health check with retry
+            # Health check with retry (using docker exec since port is only exposed to containers)
             echo "Waiting for app to start..."
             for i in 1 2 3 4 5; do
               sleep 10
               echo "Health check attempt $i..."
-              if curl -f http://localhost:3000/api/health 2>/dev/null; then
+              if docker compose exec -T app wget -q --spider http://127.0.0.1:3000/api/health 2>/dev/null; then
                 echo "App is healthy!"
                 break
               fi
