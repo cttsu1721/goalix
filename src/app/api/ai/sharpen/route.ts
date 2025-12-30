@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { checkAIRateLimit, getAIUsageCount } from "@/lib/redis";
 import {
   anthropic,
   AI_CONFIG,
@@ -8,7 +9,6 @@ import {
   createGoalSharpenMessage,
   parseAIResponse,
   validateGoalSharpenResponse,
-  AI_RATE_LIMITS,
   type GoalSharpenResponse,
 } from "@/lib/ai";
 
@@ -29,24 +29,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check rate limit
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const usageCount = await prisma.aIInteraction.count({
-      where: {
-        userId: session.user.id,
-        type: "GOAL_SHARPEN",
-        createdAt: { gte: today },
-      },
-    });
-
-    if (usageCount >= AI_RATE_LIMITS.freeLimit) {
+    // Check rate limit using Redis (fast, no DB query)
+    const rateLimit = await checkAIRateLimit(session.user.id);
+    if (!rateLimit.allowed) {
       return NextResponse.json(
         {
           error: "Daily AI limit reached",
-          limit: AI_RATE_LIMITS.freeLimit,
-          used: usageCount,
+          limit: rateLimit.limit,
+          remaining: rateLimit.remaining,
         },
         { status: 429 }
       );
@@ -88,15 +78,12 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Return remaining uses
-    const remainingUses = AI_RATE_LIMITS.freeLimit - usageCount - 1;
-
     return NextResponse.json({
       success: true,
       data: result,
       usage: {
-        remaining: remainingUses,
-        limit: AI_RATE_LIMITS.freeLimit,
+        remaining: rateLimit.remaining,
+        limit: rateLimit.limit,
       },
     });
   } catch (error) {
@@ -124,20 +111,13 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const usageCount = await prisma.aIInteraction.count({
-      where: {
-        userId: session.user.id,
-        createdAt: { gte: today },
-      },
-    });
+    // Use Redis for fast usage check (no DB query)
+    const usage = await getAIUsageCount(session.user.id);
 
     return NextResponse.json({
-      remaining: Math.max(0, AI_RATE_LIMITS.freeLimit - usageCount),
-      limit: AI_RATE_LIMITS.freeLimit,
-      used: usageCount,
+      remaining: usage.remaining,
+      limit: usage.limit,
+      used: usage.used,
     });
   } catch (error) {
     console.error("Error fetching AI usage:", error);

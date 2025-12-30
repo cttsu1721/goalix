@@ -8,75 +8,75 @@ interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
-// Helper to determine goal level by ID
+// Helper to determine goal level by ID - uses parallel queries for performance
 async function findGoalByIdAndUser(id: string, userId: string) {
-  // Try each goal type
-  const dream = await prisma.dream.findFirst({
-    where: { id, userId },
-    include: {
-      fiveYearGoals: {
-        include: {
-          oneYearGoals: {
-            include: {
-              monthlyGoals: {
-                include: {
-                  weeklyGoals: true,
+  // Run all queries in parallel using $transaction
+  const [dream, fiveYear, oneYear, monthly, weekly] = await prisma.$transaction([
+    prisma.dream.findFirst({
+      where: { id, userId },
+      include: {
+        fiveYearGoals: {
+          include: {
+            oneYearGoals: {
+              include: {
+                monthlyGoals: {
+                  include: {
+                    weeklyGoals: true,
+                  },
                 },
               },
             },
           },
         },
       },
-    },
-  });
-  if (dream) return { goal: dream, level: "dream" as GoalLevel };
-
-  const fiveYear = await prisma.fiveYearGoal.findFirst({
-    where: { id, dream: { userId } },
-    include: {
-      dream: { select: { id: true, title: true } },
-      oneYearGoals: {
-        include: {
-          monthlyGoals: {
-            include: {
-              weeklyGoals: true,
+    }),
+    prisma.fiveYearGoal.findFirst({
+      where: { id, dream: { userId } },
+      include: {
+        dream: { select: { id: true, title: true } },
+        oneYearGoals: {
+          include: {
+            monthlyGoals: {
+              include: {
+                weeklyGoals: true,
+              },
             },
           },
         },
       },
-    },
-  });
-  if (fiveYear) return { goal: fiveYear, level: "fiveYear" as GoalLevel };
-
-  const oneYear = await prisma.oneYearGoal.findFirst({
-    where: { id, fiveYearGoal: { dream: { userId } } },
-    include: {
-      fiveYearGoal: { select: { id: true, title: true } },
-      monthlyGoals: {
-        include: {
-          weeklyGoals: true,
+    }),
+    prisma.oneYearGoal.findFirst({
+      where: { id, fiveYearGoal: { dream: { userId } } },
+      include: {
+        fiveYearGoal: { select: { id: true, title: true } },
+        monthlyGoals: {
+          include: {
+            weeklyGoals: true,
+          },
         },
       },
-    },
-  });
+    }),
+    prisma.monthlyGoal.findFirst({
+      where: { id, oneYearGoal: { fiveYearGoal: { dream: { userId } } } },
+      include: {
+        oneYearGoal: { select: { id: true, title: true } },
+        weeklyGoals: true,
+      },
+    }),
+    prisma.weeklyGoal.findFirst({
+      where: { id, monthlyGoal: { oneYearGoal: { fiveYearGoal: { dream: { userId } } } } },
+      include: {
+        monthlyGoal: { select: { id: true, title: true } },
+        dailyTasks: true,
+      },
+    }),
+  ]);
+
+  // Return the first match found
+  if (dream) return { goal: dream, level: "dream" as GoalLevel };
+  if (fiveYear) return { goal: fiveYear, level: "fiveYear" as GoalLevel };
   if (oneYear) return { goal: oneYear, level: "oneYear" as GoalLevel };
-
-  const monthly = await prisma.monthlyGoal.findFirst({
-    where: { id, oneYearGoal: { fiveYearGoal: { dream: { userId } } } },
-    include: {
-      oneYearGoal: { select: { id: true, title: true } },
-      weeklyGoals: true,
-    },
-  });
   if (monthly) return { goal: monthly, level: "monthly" as GoalLevel };
-
-  const weekly = await prisma.weeklyGoal.findFirst({
-    where: { id, monthlyGoal: { oneYearGoal: { fiveYearGoal: { dream: { userId } } } } },
-    include: {
-      monthlyGoal: { select: { id: true, title: true } },
-      dailyTasks: true,
-    },
-  });
   if (weekly) return { goal: weekly, level: "weekly" as GoalLevel };
 
   return null;

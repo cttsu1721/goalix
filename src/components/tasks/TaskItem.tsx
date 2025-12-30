@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { cn } from "@/lib/utils";
 import { Check, Pencil } from "lucide-react";
 
@@ -16,7 +17,7 @@ interface TaskItemProps {
   className?: string;
 }
 
-export function TaskItem({ task, onToggle, onEdit, className }: TaskItemProps) {
+export const TaskItem = memo(function TaskItem({ task, onToggle, onEdit, className }: TaskItemProps) {
   return (
     <div
       className={cn(
@@ -82,4 +83,4 @@ export function TaskItem({ task, onToggle, onEdit, className }: TaskItemProps) {
       </span>
     </div>
   );
-}
+});

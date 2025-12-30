@@ -7,7 +7,7 @@ import "./globals.css";
 const sora = Sora({
   variable: "--font-sora",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
+  weight: ["400", "600"], // Reduced from 4 weights to 2 for ~30KB savings
 });
 
 const jetbrainsMono = JetBrains_Mono({

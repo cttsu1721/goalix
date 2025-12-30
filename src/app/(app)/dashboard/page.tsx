@@ -1,12 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { MitCard, TaskList, TaskCreateModal, TaskEditModal, PlanDayModal } from "@/components/tasks";
+import { MitCard, TaskList } from "@/components/tasks";
 import { StatsPanel } from "@/components/gamification/StatsPanel";
-import { TaskSuggestModal } from "@/components/ai";
+
+// Lazy load modal components to reduce initial bundle size
+const TaskCreateModal = dynamic(
+  () => import("@/components/tasks/TaskCreateModal").then((m) => m.TaskCreateModal),
+  { ssr: false }
+);
+const TaskEditModal = dynamic(
+  () => import("@/components/tasks/TaskEditModal").then((m) => m.TaskEditModal),
+  { ssr: false }
+);
+const PlanDayModal = dynamic(
+  () => import("@/components/tasks/PlanDayModal").then((m) => m.PlanDayModal),
+  { ssr: false }
+);
+const TaskSuggestModal = dynamic(
+  () => import("@/components/ai/TaskSuggestModal").then((m) => m.TaskSuggestModal),
+  { ssr: false }
+);
 import {
   useTasks,
   useCreateTask,
@@ -110,55 +128,59 @@ export default function DashboardPage() {
     );
   }
 
-  // Transform tasks data
+  // Transform tasks data - memoized to prevent recalculation on re-renders
   const tasks = tasksData?.tasks || [];
-  const mitTask = tasks.find((t) => t.priority === "MIT");
-  const primaryTasks = tasks.filter((t) => t.priority === "PRIMARY");
-  const secondaryTasks = tasks.filter((t) => t.priority === "SECONDARY");
 
-  // Transform MIT for component
-  const mit = mitTask
-    ? {
-        id: mitTask.id,
-        title: mitTask.title,
-        category: getCategoryLabel(mitTask.weeklyGoal?.category || "OTHER"),
-        estimatedMinutes: mitTask.estimatedMinutes || undefined,
-        completed: mitTask.status === "COMPLETED",
-      }
-    : undefined;
+  const { mitTask, mit, primaryTasksFormatted, secondaryTasksFormatted } = useMemo(() => {
+    const mitTask = tasks.find((t) => t.priority === "MIT");
+    const primaryTasks = tasks.filter((t) => t.priority === "PRIMARY");
+    const secondaryTasks = tasks.filter((t) => t.priority === "SECONDARY");
 
-  // Transform other tasks for component
-  const transformTask = (task: (typeof tasks)[0]) => ({
-    id: task.id,
-    title: task.title,
-    category: getCategoryLabel(task.weeklyGoal?.category || "OTHER"),
-    completed: task.status === "COMPLETED",
-    points: TASK_PRIORITY_POINTS[task.priority],
-  });
+    // Transform task helper
+    const transformTask = (task: (typeof tasks)[0]) => ({
+      id: task.id,
+      title: task.title,
+      category: getCategoryLabel(task.weeklyGoal?.category || "OTHER"),
+      completed: task.status === "COMPLETED",
+      points: TASK_PRIORITY_POINTS[task.priority],
+    });
 
-  const primaryTasksFormatted = primaryTasks.map(transformTask);
-  const secondaryTasksFormatted = secondaryTasks.map(transformTask);
+    return {
+      mitTask,
+      mit: mitTask
+        ? {
+            id: mitTask.id,
+            title: mitTask.title,
+            category: getCategoryLabel(mitTask.weeklyGoal?.category || "OTHER"),
+            estimatedMinutes: mitTask.estimatedMinutes || undefined,
+            completed: mitTask.status === "COMPLETED",
+          }
+        : undefined,
+      primaryTasksFormatted: primaryTasks.map(transformTask),
+      secondaryTasksFormatted: secondaryTasks.map(transformTask),
+    };
+  }, [tasks]);
 
-  // Handle task completion
-  const handleToggleMit = () => {
+  // Handle task completion - memoized with useCallback
+  const handleToggleMit = useCallback(() => {
     if (mitTask && mitTask.status !== "COMPLETED" && !isCompleting) {
       completeTask(mitTask.id, true); // true = MIT, triggers confetti
     }
-  };
+  }, [mitTask, isCompleting, completeTask]);
 
-  const handleTogglePrimary = (taskId: string) => {
-    const task = primaryTasks.find((t) => t.id === taskId);
+  const handleTogglePrimary = useCallback((taskId: string) => {
+    const task = tasks.find((t) => t.id === taskId && t.priority === "PRIMARY");
     if (task && task.status !== "COMPLETED" && !isCompleting) {
       completeTask(taskId, false);
     }
-  };
+  }, [tasks, isCompleting, completeTask]);
 
-  const handleToggleSecondary = (taskId: string) => {
-    const task = secondaryTasks.find((t) => t.id === taskId);
+  const handleToggleSecondary = useCallback((taskId: string) => {
+    const task = tasks.find((t) => t.id === taskId && t.priority === "SECONDARY");
     if (task && task.status !== "COMPLETED" && !isCompleting) {
       completeTask(taskId, false);
     }
-  };
+  }, [tasks, isCompleting, completeTask]);
 
   // Handle AI task suggestions
   const handleOpenTaskSuggest = () => {

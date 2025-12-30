@@ -2,6 +2,10 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Target, Trophy, Sparkles, ArrowRight, Layers } from "lucide-react";
 
+// Static generation with ISR - revalidate every hour
+export const revalidate = 3600;
+export const dynamic = "force-static";
+
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-void text-moon overflow-hidden">

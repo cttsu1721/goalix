@@ -45,3 +45,26 @@ coverage
 .claude
 claude.md
 CLAUDE.md
+
+# Temp directories
+temp-init
+tmp
+
+# Docker files (avoid recursive context)
+docker-compose*.yml
+Dockerfile*
+
+# Test files
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+__tests__
+playwright-report
+test-results
+
+# Misc
+.eslintcache
+.turbo
+tsconfig.tsbuildinfo
+*.tgz
