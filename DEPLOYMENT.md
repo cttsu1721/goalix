@@ -64,8 +64,26 @@ git clone https://github.com/cttsu1721/goalix.git .
 
 ### 4. Create Environment File
 
+**Option A: Interactive Setup (Recommended)**
+
+Use the setup script which validates API keys and prevents common errors:
+
 ```bash
-cp .env.example .env
+bash scripts/setup-production-env.sh
+```
+
+This script will:
+- Prompt for each configuration value
+- Validate API key formats (EmailIt should start with `em_`, Anthropic with `sk-ant-`)
+- Test API keys against live endpoints
+- Prevent localhost URLs in production
+- Generate secure NEXTAUTH_SECRET automatically
+- Set proper file permissions (600)
+
+**Option B: Manual Setup**
+
+```bash
+cp .env.production.example .env
 nano .env
 ```
 
@@ -86,11 +104,21 @@ REDIS_URL=redis://goalix-redis:6379
 NEXTAUTH_SECRET=<generate with: openssl rand -base64 32>
 NEXTAUTH_URL=https://goal.quantumdigitalplus.com
 
-# Email (EmailIt for magic links)
-EMAILIT_API_KEY=your_emailit_api_key
+# Email (EmailIt) - Key format: em_xxxxxxxxxxxx
+EMAILIT_API_KEY=em_your_emailit_api_key
 
-# AI (Anthropic)
-ANTHROPIC_API_KEY=your_anthropic_api_key
+# AI (Anthropic) - Key format: sk-ant-api03-xxxxxxxxxxxx
+ANTHROPIC_API_KEY=sk-ant-api03-your_anthropic_api_key
+```
+
+**Important API Key Formats:**
+- EmailIt: Must start with `em_` (not `emailit_`)
+- Anthropic: Must start with `sk-ant-` (usually `sk-ant-api03-`)
+
+**Validate your environment after setup:**
+
+```bash
+bash scripts/validate-env.sh
 ```
 
 ### 5. Create Database
@@ -246,6 +274,35 @@ docker-compose ps
 1. Check Caddy logs: `docker logs n8n-docker-caddy-caddy-1`
 2. Verify DNS: `dig goal.quantumdigitalplus.com`
 3. Reload Caddy: `docker exec n8n-docker-caddy-caddy-1 caddy reload --config /config/Caddyfile`
+
+### API Keys Not Working
+
+If you see errors like "Invalid API Key" or 401 Unauthorized:
+
+```bash
+# Validate your environment file
+bash scripts/validate-env.sh --test
+
+# Check specific key formats
+grep EMAILIT_API_KEY .env  # Should start with em_
+grep ANTHROPIC_API_KEY .env  # Should start with sk-ant-
+```
+
+**Common API Key Issues:**
+
+| Service | Wrong Format | Correct Format |
+|---------|--------------|----------------|
+| EmailIt | `emailit_xxx...` | `em_xxx...` |
+| Anthropic | `api03-xxx...` | `sk-ant-api03-xxx...` |
+
+After fixing the .env file, restart the containers:
+
+```bash
+docker compose down
+docker compose up -d
+```
+
+**Note:** `docker compose restart` does NOT reload environment variables. You must use `down` + `up`.
 
 ### Migration Failed
 
