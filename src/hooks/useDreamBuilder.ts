@@ -1,7 +1,7 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { GoalCategory } from "@prisma/client";
-import type { DreamBuilderResponse, DreamBuilderFiveYearGoal, DreamBuilderOneYearGoal } from "@/lib/ai";
+import type { DreamBuilderResponse } from "@/lib/ai";
 
 interface GenerateHierarchyInput {
   idea: string;
@@ -101,9 +101,11 @@ export function useDreamBuilder() {
     },
   });
 
-  // Keep refs updated with mutation reset functions
-  generateMutationResetRef.current = generateMutation.reset;
-  createMutationResetRef.current = createMutation.reset;
+  // Keep refs updated with mutation reset functions (must be in useEffect, not during render)
+  useEffect(() => {
+    generateMutationResetRef.current = generateMutation.reset;
+    createMutationResetRef.current = createMutation.reset;
+  }, [generateMutation.reset, createMutation.reset]);
 
   // Generate hierarchy
   const generateHierarchy = useCallback(() => {
