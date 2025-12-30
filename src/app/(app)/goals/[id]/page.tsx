@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
-import { GoalCard, GoalCategoryBadge, GoalCreateModal } from "@/components/goals";
+import { GoalCard, GoalCategoryBadge, GoalCreateModal, GoalEditModal } from "@/components/goals";
 import { Button } from "@/components/ui/button";
 import { useGoal, useUpdateGoal, useDeleteGoal } from "@/hooks";
 import { GOAL_CATEGORY_LABELS, GOAL_STATUS_LABELS } from "@/types/goals";
@@ -120,6 +120,7 @@ export default function GoalDetailPage() {
   const id = params.id as string;
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const { data, isLoading, refetch } = useGoal(id);
   const updateGoal = useUpdateGoal();
@@ -244,7 +245,7 @@ export default function GoalDetailPage() {
               className="bg-night border-night-glow"
             >
               <DropdownMenuItem
-                onClick={() => {/* TODO: Open edit modal */}}
+                onClick={() => setIsEditModalOpen(true)}
                 className="text-moon hover:text-moon"
               >
                 <Pencil className="w-4 h-4 mr-2" />
@@ -435,6 +436,21 @@ export default function GoalDetailPage() {
           onSuccess={() => refetch()}
         />
       )}
+
+      {/* Edit goal modal */}
+      <GoalEditModal
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        goal={{
+          id,
+          title: goal.title as string,
+          description: goal.description as string | null,
+          category: goal.category as GoalCategory,
+          targetDate: goal.targetDate as Date | null,
+        }}
+        level={level}
+        onSuccess={() => refetch()}
+      />
     </AppShell>
   );
 }
