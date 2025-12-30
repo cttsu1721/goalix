@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { ChevronRight, Sparkles, Target } from "lucide-react";
 import { GoalCategoryBadge } from "./GoalCategoryBadge";
@@ -34,15 +35,15 @@ export function DreamCard({
   const isCompleted = status === "COMPLETED";
   const isPaused = status === "PAUSED";
 
-  // Calculate years remaining
-  const yearsRemaining = targetDate
-    ? Math.max(
-        0,
-        Math.ceil(
-          (new Date(targetDate).getTime() - Date.now()) / (365 * 24 * 60 * 60 * 1000)
-        )
-      )
-    : null;
+  // Calculate years remaining - memoized to avoid hydration mismatch
+  // Uses current year comparison instead of Date.now() for stable SSR
+  const yearsRemaining = useMemo(() => {
+    if (!targetDate) return null;
+    const target = new Date(targetDate);
+    const now = new Date();
+    const years = target.getFullYear() - now.getFullYear();
+    return Math.max(0, years);
+  }, [targetDate]);
 
   return (
     <button
