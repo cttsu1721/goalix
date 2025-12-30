@@ -38,8 +38,8 @@ print_header() {
 }
 
 print_success() { echo -e "${GREEN}✓ $1${NC}"; }
-print_error() { echo -e "${RED}✗ $1${NC}"; ((ERRORS++)); }
-print_warning() { echo -e "${YELLOW}⚠ $1${NC}"; ((WARNINGS++)); }
+print_error() { echo -e "${RED}✗ $1${NC}"; ERRORS=$((ERRORS + 1)); }
+print_warning() { echo -e "${YELLOW}⚠ $1${NC}"; WARNINGS=$((WARNINGS + 1)); }
 print_info() { echo -e "${BLUE}ℹ $1${NC}"; }
 
 get_env_value() {
