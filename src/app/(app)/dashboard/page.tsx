@@ -105,30 +105,7 @@ export default function DashboardPage() {
   const saveKaizen = useSaveKaizenCheckin();
   const createTask = useCreateTask();
 
-  // Open create modal with specific priority
-  const openCreateModal = (priority: TaskPriority) => {
-    setDefaultPriority(priority);
-    setIsCreateModalOpen(true);
-  };
-
-  // Open edit modal for a task
-  const openEditModal = (taskId: string) => {
-    setEditingTaskId(taskId);
-    setIsEditModalOpen(true);
-  };
-
-  // Loading state
-  if (tasksLoading || statsLoading) {
-    return (
-      <AppShell>
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="w-8 h-8 animate-spin text-lantern" />
-        </div>
-      </AppShell>
-    );
-  }
-
-  // Transform tasks data - memoized to prevent recalculation on re-renders
+  // Transform tasks data - memoized (MUST be before early return to follow Rules of Hooks)
   const tasks = tasksData?.tasks || [];
 
   const { mitTask, mit, primaryTasksFormatted, secondaryTasksFormatted } = useMemo(() => {
@@ -161,7 +138,7 @@ export default function DashboardPage() {
     };
   }, [tasks]);
 
-  // Handle task completion - memoized with useCallback
+  // Handle task completion - memoized with useCallback (MUST be before early return)
   const handleToggleMit = useCallback(() => {
     if (mitTask && mitTask.status !== "COMPLETED" && !isCompleting) {
       completeTask(mitTask.id, true); // true = MIT, triggers confetti
@@ -181,6 +158,29 @@ export default function DashboardPage() {
       completeTask(taskId, false);
     }
   }, [tasks, isCompleting, completeTask]);
+
+  // Open create modal with specific priority
+  const openCreateModal = (priority: TaskPriority) => {
+    setDefaultPriority(priority);
+    setIsCreateModalOpen(true);
+  };
+
+  // Open edit modal for a task
+  const openEditModal = (taskId: string) => {
+    setEditingTaskId(taskId);
+    setIsEditModalOpen(true);
+  };
+
+  // Loading state (after all hooks)
+  if (tasksLoading || statsLoading) {
+    return (
+      <AppShell>
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="w-8 h-8 animate-spin text-lantern" />
+        </div>
+      </AppShell>
+    );
+  }
 
   // Handle AI task suggestions
   const handleOpenTaskSuggest = () => {
