@@ -24,10 +24,22 @@ export async function checkRedisConnection(): Promise<boolean> {
 
 // Rate limiting for AI features - uses Redis instead of database queries
 const AI_DAILY_LIMIT = 5;
+const AI_UNLIMITED_LIMIT = 9999;
+
+// Users with unlimited AI access (by email)
+const UNLIMITED_AI_USERS = [
+  "thomas@quantumdigitalplus.com",
+];
 
 export async function checkAIRateLimit(
-  userId: string
+  userId: string,
+  userEmail?: string
 ): Promise<{ allowed: boolean; remaining: number; limit: number }> {
+  // Check if user has unlimited access
+  if (userEmail && UNLIMITED_AI_USERS.includes(userEmail.toLowerCase())) {
+    return { allowed: true, remaining: AI_UNLIMITED_LIMIT, limit: AI_UNLIMITED_LIMIT };
+  }
+
   const today = new Date().toISOString().split("T")[0];
   const key = `ratelimit:ai:${userId}:${today}`;
 
@@ -58,7 +70,12 @@ export async function checkAIRateLimit(
   }
 }
 
-export async function getAIUsageCount(userId: string): Promise<{ used: number; remaining: number; limit: number }> {
+export async function getAIUsageCount(userId: string, userEmail?: string): Promise<{ used: number; remaining: number; limit: number }> {
+  // Check if user has unlimited access
+  if (userEmail && UNLIMITED_AI_USERS.includes(userEmail.toLowerCase())) {
+    return { used: 0, remaining: AI_UNLIMITED_LIMIT, limit: AI_UNLIMITED_LIMIT };
+  }
+
   const today = new Date().toISOString().split("T")[0];
   const key = `ratelimit:ai:${userId}:${today}`;
 

@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check rate limit using Redis (fast, no DB query)
-    const rateLimit = await checkAIRateLimit(session.user.id);
+    const rateLimit = await checkAIRateLimit(session.user.id, session.user.email || undefined);
     if (!rateLimit.allowed) {
       return NextResponse.json(
         {
@@ -112,7 +112,7 @@ export async function GET() {
     }
 
     // Use Redis for fast usage check (no DB query)
-    const usage = await getAIUsageCount(session.user.id);
+    const usage = await getAIUsageCount(session.user.id, session.user.email || undefined);
 
     return NextResponse.json({
       remaining: usage.remaining,
