@@ -15,7 +15,7 @@ services:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
     networks:
-      - n8n-docker-caddy_default
+      - n8n_network
     expose:
       - "3000"
     depends_on:
@@ -28,12 +28,13 @@ services:
     volumes:
       - redis_data:/data
     networks:
-      - n8n-docker-caddy_default
+      - n8n_network
     command: redis-server --appendonly yes
 
 volumes:
   redis_data:
 
 networks:
-  n8n-docker-caddy_default:
+  n8n_network:
     external: true
+    name: n8n-docker-caddy_n8n_network
