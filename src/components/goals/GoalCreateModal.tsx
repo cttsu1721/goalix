@@ -22,10 +22,11 @@ import { useCreateGoal } from "@/hooks";
 import { GOAL_CATEGORY_LABELS } from "@/types/goals";
 import type { GoalLevel } from "@/types/goals";
 import type { GoalCategory } from "@prisma/client";
-import { Sparkles, Target, Calendar, Layers, CheckCircle2, Loader2, Wand2 } from "lucide-react";
+import { Sparkles, Target, Calendar, Layers, CheckCircle2, Loader2, Wand2, Lightbulb } from "lucide-react";
 import { toast } from "sonner";
-import { AiButton, GoalSharpenModal } from "@/components/ai";
-import type { GoalSharpenResponse } from "@/lib/ai/schemas";
+import { AiButton, GoalSharpenModal, GoalSuggestModal } from "@/components/ai";
+import type { GoalSharpenResponse, SuggestedGoal } from "@/lib/ai/schemas";
+import type { GoalLevelForSuggestion } from "@/lib/ai/prompts";
 
 interface GoalCreateModalProps {
   open: boolean;
@@ -87,14 +88,40 @@ export function GoalCreateModal({
   const [category, setCategory] = useState<GoalCategory | "">("");
   const [targetDate, setTargetDate] = useState("");
   const [showSharpenModal, setShowSharpenModal] = useState(false);
+  const [showSuggestModal, setShowSuggestModal] = useState(false);
 
   const createGoal = useCreateGoal();
   const config = LEVEL_CONFIG[level];
+
+  // Map GoalLevel to GoalLevelForSuggestion (they're the same, but typed differently)
+  const levelForSuggestion: GoalLevelForSuggestion = level as GoalLevelForSuggestion;
+
+  // Determine parent level for cascading context
+  const getParentLevel = (): GoalLevelForSuggestion | undefined => {
+    switch (level) {
+      case "fiveYear":
+        return "dream";
+      case "oneYear":
+        return "fiveYear";
+      case "monthly":
+        return "oneYear";
+      case "weekly":
+        return "monthly";
+      default:
+        return undefined;
+    }
+  };
 
   const handleApplySharpen = (result: GoalSharpenResponse) => {
     setTitle(result.sharpened_title);
     setDescription(result.description);
     toast.success("AI suggestions applied!");
+  };
+
+  const handleApplySuggest = (suggestion: SuggestedGoal) => {
+    setTitle(suggestion.title);
+    setDescription(suggestion.description);
+    toast.success("AI suggestion applied!");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -232,6 +259,33 @@ export function GoalCreateModal({
             </Select>
           </div>
 
+          {/* AI Suggest Button - shows when category is selected but no title yet */}
+          {category && !title.trim() && (
+            <div className="p-4 bg-lantern/5 border border-lantern/20 rounded-xl">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-lantern/10 flex items-center justify-center">
+                    <Lightbulb className="w-4 h-4 text-lantern" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-moon font-medium">Need inspiration?</p>
+                    <p className="text-xs text-moon-faint">
+                      Let AI suggest goals based on your hierarchy
+                    </p>
+                  </div>
+                </div>
+                <AiButton
+                  onClick={() => setShowSuggestModal(true)}
+                  size="sm"
+                  className="bg-lantern text-void hover:bg-lantern/90"
+                >
+                  <Lightbulb className="w-3 h-3 mr-1" />
+                  Suggest
+                </AiButton>
+              </div>
+            </div>
+          )}
+
           {/* Target Date (for dreams, 5-year, 1-year goals) */}
           {(level === "dream" || level === "fiveYear" || level === "oneYear") && (
             <div className="space-y-2">
@@ -315,6 +369,18 @@ export function GoalCreateModal({
         goalTitle={title}
         goalCategory={category || undefined}
         onApply={handleApplySharpen}
+      />
+
+      {/* AI Goal Suggest Modal */}
+      <GoalSuggestModal
+        open={showSuggestModal}
+        onOpenChange={setShowSuggestModal}
+        level={levelForSuggestion}
+        category={category || "OTHER"}
+        parentId={parentId}
+        parentLevel={getParentLevel()}
+        parentTitle={parentTitle}
+        onSelect={handleApplySuggest}
       />
     </Dialog>
   );

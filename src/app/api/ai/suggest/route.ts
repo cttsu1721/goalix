@@ -10,6 +10,7 @@ import {
   parseAIResponse,
   validateTaskSuggestResponse,
   type TaskSuggestResponse,
+  type CascadingContext,
 } from "@/lib/ai";
 
 // POST /api/ai/suggest - Suggest tasks for a weekly goal
@@ -44,17 +45,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // If weeklyGoalId provided, fetch the goal details
+    // If weeklyGoalId provided, fetch the goal details with full cascading context
     let goalTitle = weeklyGoalTitle;
     let goalDescription = weeklyGoalDescription;
     let parentTitle = parentGoalTitle;
+    let cascadingContext: CascadingContext | undefined;
 
     if (weeklyGoalId) {
       const weeklyGoal = await prisma.weeklyGoal.findUnique({
         where: { id: weeklyGoalId, userId: session.user.id },
         include: {
           monthlyGoal: {
-            select: { title: true },
+            select: {
+              title: true,
+              description: true,
+              oneYearGoal: {
+                select: {
+                  title: true,
+                  description: true,
+                  fiveYearGoal: {
+                    select: {
+                      title: true,
+                      description: true,
+                      dream: {
+                        select: { title: true, description: true },
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
         },
       });
@@ -69,13 +89,44 @@ export async function POST(request: NextRequest) {
       goalTitle = weeklyGoal.title;
       goalDescription = weeklyGoal.description || undefined;
       parentTitle = weeklyGoal.monthlyGoal?.title || undefined;
+
+      // Build cascading context for better AI suggestions
+      cascadingContext = {
+        weekly: { title: weeklyGoal.title, description: weeklyGoal.description || undefined },
+      };
+
+      if (weeklyGoal.monthlyGoal) {
+        cascadingContext.monthly = {
+          title: weeklyGoal.monthlyGoal.title,
+          description: weeklyGoal.monthlyGoal.description || undefined,
+        };
+        if (weeklyGoal.monthlyGoal.oneYearGoal) {
+          cascadingContext.oneYear = {
+            title: weeklyGoal.monthlyGoal.oneYearGoal.title,
+            description: weeklyGoal.monthlyGoal.oneYearGoal.description || undefined,
+          };
+          if (weeklyGoal.monthlyGoal.oneYearGoal.fiveYearGoal) {
+            cascadingContext.fiveYear = {
+              title: weeklyGoal.monthlyGoal.oneYearGoal.fiveYearGoal.title,
+              description: weeklyGoal.monthlyGoal.oneYearGoal.fiveYearGoal.description || undefined,
+            };
+            if (weeklyGoal.monthlyGoal.oneYearGoal.fiveYearGoal.dream) {
+              cascadingContext.dream = {
+                title: weeklyGoal.monthlyGoal.oneYearGoal.fiveYearGoal.dream.title,
+                description: weeklyGoal.monthlyGoal.oneYearGoal.fiveYearGoal.dream.description || undefined,
+              };
+            }
+          }
+        }
+      }
     }
 
-    // Call Anthropic API
+    // Call Anthropic API with cascading context
     const userMessage = createTaskSuggestMessage(
       goalTitle,
       goalDescription,
-      parentTitle
+      parentTitle,
+      cascadingContext
     );
 
     const response = await anthropic.messages.create({

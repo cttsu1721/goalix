@@ -49,6 +49,7 @@ enum StreakType {
 enum AIInteractionType {
   GOAL_SHARPEN
   TASK_SUGGEST
+  GOAL_SUGGEST
 }
 
 // NextAuth.js Models

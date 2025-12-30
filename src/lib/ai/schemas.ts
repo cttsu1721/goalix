@@ -23,8 +23,28 @@ export interface TaskSuggestResponse {
   mit_rationale: string;
 }
 
+// Task Suggester with Context Response Schema
+export interface TaskSuggestWithContextResponse {
+  tasks: SuggestedTask[];
+  mit_rationale: string;
+  alignment_insight: string;
+}
+
+// Goal Suggester Response Schema
+export interface SuggestedGoal {
+  title: string;
+  description: string;
+  reasoning: string;
+  priority: number;
+}
+
+export interface GoalSuggestResponse {
+  suggestions: SuggestedGoal[];
+  strategy_note: string;
+}
+
 // AI Interaction Types
-export type AIInteractionType = "GOAL_SHARPEN" | "TASK_SUGGEST";
+export type AIInteractionType = "GOAL_SHARPEN" | "TASK_SUGGEST" | "GOAL_SUGGEST";
 
 // Rate limit configuration
 export const AI_RATE_LIMITS = {
@@ -67,6 +87,55 @@ export function validateTaskSuggestResponse(data: unknown): data is TaskSuggestR
       typeof t.estimated_minutes === "number" &&
       typeof t.reasoning === "string" &&
       typeof t.sequence === "number"
+    );
+  });
+}
+
+export function validateTaskSuggestWithContextResponse(
+  data: unknown
+): data is TaskSuggestWithContextResponse {
+  if (!data || typeof data !== "object") return false;
+  const obj = data as Record<string, unknown>;
+
+  if (
+    !Array.isArray(obj.tasks) ||
+    typeof obj.mit_rationale !== "string" ||
+    typeof obj.alignment_insight !== "string"
+  ) {
+    return false;
+  }
+
+  return obj.tasks.every((task: unknown) => {
+    if (!task || typeof task !== "object") return false;
+    const t = task as Record<string, unknown>;
+
+    return (
+      typeof t.title === "string" &&
+      ["MIT", "PRIMARY", "SECONDARY"].includes(t.priority as string) &&
+      typeof t.estimated_minutes === "number" &&
+      typeof t.reasoning === "string" &&
+      typeof t.sequence === "number"
+    );
+  });
+}
+
+export function validateGoalSuggestResponse(data: unknown): data is GoalSuggestResponse {
+  if (!data || typeof data !== "object") return false;
+  const obj = data as Record<string, unknown>;
+
+  if (!Array.isArray(obj.suggestions) || typeof obj.strategy_note !== "string") {
+    return false;
+  }
+
+  return obj.suggestions.every((suggestion: unknown) => {
+    if (!suggestion || typeof suggestion !== "object") return false;
+    const s = suggestion as Record<string, unknown>;
+
+    return (
+      typeof s.title === "string" &&
+      typeof s.description === "string" &&
+      typeof s.reasoning === "string" &&
+      typeof s.priority === "number"
     );
   });
 }

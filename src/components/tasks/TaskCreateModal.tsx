@@ -22,8 +22,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { Loader2, Sparkles, Clock, Target, AlertCircle } from "lucide-react";
+import { Loader2, Sparkles, Clock, Target, AlertCircle, Lightbulb } from "lucide-react";
 import type { TaskPriority } from "@prisma/client";
+import { AiButton, TaskSuggestModal } from "@/components/ai";
+import type { SuggestedTask } from "@/lib/ai/schemas";
+import { toast } from "sonner";
 
 interface TaskCreateModalProps {
   open: boolean;
@@ -79,11 +82,28 @@ export function TaskCreateModal({
   const [estimatedMinutes, setEstimatedMinutes] = useState<string>("");
   const [weeklyGoalId, setWeeklyGoalId] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [showSuggestModal, setShowSuggestModal] = useState(false);
 
   const createTask = useCreateTask();
   const { data: weeklyGoalsData } = useGoals("weekly");
 
-  const weeklyGoals = (weeklyGoalsData?.goals || []) as Array<{ id: string; title: string }>;
+  const weeklyGoals = (weeklyGoalsData?.goals || []) as Array<{ id: string; title: string; description?: string }>;
+
+  // Get selected weekly goal details for AI suggest
+  const selectedWeeklyGoal = weeklyGoals.find((g) => g.id === weeklyGoalId);
+
+  // Handle applying AI suggestion to form
+  const handleApplySuggestion = (tasks: SuggestedTask[]) => {
+    if (tasks.length > 0) {
+      const task = tasks[0]; // Apply first selected task
+      setTitle(task.title);
+      setPriority(task.priority as TaskPriority);
+      if (task.estimated_minutes) {
+        setEstimatedMinutes(String(task.estimated_minutes));
+      }
+      toast.success("AI suggestion applied!");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -280,6 +300,33 @@ export function TaskCreateModal({
             </div>
           </div>
 
+          {/* AI Suggest Button - shows when goal is selected but no title yet */}
+          {selectedWeeklyGoal && !title.trim() && (
+            <div className="p-4 bg-zen-purple/5 border border-zen-purple/20 rounded-xl">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-zen-purple/10 flex items-center justify-center">
+                    <Lightbulb className="w-4 h-4 text-zen-purple" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-moon font-medium">Need task ideas?</p>
+                    <p className="text-xs text-moon-faint">
+                      Let AI suggest tasks for your weekly goal
+                    </p>
+                  </div>
+                </div>
+                <AiButton
+                  onClick={() => setShowSuggestModal(true)}
+                  size="sm"
+                  className="bg-zen-purple text-void hover:bg-zen-purple/90"
+                >
+                  <Lightbulb className="w-3 h-3 mr-1" />
+                  Suggest
+                </AiButton>
+              </div>
+            </div>
+          )}
+
           <DialogFooter className="gap-2 sm:gap-2">
             <Button
               type="button"
@@ -309,6 +356,18 @@ export function TaskCreateModal({
           </DialogFooter>
         </form>
       </DialogContent>
+
+      {/* AI Task Suggest Modal */}
+      {selectedWeeklyGoal && (
+        <TaskSuggestModal
+          open={showSuggestModal}
+          onOpenChange={setShowSuggestModal}
+          weeklyGoalId={weeklyGoalId}
+          weeklyGoalTitle={selectedWeeklyGoal.title}
+          weeklyGoalDescription={selectedWeeklyGoal.description}
+          onApply={handleApplySuggestion}
+        />
+      )}
     </Dialog>
   );
 }

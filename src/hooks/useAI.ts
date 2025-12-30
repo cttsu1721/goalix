@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { GoalSharpenResponse, TaskSuggestResponse } from "@/lib/ai/schemas";
+import type { GoalSharpenResponse, TaskSuggestResponse, GoalSuggestResponse } from "@/lib/ai/schemas";
+import type { GoalLevelForSuggestion } from "@/lib/ai/prompts";
 
 interface AIUsage {
   remaining: number;
@@ -16,6 +17,12 @@ interface SharpenResult {
 interface SuggestResult {
   success: boolean;
   data: TaskSuggestResponse;
+  usage: AIUsage;
+}
+
+interface GoalSuggestResult {
+  success: boolean;
+  data: GoalSuggestResponse;
   usage: AIUsage;
 }
 
@@ -99,6 +106,41 @@ export function useTaskSuggest() {
       if (!res.ok) {
         const error = await res.json();
         throw new Error(error.error || "Failed to suggest tasks");
+      }
+
+      return res.json();
+    },
+    onSuccess: (data) => {
+      // Update AI usage in cache
+      queryClient.setQueryData(["ai", "usage"], data.usage);
+    },
+  });
+}
+
+// Goal Suggester mutation - suggests goals based on cascading context
+export function useGoalSuggest() {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    GoalSuggestResult,
+    Error,
+    {
+      level: GoalLevelForSuggestion;
+      category: string;
+      parentId?: string;
+      parentLevel?: GoalLevelForSuggestion;
+    }
+  >({
+    mutationFn: async ({ level, category, parentId, parentLevel }) => {
+      const res = await fetch("/api/ai/suggest-goal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ level, category, parentId, parentLevel }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to suggest goals");
       }
 
       return res.json();
