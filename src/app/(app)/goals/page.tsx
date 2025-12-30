@@ -4,7 +4,7 @@ import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { GoalCard, DreamCard, GoalCreateModal } from "@/components/goals";
+import { GoalCard, DreamCard, GoalCreateModal, DreamBuilderModal } from "@/components/goals";
 import { Button } from "@/components/ui/button";
 import { useGoals, useDreams } from "@/hooks";
 import type { GoalLevel } from "@/types/goals";
@@ -17,6 +17,7 @@ import {
   Calendar,
   CheckCircle2,
   Loader2,
+  Wand2,
 } from "lucide-react";
 
 type UIGoalLevel = "dreams" | "5-year" | "1-year" | "monthly" | "weekly";
@@ -57,7 +58,7 @@ const levelConfig: Record<
   },
 };
 
-function EmptyState({ onCreateDream }: { onCreateDream: () => void }) {
+function EmptyState({ onCreateDream, onDreamBuilder }: { onCreateDream: () => void; onDreamBuilder: () => void }) {
   return (
     <div className="bg-night border border-night-mist rounded-2xl p-12 text-center">
       {/* Icon */}
@@ -72,14 +73,25 @@ function EmptyState({ onCreateDream }: { onCreateDream: () => void }) {
         milestones. The journey of a thousand miles begins with a single step.
       </p>
 
-      {/* CTA */}
-      <Button
-        onClick={onCreateDream}
-        className="bg-lantern text-void hover:bg-lantern/90 font-medium px-6 h-11 rounded-xl"
-      >
-        <Plus className="w-4 h-4 mr-2" />
-        Create Your First Dream
-      </Button>
+      {/* CTAs */}
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+        <Button
+          onClick={onDreamBuilder}
+          className="bg-gradient-to-r from-lantern to-lantern/80 text-void hover:from-lantern/90 hover:to-lantern/70 font-medium px-6 h-11 rounded-xl shadow-lg shadow-lantern/20"
+        >
+          <Wand2 className="w-4 h-4 mr-2" />
+          Dream Builder
+        </Button>
+        <span className="text-moon-faint text-sm">or</span>
+        <Button
+          onClick={onCreateDream}
+          variant="outline"
+          className="border-night-mist bg-night-soft text-moon hover:border-lantern hover:text-lantern hover:bg-lantern/5 font-medium px-6 h-11 rounded-xl"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Create Manually
+        </Button>
+      </div>
     </div>
   );
 }
@@ -210,6 +222,7 @@ function GoalsPageContent() {
 
   const [activeLevel, setActiveLevel] = useState<UIGoalLevel>(getInitialLevel);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isDreamBuilderOpen, setIsDreamBuilderOpen] = useState(false);
 
   // Update active level when URL changes
   useEffect(() => {
@@ -256,14 +269,25 @@ function GoalsPageContent() {
           </h2>
           <span className="text-moon-faint text-sm">({goals.length})</span>
         </div>
-        <Button
-          onClick={handleCreateGoal}
-          variant="outline"
-          className="border-night-mist bg-night-soft text-moon hover:border-lantern hover:text-lantern hover:bg-lantern/5 rounded-xl h-10"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          New {activeLevel === "dreams" ? "Dream" : "Goal"}
-        </Button>
+        <div className="flex items-center gap-2">
+          {activeLevel === "dreams" && (
+            <Button
+              onClick={() => setIsDreamBuilderOpen(true)}
+              className="bg-gradient-to-r from-lantern to-lantern/80 text-void hover:from-lantern/90 hover:to-lantern/70 font-medium rounded-xl h-10 shadow-lg shadow-lantern/20"
+            >
+              <Wand2 className="w-4 h-4 mr-2" />
+              Dream Builder
+            </Button>
+          )}
+          <Button
+            onClick={handleCreateGoal}
+            variant="outline"
+            className="border-night-mist bg-night-soft text-moon hover:border-lantern hover:text-lantern hover:bg-lantern/5 rounded-xl h-10"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            New {activeLevel === "dreams" ? "Dream" : "Goal"}
+          </Button>
+        </div>
       </div>
 
       {/* Content */}
@@ -272,7 +296,7 @@ function GoalsPageContent() {
           <Loader2 className="w-8 h-8 animate-spin text-lantern" />
         </div>
       ) : !hasDreams && activeLevel === "dreams" ? (
-        <EmptyState onCreateDream={handleCreateGoal} />
+        <EmptyState onCreateDream={handleCreateGoal} onDreamBuilder={() => setIsDreamBuilderOpen(true)} />
       ) : goals.length === 0 ? (
         <div className="bg-night border border-night-mist rounded-2xl p-8 text-center">
           <p className="text-moon-dim">
@@ -327,6 +351,12 @@ function GoalsPageContent() {
         onOpenChange={setIsCreateModalOpen}
         level={apiLevel}
         onSuccess={() => refetch()}
+      />
+
+      {/* Dream Builder Modal */}
+      <DreamBuilderModal
+        open={isDreamBuilderOpen}
+        onOpenChange={setIsDreamBuilderOpen}
       />
     </AppShell>
   );

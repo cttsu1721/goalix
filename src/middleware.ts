@@ -11,7 +11,7 @@ const protectedRoutes = [
 ];
 
 // Routes that should redirect to dashboard if already authenticated
-const authRoutes = ["/login", "/verify"];
+const authRoutes = ["/login", "/register", "/forgot-password", "/reset-password", "/verify"];
 
 export default auth((req) => {
   const { nextUrl } = req;

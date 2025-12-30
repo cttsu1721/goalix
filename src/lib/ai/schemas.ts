@@ -43,8 +43,34 @@ export interface GoalSuggestResponse {
   strategy_note: string;
 }
 
+// Dream Builder Response Schema
+export interface DreamBuilderGoal {
+  title: string;
+  description: string;
+}
+
+export type DreamBuilderWeeklyGoal = DreamBuilderGoal;
+
+export interface DreamBuilderMonthlyGoal extends DreamBuilderGoal {
+  weeklyGoal: DreamBuilderWeeklyGoal;
+}
+
+export interface DreamBuilderOneYearGoal extends DreamBuilderGoal {
+  monthlyGoal: DreamBuilderMonthlyGoal;
+}
+
+export interface DreamBuilderFiveYearGoal extends DreamBuilderGoal {
+  oneYearGoals: DreamBuilderOneYearGoal[];
+}
+
+export interface DreamBuilderResponse {
+  dream: DreamBuilderGoal;
+  fiveYearGoals: DreamBuilderFiveYearGoal[];
+  strategyNote: string;
+}
+
 // AI Interaction Types
-export type AIInteractionType = "GOAL_SHARPEN" | "TASK_SUGGEST" | "GOAL_SUGGEST";
+export type AIInteractionType = "GOAL_SHARPEN" | "TASK_SUGGEST" | "GOAL_SUGGEST" | "DREAM_BUILD";
 
 // Rate limit configuration
 export const AI_RATE_LIMITS = {
@@ -137,6 +163,49 @@ export function validateGoalSuggestResponse(data: unknown): data is GoalSuggestR
       typeof s.reasoning === "string" &&
       typeof s.priority === "number"
     );
+  });
+}
+
+export function validateDreamBuilderResponse(data: unknown): data is DreamBuilderResponse {
+  if (!data || typeof data !== "object") return false;
+  const obj = data as Record<string, unknown>;
+
+  // Validate dream
+  if (!obj.dream || typeof obj.dream !== "object") return false;
+  const dream = obj.dream as Record<string, unknown>;
+  if (typeof dream.title !== "string" || typeof dream.description !== "string") return false;
+
+  // Validate strategyNote
+  if (typeof obj.strategyNote !== "string") return false;
+
+  // Validate fiveYearGoals array
+  if (!Array.isArray(obj.fiveYearGoals) || obj.fiveYearGoals.length === 0) return false;
+
+  return obj.fiveYearGoals.every((fiveYear: unknown) => {
+    if (!fiveYear || typeof fiveYear !== "object") return false;
+    const fy = fiveYear as Record<string, unknown>;
+    if (typeof fy.title !== "string" || typeof fy.description !== "string") return false;
+
+    // Validate oneYearGoals array
+    if (!Array.isArray(fy.oneYearGoals) || fy.oneYearGoals.length === 0) return false;
+
+    return fy.oneYearGoals.every((oneYear: unknown) => {
+      if (!oneYear || typeof oneYear !== "object") return false;
+      const oy = oneYear as Record<string, unknown>;
+      if (typeof oy.title !== "string" || typeof oy.description !== "string") return false;
+
+      // Validate monthlyGoal
+      if (!oy.monthlyGoal || typeof oy.monthlyGoal !== "object") return false;
+      const mg = oy.monthlyGoal as Record<string, unknown>;
+      if (typeof mg.title !== "string" || typeof mg.description !== "string") return false;
+
+      // Validate weeklyGoal
+      if (!mg.weeklyGoal || typeof mg.weeklyGoal !== "object") return false;
+      const wg = mg.weeklyGoal as Record<string, unknown>;
+      if (typeof wg.title !== "string" || typeof wg.description !== "string") return false;
+
+      return true;
+    });
   });
 }
 

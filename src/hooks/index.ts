@@ -34,3 +34,6 @@ export {
   useKaizenCheckins,
   useSaveKaizenCheckin,
 } from "./useKaizen";
+
+// Dream Builder hook
+export { useDreamBuilder, type DreamBuilderStep, type GoalPath } from "./useDreamBuilder";

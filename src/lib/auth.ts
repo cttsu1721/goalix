@@ -1,7 +1,9 @@
 import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
+import Credentials from "next-auth/providers/credentials";
 import type { NextAuthConfig } from "next-auth";
 import type { EmailConfig } from "next-auth/providers/email";
+import bcrypt from "bcryptjs";
 import { prisma } from "./db";
 
 // Custom EmailIt email provider
@@ -93,6 +95,7 @@ async function sendVerificationRequest({
 export const authConfig: NextAuthConfig = {
   adapter: PrismaAdapter(prisma),
   providers: [
+    // Email provider (kept for password reset emails)
     {
       id: "email",
       name: "Email",
@@ -100,6 +103,47 @@ export const authConfig: NextAuthConfig = {
       maxAge: 24 * 60 * 60, // 24 hours
       sendVerificationRequest,
     },
+    // Credentials provider for email + password login
+    Credentials({
+      name: "credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          return null;
+        }
+
+        const email = credentials.email as string;
+        const password = credentials.password as string;
+
+        // Find user by email
+        const user = await prisma.user.findUnique({
+          where: { email },
+        });
+
+        if (!user || !user.password) {
+          // User doesn't exist or hasn't set a password yet
+          return null;
+        }
+
+        // Compare password
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+
+        if (!isPasswordValid) {
+          return null;
+        }
+
+        // Return user object (password is excluded automatically)
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          image: user.image,
+        };
+      },
+    }),
   ],
   pages: {
     signIn: "/login",
