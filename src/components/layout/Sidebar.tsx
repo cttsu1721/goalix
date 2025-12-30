@@ -1,7 +1,8 @@
 "use client";
 
+import { Suspense } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   CheckCircle,
@@ -59,7 +60,7 @@ const navGroups: NavGroup[] = [
         icon: <Star className="w-5 h-5" />,
       },
       {
-        href: "/goals",
+        href: "/goals?view=goals",
         label: "Goals",
         icon: <Target className="w-5 h-5" />,
       },
@@ -77,14 +78,34 @@ const navGroups: NavGroup[] = [
   },
 ];
 
-export function Sidebar({ className }: SidebarProps) {
+function SidebarContent({ className }: SidebarProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const isActive = (href: string) => {
+    const [hrefPath, hrefQuery] = href.split("?");
+
     if (href === "/dashboard") {
       return pathname === "/dashboard" || pathname === "/";
     }
-    return pathname.startsWith(href.split("?")[0]);
+
+    // Special handling for /goals with view param
+    if (hrefPath === "/goals" && pathname === "/goals") {
+      const hrefParams = new URLSearchParams(hrefQuery || "");
+      const hrefView = hrefParams.get("view");
+      const currentView = searchParams.get("view");
+
+      // Dreams tab active when view=dreams or no view (default)
+      if (hrefView === "dreams") {
+        return currentView === "dreams" || !currentView;
+      }
+      // Goals tab active when view=goals
+      if (hrefView === "goals") {
+        return currentView === "goals";
+      }
+    }
+
+    return pathname.startsWith(hrefPath);
   };
 
   return (
@@ -167,6 +188,39 @@ export function Sidebar({ className }: SidebarProps) {
           </div>
         </Link>
       </div>
+    </aside>
+  );
+}
+
+export function Sidebar({ className }: SidebarProps) {
+  return (
+    <Suspense fallback={<SidebarFallback className={className} />}>
+      <SidebarContent className={className} />
+    </Suspense>
+  );
+}
+
+function SidebarFallback({ className }: SidebarProps) {
+  return (
+    <aside
+      className={cn(
+        "bg-night border-r border-night-mist flex-col py-10",
+        className
+      )}
+    >
+      <div className="px-7 pb-10">
+        <span className="text-moon text-[1.375rem] font-medium tracking-wider">
+          goalix<span className="text-lantern font-light">.</span>
+        </span>
+      </div>
+      <nav className="flex-1 px-4">
+        {/* Skeleton loading state */}
+        <div className="space-y-2">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-12 bg-night-soft rounded-xl animate-pulse" />
+          ))}
+        </div>
+      </nav>
     </aside>
   );
 }

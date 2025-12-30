@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { GoalCard, DreamCard, GoalCreateModal } from "@/components/goals";
@@ -190,10 +190,33 @@ function transformGoals(goals: unknown[], level: GoalLevel): DisplayGoal[] {
   });
 }
 
-export default function GoalsPage() {
+function GoalsPageContent() {
   const router = useRouter();
-  const [activeLevel, setActiveLevel] = useState<UIGoalLevel>("dreams");
+  const searchParams = useSearchParams();
+  const viewParam = searchParams.get("view");
+
+  // Map URL param to valid UIGoalLevel
+  const getInitialLevel = (): UIGoalLevel => {
+    const validLevels: UIGoalLevel[] = ["dreams", "5-year", "1-year", "monthly", "weekly"];
+    if (viewParam && validLevels.includes(viewParam as UIGoalLevel)) {
+      return viewParam as UIGoalLevel;
+    }
+    // Default to first non-dreams tab if coming from "Goals" sidebar item
+    if (viewParam === "goals") {
+      return "5-year";
+    }
+    return "dreams";
+  };
+
+  const [activeLevel, setActiveLevel] = useState<UIGoalLevel>(getInitialLevel);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  // Update active level when URL changes
+  useEffect(() => {
+    const newLevel = getInitialLevel();
+    setActiveLevel(newLevel);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewParam]);
 
   const apiLevel = levelConfig[activeLevel].apiLevel;
 
@@ -306,5 +329,27 @@ export default function GoalsPage() {
         onSuccess={() => refetch()}
       />
     </AppShell>
+  );
+}
+
+function GoalsPageFallback() {
+  return (
+    <AppShell>
+      <PageHeader
+        title="Goal Hierarchy"
+        subtitle="Your 1/5/10 cascade from dreams to daily tasks"
+      />
+      <div className="flex items-center justify-center py-16">
+        <Loader2 className="w-8 h-8 animate-spin text-lantern" />
+      </div>
+    </AppShell>
+  );
+}
+
+export default function GoalsPage() {
+  return (
+    <Suspense fallback={<GoalsPageFallback />}>
+      <GoalsPageContent />
+    </Suspense>
   );
 }

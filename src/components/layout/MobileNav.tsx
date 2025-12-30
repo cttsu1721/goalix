@@ -16,7 +16,7 @@ const navItems = [
     icon: CheckCircle,
   },
   {
-    href: "/goals",
+    href: "/goals?view=dreams",
     label: "Dreams",
     icon: Star,
   },
