@@ -43,9 +43,9 @@ jobs:
             docker compose build --no-cache
             docker compose up -d
 
-            # Run database migrations
+            # Run database migrations (prisma CLI now included in image)
             echo "Running database migrations..."
-            docker compose exec -T app npx prisma migrate deploy
+            docker compose exec -T app node_modules/prisma/build/index.js migrate deploy
 
             # Health check
             echo "Waiting for app to start..."
