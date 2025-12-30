@@ -16,6 +16,7 @@ services:
       - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
     networks:
       - n8n_network
+      - caddy_network
     expose:
       - "3000"
     depends_on:
@@ -38,3 +39,6 @@ networks:
   n8n_network:
     external: true
     name: n8n-docker-caddy_n8n_network
+  caddy_network:
+    external: true
+    name: n8n-docker-caddy_default
