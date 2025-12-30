@@ -217,6 +217,33 @@ export function GoalCreateModal({
             />
           </div>
 
+          {/* AI Suggest Button - shows when no title yet */}
+          {!title.trim() && (
+            <div className="p-4 bg-lantern/5 border border-lantern/20 rounded-xl">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-lantern/10 flex items-center justify-center">
+                    <Lightbulb className="w-4 h-4 text-lantern" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-moon font-medium">Need inspiration?</p>
+                    <p className="text-xs text-moon-faint">
+                      Let AI suggest {config.singularLabel.toLowerCase()}s for you
+                    </p>
+                  </div>
+                </div>
+                <AiButton
+                  onClick={() => setShowSuggestModal(true)}
+                  size="sm"
+                  className="bg-lantern text-void hover:bg-lantern/90"
+                >
+                  <Lightbulb className="w-3 h-3 mr-1" />
+                  Suggest
+                </AiButton>
+              </div>
+            </div>
+          )}
+
           {/* Description */}
           <div className="space-y-2">
             <Label htmlFor="description" className="text-moon-soft text-sm">
@@ -258,33 +285,6 @@ export function GoalCreateModal({
               </SelectContent>
             </Select>
           </div>
-
-          {/* AI Suggest Button - shows when category is selected but no title yet */}
-          {category && !title.trim() && (
-            <div className="p-4 bg-lantern/5 border border-lantern/20 rounded-xl">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-lantern/10 flex items-center justify-center">
-                    <Lightbulb className="w-4 h-4 text-lantern" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-moon font-medium">Need inspiration?</p>
-                    <p className="text-xs text-moon-faint">
-                      Let AI suggest goals based on your hierarchy
-                    </p>
-                  </div>
-                </div>
-                <AiButton
-                  onClick={() => setShowSuggestModal(true)}
-                  size="sm"
-                  className="bg-lantern text-void hover:bg-lantern/90"
-                >
-                  <Lightbulb className="w-3 h-3 mr-1" />
-                  Suggest
-                </AiButton>
-              </div>
-            </div>
-          )}
 
           {/* Target Date (for dreams, 5-year, 1-year goals) */}
           {(level === "dream" || level === "fiveYear" || level === "oneYear") && (
