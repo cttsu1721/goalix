@@ -111,8 +111,8 @@ export function DreamCard({
           </div>
         </div>
 
-        {/* Stats row */}
-        <div className="flex items-center justify-between pt-3 border-t border-night-mist">
+        {/* Stats row - pr-16 to avoid overlap with View button */}
+        <div className="flex items-center justify-between pt-3 border-t border-night-mist pr-16">
           {/* Children count */}
           <div className="flex items-center gap-2 text-xs">
             <Target className="w-3.5 h-3.5 text-moon-faint" />
