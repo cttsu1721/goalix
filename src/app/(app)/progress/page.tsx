@@ -33,15 +33,17 @@ function StatCard({
   iconColor?: string;
 }) {
   return (
-    <div className="bg-night border border-night-mist rounded-2xl p-5">
-      <div className="flex items-start justify-between mb-3">
-        <div className={`w-10 h-10 rounded-xl bg-night-soft flex items-center justify-center ${iconColor}`}>
-          <Icon className="w-5 h-5" />
+    <div className="bg-night border border-night-mist rounded-xl sm:rounded-2xl p-4 sm:p-5">
+      <div className="flex items-center gap-3 sm:block">
+        <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-night-soft flex items-center justify-center ${iconColor} sm:mb-3`}>
+          <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+        </div>
+        <div className="flex-1 sm:flex-none">
+          <p className="text-xl sm:text-2xl font-semibold text-moon">{value}</p>
+          <p className="text-xs sm:text-sm text-moon-dim">{label}</p>
+          {subtext && <p className="text-xs text-moon-faint mt-0.5 sm:mt-1">{subtext}</p>}
         </div>
       </div>
-      <p className="text-2xl font-semibold text-moon mb-1">{value}</p>
-      <p className="text-sm text-moon-dim">{label}</p>
-      {subtext && <p className="text-xs text-moon-faint mt-1">{subtext}</p>}
     </div>
   );
 }
@@ -51,7 +53,6 @@ function LevelProgressCard({
   levelName,
   totalPoints,
   levelProgress,
-  pointsToNextLevel,
 }: {
   level: number;
   levelName: string;
@@ -60,27 +61,28 @@ function LevelProgressCard({
   pointsToNextLevel: number;
 }) {
   const nextLevel = LEVELS.find((l) => l.level === level + 1);
-  const currentLevelPoints = LEVELS.find((l) => l.level === level)?.pointsRequired || 0;
   const nextLevelPoints = nextLevel?.pointsRequired || totalPoints;
 
   return (
-    <div className="bg-night border border-night-mist rounded-2xl p-6">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-12 h-12 rounded-xl bg-lantern/10 flex items-center justify-center">
-          <Trophy className="w-6 h-6 text-lantern" />
+    <div className="bg-night border border-night-mist rounded-xl sm:rounded-2xl p-5 sm:p-6">
+      {/* Header - stacked on mobile */}
+      <div className="flex items-center gap-3 mb-5 sm:mb-6">
+        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-lantern/10 flex items-center justify-center">
+          <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-lantern" />
         </div>
-        <div>
-          <h3 className="text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-moon-faint">
+        <div className="flex-1 min-w-0">
+          <h3 className="text-[0.625rem] sm:text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-moon-faint">
             Current Level
           </h3>
-          <p className="text-xl font-semibold text-moon">Level {level} — {levelName}</p>
+          <p className="text-lg sm:text-xl font-semibold text-moon truncate">
+            Level {level} — {levelName}
+          </p>
         </div>
       </div>
 
-      {/* Level Ring */}
-      <div className="flex items-center gap-6 mb-6">
-        <div className="relative w-24 h-24 flex-shrink-0">
+      {/* Level Ring - centered on mobile */}
+      <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 mb-5 sm:mb-6">
+        <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0">
           {/* Background ring */}
           <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
             <circle
@@ -89,7 +91,7 @@ function LevelProgressCard({
               r="42"
               fill="none"
               stroke="currentColor"
-              strokeWidth="8"
+              strokeWidth="10"
               className="text-night-mist"
             />
             <circle
@@ -98,7 +100,7 @@ function LevelProgressCard({
               r="42"
               fill="none"
               stroke="url(#levelGradient)"
-              strokeWidth="8"
+              strokeWidth="10"
               strokeLinecap="round"
               strokeDasharray={`${levelProgress * 2.64} 264`}
             />
@@ -111,17 +113,17 @@ function LevelProgressCard({
           </svg>
           {/* Center text */}
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-2xl font-bold text-moon">{level}</span>
-            <span className="text-xs text-moon-faint">Level</span>
+            <span className="text-xl sm:text-2xl font-bold text-moon">{level}</span>
+            <span className="text-[0.625rem] sm:text-xs text-moon-faint">Level</span>
           </div>
         </div>
 
-        <div className="flex-1">
+        <div className="flex-1 w-full">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-moon-soft">
-              {nextLevel ? `Progress to Level ${level + 1}` : "Max Level Reached!"}
+            <span className="text-xs sm:text-sm text-moon-soft">
+              {nextLevel ? `To Level ${level + 1}` : "Max Level!"}
             </span>
-            <span className="text-sm font-medium text-moon">{levelProgress}%</span>
+            <span className="text-xs sm:text-sm font-medium text-moon">{levelProgress}%</span>
           </div>
           <div className="h-2 bg-night-mist rounded-full overflow-hidden mb-2">
             <div
@@ -129,7 +131,7 @@ function LevelProgressCard({
               style={{ width: `${levelProgress}%` }}
             />
           </div>
-          <p className="text-xs text-moon-faint">
+          <p className="text-xs text-moon-faint text-center sm:text-left">
             {totalPoints.toLocaleString()} / {nextLevelPoints.toLocaleString()} XP
           </p>
         </div>
@@ -138,8 +140,8 @@ function LevelProgressCard({
       {/* Total XP */}
       <div className="pt-4 border-t border-night-mist">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-moon-dim">Total XP Earned</span>
-          <span className="text-lg font-semibold text-lantern">{totalPoints.toLocaleString()}</span>
+          <span className="text-xs sm:text-sm text-moon-dim">Total XP</span>
+          <span className="text-base sm:text-lg font-semibold text-lantern">{totalPoints.toLocaleString()}</span>
         </div>
       </div>
     </div>
@@ -157,30 +159,30 @@ function StreaksCard({
   }>;
 }) {
   const streakConfig = [
-    { type: "DAILY_PLANNING", label: "Daily Planning", unit: "days", icon: Calendar },
-    { type: "MIT_COMPLETION", label: "MIT Completion", unit: "days", icon: Target },
-    { type: "WEEKLY_REVIEW", label: "Weekly Review", unit: "weeks", icon: TrendingUp },
-    { type: "MONTHLY_REVIEW", label: "Monthly Review", unit: "months", icon: CheckCircle2 },
-    { type: "KAIZEN_CHECKIN", label: "Kaizen Check-in", unit: "days", icon: Star },
+    { type: "DAILY_PLANNING", label: "Planning", unit: "d", icon: Calendar },
+    { type: "MIT_COMPLETION", label: "MIT", unit: "d", icon: Target },
+    { type: "WEEKLY_REVIEW", label: "Weekly", unit: "w", icon: TrendingUp },
+    { type: "MONTHLY_REVIEW", label: "Monthly", unit: "m", icon: CheckCircle2 },
+    { type: "KAIZEN_CHECKIN", label: "Kaizen", unit: "d", icon: Star },
   ];
 
   return (
-    <div className="bg-night border border-night-mist rounded-2xl p-6">
+    <div className="bg-night border border-night-mist rounded-xl sm:rounded-2xl p-5 sm:p-6">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-12 h-12 rounded-xl bg-zen-red/10 flex items-center justify-center">
-          <Flame className="w-6 h-6 text-zen-red" />
+      <div className="flex items-center gap-3 mb-5 sm:mb-6">
+        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-zen-red/10 flex items-center justify-center">
+          <Flame className="w-5 h-5 sm:w-6 sm:h-6 text-zen-red" />
         </div>
         <div>
-          <h3 className="text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-moon-faint">
+          <h3 className="text-[0.625rem] sm:text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-moon-faint">
             Active Streaks
           </h3>
-          <p className="text-xl font-semibold text-moon">Keep the fire burning</p>
+          <p className="text-lg sm:text-xl font-semibold text-moon">Keep the fire burning</p>
         </div>
       </div>
 
-      {/* Streak Grid */}
-      <div className="grid grid-cols-2 gap-3">
+      {/* Streak Grid - 3 cols on mobile for compactness */}
+      <div className="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
         {streakConfig.map((config) => {
           const streak = streaks.find((s) => s.type === config.type);
           const count = streak?.currentCount || 0;
@@ -191,24 +193,24 @@ function StreaksCard({
             <div
               key={config.type}
               className={`
-                p-4 rounded-xl border transition-colors
+                p-3 sm:p-4 rounded-lg sm:rounded-xl border transition-colors
                 ${isActive && count > 0 ? "bg-night-soft border-night-glow" : "bg-night border-night-mist opacity-60"}
               `}
             >
-              <div className="flex items-center gap-2 mb-2">
-                <Icon className={`w-4 h-4 ${isActive && count > 0 ? "text-lantern" : "text-moon-faint"}`} />
-                <span className="text-xs text-moon-faint">{config.label}</span>
+              <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isActive && count > 0 ? "text-lantern" : "text-moon-faint"}`} />
+                <span className="text-[0.625rem] sm:text-xs text-moon-faint truncate">{config.label}</span>
               </div>
-              <div className="flex items-baseline gap-1">
-                <span className={`text-2xl font-bold ${isActive && count > 0 ? "text-moon" : "text-moon-dim"}`}>
+              <div className="flex items-baseline gap-0.5 sm:gap-1">
+                <span className={`text-xl sm:text-2xl font-bold ${isActive && count > 0 ? "text-moon" : "text-moon-dim"}`}>
                   {count}
                 </span>
-                <span className="text-xs text-moon-faint">{config.unit}</span>
+                <span className="text-[0.625rem] sm:text-xs text-moon-faint">{config.unit}</span>
               </div>
               {isActive && count >= 7 && (
-                <div className="mt-2 flex items-center gap-1">
+                <div className="mt-1.5 sm:mt-2 flex items-center gap-1">
                   <Flame className="w-3 h-3 text-zen-red" />
-                  <span className="text-xs text-zen-red">On fire!</span>
+                  <span className="text-[0.625rem] sm:text-xs text-zen-red">On fire!</span>
                 </div>
               )}
             </div>
@@ -237,18 +239,18 @@ function BadgesCard({
   const lockedBadges = badges.filter((b) => !b.earned);
 
   return (
-    <div className="bg-night border border-night-mist rounded-2xl p-6">
+    <div className="bg-night border border-night-mist rounded-xl sm:rounded-2xl p-5 sm:p-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-5 sm:mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-zen-purple/10 flex items-center justify-center">
-            <Award className="w-6 h-6 text-zen-purple" />
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-zen-purple/10 flex items-center justify-center">
+            <Award className="w-5 h-5 sm:w-6 sm:h-6 text-zen-purple" />
           </div>
           <div>
-            <h3 className="text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-moon-faint">
+            <h3 className="text-[0.625rem] sm:text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-moon-faint">
               Badge Collection
             </h3>
-            <p className="text-xl font-semibold text-moon">
+            <p className="text-lg sm:text-xl font-semibold text-moon">
               {summary.earned} / {summary.total} Earned
             </p>
           </div>
@@ -257,64 +259,57 @@ function BadgesCard({
 
       {/* Earned Badges */}
       {earnedBadges.length > 0 && (
-        <div className="mb-6">
-          <h4 className="text-xs font-medium uppercase tracking-wider text-moon-faint mb-3">
+        <div className="mb-5 sm:mb-6">
+          <h4 className="text-[0.625rem] sm:text-xs font-medium uppercase tracking-wider text-moon-faint mb-3">
             Earned
           </h4>
-          <div className="grid grid-cols-4 gap-3">
+          {/* 3 cols on mobile, 4 on tablet+ */}
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3">
             {earnedBadges.map((badge) => (
               <div
                 key={badge.slug}
-                className="group relative bg-night-soft border border-night-glow rounded-xl p-3 text-center hover:border-lantern/30 transition-colors"
+                className="group relative bg-night-soft border border-night-glow rounded-lg sm:rounded-xl p-2.5 sm:p-3 text-center active:scale-95 transition-transform"
               >
-                <span className="text-2xl mb-1 block">{badge.icon}</span>
-                <span className="text-xs text-moon-soft font-medium block truncate">
+                <span className="text-xl sm:text-2xl mb-0.5 sm:mb-1 block">{badge.icon}</span>
+                <span className="text-[0.625rem] sm:text-xs text-moon-soft font-medium block truncate">
                   {badge.name}
                 </span>
-                {/* Tooltip */}
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-night-glow border border-night-mist rounded-lg text-xs text-moon opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                  {badge.description}
-                </div>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Locked Badges */}
+      {/* Locked Badges - show fewer on mobile */}
       {lockedBadges.length > 0 && (
         <div>
-          <h4 className="text-xs font-medium uppercase tracking-wider text-moon-faint mb-3">
-            Locked
+          <h4 className="text-[0.625rem] sm:text-xs font-medium uppercase tracking-wider text-moon-faint mb-3">
+            Locked ({lockedBadges.length})
           </h4>
-          <div className="grid grid-cols-4 gap-3">
-            {lockedBadges.map((badge) => (
+          <div className="grid grid-cols-4 sm:grid-cols-5 lg:grid-cols-6 gap-2">
+            {lockedBadges.slice(0, 12).map((badge) => (
               <div
                 key={badge.slug}
-                className="group relative bg-night border border-night-mist rounded-xl p-3 text-center opacity-50"
+                className="relative bg-night border border-night-mist rounded-lg p-2 sm:p-2.5 text-center opacity-40"
               >
-                <div className="relative">
-                  <span className="text-2xl mb-1 block grayscale">{badge.icon}</span>
-                  <Lock className="absolute -top-1 -right-1 w-3 h-3 text-moon-faint" />
-                </div>
-                <span className="text-xs text-moon-faint font-medium block truncate">
-                  {badge.name}
-                </span>
-                {/* Tooltip */}
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-night-glow border border-night-mist rounded-lg text-xs text-moon opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                  {badge.description}
-                </div>
+                <span className="text-lg sm:text-xl block grayscale">{badge.icon}</span>
+                <Lock className="absolute top-1 right-1 w-2.5 h-2.5 text-moon-faint" />
               </div>
             ))}
           </div>
+          {lockedBadges.length > 12 && (
+            <p className="text-xs text-moon-faint text-center mt-3">
+              +{lockedBadges.length - 12} more to unlock
+            </p>
+          )}
         </div>
       )}
 
       {/* Empty state */}
       {badges.length === 0 && (
-        <div className="text-center py-8">
-          <Star className="w-12 h-12 mx-auto mb-4 text-moon-faint opacity-30" />
-          <p className="text-moon-dim">Complete tasks and goals to earn badges!</p>
+        <div className="text-center py-6 sm:py-8">
+          <Star className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 text-moon-faint opacity-30" />
+          <p className="text-sm sm:text-base text-moon-dim">Complete tasks to earn badges!</p>
         </div>
       )}
     </div>

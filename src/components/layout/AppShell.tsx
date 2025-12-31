@@ -35,8 +35,10 @@ export function AppShell({ children, rightPanel, className }: AppShellProps) {
             "xl:px-14 xl:py-12",
             // Tablet padding
             "lg:px-12 lg:py-10",
-            // Mobile padding with bottom nav clearance
-            "px-6 py-7 pb-24 lg:pb-10"
+            // Mobile padding - tighter horizontal for more content
+            "px-4 sm:px-6 py-6 sm:py-7",
+            // Bottom padding for mobile nav + safe area
+            "pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] lg:pb-10"
           )}
         >
           {children}

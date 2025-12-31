@@ -2,7 +2,7 @@
 
 import { memo } from "react";
 import { cn } from "@/lib/utils";
-import { Check, Pencil } from "lucide-react";
+import { Check, ChevronRight } from "lucide-react";
 
 interface TaskItemProps {
   task: {
@@ -21,34 +21,53 @@ export const TaskItem = memo(function TaskItem({ task, onToggle, onEdit, classNa
   return (
     <div
       className={cn(
-        "group flex items-center gap-[18px] py-5",
+        "group flex items-center gap-3 sm:gap-4 py-4",
         "border-b border-night-soft last:border-b-0",
         "transition-all duration-200",
+        // Touch feedback
+        "active:bg-night-soft/50",
         className
       )}
     >
-      {/* Checkbox */}
+      {/* Checkbox - larger touch target for mobile */}
       <button
         className={cn(
-          "w-[22px] h-[22px] rounded-[7px] border-[1.5px] flex-shrink-0",
+          // 44px minimum touch target with visual 24px checkbox
+          "w-11 h-11 sm:w-10 sm:h-10 flex-shrink-0",
           "flex items-center justify-center",
-          "transition-all duration-200",
-          task.completed
-            ? "bg-zen-green border-zen-green"
-            : "border-night-glow hover:border-moon-dim"
+          "-ml-2 sm:-ml-1", // Negative margin to maintain visual alignment
+          "rounded-xl",
+          "transition-all duration-200 active:scale-90"
         )}
-        onClick={onToggle}
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggle?.();
+        }}
       >
-        {task.completed && (
-          <Check className="w-3.5 h-3.5 text-void" strokeWidth={2} />
-        )}
-      </button>
-
-      {/* Content */}
-      <div className="flex-1 cursor-pointer" onClick={onEdit}>
         <div
           className={cn(
-            "text-[0.9375rem] font-normal mb-1",
+            "w-6 h-6 sm:w-[22px] sm:h-[22px] rounded-lg border-2",
+            "flex items-center justify-center",
+            "transition-all duration-200",
+            task.completed
+              ? "bg-zen-green border-zen-green"
+              : "border-night-glow"
+          )}
+        >
+          {task.completed && (
+            <Check className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-void" strokeWidth={2.5} />
+          )}
+        </div>
+      </button>
+
+      {/* Content - tap to edit */}
+      <button
+        className="flex-1 text-left min-w-0"
+        onClick={onEdit}
+      >
+        <div
+          className={cn(
+            "text-[0.9375rem] font-normal mb-0.5 truncate",
             task.completed
               ? "line-through text-moon-faint"
               : "text-moon"
@@ -56,31 +75,28 @@ export const TaskItem = memo(function TaskItem({ task, onToggle, onEdit, classNa
         >
           {task.title}
         </div>
-        <div className="text-xs text-moon-faint">{task.category}</div>
-      </div>
-
-      {/* Edit button (visible on hover) */}
-      <button
-        onClick={onEdit}
-        className={cn(
-          "p-1.5 rounded-lg opacity-0 group-hover:opacity-100",
-          "text-moon-faint hover:text-moon hover:bg-night-soft",
-          "transition-all duration-200"
-        )}
-      >
-        <Pencil className="w-3.5 h-3.5" />
+        <div className="text-xs text-moon-faint truncate">{task.category}</div>
       </button>
 
-      {/* Points */}
-      <span
-        className={cn(
-          "text-[0.8125rem] font-normal text-moon-faint",
-          "transition-colors duration-200",
-          !task.completed && "group-hover:text-lantern"
-        )}
-      >
-        {task.completed ? `+${task.points}` : task.points}
-      </span>
+      {/* Points + Edit indicator */}
+      <div className="flex items-center gap-2 flex-shrink-0">
+        <span
+          className={cn(
+            "text-sm font-medium tabular-nums",
+            task.completed ? "text-zen-green" : "text-moon-faint"
+          )}
+        >
+          {task.completed ? `+${task.points}` : task.points}
+        </span>
+        {/* Chevron hint for edit - always visible on mobile */}
+        <ChevronRight
+          className={cn(
+            "w-4 h-4 text-moon-faint/50",
+            "sm:opacity-0 sm:group-hover:opacity-100",
+            "transition-opacity"
+          )}
+        />
+      </div>
     </div>
   );
 });
