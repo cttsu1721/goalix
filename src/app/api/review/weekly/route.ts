@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
+const WEEKLY_REVIEW_POINTS = 50;
+
 interface DayBreakdown {
   date: string;
   dayOfWeek: string;
@@ -214,6 +216,180 @@ export async function GET(request: Request) {
     console.error("Error fetching weekly review data:", error);
     return NextResponse.json(
       { error: "Failed to fetch weekly review data" },
+      { status: 500 }
+    );
+  }
+}
+
+// POST /api/review/weekly - Submit/update weekly review reflection
+export async function POST(request: Request) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { wins, challenges, nextWeekFocus, weekOffset = 0 } = body;
+
+    // Calculate week boundaries
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Get start of target week (Monday)
+    const startOfWeek = new Date(today);
+    const dayOfWeek = today.getDay();
+    const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    startOfWeek.setDate(today.getDate() - daysToSubtract - weekOffset * 7);
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    // End of week (Sunday)
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
+
+    // Fetch stats for the week to snapshot
+    const tasks = await prisma.dailyTask.findMany({
+      where: {
+        userId: session.user.id,
+        scheduledDate: {
+          gte: startOfWeek,
+          lte: endOfWeek,
+        },
+      },
+      select: {
+        status: true,
+        priority: true,
+        pointsEarned: true,
+        weeklyGoalId: true,
+      },
+    });
+
+    const completedTasks = tasks.filter((t) => t.status === "COMPLETED");
+    const tasksCompleted = completedTasks.length;
+    const totalTasks = tasks.length;
+
+    const mitTasks = tasks.filter((t) => t.priority === "MIT");
+    const mitCompleted = mitTasks.filter((t) => t.status === "COMPLETED").length;
+    const mitTotal = mitTasks.length;
+
+    const linkedCompleted = completedTasks.filter((t) => t.weeklyGoalId !== null).length;
+    const goalAlignmentRate = tasksCompleted > 0
+      ? Math.round((linkedCompleted / tasksCompleted) * 100)
+      : 0;
+
+    const pointsEarned = tasks.reduce((sum, t) => sum + t.pointsEarned, 0);
+
+    // Check if review already exists for this week
+    const existingReview = await prisma.weeklyReview.findUnique({
+      where: {
+        userId_weekStart: {
+          userId: session.user.id,
+          weekStart: startOfWeek,
+        },
+      },
+    });
+
+    let review;
+    let isNewReview = false;
+
+    if (existingReview) {
+      // Update existing review
+      review = await prisma.weeklyReview.update({
+        where: { id: existingReview.id },
+        data: {
+          wins,
+          challenges,
+          nextWeekFocus,
+          tasksCompleted,
+          totalTasks,
+          mitCompleted,
+          mitTotal,
+          pointsEarned,
+          goalAlignmentRate,
+        },
+      });
+    } else {
+      // Create new review and award points
+      isNewReview = true;
+
+      review = await prisma.weeklyReview.create({
+        data: {
+          userId: session.user.id,
+          weekStart: startOfWeek,
+          wins,
+          challenges,
+          nextWeekFocus,
+          tasksCompleted,
+          totalTasks,
+          mitCompleted,
+          mitTotal,
+          pointsEarned,
+          goalAlignmentRate,
+          reviewPoints: WEEKLY_REVIEW_POINTS,
+        },
+      });
+
+      // Award points to user
+      await prisma.user.update({
+        where: { id: session.user.id },
+        data: {
+          totalPoints: { increment: WEEKLY_REVIEW_POINTS },
+        },
+      });
+
+      // Update weekly review streak
+      await prisma.streak.upsert({
+        where: {
+          userId_type: {
+            userId: session.user.id,
+            type: "WEEKLY_REVIEW",
+          },
+        },
+        update: {
+          currentCount: { increment: 1 },
+          longestCount: {
+            increment: 0, // Will be handled separately
+          },
+          lastActionAt: new Date(),
+        },
+        create: {
+          userId: session.user.id,
+          type: "WEEKLY_REVIEW",
+          currentCount: 1,
+          longestCount: 1,
+          lastActionAt: new Date(),
+        },
+      });
+
+      // Update longest count if needed
+      const streak = await prisma.streak.findUnique({
+        where: {
+          userId_type: {
+            userId: session.user.id,
+            type: "WEEKLY_REVIEW",
+          },
+        },
+      });
+
+      if (streak && streak.currentCount > streak.longestCount) {
+        await prisma.streak.update({
+          where: { id: streak.id },
+          data: { longestCount: streak.currentCount },
+        });
+      }
+    }
+
+    return NextResponse.json({
+      success: true,
+      review,
+      isNewReview,
+      pointsAwarded: isNewReview ? WEEKLY_REVIEW_POINTS : 0,
+    });
+  } catch (error) {
+    console.error("Error submitting weekly review:", error);
+    return NextResponse.json(
+      { error: "Failed to submit weekly review" },
       { status: 500 }
     );
   }

@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface DayBreakdown {
   date: string;
@@ -82,4 +82,62 @@ export function formatAreaName(area: string): string {
     lifestyle: "Lifestyle",
   };
   return areaNames[area] || area;
+}
+
+// Submit weekly review mutation
+interface SubmitWeeklyReviewInput {
+  wins: string;
+  challenges: string;
+  nextWeekFocus: string;
+  weekOffset?: number;
+}
+
+interface SubmitWeeklyReviewResponse {
+  success: boolean;
+  review: {
+    id: string;
+    wins: string | null;
+    challenges: string | null;
+    nextWeekFocus: string | null;
+    tasksCompleted: number;
+    totalTasks: number;
+    mitCompleted: number;
+    mitTotal: number;
+    pointsEarned: number;
+    goalAlignmentRate: number;
+    reviewPoints: number;
+    createdAt: string;
+    updatedAt: string;
+  };
+  isNewReview: boolean;
+  pointsAwarded: number;
+}
+
+export function useSubmitWeeklyReview() {
+  const queryClient = useQueryClient();
+
+  return useMutation<SubmitWeeklyReviewResponse, Error, SubmitWeeklyReviewInput>({
+    mutationFn: async (input) => {
+      const res = await fetch("/api/review/weekly", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to submit weekly review");
+      }
+
+      return res.json();
+    },
+    onSuccess: (_, variables) => {
+      // Invalidate weekly review queries to refetch fresh data
+      queryClient.invalidateQueries({ queryKey: ["review", "weekly", variables.weekOffset || 0] });
+      queryClient.invalidateQueries({ queryKey: ["review", "history"] });
+      // Also invalidate user stats as points may have changed
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      queryClient.invalidateQueries({ queryKey: ["gamification"] });
+    },
+  });
 }

@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface WeekBreakdown {
   weekNumber: number;
@@ -78,6 +78,67 @@ export function useMonthlyReview(monthOffset = 0) {
         throw new Error("Failed to fetch monthly review data");
       }
       return res.json();
+    },
+  });
+}
+
+// Submit monthly review mutation
+interface SubmitMonthlyReviewInput {
+  wins: string;
+  learnings: string;
+  nextMonthFocus: string;
+  monthOffset?: number;
+}
+
+interface SubmitMonthlyReviewResponse {
+  success: boolean;
+  review: {
+    id: string;
+    wins: string | null;
+    learnings: string | null;
+    nextMonthFocus: string | null;
+    tasksCompleted: number;
+    totalTasks: number;
+    mitCompleted: number;
+    mitTotal: number;
+    goalsCompleted: number;
+    goalsTotal: number;
+    pointsEarned: number;
+    goalAlignmentRate: number;
+    kaizenCheckinsCount: number;
+    reviewPoints: number;
+    createdAt: string;
+    updatedAt: string;
+  };
+  isNewReview: boolean;
+  pointsAwarded: number;
+}
+
+export function useSubmitMonthlyReview() {
+  const queryClient = useQueryClient();
+
+  return useMutation<SubmitMonthlyReviewResponse, Error, SubmitMonthlyReviewInput>({
+    mutationFn: async (input) => {
+      const res = await fetch("/api/review/monthly", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to submit monthly review");
+      }
+
+      return res.json();
+    },
+    onSuccess: (_, variables) => {
+      // Invalidate monthly review queries to refetch fresh data
+      queryClient.invalidateQueries({ queryKey: ["review", "monthly", variables.monthOffset || 0] });
+      queryClient.invalidateQueries({ queryKey: ["review", "history"] });
+      // Also invalidate user stats as points may have changed
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      queryClient.invalidateQueries({ queryKey: ["gamification"] });
     },
   });
 }

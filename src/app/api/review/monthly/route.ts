@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
+const MONTHLY_REVIEW_POINTS = 100;
+
 interface WeekBreakdown {
   weekNumber: number;
   startDate: string;
@@ -231,6 +233,213 @@ export async function GET(request: Request) {
     console.error("Error fetching monthly review data:", error);
     return NextResponse.json(
       { error: "Failed to fetch monthly review data" },
+      { status: 500 }
+    );
+  }
+}
+
+// POST /api/review/monthly - Submit/update monthly review reflection
+export async function POST(request: Request) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { wins, learnings, nextMonthFocus, monthOffset = 0 } = body;
+
+    // Calculate month boundaries
+    const now = new Date();
+    const targetMonth = new Date(now.getFullYear(), now.getMonth() - monthOffset, 1);
+    const startOfMonth = new Date(targetMonth.getFullYear(), targetMonth.getMonth(), 1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const endOfMonth = new Date(targetMonth.getFullYear(), targetMonth.getMonth() + 1, 0);
+    endOfMonth.setHours(23, 59, 59, 999);
+
+    // Fetch stats for the month to snapshot
+    const tasks = await prisma.dailyTask.findMany({
+      where: {
+        userId: session.user.id,
+        scheduledDate: {
+          gte: startOfMonth,
+          lte: endOfMonth,
+        },
+      },
+      select: {
+        status: true,
+        priority: true,
+        pointsEarned: true,
+        weeklyGoalId: true,
+      },
+    });
+
+    const completedTasks = tasks.filter((t) => t.status === "COMPLETED");
+    const tasksCompleted = completedTasks.length;
+    const totalTasks = tasks.length;
+
+    const mitTasks = tasks.filter((t) => t.priority === "MIT");
+    const mitCompleted = mitTasks.filter((t) => t.status === "COMPLETED").length;
+    const mitTotal = mitTasks.length;
+
+    const linkedCompleted = completedTasks.filter((t) => t.weeklyGoalId !== null).length;
+    const goalAlignmentRate = tasksCompleted > 0
+      ? Math.round((linkedCompleted / tasksCompleted) * 100)
+      : 0;
+
+    const pointsEarned = tasks.reduce((sum, t) => sum + t.pointsEarned, 0);
+
+    // Get monthly goals progress
+    const monthlyGoals = await prisma.monthlyGoal.findMany({
+      where: {
+        oneYearGoal: {
+          fiveYearGoal: {
+            dream: {
+              userId: session.user.id,
+            },
+          },
+        },
+        targetMonth: {
+          gte: startOfMonth,
+          lte: endOfMonth,
+        },
+      },
+      select: {
+        status: true,
+      },
+    });
+
+    const goalsCompleted = monthlyGoals.filter((g) => g.status === "COMPLETED").length;
+    const goalsTotal = monthlyGoals.length;
+
+    // Get Kaizen check-ins count
+    const kaizenCheckinsCount = await prisma.kaizenCheckin.count({
+      where: {
+        userId: session.user.id,
+        checkinDate: {
+          gte: startOfMonth,
+          lte: endOfMonth,
+        },
+      },
+    });
+
+    // Check if review already exists for this month
+    const existingReview = await prisma.monthlyReview.findUnique({
+      where: {
+        userId_monthStart: {
+          userId: session.user.id,
+          monthStart: startOfMonth,
+        },
+      },
+    });
+
+    let review;
+    let isNewReview = false;
+
+    if (existingReview) {
+      // Update existing review
+      review = await prisma.monthlyReview.update({
+        where: { id: existingReview.id },
+        data: {
+          wins,
+          learnings,
+          nextMonthFocus,
+          tasksCompleted,
+          totalTasks,
+          mitCompleted,
+          mitTotal,
+          goalsCompleted,
+          goalsTotal,
+          pointsEarned,
+          goalAlignmentRate,
+          kaizenCheckinsCount,
+        },
+      });
+    } else {
+      // Create new review and award points
+      isNewReview = true;
+
+      review = await prisma.monthlyReview.create({
+        data: {
+          userId: session.user.id,
+          monthStart: startOfMonth,
+          wins,
+          learnings,
+          nextMonthFocus,
+          tasksCompleted,
+          totalTasks,
+          mitCompleted,
+          mitTotal,
+          goalsCompleted,
+          goalsTotal,
+          pointsEarned,
+          goalAlignmentRate,
+          kaizenCheckinsCount,
+          reviewPoints: MONTHLY_REVIEW_POINTS,
+        },
+      });
+
+      // Award points to user
+      await prisma.user.update({
+        where: { id: session.user.id },
+        data: {
+          totalPoints: { increment: MONTHLY_REVIEW_POINTS },
+        },
+      });
+
+      // Update monthly review streak
+      await prisma.streak.upsert({
+        where: {
+          userId_type: {
+            userId: session.user.id,
+            type: "MONTHLY_REVIEW",
+          },
+        },
+        update: {
+          currentCount: { increment: 1 },
+          longestCount: {
+            increment: 0, // Will be handled separately
+          },
+          lastActionAt: new Date(),
+        },
+        create: {
+          userId: session.user.id,
+          type: "MONTHLY_REVIEW",
+          currentCount: 1,
+          longestCount: 1,
+          lastActionAt: new Date(),
+        },
+      });
+
+      // Update longest count if needed
+      const streak = await prisma.streak.findUnique({
+        where: {
+          userId_type: {
+            userId: session.user.id,
+            type: "MONTHLY_REVIEW",
+          },
+        },
+      });
+
+      if (streak && streak.currentCount > streak.longestCount) {
+        await prisma.streak.update({
+          where: { id: streak.id },
+          data: { longestCount: streak.currentCount },
+        });
+      }
+    }
+
+    return NextResponse.json({
+      success: true,
+      review,
+      isNewReview,
+      pointsAwarded: isNewReview ? MONTHLY_REVIEW_POINTS : 0,
+    });
+  } catch (error) {
+    console.error("Error submitting monthly review:", error);
+    return NextResponse.json(
+      { error: "Failed to submit monthly review" },
       { status: 500 }
     );
   }

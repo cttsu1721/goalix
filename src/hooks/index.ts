@@ -40,7 +40,7 @@ export {
 export { useDreamBuilder, type DreamBuilderStep, type GoalPath } from "./useDreamBuilder";
 
 // Weekly Review hook
-export { useWeeklyReview, formatAreaName } from "./useWeeklyReview";
+export { useWeeklyReview, useSubmitWeeklyReview, formatAreaName } from "./useWeeklyReview";
 
 // Monthly Review hook
-export { useMonthlyReview } from "./useMonthlyReview";
+export { useMonthlyReview, useSubmitMonthlyReview } from "./useMonthlyReview";

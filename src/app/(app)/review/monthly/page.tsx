@@ -4,7 +4,9 @@ import { useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
-import { useMonthlyReview, formatAreaName } from "@/hooks";
+import { useMonthlyReview, useSubmitMonthlyReview, formatAreaName } from "@/hooks";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   Calendar,
   CheckCircle2,
@@ -358,13 +360,16 @@ function GoalAlignmentCard({ goalAlignment }: {
   );
 }
 
-function ReviewWizard({ monthData }: {
+function ReviewWizard({ monthData, onComplete }: {
   monthData: ReturnType<typeof useMonthlyReview>["data"];
+  onComplete: () => void;
 }) {
   const [currentStep, setCurrentStep] = useState(1);
   const [wins, setWins] = useState("");
   const [learnings, setLearnings] = useState("");
   const [nextMonthFocus, setNextMonthFocus] = useState("");
+
+  const submitReview = useSubmitMonthlyReview();
 
   const handleNext = () => {
     if (currentStep < 4) setCurrentStep(currentStep + 1);
@@ -374,9 +379,25 @@ function ReviewWizard({ monthData }: {
     if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
-  const handleSubmit = () => {
-    console.log("Review submitted:", { wins, learnings, nextMonthFocus });
-    // TODO: Submit to API
+  const handleSubmit = async () => {
+    try {
+      const result = await submitReview.mutateAsync({
+        wins,
+        learnings,
+        nextMonthFocus,
+        monthOffset: 0,
+      });
+
+      if (result.isNewReview) {
+        toast.success(`Monthly review completed! +${result.pointsAwarded} points`);
+      } else {
+        toast.success("Monthly review updated!");
+      }
+
+      onComplete();
+    } catch (error) {
+      toast.error("Failed to submit review. Please try again.");
+    }
   };
 
   return (
@@ -553,10 +574,20 @@ function ReviewWizard({ monthData }: {
         ) : (
           <Button
             onClick={handleSubmit}
-            className="bg-zen-green text-void hover:bg-zen-green/90 rounded-xl"
+            disabled={submitReview.isPending}
+            className="bg-zen-green text-void hover:bg-zen-green/90 rounded-xl disabled:opacity-50"
           >
-            <CheckCircle2 className="w-4 h-4 mr-2" />
-            Complete Review
+            {submitReview.isPending ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="w-4 h-4 mr-2" />
+                Complete Review
+              </>
+            )}
           </Button>
         )}
       </div>
@@ -595,11 +626,18 @@ function LoadingState() {
 }
 
 export default function MonthlyReviewPage() {
+  const router = useRouter();
   const [isReviewing, setIsReviewing] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
   const { data: monthData, isLoading } = useMonthlyReview(0);
 
   const handleStartReview = () => {
     setIsReviewing(true);
+  };
+
+  const handleComplete = () => {
+    setIsCompleted(true);
+    setIsReviewing(false);
   };
 
   const monthName = monthData?.monthRange.monthName || new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" });
@@ -686,9 +724,36 @@ export default function MonthlyReviewPage() {
         </div>
       )}
 
-      {/* Review Wizard or Empty State */}
-      {isReviewing ? (
-        <ReviewWizard monthData={monthData} />
+      {/* Review Wizard, Completed State, or Empty State */}
+      {isCompleted ? (
+        <div className="bg-night border border-night-mist rounded-2xl p-12 text-center">
+          <div className="w-20 h-20 rounded-2xl bg-zen-green/10 flex items-center justify-center mx-auto mb-6">
+            <CheckCircle2 className="w-10 h-10 text-zen-green" />
+          </div>
+          <h3 className="text-xl font-medium text-moon mb-3">Monthly Review Completed!</h3>
+          <p className="text-moon-dim max-w-md mx-auto mb-8 leading-relaxed">
+            Great job reflecting on {monthName}. Your insights have been saved and you&apos;ve
+            earned points for completing your monthly review.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button
+              onClick={() => router.push("/dashboard")}
+              className="bg-lantern text-void hover:bg-lantern/90 font-medium px-6 h-11 rounded-xl"
+            >
+              Back to Dashboard
+            </Button>
+            <Button
+              onClick={() => router.push("/progress")}
+              variant="outline"
+              className="border-night-mist bg-night-soft text-moon hover:border-moon-dim font-medium px-6 h-11 rounded-xl"
+            >
+              <Award className="w-4 h-4 mr-2" />
+              View Progress
+            </Button>
+          </div>
+        </div>
+      ) : isReviewing ? (
+        <ReviewWizard monthData={monthData} onComplete={handleComplete} />
       ) : (
         <EmptyReviewState onStartReview={handleStartReview} monthName={monthName} />
       )}

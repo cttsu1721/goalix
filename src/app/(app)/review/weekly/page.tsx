@@ -4,7 +4,9 @@ import { useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
-import { useWeeklyReview, formatAreaName, useUserStreaks } from "@/hooks";
+import { useWeeklyReview, useSubmitWeeklyReview, formatAreaName, useUserStreaks } from "@/hooks";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   Calendar,
   CheckCircle2,
@@ -281,14 +283,17 @@ function KaizenWeeklyCard({ kaizen }: {
   );
 }
 
-function ReviewWizard({ weekData, streaks }: {
+function ReviewWizard({ weekData, streaks, onComplete }: {
   weekData: ReturnType<typeof useWeeklyReview>["data"];
   streaks: Array<{ type: string; currentCount: number }>;
+  onComplete: () => void;
 }) {
   const [currentStep, setCurrentStep] = useState(1);
   const [wins, setWins] = useState("");
   const [challenges, setChallenges] = useState("");
   const [nextWeekFocus, setNextWeekFocus] = useState("");
+
+  const submitReview = useSubmitWeeklyReview();
 
   const handleNext = () => {
     if (currentStep < 4) setCurrentStep(currentStep + 1);
@@ -298,9 +303,25 @@ function ReviewWizard({ weekData, streaks }: {
     if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
-  const handleSubmit = () => {
-    console.log("Review submitted:", { wins, challenges, nextWeekFocus });
-    // TODO: Submit to API
+  const handleSubmit = async () => {
+    try {
+      const result = await submitReview.mutateAsync({
+        wins,
+        challenges,
+        nextWeekFocus,
+        weekOffset: 0,
+      });
+
+      if (result.isNewReview) {
+        toast.success(`Weekly review completed! +${result.pointsAwarded} points`);
+      } else {
+        toast.success("Weekly review updated!");
+      }
+
+      onComplete();
+    } catch (error) {
+      toast.error("Failed to submit review. Please try again.");
+    }
   };
 
   const currentStreak = streaks.find((s) => s.type === "WEEKLY_REVIEW")?.currentCount || 0;
@@ -499,10 +520,20 @@ function ReviewWizard({ weekData, streaks }: {
         ) : (
           <Button
             onClick={handleSubmit}
-            className="bg-zen-green text-void hover:bg-zen-green/90 rounded-xl"
+            disabled={submitReview.isPending}
+            className="bg-zen-green text-void hover:bg-zen-green/90 rounded-xl disabled:opacity-50"
           >
-            <CheckCircle2 className="w-4 h-4 mr-2" />
-            Complete Review
+            {submitReview.isPending ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="w-4 h-4 mr-2" />
+                Complete Review
+              </>
+            )}
           </Button>
         )}
       </div>
@@ -541,12 +572,19 @@ function LoadingState() {
 }
 
 export default function WeeklyReviewPage() {
+  const router = useRouter();
   const [isReviewing, setIsReviewing] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
   const { data: weekData, isLoading } = useWeeklyReview(0);
   const { data: streaksData } = useUserStreaks();
 
   const handleStartReview = () => {
     setIsReviewing(true);
+  };
+
+  const handleComplete = () => {
+    setIsCompleted(true);
+    setIsReviewing(false);
   };
 
   // Get current week date range
@@ -650,9 +688,37 @@ export default function WeeklyReviewPage() {
         )}
       </div>
 
-      {/* Review Wizard or Empty State */}
-      {isReviewing ? (
-        <ReviewWizard weekData={weekData} streaks={streaksData?.streaks || []} />
+      {/* Review Wizard, Completed State, or Empty State */}
+      {isCompleted ? (
+        <div className="bg-night border border-night-mist rounded-2xl p-12 text-center">
+          <div className="w-20 h-20 rounded-2xl bg-zen-green/10 flex items-center justify-center mx-auto mb-6">
+            <CheckCircle2 className="w-10 h-10 text-zen-green" />
+          </div>
+          <h3 className="text-xl font-medium text-moon mb-3">Review Completed!</h3>
+          <p className="text-moon-dim max-w-md mx-auto mb-8 leading-relaxed">
+            Great job reflecting on your week. Keep building momentum with consistent reviews.
+          </p>
+          <div className="flex items-center justify-center gap-4">
+            <Button
+              onClick={() => router.push("/dashboard")}
+              className="bg-lantern text-void hover:bg-lantern/90 font-medium px-6 h-11 rounded-xl"
+            >
+              Back to Dashboard
+            </Button>
+            <Button
+              onClick={() => {
+                setIsCompleted(false);
+                setIsReviewing(true);
+              }}
+              variant="outline"
+              className="border-night-mist bg-night-soft text-moon hover:border-lantern hover:text-lantern font-medium px-6 h-11 rounded-xl"
+            >
+              Edit Review
+            </Button>
+          </div>
+        </div>
+      ) : isReviewing ? (
+        <ReviewWizard weekData={weekData} streaks={streaksData?.streaks || []} onComplete={handleComplete} />
       ) : (
         <EmptyReviewState onStartReview={handleStartReview} />
       )}

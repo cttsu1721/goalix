@@ -124,6 +124,8 @@ model User {
   earnedBadges    EarnedBadge[]
   aiInteractions  AIInteraction[]
   kaizenCheckins  KaizenCheckin[]
+  weeklyReviews   WeeklyReview[]
+  monthlyReviews  MonthlyReview[]
 
   @@map("users")
 }
@@ -334,4 +336,71 @@ model AIInteraction {
 
   @@index([userId, createdAt])
   @@map("ai_interactions")
+}
+
+// Weekly Review
+model WeeklyReview {
+  id                String   @id @default(cuid())
+  userId            String   @map("user_id")
+  weekStart         DateTime @map("week_start") @db.Date // Monday of the week
+
+  // Reflection content
+  wins              String?  @db.Text
+  challenges        String?  @db.Text
+  nextWeekFocus     String?  @map("next_week_focus") @db.Text
+
+  // Stats snapshot (captured at review time)
+  tasksCompleted    Int      @default(0) @map("tasks_completed")
+  totalTasks        Int      @default(0) @map("total_tasks")
+  mitCompleted      Int      @default(0) @map("mit_completed")
+  mitTotal          Int      @default(0) @map("mit_total")
+  pointsEarned      Int      @default(0) @map("points_earned")
+  goalAlignmentRate Int      @default(0) @map("goal_alignment_rate") // 0-100
+
+  // Gamification
+  reviewPoints      Int      @default(0) @map("review_points") // Points earned for completing review
+
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, weekStart])
+  @@index([userId, weekStart])
+  @@map("weekly_reviews")
+}
+
+// Monthly Review
+model MonthlyReview {
+  id                String   @id @default(cuid())
+  userId            String   @map("user_id")
+  monthStart        DateTime @map("month_start") @db.Date // First day of the month
+
+  // Reflection content
+  wins              String?  @db.Text
+  learnings         String?  @db.Text
+  nextMonthFocus    String?  @map("next_month_focus") @db.Text
+
+  // Stats snapshot (captured at review time)
+  tasksCompleted    Int      @default(0) @map("tasks_completed")
+  totalTasks        Int      @default(0) @map("total_tasks")
+  mitCompleted      Int      @default(0) @map("mit_completed")
+  mitTotal          Int      @default(0) @map("mit_total")
+  goalsCompleted    Int      @default(0) @map("goals_completed")
+  goalsTotal        Int      @default(0) @map("goals_total")
+  pointsEarned      Int      @default(0) @map("points_earned")
+  goalAlignmentRate Int      @default(0) @map("goal_alignment_rate") // 0-100
+  kaizenCheckinsCount Int    @default(0) @map("kaizen_checkins_count")
+
+  // Gamification
+  reviewPoints      Int      @default(0) @map("review_points") // Points earned for completing review
+
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, monthStart])
+  @@index([userId, monthStart])
+  @@map("monthly_reviews")
 }
