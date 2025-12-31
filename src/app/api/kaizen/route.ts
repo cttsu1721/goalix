@@ -6,6 +6,7 @@ import {
   isBalancedDay,
   type KaizenCheckinInput,
 } from "@/types/kaizen";
+import { checkAllBadges } from "@/lib/gamification/badges";
 
 // GET /api/kaizen - Get Kaizen check-in(s)
 export async function GET(request: NextRequest) {
@@ -223,6 +224,14 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Check and award badges (only for new check-ins)
+    const earnedBadges = !existingCheckin
+      ? await checkAllBadges(session.user.id, {
+          kaizenCheckin: true,
+          currentStreak: streak?.currentCount || 0,
+        })
+      : [];
+
     return NextResponse.json({
       checkin,
       pointsEarned,
@@ -232,6 +241,10 @@ export async function POST(request: NextRequest) {
         currentCount: streak?.currentCount || 0,
         longestCount: streak?.longestCount || 0,
       },
+      badges: earnedBadges.map((b) => ({
+        name: b.badge.name,
+        description: b.badge.description,
+      })),
     });
   } catch (error) {
     console.error("Error creating kaizen checkin:", error);

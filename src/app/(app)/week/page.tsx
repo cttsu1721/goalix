@@ -310,18 +310,18 @@ function DaySection({
         <div className={cn(
           "flex flex-col items-center justify-center w-14 h-14 rounded-xl flex-shrink-0",
           today
-            ? "bg-gradient-to-br from-sakura-500 to-sakura-600 shadow-md"
+            ? "bg-sakura-200 border-2 border-sakura-300"
             : "bg-night-soft/50"
         )}>
           <span className={cn(
             "text-[0.6rem] uppercase tracking-wider font-medium",
-            today ? "text-white/90" : "text-moon-dim"
+            today ? "text-sakura-600" : "text-moon-dim"
           )}>
             {dayName.slice(0, 3)}
           </span>
           <span className={cn(
             "text-xl font-semibold leading-none",
-            today ? "text-white" : "text-moon-dim"
+            today ? "text-sakura-700" : "text-moon-dim"
           )}>
             {dayNum}
           </span>

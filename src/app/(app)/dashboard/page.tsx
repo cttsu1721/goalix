@@ -28,6 +28,7 @@ const TaskSuggestModal = dynamic(
 import {
   useTasks,
   useCreateTask,
+  useUpdateTask,
   useTaskCompletion,
   useUserStats,
   useKaizenCheckin,
@@ -102,8 +103,20 @@ export default function DashboardPage() {
 
   // Mutations
   const { complete: completeTask, isPending: isCompleting } = useTaskCompletion();
+  const updateTask = useUpdateTask();
   const saveKaizen = useSaveKaizenCheckin();
   const createTask = useCreateTask();
+
+  // Uncomplete a task (revert to pending)
+  const uncompleteTask = useCallback(async (taskId: string) => {
+    try {
+      await updateTask.mutateAsync({ id: taskId, status: "PENDING" });
+      toast.success("Task reopened");
+      refetchTasks();
+    } catch {
+      toast.error("Failed to reopen task");
+    }
+  }, [updateTask, refetchTasks]);
 
   // Transform tasks data - memoized (MUST be before early return to follow Rules of Hooks)
   const tasks = tasksData?.tasks || [];
@@ -138,26 +151,42 @@ export default function DashboardPage() {
     };
   }, [tasks]);
 
-  // Handle task completion - memoized with useCallback (MUST be before early return)
+  // Handle task toggle (complete or uncomplete) - memoized with useCallback (MUST be before early return)
   const handleToggleMit = useCallback(() => {
-    if (mitTask && mitTask.status !== "COMPLETED" && !isCompleting) {
+    if (!mitTask || isCompleting || updateTask.isPending) return;
+
+    if (mitTask.status === "COMPLETED") {
+      uncompleteTask(mitTask.id);
+    } else {
       completeTask(mitTask.id, true); // true = MIT, triggers confetti
     }
-  }, [mitTask, isCompleting, completeTask]);
+  }, [mitTask, isCompleting, updateTask.isPending, completeTask, uncompleteTask]);
 
   const handleTogglePrimary = useCallback((taskId: string) => {
+    if (isCompleting || updateTask.isPending) return;
+
     const task = tasks.find((t) => t.id === taskId && t.priority === "PRIMARY");
-    if (task && task.status !== "COMPLETED" && !isCompleting) {
+    if (!task) return;
+
+    if (task.status === "COMPLETED") {
+      uncompleteTask(taskId);
+    } else {
       completeTask(taskId, false);
     }
-  }, [tasks, isCompleting, completeTask]);
+  }, [tasks, isCompleting, updateTask.isPending, completeTask, uncompleteTask]);
 
   const handleToggleSecondary = useCallback((taskId: string) => {
+    if (isCompleting || updateTask.isPending) return;
+
     const task = tasks.find((t) => t.id === taskId && t.priority === "SECONDARY");
-    if (task && task.status !== "COMPLETED" && !isCompleting) {
+    if (!task) return;
+
+    if (task.status === "COMPLETED") {
+      uncompleteTask(taskId);
+    } else {
       completeTask(taskId, false);
     }
-  }, [tasks, isCompleting, completeTask]);
+  }, [tasks, isCompleting, updateTask.isPending, completeTask, uncompleteTask]);
 
   // Open create modal with specific priority
   const openCreateModal = (priority: TaskPriority) => {

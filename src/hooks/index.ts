@@ -44,3 +44,6 @@ export { useWeeklyReview, useSubmitWeeklyReview, formatAreaName } from "./useWee
 
 // Monthly Review hook
 export { useMonthlyReview, useSubmitMonthlyReview } from "./useMonthlyReview";
+
+// Mind Map / Hierarchy hook
+export { useGoalHierarchy } from "./useGoalHierarchy";

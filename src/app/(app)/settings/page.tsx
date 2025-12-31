@@ -19,10 +19,14 @@ import {
   Check,
   AlertTriangle,
   Moon,
+  Sun,
   Globe,
   LogOut,
   Loader2,
+  Flower2,
 } from "lucide-react";
+import { useTheme } from "next-themes";
+import { THEME_NAMES, THEME_DESCRIPTIONS } from "@/components/theme-provider";
 
 const timezones = [
   { value: "Australia/Melbourne", label: "Melbourne (AEDT)" },
@@ -208,6 +212,160 @@ function SettingsSkeleton() {
         </div>
       ))}
     </div>
+  );
+}
+
+function ThemeCard({
+  themeKey,
+  isSelected,
+  onSelect,
+}: {
+  themeKey: "dark" | "light";
+  isSelected: boolean;
+  onSelect: () => void;
+}) {
+  const isDark = themeKey === "dark";
+
+  return (
+    <button
+      onClick={onSelect}
+      className={`
+        relative flex-1 p-4 rounded-xl border-2 transition-all duration-300
+        ${isSelected
+          ? "border-lantern shadow-lg shadow-lantern/20"
+          : "border-night-mist hover:border-moon-dim"
+        }
+      `}
+    >
+      {/* Theme preview */}
+      <div
+        className={`
+          w-full aspect-[4/3] rounded-lg overflow-hidden mb-3 relative
+          ${isDark
+            ? "bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#334155]"
+            : "bg-gradient-to-br from-[#fefdfb] via-[#faf8f4] to-[#f5f2eb]"
+          }
+        `}
+      >
+        {/* Mini sidebar preview */}
+        <div
+          className={`
+            absolute left-0 top-0 bottom-0 w-1/4 border-r
+            ${isDark
+              ? "bg-[#0f172a] border-[#334155]"
+              : "bg-[#faf8f4] border-[#ebe5db]"
+            }
+          `}
+        >
+          <div className={`w-3 h-3 m-2 rounded-full ${isDark ? "bg-amber-500/80" : "bg-pink-400/80"}`} />
+          <div className="space-y-1 px-2 mt-2">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className={`h-1.5 rounded-full ${isDark ? "bg-slate-600" : "bg-stone-300"}`}
+                style={{ width: `${60 + i * 10}%` }}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Mini content preview */}
+        <div className="absolute left-1/4 right-0 top-0 bottom-0 p-2">
+          <div className={`h-2 w-1/2 rounded-full mb-2 ${isDark ? "bg-slate-500" : "bg-stone-400"}`} />
+          <div className="grid grid-cols-2 gap-1">
+            {[1, 2].map((i) => (
+              <div
+                key={i}
+                className={`aspect-video rounded ${isDark ? "bg-slate-700/50" : "bg-white/80"} border ${isDark ? "border-slate-600" : "border-stone-200"}`}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Decorative accent */}
+        {isDark ? (
+          <Moon className="absolute bottom-2 right-2 w-4 h-4 text-amber-500/50" />
+        ) : (
+          <Flower2 className="absolute bottom-2 right-2 w-4 h-4 text-pink-400/50" />
+        )}
+      </div>
+
+      {/* Theme info */}
+      <div className="text-left">
+        <div className="flex items-center gap-2">
+          {isDark ? (
+            <Moon className="w-4 h-4 text-lantern" />
+          ) : (
+            <Sun className="w-4 h-4 text-lantern" />
+          )}
+          <span className="font-medium text-moon">
+            {THEME_NAMES[themeKey]}
+          </span>
+          {isSelected && (
+            <span className="ml-auto">
+              <Check className="w-4 h-4 text-lantern" />
+            </span>
+          )}
+        </div>
+        <p className="text-xs text-moon-faint mt-1 line-clamp-2">
+          {THEME_DESCRIPTIONS[themeKey]}
+        </p>
+      </div>
+    </button>
+  );
+}
+
+function AppearanceSection() {
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  // Avoid hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <SettingsSection
+        icon={Palette}
+        title="Appearance"
+        description="Customize how Goalix looks"
+      >
+        <div className="grid grid-cols-2 gap-4">
+          <div className="aspect-[4/3] rounded-xl bg-night-soft animate-pulse" />
+          <div className="aspect-[4/3] rounded-xl bg-night-soft animate-pulse" />
+        </div>
+      </SettingsSection>
+    );
+  }
+
+  return (
+    <SettingsSection
+      icon={Palette}
+      title="Appearance"
+      description="Customize how Goalix looks"
+    >
+      <div className="space-y-4">
+        <p className="text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-moon-faint">
+          Theme
+        </p>
+        <div className="grid grid-cols-2 gap-4">
+          <ThemeCard
+            themeKey="dark"
+            isSelected={theme === "dark"}
+            onSelect={() => setTheme("dark")}
+          />
+          <ThemeCard
+            themeKey="light"
+            isSelected={theme === "light"}
+            onSelect={() => setTheme("light")}
+          />
+        </div>
+        <p className="text-xs text-moon-faint mt-2">
+          Your theme preference is saved automatically and synced across devices.
+        </p>
+      </div>
+    </SettingsSection>
   );
 }
 
@@ -427,30 +585,7 @@ export default function SettingsPage() {
         </SettingsSection>
 
         {/* Appearance Section */}
-        <SettingsSection
-          icon={Palette}
-          title="Appearance"
-          description="Customize how Goalix looks"
-        >
-          <div className="space-y-4">
-            <div className="flex items-center justify-between py-3">
-              <div>
-                <p className="text-sm font-medium text-moon">Theme</p>
-                <p className="text-xs text-moon-faint mt-0.5">
-                  Yoru Zen is optimized for dark environments
-                </p>
-              </div>
-              <div className="flex items-center gap-2 px-3 py-2 bg-night-soft border border-night-mist rounded-xl">
-                <Moon className="w-4 h-4 text-lantern" />
-                <span className="text-sm text-moon-soft">Dark</span>
-              </div>
-            </div>
-            <p className="text-xs text-moon-faint">
-              Light mode coming soon. The Yoru Zen design system is built for
-              comfortable viewing in low-light conditions.
-            </p>
-          </div>
-        </SettingsSection>
+        <AppearanceSection />
 
         {/* Security Section */}
         <SettingsSection

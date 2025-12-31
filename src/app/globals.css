@@ -173,6 +173,94 @@
   /* Yoru Zen is already dark, no changes needed */
 }
 
+/* ============================================
+   SAKURA LIGHT THEME
+   Japanese cherry blossom-inspired light theme
+   ============================================ */
+
+.light {
+  /* ========== SAKURA PALETTE ========== */
+
+  /* Backgrounds - Warm washi paper tones */
+  --void: oklch(0.985 0.008 60);          /* #fefdfb - Lightest cream */
+  --night: oklch(0.975 0.012 60);         /* #faf8f4 - Primary surface (paper) */
+  --night-soft: oklch(0.96 0.015 60);     /* #f5f2eb - Elevated surface */
+  --night-mist: oklch(0.92 0.02 60);      /* #ebe5db - Borders, dividers */
+  --night-glow: oklch(0.88 0.025 60);     /* #ded5c8 - Hover states */
+
+  /* Accent - Sakura (cherry blossom pink) */
+  --lantern: oklch(0.68 0.14 350);                /* #d4718a - Primary accent */
+  --lantern-soft: oklch(0.68 0.14 350 / 0.12);    /* Accent background */
+  --lantern-mist: oklch(0.68 0.14 350 / 0.06);    /* Subtle accent */
+
+  /* Text - Ink (warm charcoal) */
+  --moon: oklch(0.22 0.02 60);            /* #2d2a26 - Primary text */
+  --moon-soft: oklch(0.40 0.02 60);       /* #5c5650 - Secondary text */
+  --moon-dim: oklch(0.55 0.02 60);        /* #7d756c - Tertiary text */
+  --moon-faint: oklch(0.68 0.02 60);      /* #9e958a - Muted text */
+
+  /* Semantic colors - Soft, organic tones */
+  --zen-green: oklch(0.62 0.12 160);              /* #4a9d7a - Success (bamboo) */
+  --zen-green-soft: oklch(0.62 0.12 160 / 0.12);  /* Success background */
+  --zen-blue: oklch(0.58 0.10 220);               /* #4a8dad - Info (sky) */
+  --zen-purple: oklch(0.58 0.12 300);             /* #8a5dad - Growth (wisteria) */
+  --zen-red: oklch(0.58 0.14 25);                 /* #c45a4a - Destructive (maple) */
+  --zen-red-soft: oklch(0.58 0.14 25 / 0.12);     /* Destructive background */
+
+  /* ========== SHADCN SEMANTIC MAPPINGS ========== */
+
+  /* Core */
+  --background: var(--void);
+  --foreground: var(--moon);
+
+  /* Cards & Surfaces */
+  --card: var(--night);
+  --card-foreground: var(--moon);
+  --popover: var(--night);
+  --popover-foreground: var(--moon);
+
+  /* Primary - Sakura accent */
+  --primary: var(--lantern);
+  --primary-foreground: oklch(0.98 0.01 60);
+
+  /* Secondary */
+  --secondary: var(--night-soft);
+  --secondary-foreground: var(--moon-soft);
+
+  /* Muted */
+  --muted: var(--night-mist);
+  --muted-foreground: var(--moon-dim);
+
+  /* Accent - Sakura glow */
+  --accent: var(--lantern-soft);
+  --accent-foreground: var(--lantern);
+
+  /* Destructive */
+  --destructive: var(--zen-red);
+
+  /* Form elements */
+  --border: var(--night-mist);
+  --input: var(--night);
+  --ring: var(--lantern);
+
+  /* Sidebar */
+  --sidebar: var(--night);
+  --sidebar-foreground: var(--moon);
+  --sidebar-primary: var(--lantern);
+  --sidebar-primary-foreground: oklch(0.98 0.01 60);
+  --sidebar-accent: var(--lantern-soft);
+  --sidebar-accent-foreground: var(--lantern);
+  --sidebar-border: var(--night-mist);
+  --sidebar-ring: var(--lantern);
+
+  /* Charts - Sakura palette */
+  --chart-1: var(--lantern);
+  --chart-2: var(--zen-green);
+  --chart-3: var(--zen-blue);
+  --chart-4: var(--zen-purple);
+  --chart-5: oklch(0.72 0.12 45); /* Warm peach */
+}
+
 /* ========== BASE STYLES ========== */
 
 @layer base {
@@ -196,37 +284,81 @@
 
 /* ========== GOAL CATEGORY COLORS ========== */
 
-.category-health {
+/* Dark theme (Yoru Zen) category colors */
+:root .category-health,
+.dark .category-health {
   --category-color: var(--zen-green);
   --category-bg: var(--zen-green-soft);
 }
 
-.category-wealth {
+:root .category-wealth,
+.dark .category-wealth {
   --category-color: var(--lantern);
   --category-bg: var(--lantern-soft);
 }
 
-.category-relationships {
+:root .category-relationships,
+.dark .category-relationships {
   --category-color: oklch(0.72 0.15 350); /* Pink-red */
   --category-bg: oklch(0.72 0.15 350 / 0.10);
 }
 
-.category-career {
+:root .category-career,
+.dark .category-career {
   --category-color: var(--zen-blue);
   --category-bg: oklch(0.75 0.10 220 / 0.10);
 }
 
-.category-personal-growth {
+:root .category-personal-growth,
+.dark .category-personal-growth {
   --category-color: var(--zen-purple);
   --category-bg: oklch(0.68 0.12 300 / 0.10);
 }
 
-.category-lifestyle {
+:root .category-lifestyle,
+.dark .category-lifestyle {
   --category-color: oklch(0.75 0.12 35); /* Warm orange */
   --category-bg: oklch(0.75 0.12 35 / 0.10);
 }
 
-.category-other {
+:root .category-other,
+.dark .category-other {
+  --category-color: var(--moon-dim);
+  --category-bg: var(--night-soft);
+}
+
+/* Light theme (Sakura) category colors - deeper tones for contrast */
+.light .category-health {
+  --category-color: oklch(0.52 0.14 160);
+  --category-bg: oklch(0.52 0.14 160 / 0.10);
+}
+
+.light .category-wealth {
+  --category-color: oklch(0.58 0.14 45);
+  --category-bg: oklch(0.58 0.14 45 / 0.10);
+}
+
+.light .category-relationships {
+  --category-color: oklch(0.58 0.16 350);
+  --category-bg: oklch(0.58 0.16 350 / 0.10);
+}
+
+.light .category-career {
+  --category-color: oklch(0.50 0.12 220);
+  --category-bg: oklch(0.50 0.12 220 / 0.10);
+}
+
+.light .category-personal-growth {
+  --category-color: oklch(0.50 0.14 300);
+  --category-bg: oklch(0.50 0.14 300 / 0.10);
+}
+
+.light .category-lifestyle {
+  --category-color: oklch(0.60 0.14 35);
+  --category-bg: oklch(0.60 0.14 35 / 0.10);
+}
+
+.light .category-other {
   --category-color: var(--moon-dim);
   --category-bg: var(--night-soft);
 }
@@ -311,22 +443,78 @@
 
 /* ========== UTILITY CLASSES ========== */
 
-/* Glass effect for cards */
-.glass {
+/* Glass effect for cards - dark theme */
+:root .glass,
+.dark .glass {
   background: oklch(0.10 0.01 270 / 0.8);
   backdrop-filter: blur(12px);
   border: 1px solid var(--night-mist);
 }
 
-/* Gradient text */
-.text-gradient-lantern {
+/* Glass effect for cards - light theme (frosted paper) */
+.light .glass {
+  background: oklch(0.98 0.01 60 / 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--night-mist);
+  box-shadow: 0 4px 24px oklch(0.50 0.02 60 / 0.08);
+}
+
+/* Gradient text - dark theme */
+:root .text-gradient-lantern,
+.dark .text-gradient-lantern {
   background: linear-gradient(135deg, var(--lantern), var(--zen-green));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Progress bar gradient */
-.progress-gradient {
+/* Gradient text - light theme (sakura to wisteria) */
+.light .text-gradient-lantern {
+  background: linear-gradient(135deg, oklch(0.65 0.16 350), oklch(0.55 0.14 300));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Progress bar gradient - dark theme */
+:root .progress-gradient,
+.dark .progress-gradient {
   background: linear-gradient(90deg, var(--lantern), var(--zen-green));
+}
+
+/* Progress bar gradient - light theme */
+.light .progress-gradient {
+  background: linear-gradient(90deg, oklch(0.68 0.14 350), oklch(0.58 0.12 160));
+}
+
+/* ========== SAKURA DECORATIVE ELEMENTS ========== */
+
+/* Subtle sakura petal pattern overlay */
+.light .sakura-pattern {
+  position: relative;
+}
+
+.light .sakura-pattern::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M30 5c-2 3-6 4-8 8 2-1 5-1 8 2 3-3 6-3 8-2-2-4-6-5-8-8z' fill='%23d4718a' fill-opacity='0.4'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Soft shadow for light mode cards */
+.light .card-shadow {
+  box-shadow:
+    0 1px 2px oklch(0.50 0.02 60 / 0.04),
+    0 4px 12px oklch(0.50 0.02 60 / 0.06),
+    0 8px 24px oklch(0.50 0.02 60 / 0.04);
+}
+
+/* Theme transition */
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: ease-out;
+  transition-duration: 0.15s;
 }

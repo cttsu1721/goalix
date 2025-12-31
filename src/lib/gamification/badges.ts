@@ -15,6 +15,7 @@ export const BADGE_ICONS: Record<BadgeSlug, string> = {
   visionary: "👁️",
   health_nut: "💪",
   wealth_builder: "💰",
+  kaizen_starter: "🧘",
 };
 
 interface BadgeCheckResult {
@@ -312,12 +313,36 @@ export async function checkCategoryBadges(
 }
 
 /**
+ * Check and award kaizen_starter badge (first Kaizen check-in)
+ */
+export async function checkKaizenStarter(userId: string): Promise<BadgeCheckResult | null> {
+  const hasIt = await hasBadge(userId, "kaizen_starter");
+  if (hasIt) return null;
+
+  const checkinCount = await prisma.kaizenCheckin.count({
+    where: { userId },
+  });
+
+  if (checkinCount >= 1) {
+    await awardBadge(userId, "kaizen_starter");
+    return {
+      earned: true,
+      newlyEarned: true,
+      badge: BADGE_DEFINITIONS.kaizen_starter,
+    };
+  }
+
+  return null;
+}
+
+/**
  * Run all badge checks after an action
  */
 export async function checkAllBadges(
   userId: string,
   context: {
     taskCompleted?: boolean;
+    kaizenCheckin?: boolean;
     todayPoints?: number;
     currentStreak?: number;
     category?: string;
@@ -329,6 +354,12 @@ export async function checkAllBadges(
   if (context.taskCompleted) {
     const firstBlood = await checkFirstBlood(userId);
     if (firstBlood) results.push(firstBlood);
+  }
+
+  // Kaizen starter (first kaizen check-in)
+  if (context.kaizenCheckin) {
+    const kaizenStarter = await checkKaizenStarter(userId);
+    if (kaizenStarter) results.push(kaizenStarter);
   }
 
   // Streak badges

@@ -306,13 +306,13 @@ function GoalsOnlyPageContent() {
   const searchParams = useSearchParams();
   const viewParam = searchParams.get("view");
 
-  // Get initial level from URL or default to 1-year
+  // Get initial level from URL or default to 5-year
   const getInitialLevel = (): GoalsOnlyLevel => {
     const validLevels: GoalsOnlyLevel[] = ["5-year", "1-year", "monthly", "weekly"];
     if (viewParam && validLevels.includes(viewParam as GoalsOnlyLevel)) {
       return viewParam as GoalsOnlyLevel;
     }
-    return "1-year"; // Default to 1-year (most actionable)
+    return "5-year"; // Default to 5-year (top of hierarchy)
   };
 
   const [activeLevel, setActiveLevel] = useState<GoalsOnlyLevel>(getInitialLevel);

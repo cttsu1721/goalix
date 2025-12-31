@@ -108,6 +108,13 @@ export const BADGE_DEFINITIONS = {
     description: "Complete 10 wealth-related tasks",
     category: "category",
   },
+  // Kaizen badges
+  kaizen_starter: {
+    slug: "kaizen_starter",
+    name: "Kaizen Starter",
+    description: "Complete your first Kaizen check-in",
+    category: "kaizen",
+  },
 } as const;
 
 export type BadgeSlug = keyof typeof BADGE_DEFINITIONS;

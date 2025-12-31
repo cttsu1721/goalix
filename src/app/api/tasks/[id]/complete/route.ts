@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { TASK_PRIORITY_POINTS } from "@/types/tasks";
+import { checkAllBadges } from "@/lib/gamification/badges";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -129,6 +130,35 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       leveledUp = true;
     }
 
+    // Calculate today's total points for badge checking
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(today);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const todayTasks = await prisma.dailyTask.findMany({
+      where: {
+        userId: session.user.id,
+        scheduledDate: { gte: today, lte: endOfDay },
+        status: "COMPLETED",
+      },
+      select: { pointsEarned: true },
+    });
+    const todayPoints = todayTasks.reduce((sum, t) => sum + t.pointsEarned, 0);
+
+    // Get current MIT streak for badge checking
+    const currentMitStreak = await prisma.streak.findFirst({
+      where: { userId: session.user.id, type: "MIT_COMPLETION" },
+    });
+
+    // Check and award badges
+    const earnedBadges = await checkAllBadges(session.user.id, {
+      taskCompleted: true,
+      todayPoints,
+      currentStreak: currentMitStreak?.currentCount || 0,
+      category: task.weeklyGoal?.category || undefined,
+    });
+
     return NextResponse.json({
       task,
       points: {
@@ -139,6 +169,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       },
       leveledUp,
       newLevel: leveledUp ? newLevel : undefined,
+      badges: earnedBadges.map((b) => ({
+        slug: Object.entries(b.badge).find(([, v]) => v === b.badge.name)?.[0],
+        name: b.badge.name,
+        description: b.badge.description,
+      })),
     });
   } catch (error) {
     console.error("Error completing task:", error);
