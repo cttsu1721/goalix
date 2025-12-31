@@ -12,7 +12,6 @@ import {
   Star,
   Target,
   TrendingUp,
-  Network,
   CalendarCheck,
   CalendarDays,
 } from "lucide-react";
@@ -72,11 +71,6 @@ const navGroups: NavGroup[] = [
         href: "/goals?view=goals",
         label: "Goals",
         icon: <Target className="w-5 h-5" />,
-      },
-      {
-        href: "/mindmap",
-        label: "Mind Map",
-        icon: <Network className="w-5 h-5" />,
       },
     ],
   },

@@ -5,11 +5,3 @@ export { GoalCreateModal } from "./GoalCreateModal";
 export { GoalEditModal } from "./GoalEditModal";
 export { DreamBuilderModal } from "./DreamBuilderModal";
 export { DreamBuilderPreview } from "./DreamBuilderPreview";
-
-// Mind Map components
-export {
-  GoalMindMap,
-  MindMapNode,
-  MindMapControls,
-  MindMapEmpty,
-} from "./mindmap";
