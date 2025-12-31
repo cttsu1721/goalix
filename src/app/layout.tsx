@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Sora, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { Providers } from "@/components/providers";
+import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistration";
 import "./globals.css";
 
 const sora = Sora({
@@ -55,6 +56,7 @@ export default function RootLayout({
         <Providers>
           {children}
           <Toaster />
+          <ServiceWorkerRegistration />
         </Providers>
       </body>
     </html>
