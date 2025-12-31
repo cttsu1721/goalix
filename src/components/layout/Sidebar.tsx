@@ -7,10 +7,14 @@ import { cn } from "@/lib/utils";
 import {
   CheckCircle,
   Calendar,
+  CalendarRange,
   Clock,
   Star,
   Target,
   TrendingUp,
+  Network,
+  CalendarCheck,
+  CalendarDays,
 } from "lucide-react";
 import { AiUsageIndicator } from "@/components/ai";
 
@@ -45,6 +49,11 @@ const navGroups: NavGroup[] = [
         icon: <Calendar className="w-5 h-5" />,
       },
       {
+        href: "/month",
+        label: "Month",
+        icon: <CalendarRange className="w-5 h-5" />,
+      },
+      {
         href: "/upcoming",
         label: "Upcoming",
         icon: <Clock className="w-5 h-5" />,
@@ -64,6 +73,11 @@ const navGroups: NavGroup[] = [
         label: "Goals",
         icon: <Target className="w-5 h-5" />,
       },
+      {
+        href: "/mindmap",
+        label: "Mind Map",
+        icon: <Network className="w-5 h-5" />,
+      },
     ],
   },
   {
@@ -73,6 +87,16 @@ const navGroups: NavGroup[] = [
         href: "/progress",
         label: "Progress",
         icon: <TrendingUp className="w-5 h-5" />,
+      },
+      {
+        href: "/review/weekly",
+        label: "Weekly Review",
+        icon: <CalendarCheck className="w-5 h-5" />,
+      },
+      {
+        href: "/review/monthly",
+        label: "Monthly Review",
+        icon: <CalendarDays className="w-5 h-5" />,
       },
     ],
   },
