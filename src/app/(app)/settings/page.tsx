@@ -223,7 +223,6 @@ export default function SettingsPage() {
     achievements: true,
   });
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // Initialize form with fetched data
   useEffect(() => {
@@ -237,20 +236,6 @@ export default function SettingsPage() {
       });
     }
   }, [data]);
-
-  // Track unsaved changes
-  useEffect(() => {
-    if (!data?.user) return;
-
-    const hasChanges =
-      name !== (data.user.name || "") ||
-      timezone !== data.user.timezone ||
-      notifications.dailyReminder !== data.user.notifyDailyReminder ||
-      notifications.weeklyReview !== data.user.notifyWeeklyReview ||
-      notifications.achievements !== data.user.notifyAchievements;
-
-    setHasUnsavedChanges(hasChanges);
-  }, [name, timezone, notifications, data]);
 
   const handleSaveProfile = async () => {
     try {
@@ -275,7 +260,7 @@ export default function SettingsPage() {
 
       await updateSettings.mutateAsync({ [updateKey]: newValue });
       toast.success("Notification preference updated");
-    } catch (err) {
+    } catch {
       // Revert on error
       setNotifications((prev) => ({
         ...prev,
@@ -290,7 +275,7 @@ export default function SettingsPage() {
     try {
       await updateSettings.mutateAsync({ timezone: newTimezone });
       toast.success("Timezone updated successfully");
-    } catch (err) {
+    } catch {
       // Revert on error
       setTimezone(data?.user?.timezone || "UTC");
       toast.error("Failed to update timezone");

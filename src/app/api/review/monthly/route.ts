@@ -55,7 +55,7 @@ export async function GET(request: Request) {
 
     // Build weekly breakdown
     const weeklyBreakdowns: WeekBreakdown[] = [];
-    let currentWeekStart = new Date(startOfMonth);
+    const currentWeekStart = new Date(startOfMonth);
     // Adjust to Monday
     const dayOfWeek = currentWeekStart.getDay();
     if (dayOfWeek !== 1) {

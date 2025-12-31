@@ -138,7 +138,7 @@ export function LifestyleInsight({ streaks }: LifestyleInsightProps) {
           <div className="pt-4 border-t border-night-mist/50">
             <p className="text-xs text-zen-green flex items-center gap-2">
               <Crown className="w-3 h-3" />
-              You've reached the highest milestone. You're a true Fastlaner.
+              You&apos;ve reached the highest milestone. You&apos;re a true Fastlaner.
             </p>
           </div>
         )}
