@@ -14,7 +14,7 @@ export function AppShell({ children, rightPanel, className }: AppShellProps) {
   return (
     <div
       className={cn(
-        "min-h-screen grid",
+        "min-h-screen grid w-full max-w-full overflow-x-hidden",
         // Desktop: 3 columns
         "xl:grid-cols-[260px_1fr_320px]",
         // Tablet: 2 columns (no stats panel)
@@ -28,7 +28,7 @@ export function AppShell({ children, rightPanel, className }: AppShellProps) {
       <Sidebar className="hidden lg:flex" />
 
       {/* Main Content */}
-      <main className="bg-void overflow-y-auto min-h-screen">
+      <main className="bg-void overflow-y-auto overflow-x-hidden min-h-screen min-w-0">
         <div
           className={cn(
             // Desktop padding
@@ -38,10 +38,14 @@ export function AppShell({ children, rightPanel, className }: AppShellProps) {
             // Mobile padding - tighter horizontal for more content
             "px-4 sm:px-6 py-6 sm:py-7",
             // Bottom padding for mobile nav + safe area
-            "pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] lg:pb-10"
+            "pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] lg:pb-10",
+            // Prevent content from overflowing
+            "w-full max-w-full overflow-x-hidden"
           )}
         >
-          {children}
+          <div className="w-full max-w-full min-w-0">
+            {children}
+          </div>
         </div>
       </main>
 

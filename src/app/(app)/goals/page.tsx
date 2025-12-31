@@ -111,7 +111,7 @@ function LevelTabs({
   const levels = hideDreams ? allLevels.filter((l) => l !== "dreams") : allLevels;
 
   return (
-    <div className="flex gap-2 overflow-x-auto pb-2 -mx-2 px-2 scrollbar-hide">
+    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
       {levels.map((level) => {
         const config = levelConfig[level];
         const isActive = activeLevel === level;
@@ -391,7 +391,7 @@ function GoalsOnlyPageContent() {
           </Button>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2 min-w-0 w-full" style={{ maxWidth: '100%', boxSizing: 'border-box' }}>
           {goals.map((goal) => (
             <GoalCard
               key={goal.id}

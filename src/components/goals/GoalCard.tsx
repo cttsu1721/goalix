@@ -38,7 +38,7 @@ export function GoalCard({
     <button
       onClick={onClick}
       className={cn(
-        "w-full text-left group relative",
+        "w-full max-w-full text-left group relative overflow-hidden",
         "bg-night border border-night-mist rounded-2xl p-5",
         "transition-all duration-200",
         "hover:border-lantern/30 hover:bg-night-soft",
@@ -50,7 +50,7 @@ export function GoalCard({
     >
       {/* Parent reference */}
       {parentTitle && (
-        <div className="text-[0.625rem] text-moon-faint mb-2 truncate">
+        <div className="text-[0.625rem] text-moon-faint mb-2 truncate max-w-full overflow-hidden">
           From: {parentTitle}
         </div>
       )}
