@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { signOut } from "next-auth/react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useUserSettings, useUpdateUserSettings } from "@/hooks";
+import { toast } from "sonner";
 import {
   User,
   Clock,
@@ -19,27 +21,27 @@ import {
   Moon,
   Globe,
   LogOut,
+  Loader2,
 } from "lucide-react";
-
-// Mock user data
-const mockUser = {
-  name: "John Doe",
-  email: "john@example.com",
-  timezone: "Australia/Melbourne",
-  notifications: {
-    dailyReminder: true,
-    weeklyReview: true,
-    achievements: true,
-  },
-};
 
 const timezones = [
   { value: "Australia/Melbourne", label: "Melbourne (AEDT)" },
   { value: "Australia/Sydney", label: "Sydney (AEDT)" },
+  { value: "Australia/Brisbane", label: "Brisbane (AEST)" },
+  { value: "Australia/Perth", label: "Perth (AWST)" },
+  { value: "Pacific/Auckland", label: "Auckland (NZDT)" },
   { value: "America/New_York", label: "New York (EST)" },
+  { value: "America/Chicago", label: "Chicago (CST)" },
+  { value: "America/Denver", label: "Denver (MST)" },
   { value: "America/Los_Angeles", label: "Los Angeles (PST)" },
   { value: "Europe/London", label: "London (GMT)" },
+  { value: "Europe/Paris", label: "Paris (CET)" },
+  { value: "Europe/Berlin", label: "Berlin (CET)" },
   { value: "Asia/Tokyo", label: "Tokyo (JST)" },
+  { value: "Asia/Shanghai", label: "Shanghai (CST)" },
+  { value: "Asia/Singapore", label: "Singapore (SGT)" },
+  { value: "Asia/Dubai", label: "Dubai (GST)" },
+  { value: "UTC", label: "UTC" },
 ];
 
 function SettingsSection({
@@ -76,11 +78,13 @@ function ToggleSwitch({
   onChange,
   label,
   description,
+  disabled = false,
 }: {
   checked: boolean;
   onChange: (checked: boolean) => void;
   label: string;
   description?: string;
+  disabled?: boolean;
 }) {
   return (
     <div className="flex items-center justify-between py-3">
@@ -89,10 +93,12 @@ function ToggleSwitch({
         {description && <p className="text-xs text-moon-faint mt-0.5">{description}</p>}
       </div>
       <button
-        onClick={() => onChange(!checked)}
+        onClick={() => !disabled && onChange(!checked)}
+        disabled={disabled}
         className={`
           relative w-11 h-6 rounded-full transition-colors duration-200
           ${checked ? "bg-lantern" : "bg-night-mist"}
+          ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
         `}
       >
         <div
@@ -111,11 +117,13 @@ function SelectField({
   value,
   options,
   onChange,
+  disabled = false,
 }: {
   label: string;
   value: string;
   options: { value: string; label: string }[];
   onChange: (value: string) => void;
+  disabled?: boolean;
 }) {
   return (
     <div className="space-y-2">
@@ -126,7 +134,12 @@ function SelectField({
         <select
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full h-11 bg-night-soft border border-night-mist rounded-xl px-4 text-moon appearance-none cursor-pointer focus:border-lantern focus:ring-1 focus:ring-lantern/20 outline-none"
+          disabled={disabled}
+          className={`
+            w-full h-11 bg-night-soft border border-night-mist rounded-xl px-4 text-moon appearance-none
+            focus:border-lantern focus:ring-1 focus:ring-lantern/20 outline-none
+            ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+          `}
         >
           {options.map((option) => (
             <option key={option.value} value={option.value}>
@@ -172,34 +185,162 @@ function TextField({
   );
 }
 
+function SettingsSkeleton() {
+  return (
+    <div className="space-y-6">
+      {[1, 2, 3, 4].map((i) => (
+        <div key={i} className="bg-night border border-night-mist rounded-2xl overflow-hidden">
+          <div className="p-5 border-b border-night-mist">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-night-soft animate-pulse" />
+              <div className="space-y-2">
+                <div className="h-4 w-24 bg-night-soft rounded animate-pulse" />
+                <div className="h-3 w-40 bg-night-soft rounded animate-pulse" />
+              </div>
+            </div>
+          </div>
+          <div className="p-5">
+            <div className="space-y-4">
+              <div className="h-11 bg-night-soft rounded-xl animate-pulse" />
+              <div className="h-11 bg-night-soft rounded-xl animate-pulse" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function SettingsPage() {
-  const [name, setName] = useState(mockUser.name);
-  const [timezone, setTimezone] = useState(mockUser.timezone);
-  const [notifications, setNotifications] = useState(mockUser.notifications);
+  const { data, isLoading, error } = useUserSettings();
+  const updateSettings = useUpdateUserSettings();
+
+  const [name, setName] = useState("");
+  const [timezone, setTimezone] = useState("UTC");
+  const [notifications, setNotifications] = useState({
+    dailyReminder: true,
+    weeklyReview: true,
+    achievements: true,
+  });
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  // Initialize form with fetched data
+  useEffect(() => {
+    if (data?.user) {
+      setName(data.user.name || "");
+      setTimezone(data.user.timezone || "UTC");
+      setNotifications({
+        dailyReminder: data.user.notifyDailyReminder,
+        weeklyReview: data.user.notifyWeeklyReview,
+        achievements: data.user.notifyAchievements,
+      });
+    }
+  }, [data]);
+
+  // Track unsaved changes
+  useEffect(() => {
+    if (!data?.user) return;
+
+    const hasChanges =
+      name !== (data.user.name || "") ||
+      timezone !== data.user.timezone ||
+      notifications.dailyReminder !== data.user.notifyDailyReminder ||
+      notifications.weeklyReview !== data.user.notifyWeeklyReview ||
+      notifications.achievements !== data.user.notifyAchievements;
+
+    setHasUnsavedChanges(hasChanges);
+  }, [name, timezone, notifications, data]);
 
   const handleSaveProfile = async () => {
-    setIsSaving(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsSaving(false);
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 2000);
+    try {
+      await updateSettings.mutateAsync({ name, timezone });
+      toast.success("Profile updated successfully");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update profile");
+    }
   };
 
-  const handleToggleNotification = (key: keyof typeof notifications) => {
+  const handleToggleNotification = async (key: keyof typeof notifications) => {
+    const newValue = !notifications[key];
     setNotifications((prev) => ({
       ...prev,
-      [key]: !prev[key],
+      [key]: newValue,
     }));
+
+    try {
+      const updateKey = key === "dailyReminder" ? "notifyDailyReminder"
+        : key === "weeklyReview" ? "notifyWeeklyReview"
+        : "notifyAchievements";
+
+      await updateSettings.mutateAsync({ [updateKey]: newValue });
+      toast.success("Notification preference updated");
+    } catch (err) {
+      // Revert on error
+      setNotifications((prev) => ({
+        ...prev,
+        [key]: !newValue,
+      }));
+      toast.error("Failed to update notification preference");
+    }
   };
 
-  const handleDeleteAccount = () => {
-    console.log("Delete account requested");
-    // Will trigger account deletion flow
+  const handleTimezoneChange = async (newTimezone: string) => {
+    setTimezone(newTimezone);
+    try {
+      await updateSettings.mutateAsync({ timezone: newTimezone });
+      toast.success("Timezone updated successfully");
+    } catch (err) {
+      // Revert on error
+      setTimezone(data?.user?.timezone || "UTC");
+      toast.error("Failed to update timezone");
+    }
   };
+
+  const handleDeleteAccount = async () => {
+    try {
+      const res = await fetch("/api/user/delete", {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to delete account");
+      }
+
+      toast.success("Account deleted successfully");
+      signOut({ callbackUrl: "/" });
+    } catch {
+      toast.error("Failed to delete account. Please try again.");
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <AppShell>
+        <PageHeader
+          title="Settings"
+          subtitle="Manage your account and preferences"
+        />
+        <SettingsSkeleton />
+      </AppShell>
+    );
+  }
+
+  if (error) {
+    return (
+      <AppShell>
+        <PageHeader
+          title="Settings"
+          subtitle="Manage your account and preferences"
+        />
+        <div className="bg-zen-red-soft border border-zen-red/30 rounded-2xl p-6 text-center">
+          <AlertTriangle className="w-8 h-8 text-zen-red mx-auto mb-3" />
+          <p className="text-moon">Failed to load settings</p>
+          <p className="text-sm text-moon-dim mt-1">Please refresh the page and try again</p>
+        </div>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell>
@@ -224,24 +365,25 @@ export default function SettingsPage() {
             />
             <TextField
               label="Email"
-              value={mockUser.email}
+              value={data?.user?.email || ""}
               type="email"
               disabled
             />
             <Button
               onClick={handleSaveProfile}
-              disabled={isSaving}
+              disabled={updateSettings.isPending || name === (data?.user?.name || "")}
               className="bg-lantern text-void hover:bg-lantern/90 rounded-xl h-10"
             >
-              {isSaving ? (
-                "Saving..."
-              ) : saveSuccess ? (
+              {updateSettings.isPending ? (
                 <>
-                  <Check className="w-4 h-4 mr-2" />
-                  Saved
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
                 </>
               ) : (
-                "Save Changes"
+                <>
+                  <Check className="w-4 h-4 mr-2" />
+                  Save Changes
+                </>
               )}
             </Button>
           </div>
@@ -258,7 +400,8 @@ export default function SettingsPage() {
               label="Timezone"
               value={timezone}
               options={timezones}
-              onChange={setTimezone}
+              onChange={handleTimezoneChange}
+              disabled={updateSettings.isPending}
             />
             <p className="text-xs text-moon-faint flex items-center gap-2">
               <Globe className="w-3.5 h-3.5" />
@@ -279,18 +422,21 @@ export default function SettingsPage() {
               onChange={() => handleToggleNotification("dailyReminder")}
               label="Daily Planning Reminder"
               description="Get reminded to plan your day each morning"
+              disabled={updateSettings.isPending}
             />
             <ToggleSwitch
               checked={notifications.weeklyReview}
               onChange={() => handleToggleNotification("weeklyReview")}
               label="Weekly Review Reminder"
               description="Get reminded to complete your weekly review"
+              disabled={updateSettings.isPending}
             />
             <ToggleSwitch
               checked={notifications.achievements}
               onChange={() => handleToggleNotification("achievements")}
               label="Achievement Notifications"
               description="Get notified when you earn badges or level up"
+              disabled={updateSettings.isPending}
             />
           </div>
         </SettingsSection>

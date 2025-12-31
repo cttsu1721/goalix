@@ -18,6 +18,9 @@ export async function GET() {
         email: true,
         image: true,
         timezone: true,
+        notifyDailyReminder: true,
+        notifyWeeklyReview: true,
+        notifyAchievements: true,
         createdAt: true,
       },
     });
@@ -45,10 +48,16 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, timezone } = body;
+    const { name, timezone, notifyDailyReminder, notifyWeeklyReview, notifyAchievements } = body;
 
     // Build update data
-    const updateData: { name?: string; timezone?: string } = {};
+    const updateData: {
+      name?: string;
+      timezone?: string;
+      notifyDailyReminder?: boolean;
+      notifyWeeklyReview?: boolean;
+      notifyAchievements?: boolean;
+    } = {};
 
     if (name !== undefined) {
       if (typeof name !== "string" || name.length > 100) {
@@ -71,6 +80,17 @@ export async function PATCH(request: NextRequest) {
       updateData.timezone = timezone;
     }
 
+    // Handle notification preferences
+    if (notifyDailyReminder !== undefined) {
+      updateData.notifyDailyReminder = Boolean(notifyDailyReminder);
+    }
+    if (notifyWeeklyReview !== undefined) {
+      updateData.notifyWeeklyReview = Boolean(notifyWeeklyReview);
+    }
+    if (notifyAchievements !== undefined) {
+      updateData.notifyAchievements = Boolean(notifyAchievements);
+    }
+
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json(
         { error: "No valid fields to update" },
@@ -87,6 +107,9 @@ export async function PATCH(request: NextRequest) {
         email: true,
         image: true,
         timezone: true,
+        notifyDailyReminder: true,
+        notifyWeeklyReview: true,
+        notifyAchievements: true,
         createdAt: true,
       },
     });

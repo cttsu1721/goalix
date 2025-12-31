@@ -46,6 +46,9 @@ interface UserSettings {
   email: string | null;
   image: string | null;
   timezone: string;
+  notifyDailyReminder: boolean;
+  notifyWeeklyReview: boolean;
+  notifyAchievements: boolean;
   createdAt: string;
 }
 
@@ -96,7 +99,13 @@ export function useUpdateUserSettings() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: { name?: string; timezone?: string }) => {
+    mutationFn: async (input: {
+      name?: string;
+      timezone?: string;
+      notifyDailyReminder?: boolean;
+      notifyWeeklyReview?: boolean;
+      notifyAchievements?: boolean;
+    }) => {
       const res = await fetch("/api/user/settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
