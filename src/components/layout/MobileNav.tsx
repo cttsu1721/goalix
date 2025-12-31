@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { cn } from "@/lib/utils";
-import { CheckCircle, Star, Target, TrendingUp, Settings } from "lucide-react";
+import { CheckCircle, CalendarRange, Star, Target, TrendingUp, Settings } from "lucide-react";
 
 interface MobileNavProps {
   className?: string;
@@ -15,6 +15,11 @@ const navItems = [
     href: "/dashboard",
     label: "Today",
     icon: CheckCircle,
+  },
+  {
+    href: "/month",
+    label: "Month",
+    icon: CalendarRange,
   },
   {
     href: "/goals?view=dreams",
