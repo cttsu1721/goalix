@@ -39,6 +39,12 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
+# Ensure public files are readable
+RUN chmod -R 644 ./public/* && chmod 755 ./public ./public/icons
+
+# Set ownership for nextjs user
+RUN chown -R nextjs:nodejs ./public
+
 USER nextjs
 
 EXPOSE 3000
