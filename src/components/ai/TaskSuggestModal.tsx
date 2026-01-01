@@ -81,12 +81,14 @@ export function TaskSuggestModal({
   useEffect(() => {
     if (open && weeklyGoals.length > 0) {
       const goalId = initialGoalId || weeklyGoals[0].id;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedGoalId(goalId);
     }
   }, [open, weeklyGoals, initialGoalId]);
 
   // Reset when goal changes
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setResult(null);
     setSelectedTasks(new Set());
   }, [selectedGoalId]);

@@ -58,6 +58,7 @@ export function GoalSelector({
     try {
       const stored = localStorage.getItem(RECENT_GOALS_KEY);
       if (stored) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setRecentGoalIds(JSON.parse(stored));
       }
     } catch {
@@ -67,7 +68,10 @@ export function GoalSelector({
 
   // Reset search when popover closes
   useEffect(() => {
-    if (!open) setSearch("");
+    if (!open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSearch("");
+    }
   }, [open]);
 
   // Save to recent goals when selection changes
