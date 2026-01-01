@@ -170,7 +170,7 @@ export function GoalSelector({
               className="h-10 bg-transparent text-moon placeholder:text-moon-faint border-0 focus:ring-0"
             />
           </div>
-          <CommandList className="max-h-[300px] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-night-soft [&::-webkit-scrollbar-thumb]:bg-night-mist [&::-webkit-scrollbar-thumb]:rounded-full">
+          <CommandList className="max-h-[280px] overflow-y-auto overscroll-contain touch-pan-y [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-night-soft [&::-webkit-scrollbar-thumb]:bg-night-mist [&::-webkit-scrollbar-thumb]:rounded-full [-webkit-overflow-scrolling:touch]">
             <CommandEmpty className="py-6 text-center text-sm text-moon-faint">
               No goals found.
             </CommandEmpty>
