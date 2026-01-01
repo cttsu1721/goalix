@@ -21,9 +21,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Save, Trash2, Clock, AlertCircle } from "lucide-react";
+import { Loader2, Save, Trash2, Clock, AlertCircle, CalendarDays } from "lucide-react";
 import type { TaskPriority, TaskStatus, GoalCategory } from "@prisma/client";
 import { GoalSelector } from "@/components/goals";
+import { formatLocalDate } from "@/lib/utils";
 
 interface Task {
   id: string;
@@ -33,6 +34,7 @@ interface Task {
   status: TaskStatus;
   estimatedMinutes?: number | null;
   weeklyGoalId?: string | null;
+  scheduledDate?: Date | string;
 }
 
 interface TaskEditModalProps {
@@ -93,8 +95,14 @@ function TaskEditForm({ task, onClose }: { task: Task; onClose: () => void }) {
   const [status, setStatus] = useState<TaskStatus>(task.status);
   const [estimatedMinutes, setEstimatedMinutes] = useState<string>(task.estimatedMinutes?.toString() || "");
   const [weeklyGoalId, setWeeklyGoalId] = useState<string>(task.weeklyGoalId || "");
+  const [scheduledDate, setScheduledDate] = useState<string>(
+    task.scheduledDate ? formatLocalDate(new Date(task.scheduledDate)) : formatLocalDate()
+  );
   const [error, setError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const today = formatLocalDate();
+  const isOverdue = scheduledDate < today;
 
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
@@ -120,6 +128,7 @@ function TaskEditForm({ task, onClose }: { task: Task; onClose: () => void }) {
         status,
         estimatedMinutes: estimatedMinutes ? parseInt(estimatedMinutes) : undefined,
         weeklyGoalId: weeklyGoalId || undefined,
+        scheduledDate,
       });
 
       onClose();
@@ -222,6 +231,29 @@ function TaskEditForm({ task, onClose }: { task: Task; onClose: () => void }) {
           rows={3}
           className="bg-night-soft border-night-mist text-moon placeholder:text-moon-faint focus:border-lantern focus:ring-lantern/20 resize-none"
         />
+      </div>
+
+      {/* Scheduled Date */}
+      <div className="space-y-2">
+        <Label htmlFor="edit-scheduled-date" className="text-moon-soft text-sm flex items-center gap-1.5">
+          <CalendarDays className="w-3.5 h-3.5" />
+          Scheduled Date
+        </Label>
+        <div className="relative">
+          <Input
+            id="edit-scheduled-date"
+            type="date"
+            value={scheduledDate}
+            onChange={(e) => setScheduledDate(e.target.value)}
+            className="bg-night-soft border-night-mist text-moon focus:border-lantern focus:ring-lantern/20 [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-50"
+          />
+          {isOverdue && (
+            <div className="flex items-center gap-1.5 mt-2 text-xs text-zen-red">
+              <AlertCircle className="w-3.5 h-3.5" />
+              This task is overdue. Change date to reschedule.
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Estimated Time & Weekly Goal */}

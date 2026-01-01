@@ -17,10 +17,11 @@ export function formatLocalDate(date: Date = new Date()): string {
 }
 
 /**
- * Parse a YYYY-MM-DD date string as LOCAL midnight
- * Use this instead of new Date("YYYY-MM-DD") which parses as UTC
+ * Parse a YYYY-MM-DD date string as LOCAL noon
+ * Using noon (12:00) instead of midnight provides a 12-hour buffer
+ * so timezone conversions to UTC won't shift the date to a different day
  */
 export function parseLocalDate(dateStr: string): Date {
   const [year, month, day] = dateStr.split("-").map(Number);
-  return new Date(year, month - 1, day, 0, 0, 0, 0);
+  return new Date(year, month - 1, day, 12, 0, 0, 0);
 }
