@@ -44,6 +44,16 @@
   --color-zen-red: var(--zen-red);
   --color-zen-red-soft: var(--zen-red-soft);
 
+  /* Sakura palette - cherry blossom pinks for light theme */
+  --color-sakura-50: oklch(0.97 0.02 350);    /* #fef7f8 - Lightest blush */
+  --color-sakura-100: oklch(0.94 0.04 350);   /* #fceef0 - Soft petal */
+  --color-sakura-200: oklch(0.88 0.08 350);   /* #f8d8de - Light bloom */
+  --color-sakura-300: oklch(0.80 0.12 350);   /* #f0b8c4 - Petal pink */
+  --color-sakura-400: oklch(0.72 0.14 350);   /* #e495a8 - Cherry blossom */
+  --color-sakura-500: oklch(0.65 0.16 350);   /* #d4718a - Primary sakura */
+  --color-sakura-600: oklch(0.55 0.16 350);   /* #b85070 - Deep sakura */
+  --color-sakura-700: oklch(0.45 0.14 350);   /* #983f5c - Rich bloom */
+
   /* Sidebar colors */
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);

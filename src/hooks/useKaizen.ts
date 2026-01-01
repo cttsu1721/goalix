@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { KaizenCheckin, KaizenCheckinInput } from "@/types/kaizen";
+import { formatLocalDate } from "@/lib/utils";
 
 interface KaizenCheckinResponse {
   checkin: KaizenCheckin;
@@ -22,7 +23,7 @@ interface KaizenListResponse {
 
 // Fetch Kaizen checkin for a specific date
 export function useKaizenCheckin(date?: string) {
-  const dateParam = date || new Date().toISOString().split("T")[0];
+  const dateParam = date || formatLocalDate();
 
   return useQuery<{ checkin: KaizenCheckin | null }>({
     queryKey: ["kaizen", dateParam],
@@ -73,7 +74,7 @@ export function useSaveKaizenCheckin() {
       return res.json();
     },
     onSuccess: (_, variables) => {
-      const date = variables.date || new Date().toISOString().split("T")[0];
+      const date = variables.date || formatLocalDate();
       queryClient.invalidateQueries({ queryKey: ["kaizen", date] });
       queryClient.invalidateQueries({ queryKey: ["kaizen", "list"] });
       queryClient.invalidateQueries({ queryKey: ["user", "stats"] });

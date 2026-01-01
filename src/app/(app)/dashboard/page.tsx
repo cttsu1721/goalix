@@ -38,6 +38,7 @@ import {
 import { useAIUsage } from "@/hooks/useAI";
 import { LEVELS } from "@/types/gamification";
 import { TASK_PRIORITY_POINTS } from "@/types/tasks";
+import { formatLocalDate } from "@/lib/utils";
 import { Loader2, Sparkles, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -74,7 +75,7 @@ function getCategoryLabel(category: string): string {
 
 export default function DashboardPage() {
   const { data: session } = useSession();
-  const today = new Date().toISOString().split("T")[0];
+  const today = formatLocalDate();
 
   // Modal state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);

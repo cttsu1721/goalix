@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
+import { cn, formatLocalDate } from "@/lib/utils";
 import { Loader2, Sparkles, Clock, Target, AlertCircle, Lightbulb } from "lucide-react";
 import type { TaskPriority } from "@prisma/client";
 import { AiButton, TaskSuggestModal } from "@/components/ai";
@@ -127,7 +127,7 @@ export function TaskCreateModal({
   };
 
   const createTaskWithGoal = async (goalId?: string) => {
-    const date = scheduledDate || new Date().toISOString().split("T")[0];
+    const date = scheduledDate || formatLocalDate();
 
     try {
       await createTask.mutateAsync({

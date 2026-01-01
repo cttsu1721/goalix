@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { cn } from "@/lib/utils";
+import { cn, formatLocalDate } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -48,7 +48,7 @@ export function PlanDayModal({
   date,
   onComplete,
 }: PlanDayModalProps) {
-  const today = date || new Date().toISOString().split("T")[0];
+  const today = date || formatLocalDate();
   const [step, setStep] = useState(1);
   const [tasks, setTasks] = useState<TaskDraft[]>([]);
   const [currentTitle, setCurrentTitle] = useState("");

@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { DailyTask, TaskPriority, TaskStatus } from "@prisma/client";
+import { formatLocalDate } from "@/lib/utils";
 
 interface TaskWithGoal extends DailyTask {
   weeklyGoal: {
@@ -54,7 +55,7 @@ interface CompleteTaskResponse {
 
 // Fetch tasks for a specific date
 export function useTasks(date?: string) {
-  const dateParam = date || new Date().toISOString().split("T")[0];
+  const dateParam = date || formatLocalDate();
 
   return useQuery<TasksResponse>({
     queryKey: ["tasks", dateParam],

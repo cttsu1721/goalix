@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { TaskPriority } from "@prisma/client";
 import { TASK_PRIORITY_LIMITS } from "@/types/tasks";
+import { formatLocalDate, parseLocalDate } from "@/lib/utils";
 
 // GET /api/tasks - List tasks for a specific date or date range
 export async function GET(request: NextRequest) {
@@ -21,17 +22,20 @@ export async function GET(request: NextRequest) {
     let endOfRange: Date;
 
     // Support date range queries for week/month views
+    // Use parseLocalDate to avoid UTC parsing issues with date-only strings
     if (startDateParam && endDateParam) {
-      startOfRange = new Date(startDateParam);
-      startOfRange.setHours(0, 0, 0, 0);
-      endOfRange = new Date(endDateParam);
+      startOfRange = parseLocalDate(startDateParam);
+      endOfRange = parseLocalDate(endDateParam);
       endOfRange.setHours(23, 59, 59, 999);
     } else {
       // Default to single day (today if no date provided)
-      const date = dateParam ? new Date(dateParam) : new Date();
-      startOfRange = new Date(date);
-      startOfRange.setHours(0, 0, 0, 0);
-      endOfRange = new Date(date);
+      if (dateParam) {
+        startOfRange = parseLocalDate(dateParam);
+      } else {
+        startOfRange = new Date();
+        startOfRange.setHours(0, 0, 0, 0);
+      }
+      endOfRange = new Date(startOfRange);
       endOfRange.setHours(23, 59, 59, 999);
     }
 
@@ -66,9 +70,10 @@ export async function GET(request: NextRequest) {
     const secondaryCount = tasks.filter((t) => t.priority === "SECONDARY").length;
 
     // Group tasks by date for range queries
+    // Use formatLocalDate to match frontend date keys (local timezone)
     const tasksByDate: Record<string, typeof tasks> = {};
     tasks.forEach((task) => {
-      const dateKey = new Date(task.scheduledDate).toISOString().split("T")[0];
+      const dateKey = formatLocalDate(new Date(task.scheduledDate));
       if (!tasksByDate[dateKey]) {
         tasksByDate[dateKey] = [];
       }
@@ -124,9 +129,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const date = new Date(scheduledDate);
-    const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
+    // Use parseLocalDate to avoid UTC parsing issues
+    const startOfDay = parseLocalDate(scheduledDate);
 
     // Check priority limits
     const limit = TASK_PRIORITY_LIMITS[priority as TaskPriority];

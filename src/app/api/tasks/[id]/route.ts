@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { TaskPriority, TaskStatus } from "@prisma/client";
 import { TASK_PRIORITY_LIMITS } from "@/types/tasks";
+import { parseLocalDate } from "@/lib/utils";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -128,11 +129,9 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       updateData.status = body.status as TaskStatus;
     }
 
-    // Handle date change
+    // Handle date change - use parseLocalDate to avoid UTC parsing issues
     if (body.scheduledDate) {
-      const newDate = new Date(body.scheduledDate);
-      newDate.setHours(0, 0, 0, 0);
-      updateData.scheduledDate = newDate;
+      updateData.scheduledDate = parseLocalDate(body.scheduledDate);
     }
 
     const task = await prisma.dailyTask.update({
