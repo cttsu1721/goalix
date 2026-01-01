@@ -226,7 +226,7 @@ export function PlanDayModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="bg-night border-night-glow max-w-lg">
+      <DialogContent className="bg-night border-night-glow max-w-lg overflow-hidden">
         <DialogHeader>
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="w-5 h-5 text-lantern" />
@@ -237,12 +237,12 @@ export function PlanDayModal({
         </DialogHeader>
 
         {/* Progress Steps */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-center gap-1 mb-6">
           {STEPS.map((s, idx) => (
             <div key={s.id} className="flex items-center">
               <div
                 className={cn(
-                  "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors",
+                  "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors flex-shrink-0",
                   step === s.id && "bg-lantern text-void",
                   step > s.id && "bg-zen-green text-void",
                   step < s.id && "bg-night-soft text-moon-dim border border-night-glow"
@@ -253,7 +253,7 @@ export function PlanDayModal({
               {idx < STEPS.length - 1 && (
                 <div
                   className={cn(
-                    "w-12 h-0.5 mx-1",
+                    "w-8 sm:w-12 h-0.5 mx-1",
                     step > s.id ? "bg-zen-green" : "bg-night-glow"
                   )}
                 />
