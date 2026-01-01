@@ -38,6 +38,7 @@ interface DayTasksPopoverProps {
   onOpenChange: (open: boolean) => void;
   onCompleteTask: (task: TaskItem) => void;
   onAddTask: (date: Date) => void;
+  onEditTask?: (task: TaskItem) => void;
   completingTaskId: string | null;
 }
 
@@ -68,11 +69,13 @@ function formatDate(date: Date) {
 function TaskRow({
   task,
   onComplete,
+  onEdit,
   isCompleting,
   index,
 }: {
   task: TaskItem;
   onComplete: () => void;
+  onEdit?: () => void;
   isCompleting: boolean;
   index: number;
 }) {
@@ -123,8 +126,16 @@ function TaskRow({
         )}
       </button>
 
-      {/* Task content */}
-      <div className="flex-1 min-w-0">
+      {/* Task content - clickable for edit */}
+      <button
+        type="button"
+        onClick={onEdit}
+        disabled={!onEdit}
+        className={cn(
+          "flex-1 min-w-0 text-left",
+          onEdit && "cursor-pointer hover:opacity-80 transition-opacity"
+        )}
+      >
         {/* Priority badge for MIT */}
         {isMit && !completed && (
           <span className="inline-flex items-center gap-1 mb-1.5 px-2 py-0.5 rounded-full text-[0.65rem] font-semibold uppercase tracking-wider bg-lantern/20 text-lantern">
@@ -154,7 +165,7 @@ function TaskRow({
             </span>
           </div>
         )}
-      </div>
+      </button>
 
       {/* Priority indicator dot */}
       <div
@@ -176,6 +187,7 @@ function DayTasksContent({
   tasks,
   onCompleteTask,
   onAddTask,
+  onEditTask,
   completingTaskId,
   onClose,
 }: {
@@ -183,6 +195,7 @@ function DayTasksContent({
   tasks: TaskItem[];
   onCompleteTask: (task: TaskItem) => void;
   onAddTask: (date: Date) => void;
+  onEditTask?: (task: TaskItem) => void;
   completingTaskId: string | null;
   onClose: () => void;
 }) {
@@ -268,6 +281,7 @@ function DayTasksContent({
                     key={task.id}
                     task={task}
                     onComplete={() => onCompleteTask(task)}
+                    onEdit={onEditTask ? () => { onClose(); onEditTask(task); } : undefined}
                     isCompleting={completingTaskId === task.id}
                     index={index}
                   />
@@ -292,6 +306,7 @@ function DayTasksContent({
                     key={task.id}
                     task={task}
                     onComplete={() => onCompleteTask(task)}
+                    onEdit={onEditTask ? () => { onClose(); onEditTask(task); } : undefined}
                     isCompleting={completingTaskId === task.id}
                     index={mitTasks.length + index}
                   />
@@ -316,6 +331,7 @@ function DayTasksContent({
                     key={task.id}
                     task={task}
                     onComplete={() => onCompleteTask(task)}
+                    onEdit={onEditTask ? () => { onClose(); onEditTask(task); } : undefined}
                     isCompleting={completingTaskId === task.id}
                     index={mitTasks.length + primaryTasks.length + index}
                   />
@@ -356,6 +372,7 @@ export function DayTasksPopover({
   onOpenChange,
   onCompleteTask,
   onAddTask,
+  onEditTask,
   completingTaskId,
 }: DayTasksPopoverProps) {
   const isMobile = useIsMobile();
@@ -383,6 +400,7 @@ export function DayTasksPopover({
             tasks={tasks}
             onCompleteTask={onCompleteTask}
             onAddTask={onAddTask}
+            onEditTask={onEditTask}
             completingTaskId={completingTaskId}
             onClose={handleClose}
           />
@@ -412,6 +430,7 @@ export function DayTasksPopover({
           tasks={tasks}
           onCompleteTask={onCompleteTask}
           onAddTask={onAddTask}
+          onEditTask={onEditTask}
           completingTaskId={completingTaskId}
           onClose={handleClose}
         />

@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useGoals, useWeekTasks, useCompleteTask, useUpdateTask } from "@/hooks";
 import { TaskCreateModal } from "@/components/tasks/TaskCreateModal";
+import { TaskEditModal } from "@/components/tasks/TaskEditModal";
 import { toast } from "sonner";
 import Link from "next/link";
 import type { TaskPriority, TaskStatus } from "@prisma/client";
@@ -104,11 +105,13 @@ interface TaskItem {
 function DraggableTaskRow({
   task,
   onComplete,
+  onEdit,
   isCompleting,
   isDragging: isCurrentlyDragging,
 }: {
   task: TaskItem;
   onComplete: () => void;
+  onEdit?: () => void;
   isCompleting: boolean;
   isDragging?: boolean;
 }) {
@@ -172,7 +175,15 @@ function DraggableTaskRow({
         ) : null}
       </button>
 
-      <div className="flex-1 min-w-0">
+      <button
+        type="button"
+        onClick={onEdit}
+        disabled={!onEdit}
+        className={cn(
+          "flex-1 min-w-0 text-left",
+          onEdit && "cursor-pointer hover:opacity-80 transition-opacity"
+        )}
+      >
         <p
           className={cn(
             "text-sm leading-relaxed",
@@ -188,7 +199,7 @@ function DraggableTaskRow({
             Most Important Task
           </span>
         )}
-      </div>
+      </button>
 
       {/* Priority indicator */}
       <div className={cn(
@@ -253,6 +264,7 @@ function DaySection({
   tasks,
   onCompleteTask,
   onAddTask,
+  onEditTask,
   isCompletingTask,
   defaultExpanded = false,
   activeTaskId,
@@ -262,6 +274,7 @@ function DaySection({
   tasks: TaskItem[];
   onCompleteTask: (task: TaskItem) => void;
   onAddTask: (date: Date) => void;
+  onEditTask?: (task: TaskItem) => void;
   isCompletingTask: string | null;
   defaultExpanded?: boolean;
   activeTaskId: string | null;
@@ -417,6 +430,7 @@ function DaySection({
                 <DraggableTaskRow
                   task={mit}
                   onComplete={() => onCompleteTask(mit)}
+                  onEdit={onEditTask ? () => onEditTask(mit) : undefined}
                   isCompleting={isCompletingTask === mit.id}
                   isDragging={activeTaskId === mit.id}
                 />
@@ -428,6 +442,7 @@ function DaySection({
                   key={task.id}
                   task={task}
                   onComplete={() => onCompleteTask(task)}
+                  onEdit={onEditTask ? () => onEditTask(task) : undefined}
                   isCompleting={isCompletingTask === task.id}
                   isDragging={activeTaskId === task.id}
                 />
@@ -444,6 +459,7 @@ function DaySection({
                       key={task.id}
                       task={task}
                       onComplete={() => onCompleteTask(task)}
+                      onEdit={onEditTask ? () => onEditTask(task) : undefined}
                       isCompleting={isCompletingTask === task.id}
                       isDragging={activeTaskId === task.id}
                     />
@@ -486,6 +502,8 @@ export default function WeekPage() {
   const [completingTaskId, setCompletingTaskId] = useState<string | null>(null);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [createModalDate, setCreateModalDate] = useState<Date | null>(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<TaskItem | null>(null);
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
   const [activeTask, setActiveTask] = useState<TaskItem | null>(null);
 
@@ -543,6 +561,19 @@ export default function WeekPage() {
   const handleAddTask = (date: Date) => {
     setCreateModalDate(date);
     setCreateModalOpen(true);
+  };
+
+  const handleEditTask = (task: TaskItem) => {
+    setEditingTask(task);
+    setEditModalOpen(true);
+  };
+
+  const handleEditModalChange = (open: boolean) => {
+    setEditModalOpen(open);
+    if (!open) {
+      setEditingTask(null);
+      refetch();
+    }
   };
 
   // Drag handlers
@@ -760,6 +791,7 @@ export default function WeekPage() {
                   tasks={dayTasks}
                   onCompleteTask={handleToggleTask}
                   onAddTask={handleAddTask}
+                  onEditTask={handleEditTask}
                   isCompletingTask={completingTaskId}
                   defaultExpanded={index === todayIndex}
                   activeTaskId={activeTaskId}
@@ -863,6 +895,13 @@ export default function WeekPage() {
         open={createModalOpen}
         onOpenChange={setCreateModalOpen}
         scheduledDate={createModalDate ? formatDateKey(createModalDate) : undefined}
+      />
+
+      {/* Task Edit Modal */}
+      <TaskEditModal
+        open={editModalOpen}
+        onOpenChange={handleEditModalChange}
+        task={editingTask}
       />
     </AppShell>
   );

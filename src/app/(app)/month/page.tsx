@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useWeekTasks, useCompleteTask, useUpdateTask } from "@/hooks";
 import { TaskCreateModal } from "@/components/tasks/TaskCreateModal";
+import { TaskEditModal } from "@/components/tasks/TaskEditModal";
 import { DayTasksPopover } from "@/components/tasks/DayTasksPopover";
 import { toast } from "sonner";
 import type { TaskPriority, TaskStatus } from "@prisma/client";
@@ -197,6 +198,9 @@ export default function MonthPage() {
   const [completingTaskId, setCompletingTaskId] = useState<string | null>(null);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [createModalDate, setCreateModalDate] = useState<Date | null>(null);
+  // Edit modal state
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<TaskItem | null>(null);
   // Popover state - stores the date key of the day with open popover
   const [popoverDate, setPopoverDate] = useState<string | null>(null);
   const [popoverTasks, setPopoverTasks] = useState<TaskItem[]>([]);
@@ -304,6 +308,21 @@ export default function MonthPage() {
     setCreateModalDate(date);
     setCreateModalOpen(true);
   }, []);
+
+  // Handler for editing task from popover
+  const handleEditTask = useCallback((task: TaskItem) => {
+    setEditingTask(task);
+    setEditModalOpen(true);
+  }, []);
+
+  // Handle edit modal close and refresh
+  const handleEditModalChange = useCallback((open: boolean) => {
+    setEditModalOpen(open);
+    if (!open) {
+      setEditingTask(null);
+      refetch();
+    }
+  }, [refetch]);
 
   // Calculate month stats from tasksByDate (same source as calendar)
   const monthStats = useMemo(() => {
@@ -468,6 +487,7 @@ export default function MonthPage() {
           onOpenChange={handlePopoverOpenChange}
           onCompleteTask={handlePopoverCompleteTask}
           onAddTask={handlePopoverAddTask}
+          onEditTask={handleEditTask}
           completingTaskId={completingTaskId}
         />
       )}
@@ -477,6 +497,13 @@ export default function MonthPage() {
         open={createModalOpen}
         onOpenChange={setCreateModalOpen}
         scheduledDate={createModalDate ? formatDateKey(createModalDate) : undefined}
+      />
+
+      {/* Task Edit Modal */}
+      <TaskEditModal
+        open={editModalOpen}
+        onOpenChange={handleEditModalChange}
+        task={editingTask}
       />
     </AppShell>
   );
