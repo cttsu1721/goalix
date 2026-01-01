@@ -158,18 +158,19 @@ export function GoalSelector({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-[var(--radix-popover-trigger-width)] p-0 bg-night border-night-mist"
+        className="w-[400px] p-0 bg-night border-night-mist"
         align="start"
+        sideOffset={4}
       >
-        <Command className="bg-transparent">
-          <div className="flex items-center border-b border-night-mist px-3">
+        <Command className="bg-transparent max-h-[350px] flex flex-col">
+          <div className="flex items-center border-b border-night-mist px-3 shrink-0">
             <Search className="mr-2 h-4 w-4 shrink-0 text-moon-faint" />
             <CommandInput
               placeholder="Search goals..."
               className="h-10 bg-transparent text-moon placeholder:text-moon-faint border-0 focus:ring-0"
             />
           </div>
-          <CommandList className="max-h-[300px]">
+          <CommandList className="flex-1 overflow-y-auto">
             <CommandEmpty className="py-6 text-center text-sm text-moon-faint">
               No goals found.
             </CommandEmpty>
@@ -213,12 +214,12 @@ export function GoalSelector({
                     >
                       <Check
                         className={cn(
-                          "mr-2 h-4 w-4",
+                          "mr-2 h-4 w-4 shrink-0",
                           value === goal.id ? "opacity-100" : "opacity-0"
                         )}
                       />
-                      <span className="mr-2">{CATEGORY_CONFIG[goal.category].emoji}</span>
-                      <span className="truncate">{goal.title}</span>
+                      <span className="mr-2 shrink-0">{CATEGORY_CONFIG[goal.category].emoji}</span>
+                      <span className="text-sm leading-snug">{goal.title}</span>
                     </CommandItem>
                   ))}
                 </CommandGroup>
@@ -246,11 +247,11 @@ export function GoalSelector({
                   >
                     <Check
                       className={cn(
-                        "mr-2 h-4 w-4",
+                        "mr-2 h-4 w-4 shrink-0",
                         value === goal.id ? "opacity-100" : "opacity-0"
                       )}
                     />
-                    <span className="truncate">{goal.title}</span>
+                    <span className="text-sm leading-snug">{goal.title}</span>
                   </CommandItem>
                 ))}
               </CommandGroup>
