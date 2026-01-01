@@ -162,15 +162,15 @@ export function GoalSelector({
         align="start"
         sideOffset={4}
       >
-        <Command className="bg-transparent max-h-[350px] flex flex-col">
-          <div className="flex items-center border-b border-night-mist px-3 shrink-0">
+        <Command className="bg-transparent">
+          <div className="flex items-center border-b border-night-mist px-3">
             <Search className="mr-2 h-4 w-4 shrink-0 text-moon-faint" />
             <CommandInput
               placeholder="Search goals..."
               className="h-10 bg-transparent text-moon placeholder:text-moon-faint border-0 focus:ring-0"
             />
           </div>
-          <CommandList className="flex-1 overflow-y-auto">
+          <CommandList className="max-h-[300px] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-night-soft [&::-webkit-scrollbar-thumb]:bg-night-mist [&::-webkit-scrollbar-thumb]:rounded-full">
             <CommandEmpty className="py-6 text-center text-sm text-moon-faint">
               No goals found.
             </CommandEmpty>
