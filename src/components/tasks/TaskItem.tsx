@@ -2,7 +2,23 @@
 
 import { memo } from "react";
 import { cn } from "@/lib/utils";
-import { Check, ChevronRight } from "lucide-react";
+import { Check, ChevronRight, AlertTriangle } from "lucide-react";
+
+// Format overdue date to show relative time (e.g., "Dec 30" or "Yesterday")
+function formatOverdueDate(dateString: string): string {
+  const [year, month, day] = dateString.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const diffTime = today.getTime() - date.getTime();
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays <= 7) return `${diffDays} days ago`;
+
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
 
 interface TaskItemProps {
   task: {
@@ -11,6 +27,8 @@ interface TaskItemProps {
     category: string;
     completed: boolean;
     points: number;
+    isOverdue?: boolean;
+    scheduledDate?: string;
   };
   onToggle?: () => void;
   onEdit?: () => void;
@@ -75,7 +93,18 @@ export const TaskItem = memo(function TaskItem({ task, onToggle, onEdit, classNa
         >
           {task.title}
         </div>
-        <div className="text-xs text-moon-faint truncate">{task.category}</div>
+        <div className="text-xs text-moon-faint truncate flex items-center gap-1.5">
+          {task.isOverdue && !task.completed && (
+            <>
+              <AlertTriangle className="w-3 h-3 text-zen-red flex-shrink-0" />
+              <span className="text-zen-red">
+                {task.scheduledDate ? formatOverdueDate(task.scheduledDate) : "Overdue"}
+              </span>
+              <span className="text-moon-faint/50">·</span>
+            </>
+          )}
+          {task.category}
+        </div>
       </button>
 
       {/* Points + Edit indicator */}

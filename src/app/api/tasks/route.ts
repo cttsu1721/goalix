@@ -17,6 +17,7 @@ export async function GET(request: NextRequest) {
     const dateParam = searchParams.get("date");
     const startDateParam = searchParams.get("startDate");
     const endDateParam = searchParams.get("endDate");
+    const includeOverdue = searchParams.get("includeOverdue") === "true";
 
     let startOfRange: Date;
     let endOfRange: Date;
@@ -39,14 +40,39 @@ export async function GET(request: NextRequest) {
       endOfRange.setHours(23, 59, 59, 999);
     }
 
+    // Build where clause - optionally include overdue incomplete tasks
+    const whereClause = includeOverdue
+      ? {
+          userId: session.user.id,
+          OR: [
+            // Tasks scheduled for the requested date range
+            {
+              scheduledDate: {
+                gte: startOfRange,
+                lte: endOfRange,
+              },
+            },
+            // Overdue tasks: scheduled before today and not completed
+            {
+              scheduledDate: {
+                lt: startOfRange,
+              },
+              status: {
+                not: "COMPLETED" as const,
+              },
+            },
+          ],
+        }
+      : {
+          userId: session.user.id,
+          scheduledDate: {
+            gte: startOfRange,
+            lte: endOfRange,
+          },
+        };
+
     const tasks = await prisma.dailyTask.findMany({
-      where: {
-        userId: session.user.id,
-        scheduledDate: {
-          gte: startOfRange,
-          lte: endOfRange,
-        },
-      },
+      where: whereClause,
       include: {
         weeklyGoal: {
           select: {
@@ -69,6 +95,14 @@ export async function GET(request: NextRequest) {
     const primaryCount = tasks.filter((t) => t.priority === "PRIMARY").length;
     const secondaryCount = tasks.filter((t) => t.priority === "SECONDARY").length;
 
+    // Count overdue tasks (scheduled before requested date and not completed)
+    const overdueCount = includeOverdue
+      ? tasks.filter((t) => {
+          const taskDate = new Date(t.scheduledDate);
+          return taskDate < startOfRange && t.status !== "COMPLETED";
+        }).length
+      : 0;
+
     // Group tasks by date for range queries
     // Use formatLocalDate to match frontend date keys (local timezone)
     const tasksByDate: Record<string, typeof tasks> = {};
@@ -85,12 +119,14 @@ export async function GET(request: NextRequest) {
       tasksByDate,
       startDate: startOfRange.toISOString().split("T")[0],
       endDate: endOfRange.toISOString().split("T")[0],
+      requestedDate: formatLocalDate(startOfRange),
       stats: {
         total: tasks.length,
         completed,
         mit,
         primaryCount,
         secondaryCount,
+        overdueCount,
       },
     });
   } catch (error) {

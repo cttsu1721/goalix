@@ -13,12 +13,14 @@ interface TaskWithGoal extends DailyTask {
 interface TasksResponse {
   tasks: TaskWithGoal[];
   date: string;
+  requestedDate: string;
   stats: {
     total: number;
     completed: number;
     mit: TaskWithGoal | null;
     primaryCount: number;
     secondaryCount: number;
+    overdueCount: number;
   };
 }
 
@@ -53,14 +55,23 @@ interface CompleteTaskResponse {
   newLevel?: number;
 }
 
+interface UseTasksOptions {
+  includeOverdue?: boolean;
+}
+
 // Fetch tasks for a specific date
-export function useTasks(date?: string) {
+export function useTasks(date?: string, options?: UseTasksOptions) {
   const dateParam = date || formatLocalDate();
+  const includeOverdue = options?.includeOverdue ?? false;
 
   return useQuery<TasksResponse>({
-    queryKey: ["tasks", dateParam],
+    queryKey: ["tasks", dateParam, { includeOverdue }],
     queryFn: async () => {
-      const res = await fetch(`/api/tasks?date=${dateParam}`);
+      const params = new URLSearchParams({ date: dateParam });
+      if (includeOverdue) {
+        params.set("includeOverdue", "true");
+      }
+      const res = await fetch(`/api/tasks?${params}`);
       if (!res.ok) {
         throw new Error("Failed to fetch tasks");
       }

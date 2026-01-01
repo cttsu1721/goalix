@@ -10,6 +10,8 @@ interface Task {
   category: string;
   completed: boolean;
   points: number;
+  isOverdue?: boolean;
+  scheduledDate?: string;
 }
 
 interface TaskListProps {

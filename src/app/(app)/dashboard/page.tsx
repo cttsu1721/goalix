@@ -39,7 +39,7 @@ import { useAIUsage } from "@/hooks/useAI";
 import { LEVELS } from "@/types/gamification";
 import { TASK_PRIORITY_POINTS } from "@/types/tasks";
 import { formatLocalDate } from "@/lib/utils";
-import { Loader2, Sparkles, CalendarDays } from "lucide-react";
+import { Loader2, Sparkles, CalendarDays, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import type { TaskPriority } from "@prisma/client";
@@ -73,6 +73,22 @@ function getCategoryLabel(category: string): string {
   return labels[category] || category;
 }
 
+// Format overdue date to show relative time
+function formatOverdueLabel(dateString: string): string {
+  const [year, month, day] = dateString.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const diffTime = today.getTime() - date.getTime();
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays <= 7) return `${diffDays} days ago`;
+
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
 export default function DashboardPage() {
   const { data: session } = useSession();
   const today = formatLocalDate();
@@ -85,8 +101,8 @@ export default function DashboardPage() {
   const [isPlanDayModalOpen, setIsPlanDayModalOpen] = useState(false);
   const [isTaskSuggestModalOpen, setIsTaskSuggestModalOpen] = useState(false);
 
-  // Fetch data
-  const { data: tasksData, isLoading: tasksLoading, refetch: refetchTasks } = useTasks(today);
+  // Fetch data - include overdue tasks for Today's Focus
+  const { data: tasksData, isLoading: tasksLoading, refetch: refetchTasks } = useTasks(today, { includeOverdue: true });
   const { data: statsData, isLoading: statsLoading } = useUserStats();
   const { data: kaizenData } = useKaizenCheckin(today);
   const { data: goalsData } = useGoals("weekly");
@@ -115,23 +131,38 @@ export default function DashboardPage() {
   }, [updateTask, refetchTasks]);
 
   // Transform tasks data - memoized (MUST be before early return to follow Rules of Hooks)
-  const tasks = tasksData?.tasks || [];
+  const allTasks = tasksData?.tasks || [];
+  const requestedDate = tasksData?.requestedDate || today;
 
-  const { mitTask, mit, primaryTasksFormatted, secondaryTasksFormatted } = useMemo(() => {
-    const mitTask = tasks.find((t) => t.priority === "MIT");
-    const primaryTasks = tasks.filter((t) => t.priority === "PRIMARY");
-    const secondaryTasks = tasks.filter((t) => t.priority === "SECONDARY");
+  const { tasks, overdueTasks, mitTask, mit, primaryTasksFormatted, secondaryTasksFormatted, overdueTasksFormatted } = useMemo(() => {
+    // Separate today's tasks from overdue tasks
+    const todayTasks = allTasks.filter((t) => {
+      const taskDate = formatLocalDate(new Date(t.scheduledDate));
+      return taskDate === requestedDate;
+    });
+    const overdue = allTasks.filter((t) => {
+      const taskDate = formatLocalDate(new Date(t.scheduledDate));
+      return taskDate < requestedDate && t.status !== "COMPLETED";
+    });
+
+    const mitTask = todayTasks.find((t) => t.priority === "MIT");
+    const primaryTasks = todayTasks.filter((t) => t.priority === "PRIMARY");
+    const secondaryTasks = todayTasks.filter((t) => t.priority === "SECONDARY");
 
     // Transform task helper
-    const transformTask = (task: (typeof tasks)[0]) => ({
+    const transformTask = (task: (typeof allTasks)[0], isOverdue = false) => ({
       id: task.id,
       title: task.title,
       category: getCategoryLabel(task.weeklyGoal?.category || "OTHER"),
       completed: task.status === "COMPLETED",
       points: TASK_PRIORITY_POINTS[task.priority],
+      isOverdue,
+      scheduledDate: formatLocalDate(new Date(task.scheduledDate)),
     });
 
     return {
+      tasks: todayTasks,
+      overdueTasks: overdue,
       mitTask,
       mit: mitTask
         ? {
@@ -142,10 +173,11 @@ export default function DashboardPage() {
             completed: mitTask.status === "COMPLETED",
           }
         : undefined,
-      primaryTasksFormatted: primaryTasks.map(transformTask),
-      secondaryTasksFormatted: secondaryTasks.map(transformTask),
+      primaryTasksFormatted: primaryTasks.map((t) => transformTask(t)),
+      secondaryTasksFormatted: secondaryTasks.map((t) => transformTask(t)),
+      overdueTasksFormatted: overdue.map((t) => transformTask(t, true)),
     };
-  }, [tasks]);
+  }, [allTasks, requestedDate]);
 
   // Handle task toggle (complete or uncomplete) - memoized with useCallback (MUST be before early return)
   const handleToggleMit = useCallback(() => {
@@ -183,6 +215,21 @@ export default function DashboardPage() {
       completeTask(taskId, false);
     }
   }, [tasks, isCompleting, updateTask.isPending, completeTask, uncompleteTask]);
+
+  // Handle toggle for overdue tasks
+  const handleToggleOverdue = useCallback((taskId: string) => {
+    if (isCompleting || updateTask.isPending) return;
+
+    const task = overdueTasks.find((t) => t.id === taskId);
+    if (!task) return;
+
+    if (task.status === "COMPLETED") {
+      uncompleteTask(taskId);
+    } else {
+      // Completing an overdue task - treat MIT as special
+      completeTask(taskId, task.priority === "MIT");
+    }
+  }, [overdueTasks, isCompleting, updateTask.isPending, completeTask, uncompleteTask]);
 
   // Open create modal with specific priority
   const openCreateModal = (priority: TaskPriority) => {
@@ -265,9 +312,9 @@ export default function DashboardPage() {
     }
   };
 
-  // Calculate stats
-  const allTasks = [...(mit ? [mit] : []), ...primaryTasksFormatted, ...secondaryTasksFormatted];
-  const completedCount = allTasks.filter((t) => t.completed).length;
+  // Calculate stats for today's tasks
+  const todayFormattedTasks = [...(mit ? [mit] : []), ...primaryTasksFormatted, ...secondaryTasksFormatted];
+  const completedCount = todayFormattedTasks.filter((t) => t.completed).length;
   const pointsEarned = tasksData?.stats?.mit?.pointsEarned
     ? tasks.reduce((sum, t) => sum + t.pointsEarned, 0)
     : 0;
@@ -339,7 +386,7 @@ export default function DashboardPage() {
       }}
       today={{
         tasksCompleted: completedCount,
-        tasksTotal: allTasks.length,
+        tasksTotal: todayFormattedTasks.length,
         pointsEarned: statsData?.todayStats?.pointsEarned || pointsEarned,
       }}
       goalAlignment={goalAlignment}
@@ -362,8 +409,59 @@ export default function DashboardPage() {
         onAiClick={handleOpenTaskSuggest}
       />
 
+      {/* Overdue Tasks Section - shown when there are overdue tasks */}
+      {overdueTasksFormatted.length > 0 && (
+        <section className="mb-8">
+          <div className="flex items-center gap-2 mb-4 pb-3 border-b border-zen-red/20">
+            <AlertTriangle className="w-4 h-4 text-zen-red" />
+            <h2 className="text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-zen-red">
+              Overdue
+            </h2>
+            <span className="text-xs text-zen-red/70">
+              {overdueTasksFormatted.length} task{overdueTasksFormatted.length !== 1 ? "s" : ""} from previous days
+            </span>
+          </div>
+          <div className="flex flex-col bg-zen-red/5 rounded-xl border border-zen-red/20 px-4">
+            {overdueTasksFormatted.map((task) => (
+              <div
+                key={task.id}
+                className="group flex items-center gap-3 sm:gap-4 py-4 border-b border-zen-red/10 last:border-b-0"
+              >
+                {/* Checkbox */}
+                <button
+                  className="w-11 h-11 sm:w-10 sm:h-10 flex-shrink-0 flex items-center justify-center -ml-2 sm:-ml-1 rounded-xl transition-all duration-200 active:scale-90"
+                  onClick={() => handleToggleOverdue(task.id)}
+                >
+                  <div className="w-6 h-6 sm:w-[22px] sm:h-[22px] rounded-lg border-2 border-zen-red/50 flex items-center justify-center transition-all duration-200" />
+                </button>
+
+                {/* Content */}
+                <button className="flex-1 text-left min-w-0" onClick={() => openEditModal(task.id)}>
+                  <div className="text-[0.9375rem] font-normal mb-0.5 truncate text-moon">
+                    {task.title}
+                  </div>
+                  <div className="text-xs text-moon-faint truncate flex items-center gap-1.5">
+                    <AlertTriangle className="w-3 h-3 text-zen-red flex-shrink-0" />
+                    <span className="text-zen-red">{formatOverdueLabel(task.scheduledDate)}</span>
+                    <span className="text-moon-faint/50">·</span>
+                    {task.category}
+                  </div>
+                </button>
+
+                {/* Points */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <span className="text-sm font-medium tabular-nums text-moon-faint">
+                    {task.points}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* Empty State - No tasks planned */}
-      {tasks.length === 0 ? (
+      {tasks.length === 0 && overdueTasksFormatted.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 px-4">
           <div className="w-20 h-20 rounded-full bg-night-soft border border-night-glow flex items-center justify-center mb-6">
             <CalendarDays className="w-10 h-10 text-lantern" />
@@ -390,7 +488,7 @@ export default function DashboardPage() {
             </Button>
           </div>
         </div>
-      ) : (
+      ) : tasks.length > 0 ? (
         <>
           <MitCard
             task={mit}
@@ -414,7 +512,7 @@ export default function DashboardPage() {
             onAddTask={() => openCreateModal("SECONDARY")}
           />
         </>
-      )}
+      ) : null}
 
       {/* Task Create Modal */}
       <TaskCreateModal
@@ -431,7 +529,7 @@ export default function DashboardPage() {
           setIsEditModalOpen(open);
           if (!open) setEditingTaskId(null);
         }}
-        task={editingTaskId ? tasks.find((t) => t.id === editingTaskId) || null : null}
+        task={editingTaskId ? allTasks.find((t) => t.id === editingTaskId) || null : null}
       />
 
       {/* Plan Your Day Modal */}
