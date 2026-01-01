@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +10,13 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useTaskSuggest } from "@/hooks/useAI";
 import type { TaskSuggestResponse, SuggestedTask } from "@/lib/ai/schemas";
 import {
@@ -19,17 +26,22 @@ import {
   Clock,
   Info,
   CheckCircle2,
+  Target,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+interface WeeklyGoal {
+  id: string;
+  title: string;
+  description?: string | null;
+}
 
 interface TaskSuggestModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  weeklyGoalId?: string;
-  weeklyGoalTitle: string;
-  weeklyGoalDescription?: string;
-  parentGoalTitle?: string;
-  onApply: (tasks: SuggestedTask[]) => void;
+  weeklyGoals: WeeklyGoal[];
+  initialGoalId?: string;
+  onApply: (tasks: SuggestedTask[], weeklyGoalId?: string) => void;
 }
 
 const PRIORITY_STYLES = {
@@ -56,23 +68,39 @@ const PRIORITY_STYLES = {
 export function TaskSuggestModal({
   open,
   onOpenChange,
-  weeklyGoalId,
-  weeklyGoalTitle,
-  weeklyGoalDescription,
-  parentGoalTitle,
+  weeklyGoals,
+  initialGoalId,
   onApply,
 }: TaskSuggestModalProps) {
+  const [selectedGoalId, setSelectedGoalId] = useState<string>("");
   const [result, setResult] = useState<TaskSuggestResponse | null>(null);
   const [selectedTasks, setSelectedTasks] = useState<Set<number>>(new Set());
   const suggest = useTaskSuggest();
 
+  // Set initial goal when modal opens
+  useEffect(() => {
+    if (open && weeklyGoals.length > 0) {
+      const goalId = initialGoalId || weeklyGoals[0].id;
+      setSelectedGoalId(goalId);
+    }
+  }, [open, weeklyGoals, initialGoalId]);
+
+  // Reset when goal changes
+  useEffect(() => {
+    setResult(null);
+    setSelectedTasks(new Set());
+  }, [selectedGoalId]);
+
+  const selectedGoal = weeklyGoals.find((g) => g.id === selectedGoalId);
+
   const handleSuggest = async () => {
+    if (!selectedGoal) return;
+
     try {
       const response = await suggest.mutateAsync({
-        weeklyGoalId,
-        weeklyGoalTitle,
-        weeklyGoalDescription,
-        parentGoalTitle,
+        weeklyGoalId: selectedGoal.id,
+        weeklyGoalTitle: selectedGoal.title,
+        weeklyGoalDescription: selectedGoal.description || undefined,
       });
       setResult(response.data);
       // Select all tasks by default
@@ -95,7 +123,7 @@ export function TaskSuggestModal({
   const handleApply = () => {
     if (result) {
       const tasksToApply = result.tasks.filter((_, i) => selectedTasks.has(i));
-      onApply(tasksToApply);
+      onApply(tasksToApply, selectedGoalId || undefined);
       handleClose();
     }
   };
@@ -128,14 +156,36 @@ export function TaskSuggestModal({
           </div>
         </DialogHeader>
 
-        {/* Weekly Goal */}
+        {/* Weekly Goal Selector */}
         <div className="mt-4 p-4 bg-night-soft border border-night-mist rounded-xl">
           <div className="text-xs font-medium uppercase tracking-wider text-moon-faint mb-2">
             Weekly Goal
           </div>
-          <p className="text-moon">{weeklyGoalTitle}</p>
-          {weeklyGoalDescription && (
-            <p className="text-moon-dim text-sm mt-1">{weeklyGoalDescription}</p>
+          {weeklyGoals.length > 1 ? (
+            <Select value={selectedGoalId} onValueChange={setSelectedGoalId}>
+              <SelectTrigger className="bg-night border-night-mist text-moon focus:ring-lantern/20">
+                <SelectValue placeholder="Select a goal..." />
+              </SelectTrigger>
+              <SelectContent className="bg-night border-night-mist">
+                {weeklyGoals.map((goal) => (
+                  <SelectItem
+                    key={goal.id}
+                    value={goal.id}
+                    className="text-moon-soft focus:bg-night-mist focus:text-moon"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Target className="w-3.5 h-3.5 text-lantern flex-shrink-0" />
+                      <span className="truncate">{goal.title}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <p className="text-moon">{selectedGoal?.title || "No goals available"}</p>
+          )}
+          {selectedGoal?.description && (
+            <p className="text-moon-dim text-sm mt-2">{selectedGoal.description}</p>
           )}
         </div>
 

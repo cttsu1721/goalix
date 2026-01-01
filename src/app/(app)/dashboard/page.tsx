@@ -84,11 +84,6 @@ export default function DashboardPage() {
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [isPlanDayModalOpen, setIsPlanDayModalOpen] = useState(false);
   const [isTaskSuggestModalOpen, setIsTaskSuggestModalOpen] = useState(false);
-  const [selectedWeeklyGoal, setSelectedWeeklyGoal] = useState<{
-    id?: string;
-    title: string;
-    description?: string;
-  } | null>(null);
 
   // Fetch data
   const { data: tasksData, isLoading: tasksLoading, refetch: refetchTasks } = useTasks(today);
@@ -218,17 +213,10 @@ export default function DashboardPage() {
       toast.error("Create a weekly goal first to get AI task suggestions");
       return;
     }
-    // Default to first weekly goal, user can change in modal
-    const firstGoal = weeklyGoals[0];
-    setSelectedWeeklyGoal({
-      id: firstGoal.id,
-      title: firstGoal.title,
-      description: firstGoal.description,
-    });
     setIsTaskSuggestModalOpen(true);
   };
 
-  const handleApplySuggestedTasks = async (suggestedTasks: SuggestedTask[]) => {
+  const handleApplySuggestedTasks = async (suggestedTasks: SuggestedTask[], weeklyGoalId?: string) => {
     try {
       // Check current task limits
       const hasMit = tasks.some((t) => t.priority === "MIT");
@@ -261,7 +249,7 @@ export default function DashboardPage() {
           priority,
           scheduledDate: today,
           estimatedMinutes: task.estimated_minutes,
-          weeklyGoalId: selectedWeeklyGoal?.id,
+          weeklyGoalId,
         });
         addedCount++;
       }
@@ -455,16 +443,12 @@ export default function DashboardPage() {
       />
 
       {/* AI Task Suggester Modal */}
-      {selectedWeeklyGoal && (
-        <TaskSuggestModal
-          open={isTaskSuggestModalOpen}
-          onOpenChange={setIsTaskSuggestModalOpen}
-          weeklyGoalId={selectedWeeklyGoal.id}
-          weeklyGoalTitle={selectedWeeklyGoal.title}
-          weeklyGoalDescription={selectedWeeklyGoal.description}
-          onApply={handleApplySuggestedTasks}
-        />
-      )}
+      <TaskSuggestModal
+        open={isTaskSuggestModalOpen}
+        onOpenChange={setIsTaskSuggestModalOpen}
+        weeklyGoals={weeklyGoals}
+        onApply={handleApplySuggestedTasks}
+      />
     </AppShell>
   );
 }

@@ -96,13 +96,17 @@ export function TaskCreateModal({
   const selectedWeeklyGoal = weeklyGoals.find((g) => g.id === weeklyGoalId);
 
   // Handle applying AI suggestion to form
-  const handleApplySuggestion = (tasks: SuggestedTask[]) => {
+  const handleApplySuggestion = (tasks: SuggestedTask[], goalId?: string) => {
     if (tasks.length > 0) {
       const task = tasks[0]; // Apply first selected task
       setTitle(task.title);
       setPriority(task.priority as TaskPriority);
       if (task.estimated_minutes) {
         setEstimatedMinutes(String(task.estimated_minutes));
+      }
+      // Update goal if provided from modal
+      if (goalId) {
+        setWeeklyGoalId(goalId);
       }
       toast.success("AI suggestion applied!");
     }
@@ -368,16 +372,13 @@ export function TaskCreateModal({
       </DialogContent>
 
       {/* AI Task Suggest Modal */}
-      {selectedWeeklyGoal && (
-        <TaskSuggestModal
-          open={showSuggestModal}
-          onOpenChange={setShowSuggestModal}
-          weeklyGoalId={weeklyGoalId}
-          weeklyGoalTitle={selectedWeeklyGoal.title}
-          weeklyGoalDescription={selectedWeeklyGoal.description}
-          onApply={handleApplySuggestion}
-        />
-      )}
+      <TaskSuggestModal
+        open={showSuggestModal}
+        onOpenChange={setShowSuggestModal}
+        weeklyGoals={weeklyGoals}
+        initialGoalId={weeklyGoalId}
+        onApply={handleApplySuggestion}
+      />
 
       {/* Decision Compass Dialog */}
       <DecisionCompassDialog
