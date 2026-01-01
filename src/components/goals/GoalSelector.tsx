@@ -5,19 +5,11 @@ import { Check, ChevronsUpDown, Search, Clock, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-} from "@/components/ui/command";
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
 import type { GoalCategory } from "@prisma/client";
 
 // Category configuration with colors and icons
@@ -58,6 +50,7 @@ export function GoalSelector({
   className,
 }: GoalSelectorProps) {
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
   const [recentGoalIds, setRecentGoalIds] = useState<string[]>([]);
 
   // Load recent goals from localStorage
@@ -71,6 +64,11 @@ export function GoalSelector({
       // Ignore localStorage errors
     }
   }, []);
+
+  // Reset search when popover closes
+  useEffect(() => {
+    if (!open) setSearch("");
+  }, [open]);
 
   // Save to recent goals when selection changes
   const handleSelect = (goalId: string) => {
@@ -99,7 +97,14 @@ export function GoalSelector({
       .filter((g): g is WeeklyGoal => g !== undefined);
   }, [recentGoalIds, goals]);
 
-  // Group goals by category
+  // Filter goals by search
+  const filteredGoals = useMemo(() => {
+    if (!search.trim()) return goals;
+    const searchLower = search.toLowerCase();
+    return goals.filter((g) => g.title.toLowerCase().includes(searchLower));
+  }, [goals, search]);
+
+  // Group filtered goals by category
   const groupedGoals = useMemo(() => {
     const groups: Record<GoalCategory, WeeklyGoal[]> = {
       HEALTH: [],
@@ -111,7 +116,7 @@ export function GoalSelector({
       OTHER: [],
     };
 
-    goals.forEach((goal) => {
+    filteredGoals.forEach((goal) => {
       groups[goal.category].push(goal);
     });
 
@@ -123,7 +128,7 @@ export function GoalSelector({
         goals,
         config: CATEGORY_CONFIG[category as GoalCategory],
       }));
-  }, [goals]);
+  }, [filteredGoals]);
 
   // Get selected goal for display
   const selectedGoal = goals.find((g) => g.id === value);
@@ -162,102 +167,92 @@ export function GoalSelector({
         align="start"
         sideOffset={4}
       >
-        <Command className="bg-transparent">
-          <div className="flex items-center border-b border-night-mist px-3">
-            <Search className="mr-2 h-4 w-4 shrink-0 text-moon-faint" />
-            <CommandInput
-              placeholder="Search goals..."
-              className="h-10 bg-transparent text-moon placeholder:text-moon-faint border-0 focus:ring-0"
-            />
-          </div>
-          <CommandList className="max-h-[280px] overflow-y-auto overscroll-contain touch-pan-y [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-night-soft [&::-webkit-scrollbar-thumb]:bg-night-mist [&::-webkit-scrollbar-thumb]:rounded-full [-webkit-overflow-scrolling:touch]">
-            <CommandEmpty className="py-6 text-center text-sm text-moon-faint">
-              No goals found.
-            </CommandEmpty>
+        {/* Search Input */}
+        <div className="flex items-center border-b border-night-mist px-3 py-2">
+          <Search className="mr-2 h-4 w-4 shrink-0 text-moon-faint" />
+          <Input
+            placeholder="Search goals..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="h-8 border-0 bg-transparent text-moon placeholder:text-moon-faint focus-visible:ring-0 focus-visible:ring-offset-0 p-0"
+          />
+        </div>
 
-            {/* No Goal Option */}
-            <CommandGroup>
-              <CommandItem
-                value="none"
-                onSelect={() => handleSelect("none")}
-                className="text-moon-faint hover:bg-night-mist hover:text-moon cursor-pointer"
-              >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    value === "none" ? "opacity-100" : "opacity-0"
-                  )}
-                />
-                <Target className="mr-2 h-4 w-4 opacity-50" />
-                No goal
-              </CommandItem>
-            </CommandGroup>
-
-            {/* Recent Goals */}
-            {recentGoals.length > 0 && (
-              <>
-                <CommandSeparator className="bg-night-mist" />
-                <CommandGroup
-                  heading={
-                    <span className="flex items-center gap-1.5 text-moon-faint">
-                      <Clock className="h-3 w-3" />
-                      Recent
-                    </span>
-                  }
-                >
-                  {recentGoals.map((goal) => (
-                    <CommandItem
-                      key={`recent-${goal.id}`}
-                      value={`recent-${goal.title}`}
-                      onSelect={() => handleSelect(goal.id)}
-                      className="text-moon-soft hover:bg-night-mist hover:text-moon cursor-pointer"
-                    >
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4 shrink-0",
-                          value === goal.id ? "opacity-100" : "opacity-0"
-                        )}
-                      />
-                      <span className="mr-2 shrink-0">{CATEGORY_CONFIG[goal.category].emoji}</span>
-                      <span className="text-sm leading-snug">{goal.title}</span>
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </>
+        {/* Scrollable List */}
+        <div className="max-h-[300px] overflow-y-scroll overscroll-contain">
+          {/* No Goal Option */}
+          <button
+            type="button"
+            onClick={() => handleSelect("none")}
+            className={cn(
+              "w-full flex items-center gap-2 px-3 py-2 text-left text-sm",
+              "hover:bg-night-mist transition-colors",
+              value === "none" ? "text-lantern" : "text-moon-faint"
             )}
+          >
+            <Check className={cn("h-4 w-4 shrink-0", value === "none" ? "opacity-100" : "opacity-0")} />
+            <Target className="h-4 w-4 shrink-0 opacity-50" />
+            <span>No goal</span>
+          </button>
 
-            {/* Goals Grouped by Category */}
-            {groupedGoals.map(({ category, goals, config }) => (
-              <CommandGroup
-                key={category}
-                heading={
-                  <span className={cn("flex items-center gap-1.5", config.color)}>
-                    <span>{config.emoji}</span>
-                    {config.label}
-                    <span className="text-moon-faint font-normal">({goals.length})</span>
-                  </span>
-                }
-              >
-                {goals.map((goal) => (
-                  <CommandItem
+          {/* Recent Goals */}
+          {!search && recentGoals.length > 0 && (
+            <div className="border-t border-night-mist">
+              <div className="px-3 py-1.5 text-xs text-moon-faint flex items-center gap-1.5">
+                <Clock className="h-3 w-3" />
+                Recent
+              </div>
+              {recentGoals.map((goal) => (
+                <button
+                  key={`recent-${goal.id}`}
+                  type="button"
+                  onClick={() => handleSelect(goal.id)}
+                  className={cn(
+                    "w-full flex items-center gap-2 px-3 py-2 text-left text-sm",
+                    "hover:bg-night-mist transition-colors",
+                    value === goal.id ? "text-lantern" : "text-moon-soft"
+                  )}
+                >
+                  <Check className={cn("h-4 w-4 shrink-0", value === goal.id ? "opacity-100" : "opacity-0")} />
+                  <span className="shrink-0">{CATEGORY_CONFIG[goal.category].emoji}</span>
+                  <span className="leading-snug">{goal.title}</span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Goals Grouped by Category */}
+          {groupedGoals.length > 0 ? (
+            groupedGoals.map(({ category, goals: categoryGoals, config }) => (
+              <div key={category} className="border-t border-night-mist">
+                <div className={cn("px-3 py-1.5 text-xs flex items-center gap-1.5", config.color)}>
+                  <span>{config.emoji}</span>
+                  {config.label}
+                  <span className="text-moon-faint font-normal">({categoryGoals.length})</span>
+                </div>
+                {categoryGoals.map((goal) => (
+                  <button
                     key={goal.id}
-                    value={goal.title}
-                    onSelect={() => handleSelect(goal.id)}
-                    className="text-moon-soft hover:bg-night-mist hover:text-moon cursor-pointer pl-6"
+                    type="button"
+                    onClick={() => handleSelect(goal.id)}
+                    className={cn(
+                      "w-full flex items-center gap-2 px-3 py-2 pl-6 text-left text-sm",
+                      "hover:bg-night-mist transition-colors",
+                      value === goal.id ? "text-lantern" : "text-moon-soft"
+                    )}
                   >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4 shrink-0",
-                        value === goal.id ? "opacity-100" : "opacity-0"
-                      )}
-                    />
-                    <span className="text-sm leading-snug">{goal.title}</span>
-                  </CommandItem>
+                    <Check className={cn("h-4 w-4 shrink-0", value === goal.id ? "opacity-100" : "opacity-0")} />
+                    <span className="leading-snug">{goal.title}</span>
+                  </button>
                 ))}
-              </CommandGroup>
-            ))}
-          </CommandList>
-        </Command>
+              </div>
+            ))
+          ) : search ? (
+            <div className="py-6 text-center text-sm text-moon-faint">
+              No goals found.
+            </div>
+          ) : null}
+        </div>
       </PopoverContent>
     </Popover>
   );
