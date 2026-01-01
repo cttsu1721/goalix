@@ -5,3 +5,4 @@ export { GoalCreateModal } from "./GoalCreateModal";
 export { GoalEditModal } from "./GoalEditModal";
 export { DreamBuilderModal } from "./DreamBuilderModal";
 export { DreamBuilderPreview } from "./DreamBuilderPreview";
+export { GoalSelector } from "./GoalSelector";

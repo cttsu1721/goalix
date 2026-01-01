@@ -22,10 +22,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn, formatLocalDate } from "@/lib/utils";
-import { Loader2, Sparkles, Clock, Target, AlertCircle, Lightbulb } from "lucide-react";
-import type { TaskPriority } from "@prisma/client";
+import { Loader2, Sparkles, Clock, AlertCircle, Lightbulb } from "lucide-react";
+import type { TaskPriority, GoalCategory } from "@prisma/client";
 import { AiButton, TaskSuggestModal } from "@/components/ai";
 import { DecisionCompassDialog } from "./DecisionCompassDialog";
+import { GoalSelector } from "@/components/goals";
 import type { SuggestedTask } from "@/lib/ai/schemas";
 import { toast } from "sonner";
 
@@ -89,7 +90,7 @@ export function TaskCreateModal({
   const createTask = useCreateTask();
   const { data: weeklyGoalsData } = useGoals("weekly");
 
-  const weeklyGoals = (weeklyGoalsData?.goals || []) as Array<{ id: string; title: string; description?: string }>;
+  const weeklyGoals = (weeklyGoalsData?.goals || []) as Array<{ id: string; title: string; description?: string; category: GoalCategory }>;
 
   // Get selected weekly goal details for AI suggest
   const selectedWeeklyGoal = weeklyGoals.find((g) => g.id === weeklyGoalId);
@@ -299,32 +300,13 @@ export function TaskCreateModal({
 
             {/* Weekly Goal Link */}
             <div className="space-y-2">
-              <Label className="text-moon-soft text-sm flex items-center gap-1.5">
-                <Target className="w-3.5 h-3.5" />
-                Link to Goal
-              </Label>
-              <Select value={weeklyGoalId} onValueChange={setWeeklyGoalId}>
-                <SelectTrigger className="bg-night-soft border-night-mist text-moon focus:ring-lantern/20">
-                  <SelectValue placeholder="Select goal" />
-                </SelectTrigger>
-                <SelectContent className="bg-night border-night-mist max-h-48">
-                  <SelectItem
-                    value="none"
-                    className="text-moon-faint focus:bg-night-mist focus:text-moon"
-                  >
-                    No goal
-                  </SelectItem>
-                  {weeklyGoals.map((goal) => (
-                    <SelectItem
-                      key={goal.id}
-                      value={goal.id}
-                      className="text-moon-soft focus:bg-night-mist focus:text-moon"
-                    >
-                      {goal.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label className="text-moon-soft text-sm">Link to Goal</Label>
+              <GoalSelector
+                goals={weeklyGoals}
+                value={weeklyGoalId}
+                onChange={setWeeklyGoalId}
+                placeholder="Select goal..."
+              />
             </div>
           </div>
 
