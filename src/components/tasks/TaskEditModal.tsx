@@ -21,8 +21,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Save, Trash2, Clock, Target, AlertCircle } from "lucide-react";
-import type { TaskPriority, TaskStatus } from "@prisma/client";
+import { Loader2, Save, Trash2, Clock, AlertCircle } from "lucide-react";
+import type { TaskPriority, TaskStatus, GoalCategory } from "@prisma/client";
+import { GoalSelector } from "@/components/goals";
 
 interface Task {
   id: string;
@@ -99,7 +100,7 @@ function TaskEditForm({ task, onClose }: { task: Task; onClose: () => void }) {
   const deleteTask = useDeleteTask();
   const { data: weeklyGoalsData } = useGoals("weekly");
 
-  const weeklyGoals = (weeklyGoalsData?.goals || []) as Array<{ id: string; title: string }>;
+  const weeklyGoals = (weeklyGoalsData?.goals || []) as Array<{ id: string; title: string; category: GoalCategory }>;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -251,32 +252,13 @@ function TaskEditForm({ task, onClose }: { task: Task; onClose: () => void }) {
 
         {/* Weekly Goal Link */}
         <div className="space-y-2">
-          <Label className="text-moon-soft text-sm flex items-center gap-1.5">
-            <Target className="w-3.5 h-3.5" />
-            Link to Goal
-          </Label>
-          <Select value={weeklyGoalId || "none"} onValueChange={(v) => setWeeklyGoalId(v === "none" ? "" : v)}>
-            <SelectTrigger className="bg-night-soft border-night-mist text-moon focus:ring-lantern/20">
-              <SelectValue placeholder="Select goal" />
-            </SelectTrigger>
-            <SelectContent className="bg-night border-night-mist max-h-48">
-              <SelectItem
-                value="none"
-                className="text-moon-faint focus:bg-night-mist focus:text-moon"
-              >
-                No goal
-              </SelectItem>
-              {weeklyGoals.map((goal) => (
-                <SelectItem
-                  key={goal.id}
-                  value={goal.id}
-                  className="text-moon-soft focus:bg-night-mist focus:text-moon"
-                >
-                  {goal.title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Label className="text-moon-soft text-sm">Link to Goal</Label>
+          <GoalSelector
+            goals={weeklyGoals}
+            value={weeklyGoalId}
+            onChange={setWeeklyGoalId}
+            placeholder="Select goal..."
+          />
         </div>
       </div>
 
