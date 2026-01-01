@@ -230,25 +230,37 @@ export default function MonthPage() {
     setCreateModalOpen(true);
   };
 
-  // Calculate month stats
+  // Calculate month stats from tasksByDate (same source as calendar)
   const monthStats = useMemo(() => {
-    const allTasks = tasksData?.tasks || [];
-    // Filter to only tasks in the current month
-    const monthTasks = allTasks.filter((t) => {
-      const taskDate = new Date(t.scheduledDate);
-      return taskDate.getMonth() === month && taskDate.getFullYear() === year;
+    const allTasksByDate = tasksData?.tasksByDate || {};
+
+    let total = 0;
+    let completed = 0;
+    let mitsTotal = 0;
+    let mitsCompleted = 0;
+
+    // Only count tasks from dates in the current month
+    monthDates.forEach(date => {
+      if (date.getMonth() === month && date.getFullYear() === year) {
+        const dateKey = formatDateKey(date);
+        const dayTasks = (allTasksByDate[dateKey] || []) as TaskItem[];
+
+        total += dayTasks.length;
+        completed += dayTasks.filter(t => t.status === "COMPLETED").length;
+
+        const dayMits = dayTasks.filter(t => t.priority === "MIT");
+        mitsTotal += dayMits.length;
+        mitsCompleted += dayMits.filter(t => t.status === "COMPLETED").length;
+      }
     });
-    const completed = monthTasks.filter((t) => t.status === "COMPLETED").length;
-    const mits = monthTasks.filter((t) => t.priority === "MIT");
-    const mitsCompleted = mits.filter((t) => t.status === "COMPLETED").length;
 
     return {
-      total: monthTasks.length,
+      total,
       completed,
-      mitsTotal: mits.length,
+      mitsTotal,
       mitsCompleted,
     };
-  }, [tasksData?.tasks, month, year]);
+  }, [tasksData?.tasksByDate, monthDates, month, year]);
 
   const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
