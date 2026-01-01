@@ -118,7 +118,6 @@ function DayCell({
   tasks,
   isCurrentMonth: isInMonth,
   onCompleteTask,
-  onAddTask,
   onShowAllTasks,
   isCompletingTask,
   isPopoverOpen,
@@ -127,7 +126,6 @@ function DayCell({
   tasks: TaskItem[];
   isCurrentMonth: boolean;
   onCompleteTask: (task: TaskItem) => void;
-  onAddTask: (date: Date) => void;
   onShowAllTasks: (date: Date) => void;
   isCompletingTask: string | null;
   isPopoverOpen: boolean;
@@ -140,7 +138,7 @@ function DayCell({
 
   return (
     <div
-      onClick={() => onAddTask(date)}
+      onClick={() => onShowAllTasks(date)}
       className={cn(
         "min-h-[100px] p-2 border-b border-r border-night-glow/30 cursor-pointer",
         "transition-colors hover:bg-night-mist/30",
@@ -173,20 +171,14 @@ function DayCell({
           />
         ))}
         {hiddenCount > 0 && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onShowAllTasks(date);
-            }}
+          <span
             className={cn(
-              "w-full text-left text-[0.6rem] px-2 py-0.5 rounded",
-              "text-lantern hover:text-lantern-soft",
-              "hover:bg-lantern/10 transition-colors",
-              "font-medium"
+              "block text-[0.6rem] px-2 py-0.5",
+              "text-lantern font-medium"
             )}
           >
             +{hiddenCount} more
-          </button>
+          </span>
         )}
       </div>
     </div>
@@ -252,11 +244,6 @@ export default function MonthPage() {
     } finally {
       setCompletingTaskId(null);
     }
-  };
-
-  const handleAddTask = (date: Date) => {
-    setCreateModalDate(date);
-    setCreateModalOpen(true);
   };
 
   // Handler for showing all tasks in popover
@@ -467,7 +454,6 @@ export default function MonthPage() {
                   tasks={dayTasks}
                   isCurrentMonth={isCurrentMonth(date, month)}
                   onCompleteTask={handleToggleTask}
-                  onAddTask={handleAddTask}
                   onShowAllTasks={handleShowAllTasks}
                   isCompletingTask={completingTaskId}
                   isPopoverOpen={popoverDate === dateKey}
