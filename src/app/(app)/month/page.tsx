@@ -1,19 +1,24 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import {
   ChevronLeft,
   ChevronRight,
   CheckCircle2,
-  Plus,
   Loader2,
   Sparkles,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatLocalDate } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useWeekTasks, useCompleteTask, useUpdateTask } from "@/hooks";
 import { TaskCreateModal } from "@/components/tasks/TaskCreateModal";
+import { DayTasksPopover } from "@/components/tasks/DayTasksPopover";
 import { toast } from "sonner";
 import type { TaskPriority, TaskStatus } from "@prisma/client";
 
@@ -49,7 +54,7 @@ function getMonthDates(year: number, month: number) {
 }
 
 function formatDateKey(date: Date) {
-  return date.toISOString().split("T")[0];
+  return formatLocalDate(date);
 }
 
 function isToday(date: Date) {
@@ -92,9 +97,9 @@ function TaskPill({
       disabled={isCompleting}
       className={cn(
         "w-full text-left px-2 py-1 rounded-md text-[0.65rem] leading-tight truncate",
-        "transition-all duration-150 hover:ring-1 hover:ring-sakura-300",
-        isMit && !completed && "bg-sakura-100 text-sakura-700 font-medium",
-        !isMit && !completed && "bg-night-soft/50 text-moon-dim",
+        "transition-all duration-150 hover:ring-1 hover:ring-lantern/50",
+        isMit && !completed && "bg-lantern/20 text-lantern font-medium",
+        !isMit && !completed && "bg-night-mist/30 text-moon-dim",
         completed && "bg-zen-green/10 text-zen-green line-through opacity-60"
       )}
       title={task.title}
@@ -113,14 +118,18 @@ function DayCell({
   isCurrentMonth: isInMonth,
   onCompleteTask,
   onAddTask,
+  onShowAllTasks,
   isCompletingTask,
+  isPopoverOpen,
 }: {
   date: Date;
   tasks: TaskItem[];
   isCurrentMonth: boolean;
   onCompleteTask: (task: TaskItem) => void;
   onAddTask: (date: Date) => void;
+  onShowAllTasks: (date: Date) => void;
   isCompletingTask: string | null;
+  isPopoverOpen: boolean;
 }) {
   const today = isToday(date);
   const dayNum = date.getDate();
@@ -132,20 +141,21 @@ function DayCell({
     <div
       onClick={() => onAddTask(date)}
       className={cn(
-        "min-h-[100px] p-2 border-b border-r border-night-mist/20 cursor-pointer",
-        "transition-colors hover:bg-sakura-50/30",
-        !isInMonth && "bg-night-soft/20 opacity-50",
-        today && "bg-sakura-50/50 ring-2 ring-inset ring-sakura-300"
+        "min-h-[100px] p-2 border-b border-r border-night-glow/30 cursor-pointer",
+        "transition-colors hover:bg-night-mist/30",
+        !isInMonth && "bg-night/50 opacity-50",
+        today && "bg-lantern/10 ring-2 ring-inset ring-lantern/40",
+        isPopoverOpen && "bg-lantern/15 ring-2 ring-lantern/50"
       )}
     >
       {/* Day number */}
       <div className={cn(
         "text-sm font-medium mb-1.5",
-        today ? "text-sakura-600" : isInMonth ? "text-moon" : "text-moon-faint"
+        today ? "text-lantern" : isInMonth ? "text-moon" : "text-moon-faint"
       )}>
         {dayNum}
         {today && (
-          <span className="ml-1.5 text-[0.6rem] uppercase tracking-wider text-sakura-500">
+          <span className="ml-1.5 text-[0.6rem] uppercase tracking-wider text-lantern/70">
             Today
           </span>
         )}
@@ -162,9 +172,20 @@ function DayCell({
           />
         ))}
         {hiddenCount > 0 && (
-          <div className="text-[0.6rem] text-moon-faint px-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onShowAllTasks(date);
+            }}
+            className={cn(
+              "w-full text-left text-[0.6rem] px-2 py-0.5 rounded",
+              "text-lantern hover:text-lantern-soft",
+              "hover:bg-lantern/10 transition-colors",
+              "font-medium"
+            )}
+          >
             +{hiddenCount} more
-          </div>
+          </button>
         )}
       </div>
     </div>
@@ -176,6 +197,10 @@ export default function MonthPage() {
   const [completingTaskId, setCompletingTaskId] = useState<string | null>(null);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [createModalDate, setCreateModalDate] = useState<Date | null>(null);
+  // Popover state - stores the date key of the day with open popover
+  const [popoverDate, setPopoverDate] = useState<string | null>(null);
+  const [popoverTasks, setPopoverTasks] = useState<TaskItem[]>([]);
+  const [popoverDateObj, setPopoverDateObj] = useState<Date | null>(null);
 
   // Calculate current month/year based on offset
   const { year, month, monthDates } = useMemo(() => {
@@ -230,6 +255,56 @@ export default function MonthPage() {
     setCreateModalOpen(true);
   };
 
+  // Handler for showing all tasks in popover
+  const handleShowAllTasks = useCallback((date: Date) => {
+    const dateKey = formatDateKey(date);
+    const dayTasks = (tasksByDate[dateKey] || []) as TaskItem[];
+    setPopoverDate(dateKey);
+    setPopoverTasks(dayTasks);
+    setPopoverDateObj(date);
+  }, [tasksByDate]);
+
+  // Handler for closing popover
+  const handlePopoverOpenChange = useCallback((open: boolean) => {
+    if (!open) {
+      setPopoverDate(null);
+      setPopoverTasks([]);
+      setPopoverDateObj(null);
+    }
+  }, []);
+
+  // Handler for completing task from popover
+  const handlePopoverCompleteTask = useCallback(async (task: TaskItem) => {
+    setCompletingTaskId(task.id);
+    try {
+      if (task.status === "COMPLETED") {
+        await updateTask.mutateAsync({ id: task.id, status: "PENDING" });
+        toast.success("Task reopened");
+      } else {
+        await completeTask.mutateAsync(task.id);
+        toast.success("Task completed!");
+      }
+      // Refetch and update popover tasks
+      await refetch();
+      // Update popover tasks with fresh data
+      if (popoverDate) {
+        const freshTasksByDate = tasksData?.tasksByDate || {};
+        setPopoverTasks((freshTasksByDate[popoverDate] || []) as TaskItem[]);
+      }
+    } catch {
+      toast.error("Failed to update task");
+    } finally {
+      setCompletingTaskId(null);
+    }
+  }, [completeTask, updateTask, refetch, popoverDate, tasksData?.tasksByDate]);
+
+  // Handler for adding task from popover
+  const handlePopoverAddTask = useCallback((date: Date) => {
+    setPopoverDate(null);
+    setCreateModalDate(date);
+    setCreateModalOpen(true);
+  }, []);
+
   // Calculate month stats from tasksByDate (same source as calendar)
   const monthStats = useMemo(() => {
     const allTasksByDate = tasksData?.tasksByDate || {};
@@ -273,36 +348,48 @@ export default function MonthPage() {
           <p className="text-moon-dim mt-1">{monthName}</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={goToPrevMonth}
-            className="h-9 w-9 p-0 border-night-mist bg-white hover:bg-sakura-50"
-          >
-            <ChevronLeft className="w-4 h-4 text-moon-soft" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={goToPrevMonth}
+                aria-label="Previous month"
+                className="h-9 w-9 p-0 border-night-glow bg-night-soft hover:bg-night-mist"
+              >
+                <ChevronLeft className="w-4 h-4 text-moon-soft" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Previous month</TooltipContent>
+          </Tooltip>
           <Button
             variant="outline"
             size="sm"
             onClick={goToThisMonth}
             disabled={monthOffset === 0}
-            className="h-9 px-4 border-night-mist bg-white hover:bg-sakura-50 text-moon-soft text-sm"
+            className="h-9 px-4 border-night-glow bg-night-soft hover:bg-night-mist text-moon-soft text-sm"
           >
             Today
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={goToNextMonth}
-            className="h-9 w-9 p-0 border-night-mist bg-white hover:bg-sakura-50"
-          >
-            <ChevronRight className="w-4 h-4 text-moon-soft" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={goToNextMonth}
+                aria-label="Next month"
+                className="h-9 w-9 p-0 border-night-glow bg-night-soft hover:bg-night-mist"
+              >
+                <ChevronRight className="w-4 h-4 text-moon-soft" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Next month</TooltipContent>
+          </Tooltip>
         </div>
       </div>
 
       {/* Month Stats */}
-      <div className="flex items-center gap-6 mb-6 p-4 bg-white/80 border border-night-mist/30 rounded-2xl">
+      <div className="flex items-center gap-6 mb-6 p-4 bg-night-soft border border-night-glow rounded-2xl">
         <div className="flex items-center gap-2">
           <div className="text-2xl font-semibold text-moon">
             {monthStats.completed}
@@ -310,9 +397,9 @@ export default function MonthPage() {
           </div>
           <span className="text-xs text-moon-dim">tasks completed</span>
         </div>
-        <div className="w-px h-8 bg-night-mist/30" />
+        <div className="w-px h-8 bg-night-glow" />
         <div className="flex items-center gap-2">
-          <div className="text-2xl font-semibold text-sakura-600">
+          <div className="text-2xl font-semibold text-lantern">
             {monthStats.mitsCompleted}
             <span className="text-moon-faint text-base font-normal">/{monthStats.mitsTotal}</span>
           </div>
@@ -332,12 +419,12 @@ export default function MonthPage() {
       {/* Calendar Grid */}
       {tasksLoading ? (
         <div className="flex items-center justify-center py-16">
-          <Loader2 className="w-8 h-8 animate-spin text-sakura-400" />
+          <Loader2 className="w-8 h-8 animate-spin text-lantern" />
         </div>
       ) : (
-        <div className="bg-white/80 border border-night-mist/30 rounded-2xl overflow-hidden">
+        <div className="bg-night-soft border border-night-glow rounded-2xl overflow-hidden">
           {/* Week day headers */}
-          <div className="grid grid-cols-7 border-b border-night-mist/30">
+          <div className="grid grid-cols-7 border-b border-night-glow/50">
             {weekDays.map((day) => (
               <div
                 key={day}
@@ -362,12 +449,27 @@ export default function MonthPage() {
                   isCurrentMonth={isCurrentMonth(date, month)}
                   onCompleteTask={handleToggleTask}
                   onAddTask={handleAddTask}
+                  onShowAllTasks={handleShowAllTasks}
                   isCompletingTask={completingTaskId}
+                  isPopoverOpen={popoverDate === dateKey}
                 />
               );
             })}
           </div>
         </div>
+      )}
+
+      {/* Day Tasks Dialog/Sheet */}
+      {popoverDateObj && (
+        <DayTasksPopover
+          date={popoverDateObj}
+          tasks={popoverTasks}
+          isOpen={popoverDate !== null}
+          onOpenChange={handlePopoverOpenChange}
+          onCompleteTask={handlePopoverCompleteTask}
+          onAddTask={handlePopoverAddTask}
+          completingTaskId={completingTaskId}
+        />
       )}
 
       {/* Task Create Modal */}

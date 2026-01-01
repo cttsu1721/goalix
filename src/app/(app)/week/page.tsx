@@ -18,7 +18,12 @@ import {
   Sparkles,
   GripVertical,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatLocalDate } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useGoals, useWeekTasks, useCompleteTask, useUpdateTask } from "@/hooks";
 import { TaskCreateModal } from "@/components/tasks/TaskCreateModal";
 import { toast } from "sonner";
@@ -83,7 +88,7 @@ function isPast(date: Date) {
 }
 
 function formatDateKey(date: Date) {
-  return date.toISOString().split("T")[0];
+  return formatLocalDate(date);
 }
 
 interface TaskItem {
@@ -131,11 +136,11 @@ function DraggableTaskRow({
       style={style}
       className={cn(
         "group flex items-start gap-2 py-3 px-4 rounded-xl transition-all duration-200",
-        "hover:bg-sakura-100/50",
-        isMit && !completed && "bg-gradient-to-r from-sakura-100 to-transparent border-l-2 border-sakura-400",
+        "hover:bg-night-mist/50",
+        isMit && !completed && "bg-gradient-to-r from-lantern/10 to-transparent border-l-2 border-lantern",
         completed && "opacity-50",
         isDragging && "opacity-50 shadow-lg z-50",
-        isCurrentlyDragging && "ring-2 ring-sakura-300"
+        isCurrentlyDragging && "ring-2 ring-lantern/50"
       )}
     >
       {/* Drag Handle */}
@@ -156,7 +161,7 @@ function DraggableTaskRow({
           completed
             ? "bg-zen-green border-zen-green"
             : isMit
-            ? "border-sakura-400 hover:bg-sakura-100"
+            ? "border-lantern hover:bg-lantern/10"
             : "border-moon-dim/40 hover:border-moon-dim"
         )}
       >
@@ -172,13 +177,13 @@ function DraggableTaskRow({
           className={cn(
             "text-sm leading-relaxed",
             completed ? "line-through text-moon-faint" : "text-moon",
-            isMit && !completed && "font-medium text-sakura-700"
+            isMit && !completed && "font-medium text-lantern"
           )}
         >
           {task.title}
         </p>
         {isMit && !completed && (
-          <span className="inline-flex items-center gap-1 mt-1 text-[0.65rem] text-sakura-500 uppercase tracking-wider font-medium">
+          <span className="inline-flex items-center gap-1 mt-1 text-[0.65rem] text-lantern/70 uppercase tracking-wider font-medium">
             <Sparkles className="w-3 h-3" />
             Most Important Task
           </span>
@@ -188,7 +193,7 @@ function DraggableTaskRow({
       {/* Priority indicator */}
       <div className={cn(
         "w-1.5 h-1.5 rounded-full flex-shrink-0 mt-2",
-        isMit ? "bg-sakura-400" : isPrimary ? "bg-lantern/60" : "bg-moon-dim/30"
+        isMit ? "bg-lantern" : isPrimary ? "bg-zen-green/60" : "bg-moon-dim/30"
       )} />
     </div>
   );
@@ -203,8 +208,8 @@ function TaskRowOverlay({ task }: { task: TaskItem }) {
   return (
     <div
       className={cn(
-        "flex items-start gap-2 py-3 px-4 rounded-xl bg-white shadow-xl border border-sakura-200",
-        isMit && !completed && "bg-gradient-to-r from-sakura-100 to-white border-l-2 border-sakura-400",
+        "flex items-start gap-2 py-3 px-4 rounded-xl bg-night-soft shadow-xl border border-night-glow",
+        isMit && !completed && "bg-gradient-to-r from-lantern/10 to-night-soft border-l-2 border-lantern",
         completed && "opacity-50"
       )}
     >
@@ -218,7 +223,7 @@ function TaskRowOverlay({ task }: { task: TaskItem }) {
         completed
           ? "bg-zen-green border-zen-green"
           : isMit
-          ? "border-sakura-400"
+          ? "border-lantern"
           : "border-moon-dim/40"
       )}>
         {completed && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
@@ -228,7 +233,7 @@ function TaskRowOverlay({ task }: { task: TaskItem }) {
         <p className={cn(
           "text-sm leading-relaxed",
           completed ? "line-through text-moon-faint" : "text-moon",
-          isMit && !completed && "font-medium text-sakura-700"
+          isMit && !completed && "font-medium text-lantern"
         )}>
           {task.title}
         </p>
@@ -236,7 +241,7 @@ function TaskRowOverlay({ task }: { task: TaskItem }) {
 
       <div className={cn(
         "w-1.5 h-1.5 rounded-full flex-shrink-0 mt-2",
-        isMit ? "bg-sakura-400" : isPrimary ? "bg-lantern/60" : "bg-moon-dim/30"
+        isMit ? "bg-lantern" : isPrimary ? "bg-zen-green/60" : "bg-moon-dim/30"
       )} />
     </div>
   );
@@ -291,10 +296,10 @@ function DaySection({
       className={cn(
         "rounded-2xl transition-all duration-300",
         today
-          ? "bg-gradient-to-br from-sakura-50 via-white to-sakura-50/50 border-2 border-sakura-200 shadow-lg shadow-sakura-100/50"
-          : "bg-white/80 border border-night-mist/30 hover:border-sakura-200/50",
+          ? "bg-gradient-to-br from-night-soft via-night to-night-soft border-2 border-lantern/30 shadow-lg shadow-lantern/10"
+          : "bg-night-soft border border-night-glow hover:border-night-mist",
         past && !today && "opacity-70",
-        isOver && "ring-2 ring-sakura-400 ring-offset-2 bg-sakura-50/50"
+        isOver && "ring-2 ring-lantern/50 ring-offset-2 ring-offset-night bg-lantern/5"
       )}
     >
       {/* Day Header - Always Visible */}
@@ -303,25 +308,25 @@ function DaySection({
         disabled={today}
         className={cn(
           "w-full flex items-center gap-4 p-4 text-left",
-          !today && "cursor-pointer hover:bg-sakura-50/30 rounded-2xl transition-colors"
+          !today && "cursor-pointer hover:bg-night-mist/30 rounded-2xl transition-colors"
         )}
       >
         {/* Date Badge */}
         <div className={cn(
           "flex flex-col items-center justify-center w-14 h-14 rounded-xl flex-shrink-0",
           today
-            ? "bg-sakura-200 border-2 border-sakura-300"
-            : "bg-night-soft/50"
+            ? "bg-lantern/20 border-2 border-lantern/40"
+            : "bg-night-mist/30"
         )}>
           <span className={cn(
             "text-[0.6rem] uppercase tracking-wider font-medium",
-            today ? "text-sakura-600" : "text-moon-dim"
+            today ? "text-lantern" : "text-moon-dim"
           )}>
             {dayName.slice(0, 3)}
           </span>
           <span className={cn(
             "text-xl font-semibold leading-none",
-            today ? "text-sakura-700" : "text-moon-dim"
+            today ? "text-lantern" : "text-moon-dim"
           )}>
             {dayNum}
           </span>
@@ -332,12 +337,12 @@ function DaySection({
           <div className="flex items-center gap-2">
             <h3 className={cn(
               "font-medium",
-              today ? "text-sakura-700" : "text-moon"
+              today ? "text-lantern" : "text-moon"
             )}>
               {today ? "Today" : dayName}
             </h3>
             {today && (
-              <span className="px-2 py-0.5 bg-sakura-100 text-sakura-600 text-[0.65rem] rounded-full font-medium uppercase tracking-wider">
+              <span className="px-2 py-0.5 bg-lantern/20 text-lantern text-[0.65rem] rounded-full font-medium uppercase tracking-wider">
                 Focus Day
               </span>
             )}
@@ -375,7 +380,7 @@ function DaySection({
                 strokeDasharray={`${(completed / total) * 100.5} 100.5`}
                 strokeLinecap="round"
                 className={cn(
-                  today ? "text-sakura-400" : "text-zen-green"
+                  today ? "text-lantern" : "text-zen-green"
                 )}
               />
             </svg>
@@ -461,9 +466,9 @@ function DaySection({
               onClick={() => onAddTask(date)}
               className={cn(
                 "w-full flex items-center justify-center gap-2 py-3 mt-3 rounded-xl",
-                "text-sm text-moon-dim hover:text-sakura-600",
-                "border border-dashed border-night-mist/40 hover:border-sakura-300",
-                "hover:bg-sakura-50/50 transition-all duration-200"
+                "text-sm text-moon-dim hover:text-lantern",
+                "border border-dashed border-night-glow hover:border-lantern/50",
+                "hover:bg-lantern/5 transition-all duration-200"
               )}
             >
               <Plus className="w-4 h-4" />
@@ -619,36 +624,48 @@ export default function WeekPage() {
           <p className="text-moon-dim mt-1">{formatWeekRange(weekDates)}</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={goToPrevWeek}
-            className="h-9 w-9 p-0 border-night-mist bg-white hover:bg-sakura-50"
-          >
-            <ChevronLeft className="w-4 h-4 text-moon-soft" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={goToPrevWeek}
+                aria-label="Previous week"
+                className="h-9 w-9 p-0 border-night-glow bg-night-soft hover:bg-night-mist"
+              >
+                <ChevronLeft className="w-4 h-4 text-moon-soft" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Previous week</TooltipContent>
+          </Tooltip>
           <Button
             variant="outline"
             size="sm"
             onClick={goToThisWeek}
             disabled={weekOffset === 0}
-            className="h-9 px-4 border-night-mist bg-white hover:bg-sakura-50 text-moon-soft text-sm"
+            className="h-9 px-4 border-night-glow bg-night-soft hover:bg-night-mist text-moon-soft text-sm"
           >
             Today
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={goToNextWeek}
-            className="h-9 w-9 p-0 border-night-mist bg-white hover:bg-sakura-50"
-          >
-            <ChevronRight className="w-4 h-4 text-moon-soft" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={goToNextWeek}
+                aria-label="Next week"
+                className="h-9 w-9 p-0 border-night-glow bg-night-soft hover:bg-night-mist"
+              >
+                <ChevronRight className="w-4 h-4 text-moon-soft" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Next week</TooltipContent>
+          </Tooltip>
         </div>
       </div>
 
       {/* Week Stats Bar */}
-      <div className="flex items-center gap-6 mb-6 p-5 bg-white/80 border border-night-mist/30 rounded-2xl">
+      <div className="flex items-center gap-6 mb-6 p-5 bg-night-soft border border-night-glow rounded-2xl">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-xl bg-zen-green/10 flex items-center justify-center">
             <Trophy className="w-5 h-5 text-zen-green" />
@@ -662,14 +679,14 @@ export default function WeekPage() {
           </div>
         </div>
 
-        <div className="w-px h-10 bg-night-mist/30" />
+        <div className="w-px h-10 bg-night-glow" />
 
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-sakura-100 flex items-center justify-center">
-            <Flame className="w-5 h-5 text-sakura-500" />
+          <div className="w-11 h-11 rounded-xl bg-lantern/10 flex items-center justify-center">
+            <Flame className="w-5 h-5 text-lantern" />
           </div>
           <div>
-            <p className="text-2xl font-semibold text-sakura-600">
+            <p className="text-2xl font-semibold text-lantern">
               {weekStats.mitsCompleted}
               <span className="text-moon-faint text-base font-normal">/{weekStats.mitsTotal}</span>
             </p>
@@ -677,10 +694,10 @@ export default function WeekPage() {
           </div>
         </div>
 
-        <div className="w-px h-10 bg-night-mist/30" />
+        <div className="w-px h-10 bg-night-glow" />
 
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-night-soft/50 flex items-center justify-center">
+          <div className="w-11 h-11 rounded-xl bg-night-mist/30 flex items-center justify-center">
             <Target className="w-5 h-5 text-moon-soft" />
           </div>
           <div>
@@ -704,7 +721,7 @@ export default function WeekPage() {
           </div>
           <div className="h-2 bg-night-mist/30 rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-sakura-400 to-zen-green rounded-full transition-all duration-500"
+              className="h-full bg-gradient-to-r from-lantern to-zen-green rounded-full transition-all duration-500"
               style={{
                 width: `${
                   weekStats.total > 0
@@ -720,7 +737,7 @@ export default function WeekPage() {
       {/* Days List */}
       {tasksLoading ? (
         <div className="flex items-center justify-center py-16">
-          <Loader2 className="w-8 h-8 animate-spin text-sakura-400" />
+          <Loader2 className="w-8 h-8 animate-spin text-lantern" />
         </div>
       ) : (
         <DndContext
@@ -761,11 +778,11 @@ export default function WeekPage() {
       )}
 
       {/* Weekly Goals Section */}
-      <div className="mt-8 bg-white/80 border border-night-mist/30 rounded-2xl p-6">
+      <div className="mt-8 bg-night-soft border border-night-glow rounded-2xl p-6">
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-sakura-100 flex items-center justify-center">
-              <Target className="w-5 h-5 text-sakura-500" />
+            <div className="w-10 h-10 rounded-xl bg-lantern/10 flex items-center justify-center">
+              <Target className="w-5 h-5 text-lantern" />
             </div>
             <div>
               <h3 className="font-medium text-moon">Weekly Goals</h3>
@@ -779,7 +796,7 @@ export default function WeekPage() {
             <Button
               variant="outline"
               size="sm"
-              className="border-night-mist bg-white hover:bg-sakura-50 text-moon-soft"
+              className="border-night-glow bg-night-soft hover:bg-night-mist text-moon-soft"
             >
               <Plus className="w-4 h-4 mr-1" />
               Add Goal
@@ -792,7 +809,7 @@ export default function WeekPage() {
             <Target className="w-10 h-10 text-moon-faint/30 mx-auto mb-3" />
             <p className="text-moon-dim text-sm">No weekly goals yet</p>
             <Link href="/goals?level=weekly">
-              <Button variant="link" className="text-sakura-500 hover:text-sakura-600 mt-2">
+              <Button variant="link" className="text-lantern hover:text-lantern-soft mt-2">
                 Create your first weekly goal
               </Button>
             </Link>
@@ -803,7 +820,7 @@ export default function WeekPage() {
               <Link
                 key={goal.id}
                 href={`/goals/${goal.id}`}
-                className="flex items-center gap-3 p-4 bg-night-soft/30 rounded-xl hover:bg-sakura-50/50 transition-colors"
+                className="flex items-center gap-3 p-4 bg-night-mist/30 rounded-xl hover:bg-night-mist/50 transition-colors"
               >
                 {goal.status === "COMPLETED" ? (
                   <CheckCircle2 className="w-5 h-5 text-zen-green flex-shrink-0" />
@@ -825,7 +842,7 @@ export default function WeekPage() {
       </div>
 
       {/* Weekly Review CTA */}
-      <div className="mt-6 bg-gradient-to-r from-sakura-50 to-white border border-sakura-200/50 rounded-2xl p-6">
+      <div className="mt-6 bg-gradient-to-r from-lantern/10 to-night-soft border border-lantern/20 rounded-2xl p-6">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="font-medium text-moon mb-1">Ready for your weekly review?</h3>
@@ -834,7 +851,7 @@ export default function WeekPage() {
             </p>
           </div>
           <Link href="/review/weekly">
-            <Button className="bg-sakura-500 text-white hover:bg-sakura-600 shadow-md shadow-sakura-200">
+            <Button className="bg-lantern text-void hover:bg-lantern-soft shadow-md shadow-lantern/20">
               Start Review
             </Button>
           </Link>
