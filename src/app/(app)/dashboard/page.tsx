@@ -260,7 +260,7 @@ export default function DashboardPage() {
         toast.success(`Added ${addedCount} tasks to your day!`);
       }
       refetchTasks();
-    } catch (error) {
+    } catch {
       toast.error("Failed to create some tasks");
     }
   };
