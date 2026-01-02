@@ -1,8 +1,8 @@
-# Goalix — Project Instructions
+# Goalzenix — Project Instructions
 
 ## Project Overview
 
-Goalix is a goal tracking web application based on MJ DeMarco's 1/5/10 methodology. It enables users to cascade 10-year dreams down to actionable daily tasks, enhanced with gamification (points, streaks, badges, levels) and AI assistance (Goal Sharpener, Task Suggester).
+Goalzenix is a goal tracking web application based on MJ DeMarco's 1/5/10 methodology. It enables users to cascade 10-year dreams down to actionable daily tasks, enhanced with gamification (points, streaks, badges, levels) and AI assistance (Goal Sharpener, Task Suggester).
 
 ### Core Value Proposition
 Help goal-oriented professionals and entrepreneurs translate ambitious long-term visions into consistent daily action through structured goal hierarchy, habit-forming gamification, and AI-powered guidance.
@@ -40,7 +40,8 @@ Help goal-oriented professionals and entrepreneurs translate ambitious long-term
 - **Network:** n8n-docker-caddy_default
 
 ### Domain Configuration
-- **Production URL:** `https://goal.quantumdigitalplus.com`
+- **Production URL:** `https://goalzenix.com`
+- **Domain Registrar:** Cloudflare
 - **Container Name:** goalix
 - **Internal Port:** 3000
 
@@ -811,20 +812,33 @@ ANTHROPIC_API_KEY=
 - [ ] `docker compose build` succeeds
 - [ ] Health endpoint returns 200
 - [ ] Database created on VPS
-- [ ] DNS A record for goal.quantumdigitalplus.com → 170.64.137.4
+- [ ] DNS configured (see Domain Setup below)
 - [ ] ANTHROPIC_API_KEY set
-- [ ] RESEND_API_KEY set
+- [ ] EMAILIT_API_KEY set (for transactional emails)
 - [ ] NEXTAUTH_SECRET generated (use `openssl rand -base64 32`)
+
+### Domain Setup (Cloudflare)
+
+1. **DNS Records** (in Cloudflare dashboard for goalzenix.com):
+   - A record: `@` → `170.64.137.4` (DNS only, gray cloud initially)
+   - CNAME record: `www` → `goalzenix.com` (DNS only)
+
+2. **SSL Settings** (after Caddy gets certs):
+   - SSL/TLS mode: Full (strict)
+   - Can enable Cloudflare proxy (orange cloud) after HTTPS verified
 
 ### Deploy Steps
 ```bash
 ssh root@170.64.137.4
-mkdir -p /opt/apps/goalix
 cd /opt/apps/goalix
-git clone [repo] .
-cp .env.example .env
-nano .env  # Fill production values
+git pull
 docker compose up -d --build
+```
+
+### Quick Deploy Command
+```bash
+# One-liner for routine deployments
+ssh root@170.64.137.4 "cd /opt/apps/goalix && git pull && docker compose up -d --build"
 ```
 
 ### Database Migrations (Production)
@@ -844,23 +858,34 @@ docker run --rm --network n8n-docker-caddy_n8n_network \
 which has breaking changes (connection URL config moved to `prisma.config.ts`).
 
 ### Caddy Configuration
-Add to `/opt/n8n-docker-caddy/caddy_config/Caddyfile`:
+
+Current config in `/opt/n8n-docker-caddy/caddy_config/Caddyfile`:
 ```
-goal.quantumdigitalplus.com {
+# Goalzenix - Goal Tracking App
+goalzenix.com, www.goalzenix.com {
     reverse_proxy goalix:3000
 }
 ```
 
-Reload Caddy:
+Reload Caddy after changes:
 ```bash
 docker exec n8n-docker-caddy-caddy-1 caddy reload --config /config/Caddyfile
 ```
 
+### Environment Variables (Production)
+
+Key variables in `/opt/apps/goalix/.env`:
+```env
+NEXT_PUBLIC_APP_URL=https://goalzenix.com
+NEXTAUTH_URL=https://goalzenix.com
+DATABASE_URL=postgresql://goalix_user:PASSWORD@sqm_postgres:5432/goalix_db
+REDIS_URL=redis://goalix-redis:6379
+```
+
 ### Post-Deploy Verification
-- [ ] HTTPS working
+- [ ] HTTPS working at https://goalzenix.com
 - [ ] Health check returns OK (`/api/health`)
-- [ ] Can send magic link email
-- [ ] Can sign in
+- [ ] Can sign in / register
 - [ ] Can create goals/tasks
 - [ ] AI features working
 - [ ] PWA installable on mobile

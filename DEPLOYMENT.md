@@ -8,7 +8,7 @@ This guide covers deploying Goalix to production on a DigitalOcean VPS.
 |-----------|---------|
 | **VPS** | DigitalOcean SYD1 (4GB RAM / 2 vCPU) |
 | **IP Address** | 170.64.137.4 |
-| **Domain** | goal.quantumdigitalplus.com |
+| **Domain** | goalzenix.com |
 | **Reverse Proxy** | Caddy (automatic HTTPS) |
 | **Database** | PostgreSQL (sqm_postgres container) |
 | **Container Network** | n8n-docker-caddy_default |
@@ -36,7 +36,7 @@ Add these secrets to your GitHub repository (`Settings > Secrets > Actions`):
 
 Create an A record:
 ```
-goal.quantumdigitalplus.com → 170.64.137.4
+goalzenix.com → 170.64.137.4
 ```
 
 ---
@@ -92,7 +92,7 @@ Fill in production values:
 ```bash
 # App
 NODE_ENV=production
-NEXT_PUBLIC_APP_URL=https://goal.quantumdigitalplus.com
+NEXT_PUBLIC_APP_URL=https://goalzenix.com
 
 # Database (use existing PostgreSQL container)
 DATABASE_URL=postgresql://goalix_user:YOUR_DB_PASSWORD@sqm_postgres:5432/goalix_db
@@ -102,7 +102,7 @@ REDIS_URL=redis://goalix-redis:6379
 
 # Auth
 NEXTAUTH_SECRET=<generate with: openssl rand -base64 32>
-NEXTAUTH_URL=https://goal.quantumdigitalplus.com
+NEXTAUTH_URL=https://goalzenix.com
 
 # Email (EmailIt) - Key format: em_xxxxxxxxxxxx
 EMAILIT_API_KEY=em_your_emailit_api_key
@@ -139,7 +139,7 @@ GRANT ALL PRIVILEGES ON DATABASE goalix_db TO goalix_user;
 Add to `/opt/n8n-docker-caddy/caddy_config/Caddyfile`:
 
 ```caddy
-goal.quantumdigitalplus.com {
+goalzenix.com {
     reverse_proxy goalix:3000
 }
 ```
@@ -272,7 +272,7 @@ docker-compose ps
 ### HTTPS Not Working
 
 1. Check Caddy logs: `docker logs n8n-docker-caddy-caddy-1`
-2. Verify DNS: `dig goal.quantumdigitalplus.com`
+2. Verify DNS: `dig goalzenix.com`
 3. Reload Caddy: `docker exec n8n-docker-caddy-caddy-1 caddy reload --config /config/Caddyfile`
 
 ### API Keys Not Working
@@ -322,7 +322,7 @@ docker compose up -d
 ### API Health Endpoint
 
 ```bash
-curl https://goal.quantumdigitalplus.com/api/health
+curl https://goalzenix.com/api/health
 ```
 
 Expected response:
@@ -337,7 +337,7 @@ Expected response:
 docker-compose ps
 
 # Check app health
-curl -s https://goal.quantumdigitalplus.com/api/health | jq
+curl -s https://goalzenix.com/api/health | jq
 
 # Check database
 docker exec sqm_postgres pg_isready -U goalix_user -d goalix_db
@@ -374,7 +374,7 @@ docker compose up -d
 
 # 4. Verify app is healthy
 sleep 15
-curl -s https://goal.quantumdigitalplus.com/api/health | jq
+curl -s https://goalzenix.com/api/health | jq
 ```
 
 ### Rollback Scenarios
@@ -463,8 +463,8 @@ docker compose up -d
 
 After any rollback, verify these:
 
-- [ ] `curl https://goal.quantumdigitalplus.com/api/health` returns `{"status":"ok"}`
-- [ ] Landing page loads: `curl -I https://goal.quantumdigitalplus.com`
+- [ ] `curl https://goalzenix.com/api/health` returns `{"status":"ok"}`
+- [ ] Landing page loads: `curl -I https://goalzenix.com`
 - [ ] Can log in with magic link
 - [ ] Database connection works
 - [ ] Redis connection works

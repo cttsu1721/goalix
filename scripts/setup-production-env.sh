@@ -296,7 +296,7 @@ main() {
     fi
     validate_nextauth_secret "$NEXTAUTH_SECRET" || exit 1
 
-    NEXTAUTH_URL=$(prompt_value "NextAuth URL" "https://goal.quantumdigitalplus.com")
+    NEXTAUTH_URL=$(prompt_value "NextAuth URL" "https://goalzenix.com")
 
     # --------------------------------------------------------------------------
 
@@ -415,7 +415,7 @@ EOF
     echo "       node:22-alpine sh -c \"npm i prisma@6.19.1 && npx prisma migrate deploy\"${NC}"
     echo ""
     echo "  3. Verify the application is running:"
-    echo "     ${YELLOW}curl https://goal.quantumdigitalplus.com/api/health${NC}"
+    echo "     ${YELLOW}curl https://goalzenix.com/api/health${NC}"
     echo ""
 }
 
