@@ -498,7 +498,16 @@ export default function DashboardPage() {
                     <AlertTriangle className="w-3 h-3 text-zen-red flex-shrink-0" />
                     <span className="text-zen-red">{formatOverdueLabel(task.scheduledDate)}</span>
                     <span className="text-moon-faint/50">·</span>
-                    {task.category}
+                    {task.goalChain ? (
+                      <span className="truncate">
+                        {task.goalChain.weeklyGoal.title}
+                        {task.goalChain.oneYearGoal && (
+                          <span className="text-lantern/70"> → {task.goalChain.oneYearGoal.title}</span>
+                        )}
+                      </span>
+                    ) : (
+                      task.category
+                    )}
                   </div>
                 </button>
 
