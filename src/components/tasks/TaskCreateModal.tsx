@@ -25,7 +25,7 @@ import { cn, formatLocalDate } from "@/lib/utils";
 import { Loader2, Sparkles, Clock, AlertCircle, Lightbulb } from "lucide-react";
 import type { TaskPriority, GoalCategory } from "@prisma/client";
 import { AiButton, TaskSuggestModal } from "@/components/ai";
-import { DecisionCompassDialog } from "./DecisionCompassDialog";
+// DecisionCompassDialog removed - flexible hierarchy allows standalone tasks
 import { GoalSelector } from "@/components/goals";
 import type { SuggestedTask } from "@/lib/ai/schemas";
 import { toast } from "sonner";
@@ -85,7 +85,6 @@ export function TaskCreateModal({
   const [weeklyGoalId, setWeeklyGoalId] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [showSuggestModal, setShowSuggestModal] = useState(false);
-  const [showDecisionCompass, setShowDecisionCompass] = useState(false);
 
   const createTask = useCreateTask();
   const { data: weeklyGoalsData } = useGoals("weekly");
@@ -121,14 +120,9 @@ export function TaskCreateModal({
       return;
     }
 
-    // Check if task is linked to a goal - if not, show Decision Compass
-    const hasGoalLink = weeklyGoalId && weeklyGoalId !== "none";
-    if (!hasGoalLink) {
-      setShowDecisionCompass(true);
-      return;
-    }
-
-    await createTaskWithGoal(weeklyGoalId);
+    // Flexible hierarchy: allow creating tasks with or without goal links
+    const goalId = weeklyGoalId && weeklyGoalId !== "none" ? weeklyGoalId : undefined;
+    await createTaskWithGoal(goalId);
   };
 
   const createTaskWithGoal = async (goalId?: string) => {
@@ -150,21 +144,6 @@ export function TaskCreateModal({
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create task");
     }
-  };
-
-  const handleDecisionCompassLinkToGoal = () => {
-    setShowDecisionCompass(false);
-    // Focus on the goal selector - user will select a goal and resubmit
-  };
-
-  const handleDecisionCompassCreateAnyway = async () => {
-    setShowDecisionCompass(false);
-    // Create without goal link (acknowledged)
-    await createTaskWithGoal(undefined);
-  };
-
-  const handleDecisionCompassCancel = () => {
-    setShowDecisionCompass(false);
   };
 
   const resetForm = () => {
@@ -378,16 +357,6 @@ export function TaskCreateModal({
         weeklyGoals={weeklyGoals}
         initialGoalId={weeklyGoalId}
         onApply={handleApplySuggestion}
-      />
-
-      {/* Decision Compass Dialog */}
-      <DecisionCompassDialog
-        open={showDecisionCompass}
-        onOpenChange={setShowDecisionCompass}
-        taskTitle={title}
-        onLinkToGoal={handleDecisionCompassLinkToGoal}
-        onCreateAnyway={handleDecisionCompassCreateAnyway}
-        onCancel={handleDecisionCompassCancel}
       />
     </Dialog>
   );

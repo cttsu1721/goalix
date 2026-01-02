@@ -38,16 +38,16 @@ interface GoalSuggestModalProps {
 }
 
 const levelLabels: Record<GoalLevelForSuggestion, string> = {
-  dream: "10-Year Dreams",
-  fiveYear: "5-Year Goals",
+  sevenYear: "7-Year Visions",
+  threeYear: "3-Year Goals",
   oneYear: "1-Year Goals",
   monthly: "Monthly Goals",
   weekly: "Weekly Goals",
 };
 
 const levelIcons: Record<GoalLevelForSuggestion, React.ReactNode> = {
-  dream: <Star className="w-4 h-4" />,
-  fiveYear: <Target className="w-4 h-4" />,
+  sevenYear: <Star className="w-4 h-4" />,
+  threeYear: <Target className="w-4 h-4" />,
   oneYear: <Calendar className="w-4 h-4" />,
   monthly: <Layers className="w-4 h-4" />,
   weekly: <CheckCircle2 className="w-4 h-4" />,

@@ -4,8 +4,8 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { DreamBuilderResponse } from "@/lib/ai";
-import type { GoalPath } from "@/hooks/useDreamBuilder";
+import type { VisionBuilderResponse } from "@/lib/ai";
+import type { GoalPath } from "@/hooks/useVisionBuilder";
 import {
   Sparkles,
   Target,
@@ -20,23 +20,23 @@ import {
   Trash2,
 } from "lucide-react";
 
-interface DreamBuilderPreviewProps {
-  hierarchy: DreamBuilderResponse;
+interface VisionBuilderPreviewProps {
+  hierarchy: VisionBuilderResponse;
   onUpdate: (path: GoalPath, updates: { title?: string; description?: string }) => void;
-  onRemoveFiveYear?: (index: number) => void;
-  onRemoveOneYear?: (fiveYearIndex: number, oneYearIndex: number) => void;
+  onRemoveThreeYear?: (index: number) => void;
+  onRemoveOneYear?: (threeYearIndex: number, oneYearIndex: number) => void;
 }
 
 const LEVEL_STYLES = {
-  dream: {
+  vision: {
     icon: Sparkles,
     color: "lantern",
-    label: "10-Year Dream",
+    label: "7-Year Vision",
   },
-  fiveYear: {
+  threeYear: {
     icon: Target,
     color: "zen-purple",
-    label: "5-Year Goal",
+    label: "3-Year Goal",
   },
   oneYear: {
     icon: Calendar,
@@ -232,48 +232,48 @@ function GoalNode({
   );
 }
 
-export function DreamBuilderPreview({
+export function VisionBuilderPreview({
   hierarchy,
   onUpdate,
-  onRemoveFiveYear,
+  onRemoveThreeYear,
   onRemoveOneYear,
-}: DreamBuilderPreviewProps) {
+}: VisionBuilderPreviewProps) {
   return (
     <div className="space-y-3 overflow-hidden">
-      {/* Dream */}
+      {/* Vision */}
       <GoalNode
-        level="dream"
-        title={hierarchy.dream.title}
-        description={hierarchy.dream.description}
-        path={{ type: "dream" }}
+        level="vision"
+        title={hierarchy.vision.title}
+        description={hierarchy.vision.description}
+        path={{ type: "vision" }}
         onUpdate={onUpdate}
         defaultExpanded
       >
-        {/* 5-Year Goals */}
-        {hierarchy.fiveYearGoals.map((fiveYear, fyIndex) => (
+        {/* 3-Year Goals */}
+        {hierarchy.threeYearGoals.map((threeYear, tyIndex) => (
           <GoalNode
-            key={`fy-${fyIndex}`}
-            level="fiveYear"
-            title={fiveYear.title}
-            description={fiveYear.description}
-            path={{ type: "fiveYear", index: fyIndex }}
+            key={`ty-${tyIndex}`}
+            level="threeYear"
+            title={threeYear.title}
+            description={threeYear.description}
+            path={{ type: "threeYear", index: tyIndex }}
             onUpdate={onUpdate}
-            onRemove={() => onRemoveFiveYear?.(fyIndex)}
-            canRemove={hierarchy.fiveYearGoals.length > 1}
+            onRemove={() => onRemoveThreeYear?.(tyIndex)}
+            canRemove={hierarchy.threeYearGoals.length > 1}
             depth={1}
             defaultExpanded
           >
             {/* 1-Year Goals */}
-            {fiveYear.oneYearGoals.map((oneYear, oyIndex) => (
+            {threeYear.oneYearGoals.map((oneYear, oyIndex) => (
               <GoalNode
-                key={`oy-${fyIndex}-${oyIndex}`}
+                key={`oy-${tyIndex}-${oyIndex}`}
                 level="oneYear"
                 title={oneYear.title}
                 description={oneYear.description}
-                path={{ type: "oneYear", fiveYearIndex: fyIndex, oneYearIndex: oyIndex }}
+                path={{ type: "oneYear", threeYearIndex: tyIndex, oneYearIndex: oyIndex }}
                 onUpdate={onUpdate}
-                onRemove={() => onRemoveOneYear?.(fyIndex, oyIndex)}
-                canRemove={fiveYear.oneYearGoals.length > 1}
+                onRemove={() => onRemoveOneYear?.(tyIndex, oyIndex)}
+                canRemove={threeYear.oneYearGoals.length > 1}
                 depth={2}
                 defaultExpanded
               >
@@ -282,7 +282,7 @@ export function DreamBuilderPreview({
                   level="monthly"
                   title={oneYear.monthlyGoal.title}
                   description={oneYear.monthlyGoal.description}
-                  path={{ type: "monthly", fiveYearIndex: fyIndex, oneYearIndex: oyIndex }}
+                  path={{ type: "monthly", threeYearIndex: tyIndex, oneYearIndex: oyIndex }}
                   onUpdate={onUpdate}
                   depth={3}
                   defaultExpanded
@@ -292,7 +292,7 @@ export function DreamBuilderPreview({
                     level="weekly"
                     title={oneYear.monthlyGoal.weeklyGoal.title}
                     description={oneYear.monthlyGoal.weeklyGoal.description}
-                    path={{ type: "weekly", fiveYearIndex: fyIndex, oneYearIndex: oyIndex }}
+                    path={{ type: "weekly", threeYearIndex: tyIndex, oneYearIndex: oyIndex }}
                     onUpdate={onUpdate}
                     depth={4}
                   />
@@ -313,3 +313,6 @@ export function DreamBuilderPreview({
     </div>
   );
 }
+
+// Backward compatibility alias
+export const DreamBuilderPreview = VisionBuilderPreview;

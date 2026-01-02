@@ -1,6 +1,6 @@
 import type {
-  Dream,
-  FiveYearGoal,
+  SevenYearVision,
+  ThreeYearGoal,
   OneYearGoal,
   MonthlyGoal,
   WeeklyGoal,
@@ -8,24 +8,24 @@ import type {
   GoalStatus,
 } from "@prisma/client";
 
-export type { Dream, FiveYearGoal, OneYearGoal, MonthlyGoal, WeeklyGoal };
+export type { SevenYearVision, ThreeYearGoal, OneYearGoal, MonthlyGoal, WeeklyGoal };
 
 export type GoalLevel =
-  | "dream"
-  | "fiveYear"
+  | "sevenYear"
+  | "threeYear"
   | "oneYear"
   | "monthly"
   | "weekly";
 
 export type GoalType =
-  | Dream
-  | FiveYearGoal
+  | SevenYearVision
+  | ThreeYearGoal
   | OneYearGoal
   | MonthlyGoal
   | WeeklyGoal;
 
-export interface GoalWithChildren extends Dream {
-  fiveYearGoals: (FiveYearGoal & {
+export interface GoalWithChildren extends SevenYearVision {
+  threeYearGoals: (ThreeYearGoal & {
     oneYearGoals: (OneYearGoal & {
       monthlyGoals: (MonthlyGoal & {
         weeklyGoals: WeeklyGoal[];

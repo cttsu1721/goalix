@@ -45,16 +45,16 @@ const LEVEL_CONFIG: Record<
     childLabel: string;
   }
 > = {
-  dream: {
-    label: "10-Year Dreams",
-    singularLabel: "Dream",
+  sevenYear: {
+    label: "7-Year Visions",
+    singularLabel: "Vision",
     icon: <Sparkles className="w-5 h-5" />,
-    childLevel: "fiveYear",
-    childLabel: "5-Year Goals",
+    childLevel: "threeYear",
+    childLabel: "3-Year Goals",
   },
-  fiveYear: {
-    label: "5-Year Goals",
-    singularLabel: "5-Year Goal",
+  threeYear: {
+    label: "3-Year Goals",
+    singularLabel: "3-Year Goal",
     icon: <Target className="w-5 h-5" />,
     childLevel: "oneYear",
     childLabel: "1-Year Goals",
@@ -85,9 +85,9 @@ const LEVEL_CONFIG: Record<
 // Helper to get children from goal based on level
 function getChildren(goal: Record<string, unknown>, level: GoalLevel): unknown[] {
   switch (level) {
-    case "dream":
-      return (goal.fiveYearGoals as unknown[]) || [];
-    case "fiveYear":
+    case "sevenYear":
+      return (goal.threeYearGoals as unknown[]) || [];
+    case "threeYear":
       return (goal.oneYearGoals as unknown[]) || [];
     case "oneYear":
       return (goal.monthlyGoals as unknown[]) || [];

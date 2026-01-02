@@ -17,8 +17,8 @@ export async function GET(request: NextRequest) {
     const parentId = searchParams.get("parentId");
     const status = searchParams.get("status") as GoalStatus | null;
 
-    // Default to dreams if no level specified
-    const goalLevel = level || "dream";
+    // Default to sevenYear if no level specified
+    const goalLevel = level || "sevenYear";
 
     let goals;
     const where = {
@@ -26,14 +26,14 @@ export async function GET(request: NextRequest) {
     };
 
     switch (goalLevel) {
-      case "dream":
-        goals = await prisma.dream.findMany({
+      case "sevenYear":
+        goals = await prisma.sevenYearVision.findMany({
           where: {
             userId: session.user.id,
             ...where,
           },
           include: {
-            fiveYearGoals: {
+            threeYearGoals: {
               select: { id: true },
             },
           },
@@ -41,15 +41,15 @@ export async function GET(request: NextRequest) {
         });
         break;
 
-      case "fiveYear":
-        goals = await prisma.fiveYearGoal.findMany({
+      case "threeYear":
+        goals = await prisma.threeYearGoal.findMany({
           where: {
-            dream: { userId: session.user.id },
-            ...(parentId && { dreamId: parentId }),
+            userId: session.user.id,
+            ...(parentId && { sevenYearVisionId: parentId }),
             ...where,
           },
           include: {
-            dream: {
+            sevenYearVision: {
               select: { id: true, title: true },
             },
             oneYearGoals: {
@@ -63,12 +63,12 @@ export async function GET(request: NextRequest) {
       case "oneYear":
         goals = await prisma.oneYearGoal.findMany({
           where: {
-            fiveYearGoal: { dream: { userId: session.user.id } },
-            ...(parentId && { fiveYearGoalId: parentId }),
+            userId: session.user.id,
+            ...(parentId && { threeYearGoalId: parentId }),
             ...where,
           },
           include: {
-            fiveYearGoal: {
+            threeYearGoal: {
               select: { id: true, title: true },
             },
             monthlyGoals: {
@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
       case "monthly":
         goals = await prisma.monthlyGoal.findMany({
           where: {
-            oneYearGoal: { fiveYearGoal: { dream: { userId: session.user.id } } },
+            userId: session.user.id,
             ...(parentId && { oneYearGoalId: parentId }),
             ...where,
           },
@@ -158,8 +158,8 @@ export async function POST(request: NextRequest) {
     let goal;
 
     switch (level as GoalLevel) {
-      case "dream":
-        goal = await prisma.dream.create({
+      case "sevenYear":
+        goal = await prisma.sevenYearVision.create({
           data: {
             userId: session.user.id,
             title,
@@ -170,23 +170,20 @@ export async function POST(request: NextRequest) {
         });
         break;
 
-      case "fiveYear":
-        if (!parentId) {
-          return NextResponse.json(
-            { error: "parentId (dreamId) is required for 5-year goals" },
-            { status: 400 }
-          );
+      case "threeYear":
+        // If parentId provided, verify it belongs to user
+        if (parentId) {
+          const vision = await prisma.sevenYearVision.findFirst({
+            where: { id: parentId, userId: session.user.id },
+          });
+          if (!vision) {
+            return NextResponse.json({ error: "Parent vision not found" }, { status: 404 });
+          }
         }
-        // Verify parent belongs to user
-        const dream = await prisma.dream.findFirst({
-          where: { id: parentId, userId: session.user.id },
-        });
-        if (!dream) {
-          return NextResponse.json({ error: "Parent dream not found" }, { status: 404 });
-        }
-        goal = await prisma.fiveYearGoal.create({
+        goal = await prisma.threeYearGoal.create({
           data: {
-            dreamId: parentId,
+            userId: session.user.id,
+            sevenYearVisionId: parentId || null,
             title,
             description: description || null,
             category: category as GoalCategory,
@@ -196,21 +193,19 @@ export async function POST(request: NextRequest) {
         break;
 
       case "oneYear":
-        if (!parentId) {
-          return NextResponse.json(
-            { error: "parentId (fiveYearGoalId) is required for 1-year goals" },
-            { status: 400 }
-          );
-        }
-        const fiveYearGoal = await prisma.fiveYearGoal.findFirst({
-          where: { id: parentId, dream: { userId: session.user.id } },
-        });
-        if (!fiveYearGoal) {
-          return NextResponse.json({ error: "Parent 5-year goal not found" }, { status: 404 });
+        // If parentId provided, verify it belongs to user
+        if (parentId) {
+          const threeYearGoal = await prisma.threeYearGoal.findFirst({
+            where: { id: parentId, userId: session.user.id },
+          });
+          if (!threeYearGoal) {
+            return NextResponse.json({ error: "Parent 3-year goal not found" }, { status: 404 });
+          }
         }
         goal = await prisma.oneYearGoal.create({
           data: {
-            fiveYearGoalId: parentId,
+            userId: session.user.id,
+            threeYearGoalId: parentId || null,
             title,
             description: description || null,
             category: category as GoalCategory,
@@ -220,27 +215,25 @@ export async function POST(request: NextRequest) {
         break;
 
       case "monthly":
-        if (!parentId) {
-          return NextResponse.json(
-            { error: "parentId (oneYearGoalId) is required for monthly goals" },
-            { status: 400 }
-          );
-        }
         if (!targetMonth) {
           return NextResponse.json(
             { error: "targetMonth is required for monthly goals" },
             { status: 400 }
           );
         }
-        const oneYearGoal = await prisma.oneYearGoal.findFirst({
-          where: { id: parentId, fiveYearGoal: { dream: { userId: session.user.id } } },
-        });
-        if (!oneYearGoal) {
-          return NextResponse.json({ error: "Parent 1-year goal not found" }, { status: 404 });
+        // If parentId provided, verify it belongs to user
+        if (parentId) {
+          const oneYearGoal = await prisma.oneYearGoal.findFirst({
+            where: { id: parentId, userId: session.user.id },
+          });
+          if (!oneYearGoal) {
+            return NextResponse.json({ error: "Parent 1-year goal not found" }, { status: 404 });
+          }
         }
         goal = await prisma.monthlyGoal.create({
           data: {
-            oneYearGoalId: parentId,
+            userId: session.user.id,
+            oneYearGoalId: parentId || null,
             title,
             description: description || null,
             category: category as GoalCategory,
@@ -259,10 +252,7 @@ export async function POST(request: NextRequest) {
         // If parentId provided, verify it belongs to user
         if (parentId) {
           const monthlyGoal = await prisma.monthlyGoal.findFirst({
-            where: {
-              id: parentId,
-              oneYearGoal: { fiveYearGoal: { dream: { userId: session.user.id } } },
-            },
+            where: { id: parentId, userId: session.user.id },
           });
           if (!monthlyGoal) {
             return NextResponse.json({ error: "Parent monthly goal not found" }, { status: 404 });

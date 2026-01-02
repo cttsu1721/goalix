@@ -17,8 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useDreamBuilder } from "@/hooks";
-import { DreamBuilderPreview } from "./DreamBuilderPreview";
+import { useVisionBuilder } from "@/hooks";
+import { VisionBuilderPreview } from "./VisionBuilderPreview";
 import { GOAL_CATEGORY_LABELS } from "@/types/goals";
 import type { GoalCategory } from "@prisma/client";
 import {
@@ -34,14 +34,14 @@ import {
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-interface DreamBuilderModalProps {
+interface VisionBuilderModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
 const CATEGORIES = Object.entries(GOAL_CATEGORY_LABELS) as [GoalCategory, string][];
 
-export function DreamBuilderModal({ open, onOpenChange }: DreamBuilderModalProps) {
+export function VisionBuilderModal({ open, onOpenChange }: VisionBuilderModalProps) {
   const router = useRouter();
   const {
     step,
@@ -50,11 +50,11 @@ export function DreamBuilderModal({ open, onOpenChange }: DreamBuilderModalProps
     category,
     setCategory,
     hierarchy,
-    createdDreamId,
+    createdVisionId,
     generateHierarchy,
     createAllGoals,
     updateGoal,
-    removeFiveYearGoal,
+    removeThreeYearGoal,
     removeOneYearGoal,
     reset,
     goBackToInput,
@@ -63,7 +63,7 @@ export function DreamBuilderModal({ open, onOpenChange }: DreamBuilderModalProps
     isCreating,
     generateError,
     createError,
-  } = useDreamBuilder();
+  } = useVisionBuilder();
 
   // Reset when modal closes
   useEffect(() => {
@@ -86,9 +86,9 @@ export function DreamBuilderModal({ open, onOpenChange }: DreamBuilderModalProps
     onOpenChange(false);
   };
 
-  const handleViewDream = () => {
-    if (createdDreamId) {
-      router.push(`/goals/${createdDreamId}`);
+  const handleViewVision = () => {
+    if (createdVisionId) {
+      router.push(`/goals/${createdVisionId}`);
       handleClose();
     }
   };
@@ -120,10 +120,10 @@ export function DreamBuilderModal({ open, onOpenChange }: DreamBuilderModalProps
               </div>
               <div className="flex-1">
                 <DialogTitle className="text-moon text-xl font-semibold tracking-tight">
-                  {step === "success" ? "Dream Created!" : "Dream Builder"}
+                  {step === "success" ? "Vision Created!" : "Vision Builder"}
                 </DialogTitle>
                 <p className="text-sm text-moon-dim mt-1">
-                  {step === "input" && "Describe your dream and AI will build your goal hierarchy"}
+                  {step === "input" && "Describe your vision and AI will build your goal hierarchy"}
                   {step === "preview" && `Review and edit ${totalGoals} goals before creating`}
                   {step === "creating" && "Creating your goals..."}
                   {step === "success" && `${totalGoals} goals created successfully!`}
@@ -138,16 +138,16 @@ export function DreamBuilderModal({ open, onOpenChange }: DreamBuilderModalProps
           {/* Step 1: Input */}
           {step === "input" && (
             <div className="space-y-5">
-              {/* Dream Idea */}
+              {/* Vision Idea */}
               <div className="space-y-2.5">
                 <Label className="text-moon-soft text-sm font-medium">
-                  What&apos;s your dream? <span className="text-lantern">*</span>
+                  What&apos;s your vision? <span className="text-lantern">*</span>
                 </Label>
                 <div className="relative">
                   <textarea
                     value={idea}
                     onChange={(e) => setIdea(e.target.value)}
-                    placeholder="Describe your 10-year vision... e.g., 'I want to achieve financial freedom and travel the world while running a successful online business'"
+                    placeholder="Describe your 7-year vision... e.g., 'I want to achieve financial freedom and travel the world while running a successful online business'"
                     rows={4}
                     className={cn(
                       "w-full px-4 py-3 rounded-xl",
@@ -204,9 +204,9 @@ export function DreamBuilderModal({ open, onOpenChange }: DreamBuilderModalProps
                   <div>
                     <p className="text-sm text-moon font-medium">AI will generate:</p>
                     <ul className="text-xs text-moon-dim mt-1 space-y-0.5">
-                      <li>• 1 refined 10-Year Dream</li>
-                      <li>• 2-3 Five-Year Goals</li>
-                      <li>• 2 One-Year Goals per 5-year</li>
+                      <li>• 1 refined 7-Year Vision</li>
+                      <li>• 2-3 Three-Year Goals</li>
+                      <li>• 2 One-Year Goals per 3-year</li>
                       <li>• Monthly & Weekly goals for each</li>
                     </ul>
                   </div>
@@ -253,10 +253,10 @@ export function DreamBuilderModal({ open, onOpenChange }: DreamBuilderModalProps
             <div className="space-y-4">
               {/* Scrollable preview area */}
               <div className="max-h-[50vh] overflow-y-auto pr-2 -mr-2">
-                <DreamBuilderPreview
+                <VisionBuilderPreview
                   hierarchy={hierarchy}
                   onUpdate={updateGoal}
-                  onRemoveFiveYear={removeFiveYearGoal}
+                  onRemoveThreeYear={removeThreeYearGoal}
                   onRemoveOneYear={removeOneYearGoal}
                 />
               </div>
@@ -328,7 +328,7 @@ export function DreamBuilderModal({ open, onOpenChange }: DreamBuilderModalProps
 
               <div>
                 <p className="text-lg font-semibold text-moon">
-                  Your dream hierarchy is ready!
+                  Your goal hierarchy is ready!
                 </p>
                 <p className="text-sm text-moon-dim mt-1">
                   {totalGoals} goals created across all levels
@@ -339,9 +339,9 @@ export function DreamBuilderModal({ open, onOpenChange }: DreamBuilderModalProps
               {hierarchy && (
                 <div className="p-4 rounded-xl bg-night-soft/30 border border-night-mist/30 text-left">
                   <p className="text-xs font-medium text-moon-dim mb-2">Created:</p>
-                  <p className="text-sm text-moon font-medium">{hierarchy.dream.title}</p>
+                  <p className="text-sm text-moon font-medium">{hierarchy.vision.title}</p>
                   <p className="text-xs text-moon-dim mt-1">
-                    + {hierarchy.fiveYearGoals.length} five-year goals with full cascades
+                    + {hierarchy.threeYearGoals.length} three-year goals with full cascades
                   </p>
                 </div>
               )}
@@ -356,14 +356,14 @@ export function DreamBuilderModal({ open, onOpenChange }: DreamBuilderModalProps
                   Close
                 </Button>
                 <Button
-                  onClick={handleViewDream}
+                  onClick={handleViewVision}
                   className={cn(
                     "h-11 px-6 rounded-xl font-medium",
                     "bg-lantern hover:bg-lantern/90 text-void",
                     "shadow-lg shadow-lantern/20 hover:shadow-lantern/30"
                   )}
                 >
-                  View Dream
+                  View Vision
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </div>
@@ -374,3 +374,6 @@ export function DreamBuilderModal({ open, onOpenChange }: DreamBuilderModalProps
     </Dialog>
   );
 }
+
+// Backward compatibility alias
+export const DreamBuilderModal = VisionBuilderModal;

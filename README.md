@@ -1,6 +1,6 @@
 # Goalix
 
-A goal tracking web application based on MJ DeMarco's 1/5/10 methodology. Transform 10-year dreams into daily action through structured goal hierarchy, gamification, and AI assistance.
+A goal tracking web application using the 1/5/10 methodology. Transform 10-year dreams into daily action through structured goal hierarchy, gamification, and AI assistance.
 
 **Production URL:** https://goalzenix.com
 

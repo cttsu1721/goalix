@@ -14,6 +14,7 @@ export { useTaskCompletion } from "./useTaskCompletion";
 // Goal hooks
 export {
   useGoals,
+  useVisions,
   useDreams,
   useGoal,
   useCreateGoal,
@@ -36,8 +37,14 @@ export {
   useSaveKaizenCheckin,
 } from "./useKaizen";
 
-// Dream Builder hook
-export { useDreamBuilder, type DreamBuilderStep, type GoalPath } from "./useDreamBuilder";
+// Vision Builder hook
+export {
+  useVisionBuilder,
+  useDreamBuilder,
+  type VisionBuilderStep,
+  type DreamBuilderStep,
+  type GoalPath,
+} from "./useVisionBuilder";
 
 // Weekly Review hook
 export { useWeeklyReview, useSubmitWeeklyReview, formatAreaName } from "./useWeeklyReview";

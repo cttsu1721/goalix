@@ -1,8 +1,8 @@
 export { GoalCard } from "./GoalCard";
-export { DreamCard } from "./DreamCard";
+export { VisionCard, DreamCard } from "./VisionCard";
 export { GoalCategoryBadge } from "./GoalCategoryBadge";
 export { GoalCreateModal } from "./GoalCreateModal";
 export { GoalEditModal } from "./GoalEditModal";
-export { DreamBuilderModal } from "./DreamBuilderModal";
-export { DreamBuilderPreview } from "./DreamBuilderPreview";
+export { VisionBuilderModal, DreamBuilderModal } from "./VisionBuilderModal";
+export { VisionBuilderPreview, DreamBuilderPreview } from "./VisionBuilderPreview";
 export { GoalSelector } from "./GoalSelector";

@@ -1,7 +1,6 @@
 /**
  * Kaizen Daily Check-in Types
- * 
- * Based on MJ DeMarco's "Fastlane Daily" planner concept.
+ *
  * Tracks daily self-improvement across 6 life areas.
  */
 

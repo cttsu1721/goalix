@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Goalzenix is a goal tracking web application based on MJ DeMarco's 1/5/10 methodology. It enables users to cascade 10-year dreams down to actionable daily tasks, enhanced with gamification (points, streaks, badges, levels) and AI assistance (Goal Sharpener, Task Suggester).
+Goalzenix is a goal tracking web application using a cascading goal methodology. It enables users to cascade 7-year visions down to actionable daily tasks, enhanced with gamification (points, streaks, badges, levels) and AI assistance (Goal Sharpener, Task Suggester).
 
 ### Core Value Proposition
 Help goal-oriented professionals and entrepreneurs translate ambitious long-term visions into consistent daily action through structured goal hierarchy, habit-forming gamification, and AI-powered guidance.
@@ -54,13 +54,13 @@ Help goal-oriented professionals and entrepreneurs translate ambitious long-term
 
 ## Key Concepts
 
-### Goal Hierarchy (1/5/10 Methodology)
+### Goal Hierarchy
 
 The system implements a cascading goal structure:
 
 ```
-Dream (10-Year Vision)
-└── 5-Year Goal (Major Milestone)
+7-Year Vision (Long-term Vision)
+└── 3-Year Goal (Major Milestone)
     └── 1-Year Goal (Annual Objective)
         └── Monthly Goal (Monthly Target)
             └── Weekly Goal (Week's Focus)
@@ -77,7 +77,7 @@ Dream (10-Year Vision)
 
 ### Decision Compass (Unlinked Task Friction)
 
-A core principle from MJ DeMarco's framework: every action should be filtered through your 1-Year Target. The Decision Compass prevents "action faking" — busy work that feels productive but doesn't advance your goals.
+A core principle: every action should be filtered through your goals. The Decision Compass prevents "action faking" — busy work that feels productive but doesn't advance your goals.
 
 **Implementation:**
 
@@ -112,13 +112,13 @@ During Weekly Review, display goal alignment stats:
 > *"Unlinked tasks completed: 4"*
 
 **Rationale:**
-This builds the mental habit MJ describes — filtering decisions through the 1-Year Target. Over time, users internalise this even without the app.
+This builds the mental habit of filtering decisions through the 1-Year Target. Over time, users internalise this even without the app.
 
 ---
 
 ### Decision Compass (Unlinked Task Friction)
 
-A core principle from MJ DeMarco's framework: every action should be filtered through your 1-Year Target. The Decision Compass prevents "action faking" — busy work that feels productive but doesn't advance your goals.
+A core principle: every action should be filtered through your goals. The Decision Compass prevents "action faking" — busy work that feels productive but doesn't advance your goals.
 
 **Implementation:**
 
@@ -153,7 +153,7 @@ During Weekly Review, display goal alignment stats:
 > *"Unlinked tasks completed: 4"*
 
 **Rationale:**
-This builds the mental habit MJ describes — filtering decisions through the 1-Year Target. Over time, users internalise this even without the app.
+This builds the mental habit of filtering decisions through the 1-Year Target. Over time, users internalise this even without the app.
 
 ---
 
@@ -201,7 +201,7 @@ This builds the mental habit MJ describes — filtering decisions through the 1-
 
 ### Lifestyle Insights (Conveyor Belt Reinforcement)
 
-MJ's framework emphasises that habits must become *instinctual* — the "side rails" of the ladder. When users hit streak milestones, surface insights that reinforce this:
+The 1/5/10 framework emphasises that habits must become *instinctual* — the "side rails" of the ladder. When users hit streak milestones, surface insights that reinforce this:
 
 | Streak | Message |
 |--------|----------|
@@ -245,7 +245,7 @@ Reinforces that daily execution compounds into lifestyle change — the "conveyo
 **Achievement Badges:**
 - `century_club` — Earn 100 points in one day
 - `goal_getter` — Complete first goal (any level)
-- `dream_starter` — Create first 10-year dream
+- `dream_starter` — Create first 7-year vision
 - `planner_pro` — Complete daily planning 7 days in a row
 - `visionary` — Have active goals at all 5 levels
 
@@ -270,7 +270,7 @@ Reinforces that daily execution compounds into lifestyle change — the "conveyo
 ## Kaizen Daily Check-in
 
 ### Overview
-Inspired by MJ DeMarco's "Fastlane Daily" planner, the Kaizen Check-in is a lightweight end-of-day reflection that asks users if they improved in key life areas. It creates a second daily touchpoint (morning planning → evening reflection) and reinforces the connection between daily actions and goal categories.
+The Kaizen Check-in is a lightweight end-of-day reflection that asks users if they improved in key life areas. It creates a second daily touchpoint (morning planning → evening reflection) and reinforces the connection between daily actions and goal categories.
 
 ### Philosophy
 "Kaizen" (改善) means continuous improvement. The check-in isn't about perfection — it's about awareness. Did you move the needle today, even slightly?
@@ -514,7 +514,7 @@ Daily breakdown:
 **Appears in:**
 - Goal creation form
 - Goal detail page
-- New dream creation flow
+- New vision creation flow
 
 ### 2. Task Suggester
 **Purpose:** Generate daily tasks from a weekly goal
@@ -682,9 +682,9 @@ enum AIInteractionType {
 ```
 
 ### Key Relationships
-- User → Dreams (one-to-many)
-- Dream → FiveYearGoals (one-to-many)
-- FiveYearGoal → OneYearGoals (one-to-many)
+- User → SevenYearVisions (one-to-many)
+- SevenYearVision → ThreeYearGoals (one-to-many)
+- ThreeYearGoal → OneYearGoals (one-to-many)
 - OneYearGoal → MonthlyGoals (one-to-many)
 - MonthlyGoal → WeeklyGoals (one-to-many)
 - WeeklyGoal → DailyTasks (one-to-many)

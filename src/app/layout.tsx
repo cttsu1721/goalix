@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     template: "%s | Goalzenix",
   },
   description:
-    "Transform your 10-year dreams into daily action with Goalzenix - a goal tracking app based on MJ DeMarco's 1/5/10 methodology",
+    "Transform your 7-year visions into daily action with Goalzenix - cascade goals from vision to tasks with AI assistance and gamification",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

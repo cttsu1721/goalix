@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import type { GoalCategory } from "@prisma/client";
-import type { DreamBuilderResponse } from "@/lib/ai";
+import type { VisionBuilderResponse } from "@/lib/ai";
 
 // Helper to get Monday of current week
 function getWeekStart(): Date {
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
 
     const { category, hierarchy } = await request.json() as {
       category: GoalCategory;
-      hierarchy: DreamBuilderResponse;
+      hierarchy: VisionBuilderResponse;
     };
 
     // Validate required fields
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate hierarchy structure
-    if (!hierarchy.dream || !hierarchy.fiveYearGoals?.length) {
+    if (!hierarchy.vision || !hierarchy.threeYearGoals?.length) {
       return NextResponse.json(
         { error: "Invalid hierarchy structure" },
         { status: 400 }
@@ -62,27 +62,30 @@ export async function POST(request: NextRequest) {
     const userId = session.user.id;
 
     // Create the entire hierarchy in a transaction using nested creates
-    const dream = await prisma.dream.create({
+    const vision = await prisma.sevenYearVision.create({
       data: {
         userId,
-        title: hierarchy.dream.title,
-        description: hierarchy.dream.description,
+        title: hierarchy.vision.title,
+        description: hierarchy.vision.description,
         category,
-        targetDate: addYears(now, 10),
-        fiveYearGoals: {
-          create: hierarchy.fiveYearGoals.map((fiveYear) => ({
-            title: fiveYear.title,
-            description: fiveYear.description,
+        targetDate: addYears(now, 7),
+        threeYearGoals: {
+          create: hierarchy.threeYearGoals.map((threeYear) => ({
+            user: { connect: { id: userId } },
+            title: threeYear.title,
+            description: threeYear.description,
             category,
-            targetDate: addYears(now, 5),
+            targetDate: addYears(now, 3),
             oneYearGoals: {
-              create: fiveYear.oneYearGoals.map((oneYear) => ({
+              create: threeYear.oneYearGoals.map((oneYear) => ({
+                user: { connect: { id: userId } },
                 title: oneYear.title,
                 description: oneYear.description,
                 category,
                 targetDate: addYears(now, 1),
                 monthlyGoals: {
                   create: {
+                    user: { connect: { id: userId } },
                     title: oneYear.monthlyGoal.title,
                     description: oneYear.monthlyGoal.description,
                     category,
@@ -104,7 +107,7 @@ export async function POST(request: NextRequest) {
         },
       },
       include: {
-        fiveYearGoals: {
+        threeYearGoals: {
           include: {
             oneYearGoals: {
               include: {
@@ -121,10 +124,10 @@ export async function POST(request: NextRequest) {
     });
 
     // Count total goals created
-    let totalCreated = 1; // Dream
-    dream.fiveYearGoals.forEach((fy) => {
-      totalCreated += 1; // 5-year
-      fy.oneYearGoals.forEach((oy) => {
+    let totalCreated = 1; // Vision
+    vision.threeYearGoals.forEach((ty) => {
+      totalCreated += 1; // 3-year
+      ty.oneYearGoals.forEach((oy) => {
         totalCreated += 1; // 1-year
         oy.monthlyGoals.forEach((mg) => {
           totalCreated += 1; // Monthly
@@ -136,10 +139,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        dreamId: dream.id,
-        dreamTitle: dream.title,
+        visionId: vision.id,
+        visionTitle: vision.title,
         totalCreated,
-        hierarchy: dream,
+        hierarchy: vision,
       },
     });
   } catch (error) {

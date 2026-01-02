@@ -35,7 +35,7 @@ interface UpdateGoalInput {
 }
 
 // Fetch goals by level
-export function useGoals(level: GoalLevel = "dream", parentId?: string, status?: GoalStatus) {
+export function useGoals(level: GoalLevel = "sevenYear", parentId?: string, status?: GoalStatus) {
   const params = new URLSearchParams({ level });
   if (parentId) params.set("parentId", parentId);
   if (status) params.set("status", status);
@@ -52,10 +52,13 @@ export function useGoals(level: GoalLevel = "dream", parentId?: string, status?:
   });
 }
 
-// Fetch dreams (convenience hook)
-export function useDreams(status?: GoalStatus) {
-  return useGoals("dream", undefined, status);
+// Fetch visions (convenience hook)
+export function useVisions(status?: GoalStatus) {
+  return useGoals("sevenYear", undefined, status);
 }
+
+// Backward compatibility alias
+export const useDreams = useVisions;
 
 // Fetch a single goal by ID
 export function useGoal(id: string) {

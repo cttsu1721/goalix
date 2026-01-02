@@ -4,9 +4,9 @@ import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { GoalCard, DreamCard, GoalCreateModal, DreamBuilderModal } from "@/components/goals";
+import { GoalCard, VisionCard, GoalCreateModal, VisionBuilderModal } from "@/components/goals";
 import { Button } from "@/components/ui/button";
-import { useGoals, useDreams } from "@/hooks";
+import { useGoals, useVisions } from "@/hooks";
 import type { GoalLevel } from "@/types/goals";
 import type { GoalCategory, GoalStatus } from "@prisma/client";
 import {
@@ -21,24 +21,24 @@ import {
   Star,
 } from "lucide-react";
 
-type UIGoalLevel = "dreams" | "5-year" | "1-year" | "monthly" | "weekly";
-type GoalsOnlyLevel = Exclude<UIGoalLevel, "dreams">;
+type UIGoalLevel = "vision" | "3-year" | "1-year" | "monthly" | "weekly";
+type GoalsOnlyLevel = Exclude<UIGoalLevel, "vision">;
 
 const levelConfig: Record<
   UIGoalLevel,
   { label: string; color: string; icon: React.ReactNode; apiLevel: GoalLevel }
 > = {
-  dreams: {
-    label: "10-Year Dreams",
+  vision: {
+    label: "7-Year Vision",
     color: "bg-lantern",
     icon: <Sparkles className="w-4 h-4" />,
-    apiLevel: "dream",
+    apiLevel: "sevenYear",
   },
-  "5-year": {
-    label: "5-Year Goals",
+  "3-year": {
+    label: "3-Year Goals",
     color: "bg-lantern",
     icon: <Target className="w-4 h-4" />,
-    apiLevel: "fiveYear",
+    apiLevel: "threeYear",
   },
   "1-year": {
     label: "1-Year Goals",
@@ -60,7 +60,7 @@ const levelConfig: Record<
   },
 };
 
-function EmptyState({ onCreateDream, onDreamBuilder }: { onCreateDream: () => void; onDreamBuilder: () => void }) {
+function EmptyState({ onCreateVision, onVisionBuilder }: { onCreateVision: () => void; onVisionBuilder: () => void }) {
   return (
     <div className="bg-night border border-night-mist rounded-2xl p-12 text-center">
       {/* Icon */}
@@ -69,24 +69,24 @@ function EmptyState({ onCreateDream, onDreamBuilder }: { onCreateDream: () => vo
       </div>
 
       {/* Text */}
-      <h3 className="text-xl font-medium text-moon mb-3">Start with a Dream</h3>
+      <h3 className="text-xl font-medium text-moon mb-3">Start with a Vision</h3>
       <p className="text-moon-dim max-w-md mx-auto mb-8 leading-relaxed">
-        Create your first 10-year dream and cascade it down into achievable
+        Create your first 7-year vision and cascade it down into achievable
         milestones. The journey of a thousand miles begins with a single step.
       </p>
 
       {/* CTAs */}
       <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
         <Button
-          onClick={onDreamBuilder}
+          onClick={onVisionBuilder}
           className="bg-gradient-to-r from-lantern to-lantern/80 text-void hover:from-lantern/90 hover:to-lantern/70 font-medium px-6 h-11 rounded-xl shadow-lg shadow-lantern/20"
         >
           <Wand2 className="w-4 h-4 mr-2" />
-          Dream Builder
+          Vision Builder
         </Button>
         <span className="text-moon-faint text-sm">or</span>
         <Button
-          onClick={onCreateDream}
+          onClick={onCreateVision}
           variant="outline"
           className="border-night-mist bg-night-soft text-moon hover:border-lantern hover:text-lantern hover:bg-lantern/5 font-medium px-6 h-11 rounded-xl"
         >
@@ -101,14 +101,14 @@ function EmptyState({ onCreateDream, onDreamBuilder }: { onCreateDream: () => vo
 function LevelTabs({
   activeLevel,
   onLevelChange,
-  hideDreams = false,
+  hideVision = false,
 }: {
   activeLevel: UIGoalLevel;
   onLevelChange: (level: UIGoalLevel) => void;
-  hideDreams?: boolean;
+  hideVision?: boolean;
 }) {
-  const allLevels: UIGoalLevel[] = ["dreams", "5-year", "1-year", "monthly", "weekly"];
-  const levels = hideDreams ? allLevels.filter((l) => l !== "dreams") : allLevels;
+  const allLevels: UIGoalLevel[] = ["vision", "3-year", "1-year", "monthly", "weekly"];
+  const levels = hideVision ? allLevels.filter((l) => l !== "vision") : allLevels;
 
   return (
     <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
@@ -163,16 +163,16 @@ function transformGoals(goals: unknown[], level: GoalLevel): DisplayGoal[] {
     let parentTitle: string | undefined;
 
     switch (level) {
-      case "dream":
-        childrenCount = (goal.fiveYearGoals as unknown[])?.length || 0;
+      case "sevenYear":
+        childrenCount = (goal.threeYearGoals as unknown[])?.length || 0;
         break;
-      case "fiveYear":
+      case "threeYear":
         childrenCount = (goal.oneYearGoals as unknown[])?.length || 0;
-        parentTitle = (goal.dream as { title?: string })?.title;
+        parentTitle = (goal.sevenYearVision as { title?: string })?.title;
         break;
       case "oneYear":
         childrenCount = (goal.monthlyGoals as unknown[])?.length || 0;
-        parentTitle = (goal.fiveYearGoal as { title?: string })?.title;
+        parentTitle = (goal.threeYearGoal as { title?: string })?.title;
         break;
       case "monthly":
         childrenCount = (goal.weeklyGoals as unknown[])?.length || 0;
@@ -207,16 +207,16 @@ function transformGoals(goals: unknown[], level: GoalLevel): DisplayGoal[] {
   });
 }
 
-// Dreams Page - Inspirational, no tabs
-function DreamsPageContent() {
+// Vision Page - Inspirational, no tabs
+function VisionPageContent() {
   const router = useRouter();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isDreamBuilderOpen, setIsDreamBuilderOpen] = useState(false);
+  const [isVisionBuilderOpen, setIsVisionBuilderOpen] = useState(false);
 
-  const { data, isLoading, refetch } = useDreams();
-  const dreams = transformGoals(data?.goals || [], "dream");
+  const { data, isLoading, refetch } = useVisions();
+  const visions = transformGoals(data?.goals || [], "sevenYear");
 
-  const handleDreamClick = (id: string) => {
+  const handleVisionClick = (id: string) => {
     router.push(`/goals/${id}`);
   };
 
@@ -229,26 +229,26 @@ function DreamsPageContent() {
             <Star className="w-5 h-5 text-lantern" />
           </div>
           <h1 className="text-2xl font-semibold text-moon tracking-tight">
-            Your 10-Year Vision
+            Your 7-Year Vision
           </h1>
         </div>
         <p className="text-moon-dim ml-[52px]">
-          Dream big. These are the destinations that shape your journey.
+          Think big. These are the destinations that shape your journey.
         </p>
       </div>
 
       {/* Action Bar */}
       <div className="flex items-center justify-between mb-8">
         <span className="text-moon-faint text-sm">
-          {dreams.length} {dreams.length === 1 ? "dream" : "dreams"}
+          {visions.length} {visions.length === 1 ? "vision" : "visions"}
         </span>
         <div className="flex items-center gap-2">
           <Button
-            onClick={() => setIsDreamBuilderOpen(true)}
+            onClick={() => setIsVisionBuilderOpen(true)}
             className="bg-gradient-to-r from-lantern to-lantern/80 text-void hover:from-lantern/90 hover:to-lantern/70 font-medium rounded-xl h-10 shadow-lg shadow-lantern/20"
           >
             <Wand2 className="w-4 h-4 mr-2" />
-            Dream Builder
+            Vision Builder
           </Button>
           <Button
             onClick={() => setIsCreateModalOpen(true)}
@@ -256,7 +256,7 @@ function DreamsPageContent() {
             className="border-night-mist bg-night-soft text-moon hover:border-lantern hover:text-lantern hover:bg-lantern/5 rounded-xl h-10"
           >
             <Plus className="w-4 h-4 mr-2" />
-            Add Dream
+            Add Vision
           </Button>
         </div>
       </div>
@@ -266,35 +266,35 @@ function DreamsPageContent() {
         <div className="flex items-center justify-center py-16">
           <Loader2 className="w-8 h-8 animate-spin text-lantern" />
         </div>
-      ) : dreams.length === 0 ? (
+      ) : visions.length === 0 ? (
         <EmptyState
-          onCreateDream={() => setIsCreateModalOpen(true)}
-          onDreamBuilder={() => setIsDreamBuilderOpen(true)}
+          onCreateVision={() => setIsCreateModalOpen(true)}
+          onVisionBuilder={() => setIsVisionBuilderOpen(true)}
         />
       ) : (
         <div className="grid gap-6 md:grid-cols-2">
-          {dreams.map((dream) => (
-            <DreamCard
-              key={dream.id}
-              {...dream}
-              onClick={() => handleDreamClick(dream.id)}
+          {visions.map((vision) => (
+            <VisionCard
+              key={vision.id}
+              {...vision}
+              onClick={() => handleVisionClick(vision.id)}
             />
           ))}
         </div>
       )}
 
-      {/* Create Dream Modal */}
+      {/* Create Vision Modal */}
       <GoalCreateModal
         open={isCreateModalOpen}
         onOpenChange={setIsCreateModalOpen}
-        level="dream"
+        level="sevenYear"
         onSuccess={() => refetch()}
       />
 
-      {/* Dream Builder Modal */}
-      <DreamBuilderModal
-        open={isDreamBuilderOpen}
-        onOpenChange={setIsDreamBuilderOpen}
+      {/* Vision Builder Modal */}
+      <VisionBuilderModal
+        open={isVisionBuilderOpen}
+        onOpenChange={setIsVisionBuilderOpen}
       />
     </AppShell>
   );
@@ -306,13 +306,13 @@ function GoalsOnlyPageContent() {
   const searchParams = useSearchParams();
   const viewParam = searchParams.get("view");
 
-  // Get initial level from URL or default to 5-year
+  // Get initial level from URL or default to 3-year
   const getInitialLevel = (): GoalsOnlyLevel => {
-    const validLevels: GoalsOnlyLevel[] = ["5-year", "1-year", "monthly", "weekly"];
+    const validLevels: GoalsOnlyLevel[] = ["3-year", "1-year", "monthly", "weekly"];
     if (viewParam && validLevels.includes(viewParam as GoalsOnlyLevel)) {
       return viewParam as GoalsOnlyLevel;
     }
-    return "5-year"; // Default to 5-year (top of hierarchy)
+    return "3-year"; // Default to 3-year (top of hierarchy)
   };
 
   const [activeLevel, setActiveLevel] = useState<GoalsOnlyLevel>(getInitialLevel);
@@ -341,15 +341,15 @@ function GoalsOnlyPageContent() {
     <AppShell>
       <PageHeader
         title="Goals"
-        subtitle="Your milestones from 5-year targets to weekly actions"
+        subtitle="Your milestones from 3-year targets to weekly actions"
       />
 
-      {/* Level Tabs (without Dreams) */}
+      {/* Level Tabs (without Vision) */}
       <div className="mb-6">
         <LevelTabs
           activeLevel={activeLevel}
           onLevelChange={(level) => setActiveLevel(level as GoalsOnlyLevel)}
-          hideDreams
+          hideVision
         />
       </div>
 
@@ -433,9 +433,9 @@ function GoalsPageContent() {
   const searchParams = useSearchParams();
   const viewParam = searchParams.get("view");
 
-  // Show Dreams page for view=dreams, Goals page for everything else
-  if (viewParam === "dreams") {
-    return <DreamsPageContent />;
+  // Show Vision page for view=vision, Goals page for everything else
+  if (viewParam === "vision") {
+    return <VisionPageContent />;
   }
 
   return <GoalsOnlyPageContent />;
@@ -446,7 +446,7 @@ function GoalsPageFallback() {
     <AppShell>
       <PageHeader
         title="Goal Hierarchy"
-        subtitle="Your 1/5/10 cascade from dreams to daily tasks"
+        subtitle="Your cascading goals from vision to daily tasks"
       />
       <div className="flex items-center justify-center py-16">
         <Loader2 className="w-8 h-8 animate-spin text-lantern" />

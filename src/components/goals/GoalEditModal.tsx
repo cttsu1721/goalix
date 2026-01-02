@@ -45,14 +45,14 @@ const LEVEL_CONFIG: Record<
   GoalLevel,
   { label: string; singularLabel: string; icon: React.ReactNode }
 > = {
-  dream: {
-    label: "10-Year Dream",
-    singularLabel: "Dream",
+  sevenYear: {
+    label: "7-Year Vision",
+    singularLabel: "Vision",
     icon: <Sparkles className="w-5 h-5" />,
   },
-  fiveYear: {
-    label: "5-Year Goal",
-    singularLabel: "5-Year Goal",
+  threeYear: {
+    label: "3-Year Goal",
+    singularLabel: "3-Year Goal",
     icon: <Target className="w-5 h-5" />,
   },
   oneYear: {
@@ -256,7 +256,7 @@ function GoalEditForm({
           </div>
 
           {/* Target Date */}
-          {(level === "dream" || level === "fiveYear" || level === "oneYear") && (
+          {(level === "sevenYear" || level === "threeYear" || level === "oneYear") && (
             <div className="space-y-2.5">
               <Label htmlFor="targetDate" className="text-moon-soft text-sm font-medium">
                 Target Date

@@ -48,7 +48,7 @@ export default function LandingPage() {
           <div className="flex items-center justify-center gap-3 mb-8 animate-fade-in-delay-1">
             <div className="h-px w-12 bg-gradient-to-r from-transparent to-lantern/50" />
             <span className="text-[0.6875rem] font-medium uppercase tracking-[0.25em] text-lantern">
-              Based on MJ DeMarco&apos;s methodology
+              Cascading Goal Methodology
             </span>
             <div className="h-px w-12 bg-gradient-to-l from-transparent to-lantern/50" />
           </div>
@@ -57,7 +57,7 @@ export default function LandingPage() {
           <h1 className="text-center text-4xl sm:text-5xl lg:text-6xl font-light tracking-tight leading-[1.1] mb-8 animate-fade-in-delay-2">
             Transform{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-lantern to-zen-green">
-              10-year dreams
+              7-year visions
             </span>
             <br />
             into daily action
@@ -65,8 +65,8 @@ export default function LandingPage() {
 
           {/* Subtitle */}
           <p className="text-center text-lg lg:text-xl text-moon-soft font-light max-w-2xl mx-auto mb-12 leading-relaxed animate-fade-in-delay-3">
-            Cascade your biggest visions down to actionable daily tasks using the
-            proven 1/5/10 methodology. Stay motivated with gamification and
+            Cascade your biggest visions down to actionable daily tasks using a
+            proven cascading goal methodology. Stay motivated with gamification and
             AI-powered guidance.
           </p>
 
@@ -93,7 +93,7 @@ export default function LandingPage() {
 
             <div className="relative">
               <h2 className="text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-moon-faint mb-8 text-center">
-                The 1/5/10 Methodology
+                Cascading Goal Hierarchy
               </h2>
 
               {/* Cascade visualization */}
@@ -101,14 +101,14 @@ export default function LandingPage() {
                 <div className="flex items-center gap-4 w-full max-w-md">
                   <div className="w-2 h-2 rounded-full flex-shrink-0 bg-lantern" />
                   <div className="flex-1">
-                    <span className="text-sm font-medium text-moon">10-Year Dream</span>
+                    <span className="text-sm font-medium text-moon">7-Year Vision</span>
                     <span className="text-moon-faint text-sm ml-2">— Your ultimate vision</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 w-full max-w-md pl-4">
                   <div className="w-2 h-2 rounded-full flex-shrink-0 bg-lantern" />
                   <div className="flex-1">
-                    <span className="text-sm font-medium text-moon">5-Year Goal</span>
+                    <span className="text-sm font-medium text-moon">3-Year Goal</span>
                     <span className="text-moon-faint text-sm ml-2">— Major milestones</span>
                   </div>
                 </div>
@@ -164,7 +164,7 @@ export default function LandingPage() {
                   </div>
                   <h3 className="text-lg font-medium mb-3">Goal Hierarchy</h3>
                   <p className="text-moon-dim leading-relaxed">
-                    Break down your 10-year dreams into 5-year, 1-year, monthly, weekly goals and daily tasks.
+                    Break down your 7-year visions into 3-year, 1-year, monthly, weekly goals and daily tasks.
                   </p>
                 </div>
               </div>
@@ -228,8 +228,8 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="relative z-10 border-t border-night-mist/50 py-12">
         <div className="max-w-6xl mx-auto px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <span className="text-moon-faint text-sm">
-            Based on MJ DeMarco&apos;s 1/5/10 methodology
+            <span className="text-moon-faint text-sm">
+            Cascading Goals from Vision to Action
           </span>
           <Link href="/" className="text-moon-faint text-sm tracking-wider">
             goalzenix<span className="text-lantern">.</span>

@@ -123,12 +123,12 @@ export async function GET(request: Request) {
     // Points earned
     const pointsEarned = tasks.reduce((sum, t) => sum + t.pointsEarned, 0);
 
-    // Get monthly goals progress (through oneYearGoal -> fiveYearGoal -> dream -> user)
+    // Get monthly goals progress (through oneYearGoal -> threeYearGoal -> sevenYearVision -> user)
     const monthlyGoals = await prisma.monthlyGoal.findMany({
       where: {
         oneYearGoal: {
-          fiveYearGoal: {
-            dream: {
+          threeYearGoal: {
+            sevenYearVision: {
               userId: session.user.id,
             },
           },
@@ -294,8 +294,8 @@ export async function POST(request: Request) {
     const monthlyGoals = await prisma.monthlyGoal.findMany({
       where: {
         oneYearGoal: {
-          fiveYearGoal: {
-            dream: {
+          threeYearGoal: {
+            sevenYearVision: {
               userId: session.user.id,
             },
           },

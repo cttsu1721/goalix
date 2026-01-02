@@ -6,7 +6,7 @@ import { ChevronRight, Sparkles, Target } from "lucide-react";
 import { GoalCategoryBadge } from "./GoalCategoryBadge";
 import type { GoalCategory, GoalStatus } from "@prisma/client";
 
-interface DreamCardProps {
+interface VisionCardProps {
   id: string;
   title: string;
   description?: string | null;
@@ -20,7 +20,7 @@ interface DreamCardProps {
   className?: string;
 }
 
-export function DreamCard({
+export function VisionCard({
   title,
   description,
   category,
@@ -31,7 +31,7 @@ export function DreamCard({
   targetDate,
   onClick,
   className,
-}: DreamCardProps) {
+}: VisionCardProps) {
   const isCompleted = status === "COMPLETED";
   const isPaused = status === "PAUSED";
 
@@ -117,7 +117,7 @@ export function DreamCard({
           <div className="flex items-center gap-2 text-xs">
             <Target className="w-3.5 h-3.5 text-moon-faint" />
             <span className="text-moon-faint">
-              {completedChildren}/{childrenCount} 5-year goals
+              {completedChildren}/{childrenCount} 3-year goals
             </span>
           </div>
 
@@ -165,3 +165,6 @@ export function DreamCard({
     </button>
   );
 }
+
+// Backward compatibility alias
+export const DreamCard = VisionCard;

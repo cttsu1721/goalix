@@ -169,17 +169,17 @@ export async function checkCenturyClub(
 }
 
 /**
- * Check and award dream_starter badge
+ * Check and award dream_starter badge (now for 7-year visions)
  */
 export async function checkDreamStarter(userId: string): Promise<BadgeCheckResult | null> {
   const hasIt = await hasBadge(userId, "dream_starter");
   if (hasIt) return null;
 
-  const dreamCount = await prisma.dream.count({
+  const visionCount = await prisma.sevenYearVision.count({
     where: { userId },
   });
 
-  if (dreamCount >= 1) {
+  if (visionCount >= 1) {
     await awardBadge(userId, "dream_starter");
     return {
       earned: true,
@@ -201,10 +201,10 @@ export async function checkGoalGetter(userId: string): Promise<BadgeCheckResult 
   // Check any goal at any level is completed
   const completedGoals = await prisma.$transaction([
     prisma.weeklyGoal.count({ where: { userId, status: "COMPLETED" } }),
-    prisma.monthlyGoal.count({ where: { oneYearGoal: { fiveYearGoal: { dream: { userId } } }, status: "COMPLETED" } }),
-    prisma.oneYearGoal.count({ where: { fiveYearGoal: { dream: { userId } }, status: "COMPLETED" } }),
-    prisma.fiveYearGoal.count({ where: { dream: { userId }, status: "COMPLETED" } }),
-    prisma.dream.count({ where: { userId, status: "COMPLETED" } }),
+    prisma.monthlyGoal.count({ where: { oneYearGoal: { threeYearGoal: { sevenYearVision: { userId } } }, status: "COMPLETED" } }),
+    prisma.oneYearGoal.count({ where: { threeYearGoal: { sevenYearVision: { userId } }, status: "COMPLETED" } }),
+    prisma.threeYearGoal.count({ where: { sevenYearVision: { userId }, status: "COMPLETED" } }),
+    prisma.sevenYearVision.count({ where: { userId, status: "COMPLETED" } }),
   ]);
 
   const totalCompleted = completedGoals.reduce((sum, count) => sum + count, 0);
@@ -251,15 +251,15 @@ export async function checkVisionary(userId: string): Promise<BadgeCheckResult |
   const hasIt = await hasBadge(userId, "visionary");
   if (hasIt) return null;
 
-  const [dreams, fiveYear, oneYear, monthly, weekly] = await prisma.$transaction([
-    prisma.dream.count({ where: { userId, status: "ACTIVE" } }),
-    prisma.fiveYearGoal.count({ where: { dream: { userId }, status: "ACTIVE" } }),
-    prisma.oneYearGoal.count({ where: { fiveYearGoal: { dream: { userId } }, status: "ACTIVE" } }),
-    prisma.monthlyGoal.count({ where: { oneYearGoal: { fiveYearGoal: { dream: { userId } } }, status: "ACTIVE" } }),
+  const [visions, threeYear, oneYear, monthly, weekly] = await prisma.$transaction([
+    prisma.sevenYearVision.count({ where: { userId, status: "ACTIVE" } }),
+    prisma.threeYearGoal.count({ where: { sevenYearVision: { userId }, status: "ACTIVE" } }),
+    prisma.oneYearGoal.count({ where: { threeYearGoal: { sevenYearVision: { userId } }, status: "ACTIVE" } }),
+    prisma.monthlyGoal.count({ where: { oneYearGoal: { threeYearGoal: { sevenYearVision: { userId } } }, status: "ACTIVE" } }),
     prisma.weeklyGoal.count({ where: { userId, status: "ACTIVE" } }),
   ]);
 
-  if (dreams > 0 && fiveYear > 0 && oneYear > 0 && monthly > 0 && weekly > 0) {
+  if (visions > 0 && threeYear > 0 && oneYear > 0 && monthly > 0 && weekly > 0) {
     await awardBadge(userId, "visionary");
     return {
       earned: true,

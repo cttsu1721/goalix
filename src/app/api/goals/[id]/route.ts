@@ -11,11 +11,11 @@ interface RouteParams {
 // Helper to determine goal level by ID - uses parallel queries for performance
 async function findGoalByIdAndUser(id: string, userId: string) {
   // Run all queries in parallel using $transaction
-  const [dream, fiveYear, oneYear, monthly, weekly] = await prisma.$transaction([
-    prisma.dream.findFirst({
+  const [sevenYear, threeYear, oneYear, monthly, weekly] = await prisma.$transaction([
+    prisma.sevenYearVision.findFirst({
       where: { id, userId },
       include: {
-        fiveYearGoals: {
+        threeYearGoals: {
           include: {
             oneYearGoals: {
               include: {
@@ -30,10 +30,10 @@ async function findGoalByIdAndUser(id: string, userId: string) {
         },
       },
     }),
-    prisma.fiveYearGoal.findFirst({
-      where: { id, dream: { userId } },
+    prisma.threeYearGoal.findFirst({
+      where: { id, sevenYearVision: { userId } },
       include: {
-        dream: { select: { id: true, title: true } },
+        sevenYearVision: { select: { id: true, title: true } },
         oneYearGoals: {
           include: {
             monthlyGoals: {
@@ -46,9 +46,9 @@ async function findGoalByIdAndUser(id: string, userId: string) {
       },
     }),
     prisma.oneYearGoal.findFirst({
-      where: { id, fiveYearGoal: { dream: { userId } } },
+      where: { id, threeYearGoal: { sevenYearVision: { userId } } },
       include: {
-        fiveYearGoal: { select: { id: true, title: true } },
+        threeYearGoal: { select: { id: true, title: true } },
         monthlyGoals: {
           include: {
             weeklyGoals: true,
@@ -57,14 +57,14 @@ async function findGoalByIdAndUser(id: string, userId: string) {
       },
     }),
     prisma.monthlyGoal.findFirst({
-      where: { id, oneYearGoal: { fiveYearGoal: { dream: { userId } } } },
+      where: { id, oneYearGoal: { threeYearGoal: { sevenYearVision: { userId } } } },
       include: {
         oneYearGoal: { select: { id: true, title: true } },
         weeklyGoals: true,
       },
     }),
     prisma.weeklyGoal.findFirst({
-      where: { id, monthlyGoal: { oneYearGoal: { fiveYearGoal: { dream: { userId } } } } },
+      where: { id, monthlyGoal: { oneYearGoal: { threeYearGoal: { sevenYearVision: { userId } } } } },
       include: {
         monthlyGoal: { select: { id: true, title: true } },
         dailyTasks: true,
@@ -73,8 +73,8 @@ async function findGoalByIdAndUser(id: string, userId: string) {
   ]);
 
   // Return the first match found
-  if (dream) return { goal: dream, level: "dream" as GoalLevel };
-  if (fiveYear) return { goal: fiveYear, level: "fiveYear" as GoalLevel };
+  if (sevenYear) return { goal: sevenYear, level: "sevenYear" as GoalLevel };
+  if (threeYear) return { goal: threeYear, level: "threeYear" as GoalLevel };
   if (oneYear) return { goal: oneYear, level: "oneYear" as GoalLevel };
   if (monthly) return { goal: monthly, level: "monthly" as GoalLevel };
   if (weekly) return { goal: weekly, level: "weekly" as GoalLevel };
@@ -150,17 +150,17 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     let goal;
 
     switch (level) {
-      case "dream":
+      case "sevenYear":
         if (targetDate !== undefined) updateData.targetDate = targetDate ? new Date(targetDate) : null;
-        goal = await prisma.dream.update({
+        goal = await prisma.sevenYearVision.update({
           where: { id },
           data: updateData,
         });
         break;
 
-      case "fiveYear":
+      case "threeYear":
         if (targetDate !== undefined) updateData.targetDate = targetDate ? new Date(targetDate) : null;
-        goal = await prisma.fiveYearGoal.update({
+        goal = await prisma.threeYearGoal.update({
           where: { id },
           data: updateData,
         });
@@ -221,11 +221,11 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     // Delete based on level (Prisma cascade will handle children)
     switch (level) {
-      case "dream":
-        await prisma.dream.delete({ where: { id } });
+      case "sevenYear":
+        await prisma.sevenYearVision.delete({ where: { id } });
         break;
-      case "fiveYear":
-        await prisma.fiveYearGoal.delete({ where: { id } });
+      case "threeYear":
+        await prisma.threeYearGoal.delete({ where: { id } });
         break;
       case "oneYear":
         await prisma.oneYearGoal.delete({ where: { id } });

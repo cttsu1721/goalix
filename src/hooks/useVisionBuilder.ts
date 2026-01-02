@@ -37,8 +37,6 @@ interface CreateCascadeResponse {
 }
 
 export type VisionBuilderStep = "input" | "preview" | "creating" | "success";
-// Backward compatibility
-export type DreamBuilderStep = VisionBuilderStep;
 
 // Path to a specific goal in the hierarchy
 export type GoalPath =
@@ -48,7 +46,7 @@ export type GoalPath =
   | { type: "monthly"; threeYearIndex: number; oneYearIndex: number }
   | { type: "weekly"; threeYearIndex: number; oneYearIndex: number };
 
-export function useDreamBuilder() {
+export function useVisionBuilder() {
   const queryClient = useQueryClient();
   const [step, setStep] = useState<VisionBuilderStep>("input");
   const [idea, setIdea] = useState("");
@@ -63,7 +61,7 @@ export function useDreamBuilder() {
   // Generate hierarchy from AI
   const generateMutation = useMutation({
     mutationFn: async (input: GenerateHierarchyInput): Promise<GenerateHierarchyResponse> => {
-      const res = await fetch("/api/ai/dream-builder", {
+      const res = await fetch("/api/ai/vision-builder", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(input),
@@ -194,9 +192,6 @@ export function useDreamBuilder() {
     [hierarchy]
   );
 
-  // Backward compatibility alias
-  const removeFiveYearGoal = removeThreeYearGoal;
-
   // Remove a 1-year goal branch
   const removeOneYearGoal = useCallback(
     (threeYearIndex: number, oneYearIndex: number) => {
@@ -253,15 +248,12 @@ export function useDreamBuilder() {
     setCategory,
     hierarchy,
     createdVisionId,
-    // Backward compatibility
-    createdDreamId: createdVisionId,
 
     // Actions
     generateHierarchy,
     createAllGoals,
     updateGoal,
     removeThreeYearGoal,
-    removeFiveYearGoal, // Backward compatibility alias
     removeOneYearGoal,
     reset,
     goBackToInput,
@@ -276,3 +268,7 @@ export function useDreamBuilder() {
     createError: createMutation.error?.message,
   };
 }
+
+// Backward compatibility aliases
+export type DreamBuilderStep = VisionBuilderStep;
+export const useDreamBuilder = useVisionBuilder;

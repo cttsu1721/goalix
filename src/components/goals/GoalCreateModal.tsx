@@ -41,16 +41,16 @@ const LEVEL_CONFIG: Record<
   GoalLevel,
   { label: string; singularLabel: string; icon: React.ReactNode; placeholder: string; accentColor: string }
 > = {
-  dream: {
-    label: "10-Year Dream",
-    singularLabel: "Dream",
+  sevenYear: {
+    label: "7-Year Vision",
+    singularLabel: "Vision",
     icon: <Sparkles className="w-5 h-5" />,
     placeholder: "e.g., Achieve financial freedom with $2M net worth",
     accentColor: "lantern",
   },
-  fiveYear: {
-    label: "5-Year Goal",
-    singularLabel: "5-Year Goal",
+  threeYear: {
+    label: "3-Year Goal",
+    singularLabel: "3-Year Goal",
     icon: <Target className="w-5 h-5" />,
     placeholder: "e.g., Build a $500K investment portfolio",
     accentColor: "zen-purple",
@@ -104,10 +104,10 @@ export function GoalCreateModal({
   // Determine parent level for cascading context
   const getParentLevel = (): GoalLevelForSuggestion | undefined => {
     switch (level) {
-      case "fiveYear":
-        return "dream";
+      case "threeYear":
+        return "sevenYear";
       case "oneYear":
-        return "fiveYear";
+        return "threeYear";
       case "monthly":
         return "oneYear";
       case "weekly":
@@ -342,7 +342,7 @@ export function GoalCreateModal({
             </div>
 
             {/* Target Date */}
-            {(level === "dream" || level === "fiveYear" || level === "oneYear") && (
+            {(level === "sevenYear" || level === "threeYear" || level === "oneYear") && (
               <div className="space-y-2.5">
                 <Label htmlFor="targetDate" className="text-moon-soft text-sm font-medium">
                   Target Date

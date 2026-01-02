@@ -22,27 +22,27 @@ async function fetchCascadingContext(
   const context: CascadingContext = {};
 
   switch (parentLevel) {
-    case "dream": {
-      const dream = await prisma.dream.findUnique({
+    case "sevenYear": {
+      const sevenYear = await prisma.sevenYearVision.findUnique({
         where: { id: parentId },
         select: { title: true, description: true },
       });
-      if (dream) context.dream = { title: dream.title, description: dream.description || undefined };
+      if (sevenYear) context.sevenYear = { title: sevenYear.title, description: sevenYear.description || undefined };
       break;
     }
 
-    case "fiveYear": {
-      const fiveYear = await prisma.fiveYearGoal.findUnique({
+    case "threeYear": {
+      const threeYear = await prisma.threeYearGoal.findUnique({
         where: { id: parentId },
         select: {
           title: true,
           description: true,
-          dream: { select: { title: true, description: true } },
+          sevenYearVision: { select: { title: true, description: true } },
         },
       });
-      if (fiveYear) {
-        context.fiveYear = { title: fiveYear.title, description: fiveYear.description || undefined };
-        if (fiveYear.dream) context.dream = { title: fiveYear.dream.title, description: fiveYear.dream.description || undefined };
+      if (threeYear) {
+        context.threeYear = { title: threeYear.title, description: threeYear.description || undefined };
+        if (threeYear.sevenYearVision) context.sevenYear = { title: threeYear.sevenYearVision.title, description: threeYear.sevenYearVision.description || undefined };
       }
       break;
     }
@@ -53,21 +53,21 @@ async function fetchCascadingContext(
         select: {
           title: true,
           description: true,
-          fiveYearGoal: {
+          threeYearGoal: {
             select: {
               title: true,
               description: true,
-              dream: { select: { title: true, description: true } },
+              sevenYearVision: { select: { title: true, description: true } },
             },
           },
         },
       });
       if (oneYear) {
         context.oneYear = { title: oneYear.title, description: oneYear.description || undefined };
-        if (oneYear.fiveYearGoal) {
-          context.fiveYear = { title: oneYear.fiveYearGoal.title, description: oneYear.fiveYearGoal.description || undefined };
-          if (oneYear.fiveYearGoal.dream) {
-            context.dream = { title: oneYear.fiveYearGoal.dream.title, description: oneYear.fiveYearGoal.dream.description || undefined };
+        if (oneYear.threeYearGoal) {
+          context.threeYear = { title: oneYear.threeYearGoal.title, description: oneYear.threeYearGoal.description || undefined };
+          if (oneYear.threeYearGoal.sevenYearVision) {
+            context.sevenYear = { title: oneYear.threeYearGoal.sevenYearVision.title, description: oneYear.threeYearGoal.sevenYearVision.description || undefined };
           }
         }
       }
@@ -84,11 +84,11 @@ async function fetchCascadingContext(
             select: {
               title: true,
               description: true,
-              fiveYearGoal: {
+              threeYearGoal: {
                 select: {
                   title: true,
                   description: true,
-                  dream: { select: { title: true, description: true } },
+                  sevenYearVision: { select: { title: true, description: true } },
                 },
               },
             },
@@ -99,10 +99,10 @@ async function fetchCascadingContext(
         context.monthly = { title: monthly.title, description: monthly.description || undefined };
         if (monthly.oneYearGoal) {
           context.oneYear = { title: monthly.oneYearGoal.title, description: monthly.oneYearGoal.description || undefined };
-          if (monthly.oneYearGoal.fiveYearGoal) {
-            context.fiveYear = { title: monthly.oneYearGoal.fiveYearGoal.title, description: monthly.oneYearGoal.fiveYearGoal.description || undefined };
-            if (monthly.oneYearGoal.fiveYearGoal.dream) {
-              context.dream = { title: monthly.oneYearGoal.fiveYearGoal.dream.title, description: monthly.oneYearGoal.fiveYearGoal.dream.description || undefined };
+          if (monthly.oneYearGoal.threeYearGoal) {
+            context.threeYear = { title: monthly.oneYearGoal.threeYearGoal.title, description: monthly.oneYearGoal.threeYearGoal.description || undefined };
+            if (monthly.oneYearGoal.threeYearGoal.sevenYearVision) {
+              context.sevenYear = { title: monthly.oneYearGoal.threeYearGoal.sevenYearVision.title, description: monthly.oneYearGoal.threeYearGoal.sevenYearVision.description || undefined };
             }
           }
         }
@@ -124,11 +124,11 @@ async function fetchCascadingContext(
                 select: {
                   title: true,
                   description: true,
-                  fiveYearGoal: {
+                  threeYearGoal: {
                     select: {
                       title: true,
                       description: true,
-                      dream: { select: { title: true, description: true } },
+                      sevenYearVision: { select: { title: true, description: true } },
                     },
                   },
                 },
@@ -143,10 +143,10 @@ async function fetchCascadingContext(
           context.monthly = { title: weekly.monthlyGoal.title, description: weekly.monthlyGoal.description || undefined };
           if (weekly.monthlyGoal.oneYearGoal) {
             context.oneYear = { title: weekly.monthlyGoal.oneYearGoal.title, description: weekly.monthlyGoal.oneYearGoal.description || undefined };
-            if (weekly.monthlyGoal.oneYearGoal.fiveYearGoal) {
-              context.fiveYear = { title: weekly.monthlyGoal.oneYearGoal.fiveYearGoal.title, description: weekly.monthlyGoal.oneYearGoal.fiveYearGoal.description || undefined };
-              if (weekly.monthlyGoal.oneYearGoal.fiveYearGoal.dream) {
-                context.dream = { title: weekly.monthlyGoal.oneYearGoal.fiveYearGoal.dream.title, description: weekly.monthlyGoal.oneYearGoal.fiveYearGoal.dream.description || undefined };
+            if (weekly.monthlyGoal.oneYearGoal.threeYearGoal) {
+              context.threeYear = { title: weekly.monthlyGoal.oneYearGoal.threeYearGoal.title, description: weekly.monthlyGoal.oneYearGoal.threeYearGoal.description || undefined };
+              if (weekly.monthlyGoal.oneYearGoal.threeYearGoal.sevenYearVision) {
+                context.sevenYear = { title: weekly.monthlyGoal.oneYearGoal.threeYearGoal.sevenYearVision.title, description: weekly.monthlyGoal.oneYearGoal.threeYearGoal.sevenYearVision.description || undefined };
               }
             }
           }
@@ -177,7 +177,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const validLevels: GoalLevelForSuggestion[] = ["dream", "fiveYear", "oneYear", "monthly", "weekly"];
+    const validLevels: GoalLevelForSuggestion[] = ["sevenYear", "threeYear", "oneYear", "monthly", "weekly"];
     if (!validLevels.includes(level)) {
       return NextResponse.json(
         { error: "Invalid goal level" },
@@ -207,11 +207,11 @@ export async function POST(request: NextRequest) {
 
       // Set the parent goal based on level
       switch (parentLevel) {
-        case "dream":
-          parentGoal = cascadingContext.dream;
+        case "sevenYear":
+          parentGoal = cascadingContext.sevenYear;
           break;
-        case "fiveYear":
-          parentGoal = cascadingContext.fiveYear;
+        case "threeYear":
+          parentGoal = cascadingContext.threeYear;
           break;
         case "oneYear":
           parentGoal = cascadingContext.oneYear;

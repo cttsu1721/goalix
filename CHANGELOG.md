@@ -16,7 +16,7 @@ All notable changes to Goalix are documented here.
 
 **Lifestyle Insights Component:**
 - New component `LifestyleInsight.tsx` displaying motivational messages at streak milestones
-- Milestone messages at 7, 14, 30, 60, and 90 days based on MJ DeMarco's "conveyor belt" concept
+- Milestone messages at 7, 14, 30, 60, and 90 days based on the "conveyor belt" concept
 - Shows progress to next milestone with visual progress bar
 - Integrated into Progress page
 

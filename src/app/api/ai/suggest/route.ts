@@ -63,11 +63,11 @@ export async function POST(request: NextRequest) {
                 select: {
                   title: true,
                   description: true,
-                  fiveYearGoal: {
+                  threeYearGoal: {
                     select: {
                       title: true,
                       description: true,
-                      dream: {
+                      sevenYearVision: {
                         select: { title: true, description: true },
                       },
                     },
@@ -105,15 +105,15 @@ export async function POST(request: NextRequest) {
             title: weeklyGoal.monthlyGoal.oneYearGoal.title,
             description: weeklyGoal.monthlyGoal.oneYearGoal.description || undefined,
           };
-          if (weeklyGoal.monthlyGoal.oneYearGoal.fiveYearGoal) {
-            cascadingContext.fiveYear = {
-              title: weeklyGoal.monthlyGoal.oneYearGoal.fiveYearGoal.title,
-              description: weeklyGoal.monthlyGoal.oneYearGoal.fiveYearGoal.description || undefined,
+          if (weeklyGoal.monthlyGoal.oneYearGoal.threeYearGoal) {
+            cascadingContext.threeYear = {
+              title: weeklyGoal.monthlyGoal.oneYearGoal.threeYearGoal.title,
+              description: weeklyGoal.monthlyGoal.oneYearGoal.threeYearGoal.description || undefined,
             };
-            if (weeklyGoal.monthlyGoal.oneYearGoal.fiveYearGoal.dream) {
-              cascadingContext.dream = {
-                title: weeklyGoal.monthlyGoal.oneYearGoal.fiveYearGoal.dream.title,
-                description: weeklyGoal.monthlyGoal.oneYearGoal.fiveYearGoal.dream.description || undefined,
+            if (weeklyGoal.monthlyGoal.oneYearGoal.threeYearGoal.sevenYearVision) {
+              cascadingContext.sevenYear = {
+                title: weeklyGoal.monthlyGoal.oneYearGoal.threeYearGoal.sevenYearVision.title,
+                description: weeklyGoal.monthlyGoal.oneYearGoal.threeYearGoal.sevenYearVision.description || undefined,
               };
             }
           }

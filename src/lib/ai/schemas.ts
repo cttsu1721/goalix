@@ -43,34 +43,42 @@ export interface GoalSuggestResponse {
   strategy_note: string;
 }
 
-// Dream Builder Response Schema
-export interface DreamBuilderGoal {
+// Vision Builder Response Schema
+export interface VisionBuilderGoal {
   title: string;
   description: string;
 }
 
-export type DreamBuilderWeeklyGoal = DreamBuilderGoal;
+export type VisionBuilderWeeklyGoal = VisionBuilderGoal;
 
-export interface DreamBuilderMonthlyGoal extends DreamBuilderGoal {
-  weeklyGoal: DreamBuilderWeeklyGoal;
+export interface VisionBuilderMonthlyGoal extends VisionBuilderGoal {
+  weeklyGoal: VisionBuilderWeeklyGoal;
 }
 
-export interface DreamBuilderOneYearGoal extends DreamBuilderGoal {
-  monthlyGoal: DreamBuilderMonthlyGoal;
+export interface VisionBuilderOneYearGoal extends VisionBuilderGoal {
+  monthlyGoal: VisionBuilderMonthlyGoal;
 }
 
-export interface DreamBuilderFiveYearGoal extends DreamBuilderGoal {
-  oneYearGoals: DreamBuilderOneYearGoal[];
+export interface VisionBuilderThreeYearGoal extends VisionBuilderGoal {
+  oneYearGoals: VisionBuilderOneYearGoal[];
 }
 
-export interface DreamBuilderResponse {
-  dream: DreamBuilderGoal;
-  fiveYearGoals: DreamBuilderFiveYearGoal[];
+export interface VisionBuilderResponse {
+  vision: VisionBuilderGoal;
+  threeYearGoals: VisionBuilderThreeYearGoal[];
   strategyNote: string;
 }
 
+// Backward compatibility aliases
+export type DreamBuilderGoal = VisionBuilderGoal;
+export type DreamBuilderWeeklyGoal = VisionBuilderWeeklyGoal;
+export type DreamBuilderMonthlyGoal = VisionBuilderMonthlyGoal;
+export type DreamBuilderOneYearGoal = VisionBuilderOneYearGoal;
+export type DreamBuilderFiveYearGoal = VisionBuilderThreeYearGoal;
+export type DreamBuilderResponse = VisionBuilderResponse;
+
 // AI Interaction Types
-export type AIInteractionType = "GOAL_SHARPEN" | "TASK_SUGGEST" | "GOAL_SUGGEST" | "DREAM_BUILD";
+export type AIInteractionType = "GOAL_SHARPEN" | "TASK_SUGGEST" | "GOAL_SUGGEST" | "VISION_BUILD";
 
 // Rate limit configuration
 export const AI_RATE_LIMITS = {
@@ -166,30 +174,30 @@ export function validateGoalSuggestResponse(data: unknown): data is GoalSuggestR
   });
 }
 
-export function validateDreamBuilderResponse(data: unknown): data is DreamBuilderResponse {
+export function validateVisionBuilderResponse(data: unknown): data is VisionBuilderResponse {
   if (!data || typeof data !== "object") return false;
   const obj = data as Record<string, unknown>;
 
-  // Validate dream
-  if (!obj.dream || typeof obj.dream !== "object") return false;
-  const dream = obj.dream as Record<string, unknown>;
-  if (typeof dream.title !== "string" || typeof dream.description !== "string") return false;
+  // Validate vision
+  if (!obj.vision || typeof obj.vision !== "object") return false;
+  const vision = obj.vision as Record<string, unknown>;
+  if (typeof vision.title !== "string" || typeof vision.description !== "string") return false;
 
   // Validate strategyNote
   if (typeof obj.strategyNote !== "string") return false;
 
-  // Validate fiveYearGoals array
-  if (!Array.isArray(obj.fiveYearGoals) || obj.fiveYearGoals.length === 0) return false;
+  // Validate threeYearGoals array
+  if (!Array.isArray(obj.threeYearGoals) || obj.threeYearGoals.length === 0) return false;
 
-  return obj.fiveYearGoals.every((fiveYear: unknown) => {
-    if (!fiveYear || typeof fiveYear !== "object") return false;
-    const fy = fiveYear as Record<string, unknown>;
-    if (typeof fy.title !== "string" || typeof fy.description !== "string") return false;
+  return obj.threeYearGoals.every((threeYear: unknown) => {
+    if (!threeYear || typeof threeYear !== "object") return false;
+    const ty = threeYear as Record<string, unknown>;
+    if (typeof ty.title !== "string" || typeof ty.description !== "string") return false;
 
     // Validate oneYearGoals array
-    if (!Array.isArray(fy.oneYearGoals) || fy.oneYearGoals.length === 0) return false;
+    if (!Array.isArray(ty.oneYearGoals) || ty.oneYearGoals.length === 0) return false;
 
-    return fy.oneYearGoals.every((oneYear: unknown) => {
+    return ty.oneYearGoals.every((oneYear: unknown) => {
       if (!oneYear || typeof oneYear !== "object") return false;
       const oy = oneYear as Record<string, unknown>;
       if (typeof oy.title !== "string" || typeof oy.description !== "string") return false;
@@ -208,6 +216,9 @@ export function validateDreamBuilderResponse(data: unknown): data is DreamBuilde
     });
   });
 }
+
+// Backward compatibility alias
+export const validateDreamBuilderResponse = validateVisionBuilderResponse;
 
 // Parse JSON from AI response (handles markdown code blocks)
 export function parseAIResponse<T>(text: string): T {

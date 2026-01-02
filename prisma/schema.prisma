@@ -50,7 +50,7 @@ enum AIInteractionType {
   GOAL_SHARPEN
   TASK_SUGGEST
   GOAL_SUGGEST
-  DREAM_BUILD
+  VISION_BUILD
 }
 
 // NextAuth.js Models
@@ -116,22 +116,26 @@ model User {
   level       Int @default(1)
 
   // Relations
-  accounts        Account[]
-  sessions        Session[]
-  dreams          Dream[]
-  weeklyGoals     WeeklyGoal[]
-  streaks         Streak[]
-  earnedBadges    EarnedBadge[]
-  aiInteractions  AIInteraction[]
-  kaizenCheckins  KaizenCheckin[]
-  weeklyReviews   WeeklyReview[]
-  monthlyReviews  MonthlyReview[]
+  accounts          Account[]
+  sessions          Session[]
+  sevenYearVisions  SevenYearVision[]
+  threeYearGoals    ThreeYearGoal[]
+  oneYearGoals      OneYearGoal[]
+  monthlyGoals      MonthlyGoal[]
+  weeklyGoals       WeeklyGoal[]
+  dailyTasks        DailyTask[]
+  streaks           Streak[]
+  earnedBadges      EarnedBadge[]
+  aiInteractions    AIInteraction[]
+  kaizenCheckins    KaizenCheckin[]
+  weeklyReviews     WeeklyReview[]
+  monthlyReviews    MonthlyReview[]
 
   @@map("users")
 }
 
 // Goal Hierarchy Models
-model Dream {
+model SevenYearVision {
   id          String       @id @default(cuid())
   userId      String       @map("user_id")
   title       String
@@ -143,54 +147,61 @@ model Dream {
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime     @updatedAt @map("updated_at")
 
-  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  fiveYearGoals  FiveYearGoal[]
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  threeYearGoals  ThreeYearGoal[]
 
   @@index([userId])
-  @@map("dreams")
+  @@map("seven_year_visions")
 }
 
-model FiveYearGoal {
-  id          String       @id @default(cuid())
-  dreamId     String       @map("dream_id")
-  title       String
-  description String?      @db.Text
-  category    GoalCategory
-  status      GoalStatus   @default(ACTIVE)
-  targetDate  DateTime?    @map("target_date")
-  progress    Int          @default(0)
-  createdAt   DateTime     @default(now()) @map("created_at")
-  updatedAt   DateTime     @updatedAt @map("updated_at")
+model ThreeYearGoal {
+  id                 String       @id @default(cuid())
+  userId             String       @map("user_id")
+  sevenYearVisionId  String?      @map("seven_year_vision_id")
+  title              String
+  description        String?      @db.Text
+  category           GoalCategory
+  status             GoalStatus   @default(ACTIVE)
+  targetDate         DateTime?    @map("target_date")
+  progress           Int          @default(0)
+  createdAt          DateTime     @default(now()) @map("created_at")
+  updatedAt          DateTime     @updatedAt @map("updated_at")
 
-  dream        Dream          @relation(fields: [dreamId], references: [id], onDelete: Cascade)
-  oneYearGoals OneYearGoal[]
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sevenYearVision  SevenYearVision?  @relation(fields: [sevenYearVisionId], references: [id], onDelete: SetNull)
+  oneYearGoals     OneYearGoal[]
 
-  @@index([dreamId])
-  @@map("five_year_goals")
+  @@index([userId])
+  @@index([sevenYearVisionId])
+  @@map("three_year_goals")
 }
 
 model OneYearGoal {
-  id             String       @id @default(cuid())
-  fiveYearGoalId String       @map("five_year_goal_id")
-  title          String
-  description    String?      @db.Text
-  category       GoalCategory
-  status         GoalStatus   @default(ACTIVE)
-  targetDate     DateTime?    @map("target_date")
-  progress       Int          @default(0)
-  createdAt      DateTime     @default(now()) @map("created_at")
-  updatedAt      DateTime     @updatedAt @map("updated_at")
+  id               String       @id @default(cuid())
+  userId           String       @map("user_id")
+  threeYearGoalId  String?      @map("three_year_goal_id")
+  title            String
+  description      String?      @db.Text
+  category         GoalCategory
+  status           GoalStatus   @default(ACTIVE)
+  targetDate       DateTime?    @map("target_date")
+  progress         Int          @default(0)
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
 
-  fiveYearGoal FiveYearGoal  @relation(fields: [fiveYearGoalId], references: [id], onDelete: Cascade)
-  monthlyGoals MonthlyGoal[]
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  threeYearGoal  ThreeYearGoal?  @relation(fields: [threeYearGoalId], references: [id], onDelete: SetNull)
+  monthlyGoals   MonthlyGoal[]
 
-  @@index([fiveYearGoalId])
+  @@index([userId])
+  @@index([threeYearGoalId])
   @@map("one_year_goals")
 }
 
 model MonthlyGoal {
   id            String       @id @default(cuid())
-  oneYearGoalId String       @map("one_year_goal_id")
+  userId        String       @map("user_id")
+  oneYearGoalId String?      @map("one_year_goal_id")
   title         String
   description   String?      @db.Text
   category      GoalCategory
@@ -200,9 +211,11 @@ model MonthlyGoal {
   createdAt     DateTime     @default(now()) @map("created_at")
   updatedAt     DateTime     @updatedAt @map("updated_at")
 
-  oneYearGoal OneYearGoal  @relation(fields: [oneYearGoalId], references: [id], onDelete: Cascade)
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  oneYearGoal OneYearGoal?  @relation(fields: [oneYearGoalId], references: [id], onDelete: SetNull)
   weeklyGoals WeeklyGoal[]
 
+  @@index([userId])
   @@index([oneYearGoalId])
   @@index([targetMonth])
   @@map("monthly_goals")
@@ -232,8 +245,8 @@ model WeeklyGoal {
 
 model DailyTask {
   id                     String       @id @default(cuid())
-  weeklyGoalId           String?      @map("weekly_goal_id")
   userId                 String       @map("user_id")
+  weeklyGoalId           String?      @map("weekly_goal_id")
   title                  String
   description            String?      @db.Text
   priority               TaskPriority
@@ -246,6 +259,7 @@ model DailyTask {
   createdAt              DateTime     @default(now()) @map("created_at")
   updatedAt              DateTime     @updatedAt @map("updated_at")
 
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   weeklyGoal WeeklyGoal? @relation(fields: [weeklyGoalId], references: [id], onDelete: SetNull)
 
   @@index([userId, scheduledDate])

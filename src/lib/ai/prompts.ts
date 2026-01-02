@@ -61,12 +61,12 @@ Task Guidelines:
 - Suggest 4-7 tasks total`;
 
 // Goal Suggester System Prompt - for cascading goal suggestions
-export const GOAL_SUGGESTER_PROMPT = `You are an expert goal strategist specializing in MJ DeMarco's 1/5/10 goal methodology. Your role is to suggest meaningful goals that cascade down from higher-level visions to actionable objectives.
+export const GOAL_SUGGESTER_PROMPT = `You are an expert goal strategist. Your role is to suggest meaningful goals that cascade down from higher-level visions to actionable objectives.
 
-The 1/5/10 Hierarchy:
-- 10-Year Dream: The ultimate vision (wealth, lifestyle, impact)
-- 5-Year Goal: Major milestone toward the dream
-- 1-Year Goal: Annual objective toward 5-year goals
+The Goal Hierarchy:
+- 7-Year Vision: The ultimate vision (wealth, lifestyle, impact)
+- 3-Year Goal: Major milestone toward the vision
+- 1-Year Goal: Annual objective toward 3-year goals
 - Monthly Goal: Monthly target toward 1-year goals
 - Weekly Goal: Weekly focus toward monthly goals
 
@@ -96,14 +96,14 @@ Guidelines:
 - Include measurable outcomes where possible
 - Consider dependencies and logical sequencing
 - Suggestions should be diverse but complementary
-- For dreams (no parent), suggest inspiring 10-year visions based on the category`;
+- For visions (no parent), suggest inspiring 7-year visions based on the category`;
 
 // Task Suggester System Prompt with cascading context
 export const TASK_SUGGESTER_WITH_CONTEXT_PROMPT = `You are a productivity expert helping break down goals into actionable daily tasks. Your role is to suggest prioritized tasks that align with the entire goal hierarchy.
 
 You will be given:
 1. The immediate weekly goal (what needs to be accomplished this week)
-2. The cascading context (monthly → yearly → 5-year → dream)
+2. The cascading context (monthly → yearly → 3-year → vision)
 
 Your response must be in JSON format with the following structure:
 {
@@ -117,7 +117,7 @@ Your response must be in JSON format with the following structure:
     }
   ],
   "mit_rationale": "Explanation of why the MIT task is the highest-leverage action toward the bigger vision",
-  "alignment_insight": "How these daily actions connect to the long-term dream"
+  "alignment_insight": "How these daily actions connect to the long-term vision"
 }
 
 Priority Guidelines:
@@ -170,17 +170,17 @@ export function createTaskSuggestMessage(
   if (cascadingContext) {
     message += `\n\n## Full Goal Hierarchy Context`;
 
-    if (cascadingContext.dream) {
-      message += `\n\n### 10-Year Dream (ultimate vision)\n"${cascadingContext.dream.title}"`;
-      if (cascadingContext.dream.description) {
-        message += `\n${cascadingContext.dream.description}`;
+    if (cascadingContext.sevenYear) {
+      message += `\n\n### 7-Year Vision (ultimate vision)\n"${cascadingContext.sevenYear.title}"`;
+      if (cascadingContext.sevenYear.description) {
+        message += `\n${cascadingContext.sevenYear.description}`;
       }
     }
 
-    if (cascadingContext.fiveYear) {
-      message += `\n\n### 5-Year Goal\n"${cascadingContext.fiveYear.title}"`;
-      if (cascadingContext.fiveYear.description) {
-        message += `\n${cascadingContext.fiveYear.description}`;
+    if (cascadingContext.threeYear) {
+      message += `\n\n### 3-Year Goal\n"${cascadingContext.threeYear.title}"`;
+      if (cascadingContext.threeYear.description) {
+        message += `\n${cascadingContext.threeYear.description}`;
       }
     }
 
@@ -206,14 +206,14 @@ export function createTaskSuggestMessage(
 
 // Cascading context for goal hierarchy
 export interface CascadingContext {
-  dream?: { title: string; description?: string };
-  fiveYear?: { title: string; description?: string };
+  sevenYear?: { title: string; description?: string };
+  threeYear?: { title: string; description?: string };
   oneYear?: { title: string; description?: string };
   monthly?: { title: string; description?: string };
   weekly?: { title: string; description?: string };
 }
 
-export type GoalLevelForSuggestion = "dream" | "fiveYear" | "oneYear" | "monthly" | "weekly";
+export type GoalLevelForSuggestion = "sevenYear" | "threeYear" | "oneYear" | "monthly" | "weekly";
 
 export function createGoalSuggestMessage(
   level: GoalLevelForSuggestion,
@@ -222,8 +222,8 @@ export function createGoalSuggestMessage(
   cascadingContext?: CascadingContext
 ): string {
   const levelLabels: Record<GoalLevelForSuggestion, string> = {
-    dream: "10-Year Dream",
-    fiveYear: "5-Year Goal",
+    sevenYear: "7-Year Vision",
+    threeYear: "3-Year Goal",
     oneYear: "1-Year Goal",
     monthly: "Monthly Goal",
     weekly: "Weekly Goal",
@@ -241,17 +241,17 @@ export function createGoalSuggestMessage(
   if (cascadingContext) {
     message += `\n\n## Full Goal Hierarchy Context`;
 
-    if (cascadingContext.dream) {
-      message += `\n\n### 10-Year Dream\n"${cascadingContext.dream.title}"`;
-      if (cascadingContext.dream.description) {
-        message += `\n${cascadingContext.dream.description}`;
+    if (cascadingContext.sevenYear) {
+      message += `\n\n### 7-Year Vision\n"${cascadingContext.sevenYear.title}"`;
+      if (cascadingContext.sevenYear.description) {
+        message += `\n${cascadingContext.sevenYear.description}`;
       }
     }
 
-    if (cascadingContext.fiveYear) {
-      message += `\n\n### 5-Year Goal\n"${cascadingContext.fiveYear.title}"`;
-      if (cascadingContext.fiveYear.description) {
-        message += `\n${cascadingContext.fiveYear.description}`;
+    if (cascadingContext.threeYear) {
+      message += `\n\n### 3-Year Goal\n"${cascadingContext.threeYear.title}"`;
+      if (cascadingContext.threeYear.description) {
+        message += `\n${cascadingContext.threeYear.description}`;
       }
     }
 
@@ -296,12 +296,12 @@ export function createTaskSuggestWithContextMessage(
       message += `\n\n### 1-Year Goal\n"${cascadingContext.oneYear.title}"`;
     }
 
-    if (cascadingContext.fiveYear) {
-      message += `\n\n### 5-Year Goal\n"${cascadingContext.fiveYear.title}"`;
+    if (cascadingContext.threeYear) {
+      message += `\n\n### 3-Year Goal\n"${cascadingContext.threeYear.title}"`;
     }
 
-    if (cascadingContext.dream) {
-      message += `\n\n### 10-Year Dream (ultimate vision)\n"${cascadingContext.dream.title}"`;
+    if (cascadingContext.sevenYear) {
+      message += `\n\n### 7-Year Vision (ultimate vision)\n"${cascadingContext.sevenYear.title}"`;
     }
   }
 
@@ -310,37 +310,37 @@ export function createTaskSuggestWithContextMessage(
   return message;
 }
 
-// Dream Builder System Prompt - generates complete goal hierarchy from user's vision
-export const DREAM_BUILDER_PROMPT = `You are an expert goal architect specializing in MJ DeMarco's 1/5/10 goal methodology. Your role is to transform a user's rough dream or vision into a complete, actionable goal hierarchy.
+// Vision Builder System Prompt - generates complete goal hierarchy from user's vision
+export const VISION_BUILDER_PROMPT = `You are an expert goal architect. Your role is to transform a user's rough vision into a complete, actionable goal hierarchy.
 
-The 1/5/10 Hierarchy:
-- 10-Year Dream: The ultimate vision (wealth, lifestyle, impact, freedom)
-- 5-Year Goal: Major milestones toward the dream (2-3 goals)
-- 1-Year Goal: Annual objectives toward each 5-year goal (2 per 5-year)
+The Goal Hierarchy:
+- 7-Year Vision: The ultimate vision (wealth, lifestyle, impact, freedom)
+- 3-Year Goal: Major milestones toward the vision (2-3 goals)
+- 1-Year Goal: Annual objectives toward each 3-year goal (2 per 3-year)
 - Monthly Goal: This month's targets toward 1-year goals (1 per 1-year)
 - Weekly Goal: This week's focus toward monthly goals (1 per monthly)
 
-Given a user's rough dream idea and category, you will:
-1. Refine their dream into a compelling 10-year vision
-2. Break it down into 2-3 strategic 5-year milestones
-3. For each 5-year goal, create 2 focused 1-year objectives
+Given a user's rough vision idea and category, you will:
+1. Refine their vision into a compelling 7-year goal
+2. Break it down into 2-3 strategic 3-year milestones
+3. For each 3-year goal, create 2 focused 1-year objectives
 4. For each 1-year goal, create 1 monthly goal for this month
 5. For each monthly goal, create 1 weekly goal for this week
 
 Your response must be in JSON format with the following structure:
 {
-  "dream": {
-    "title": "Compelling 10-year vision title (max 100 characters)",
+  "vision": {
+    "title": "Compelling 7-year vision title (max 100 characters)",
     "description": "2-3 sentences describing the ultimate outcome and why it matters"
   },
-  "fiveYearGoals": [
+  "threeYearGoals": [
     {
-      "title": "5-year milestone title",
-      "description": "What success looks like at year 5",
+      "title": "3-year milestone title",
+      "description": "What success looks like at year 3",
       "oneYearGoals": [
         {
           "title": "1-year objective title",
-          "description": "What to achieve this year toward the 5-year goal",
+          "description": "What to achieve this year toward the 3-year goal",
           "monthlyGoal": {
             "title": "This month's target",
             "description": "Specific outcome for this month",
@@ -357,8 +357,8 @@ Your response must be in JSON format with the following structure:
 }
 
 Guidelines:
-- Dream should be inspiring but achievable (10-year horizon allows for significant change)
-- 5-year goals should be major milestones that prove progress toward the dream
+- Vision should be inspiring but achievable (7-year horizon allows for significant change)
+- 3-year goals should be major milestones that prove progress toward the vision
 - 1-year goals should be stretch goals but realistic
 - Monthly goals should be concrete and measurable
 - Weekly goals should be immediately actionable (start this week)
@@ -368,7 +368,7 @@ Guidelines:
 - Each level should logically cascade from its parent
 - The entire system should feel cohesive and motivating`;
 
-export function createDreamBuilderMessage(
+export function createVisionBuilderMessage(
   idea: string,
   category: string,
   currentDate?: Date
@@ -379,13 +379,17 @@ export function createDreamBuilderMessage(
   weekStart.setDate(now.getDate() - now.getDay() + 1); // Monday of current week
   const weekLabel = `Week of ${weekStart.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
 
-  let message = `## Dream Vision\n"${idea}"\n\n`;
+  let message = `## Vision Idea\n"${idea}"\n\n`;
   message += `## Category\n${category}\n\n`;
   message += `## Current Timeframe\n`;
   message += `- Current Month: ${monthName}\n`;
   message += `- Current Week: ${weekLabel}\n\n`;
-  message += `Please create a complete goal hierarchy from this dream vision. `;
-  message += `Generate 2-3 five-year goals, each with 2 one-year goals, and cascade down to monthly and weekly goals for the current timeframe.`;
+  message += `Please create a complete goal hierarchy from this vision. `;
+  message += `Generate 2-3 three-year goals, each with 2 one-year goals, and cascade down to monthly and weekly goals for the current timeframe.`;
 
   return message;
 }
+
+// Keep old names as aliases for backward compatibility during migration
+export const DREAM_BUILDER_PROMPT = VISION_BUILDER_PROMPT;
+export const createDreamBuilderMessage = createVisionBuilderMessage;

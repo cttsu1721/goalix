@@ -200,8 +200,8 @@ export async function POST(request: NextRequest) {
             {
               monthlyGoal: {
                 oneYearGoal: {
-                  fiveYearGoal: {
-                    dream: {
+                  threeYearGoal: {
+                    sevenYearVision: {
                       userId: session.user.id,
                     },
                   },

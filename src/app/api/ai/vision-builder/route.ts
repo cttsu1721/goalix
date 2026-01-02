@@ -5,14 +5,14 @@ import { checkAIRateLimit } from "@/lib/redis";
 import {
   anthropic,
   AI_CONFIG,
-  DREAM_BUILDER_PROMPT,
-  createDreamBuilderMessage,
+  VISION_BUILDER_PROMPT,
+  createVisionBuilderMessage,
   parseAIResponse,
-  validateDreamBuilderResponse,
-  type DreamBuilderResponse,
+  validateVisionBuilderResponse,
+  type VisionBuilderResponse,
 } from "@/lib/ai";
 
-// POST /api/ai/dream-builder - Generate complete goal hierarchy from user's dream idea
+// POST /api/ai/vision-builder - Generate complete goal hierarchy from user's vision idea
 export async function POST(request: NextRequest) {
   try {
     const session = await auth();
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     // Validate required fields
     if (!idea || typeof idea !== "string" || idea.trim().length < 10) {
       return NextResponse.json(
-        { error: "Please provide a dream idea (at least 10 characters)" },
+        { error: "Please provide a vision idea (at least 10 characters)" },
         { status: 400 }
       );
     }
@@ -51,14 +51,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Create the user message with current date context
-    const userMessage = createDreamBuilderMessage(idea.trim(), category);
+    const userMessage = createVisionBuilderMessage(idea.trim(), category);
 
     // Call Anthropic API - use slightly higher max tokens for larger response
     const response = await anthropic.messages.create({
       model: AI_CONFIG.model,
       max_tokens: 2000, // Larger response expected
       temperature: AI_CONFIG.temperature,
-      system: DREAM_BUILDER_PROMPT,
+      system: VISION_BUILDER_PROMPT,
       messages: [{ role: "user", content: userMessage }],
     });
 
@@ -69,9 +69,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Parse and validate response
-    const result = parseAIResponse<DreamBuilderResponse>(textContent.text);
+    const result = parseAIResponse<VisionBuilderResponse>(textContent.text);
 
-    if (!validateDreamBuilderResponse(result)) {
+    if (!validateVisionBuilderResponse(result)) {
       console.error("Invalid AI response structure:", result);
       throw new Error("Invalid AI response format");
     }
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
     await prisma.aIInteraction.create({
       data: {
         userId: session.user.id,
-        type: "DREAM_BUILD",
+        type: "VISION_BUILD",
         inputTokens: response.usage.input_tokens,
         outputTokens: response.usage.output_tokens,
         prompt: userMessage,
@@ -89,10 +89,10 @@ export async function POST(request: NextRequest) {
     });
 
     // Calculate total goals generated
-    let totalGoals = 1; // Dream
-    result.fiveYearGoals.forEach((fy) => {
-      totalGoals += 1; // 5-year
-      fy.oneYearGoals.forEach((oy) => {
+    let totalGoals = 1; // Vision
+    result.threeYearGoals.forEach((ty) => {
+      totalGoals += 1; // 3-year
+      ty.oneYearGoals.forEach(() => {
         totalGoals += 3; // 1-year + monthly + weekly
       });
     });
@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Error in dream builder:", error);
+    console.error("Error in vision builder:", error);
 
     if (error instanceof SyntaxError) {
       return NextResponse.json(
@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: "Failed to generate dream hierarchy" },
+      { error: "Failed to generate vision hierarchy" },
       { status: 500 }
     );
   }
