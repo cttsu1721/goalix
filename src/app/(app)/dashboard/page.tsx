@@ -7,6 +7,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { MitCard, TaskList } from "@/components/tasks";
 import { StatsPanel } from "@/components/gamification/StatsPanel";
+import { YearTargetHeader } from "@/components/dashboard";
 
 // Lazy load modal components to reduce initial bundle size
 const TaskCreateModal = dynamic(
@@ -42,7 +43,7 @@ import { formatLocalDate } from "@/lib/utils";
 import { Loader2, Sparkles, CalendarDays, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import type { TaskPriority } from "@prisma/client";
+import type { TaskPriority, GoalCategory } from "@prisma/client";
 import type { SuggestedTask } from "@/lib/ai/schemas";
 
 function getGreeting(): string {
@@ -106,10 +107,42 @@ export default function DashboardPage() {
   const { data: statsData, isLoading: statsLoading } = useUserStats();
   const { data: kaizenData } = useKaizenCheckin(today);
   const { data: goalsData } = useGoals("weekly");
+  const { data: oneYearGoalsData } = useGoals("oneYear", undefined, "ACTIVE");
   const { data: aiUsage } = useAIUsage();
 
   // Weekly goals for task suggestions
-  const weeklyGoals = (goalsData?.goals || []) as Array<{ id: string; title: string; description?: string }>;
+  const weeklyGoals = (goalsData?.goals || []) as Array<{
+    id: string;
+    title: string;
+    description?: string;
+    category: GoalCategory;
+    monthlyGoal?: {
+      id: string;
+      title: string;
+      oneYearGoal?: { id: string; title: string } | null;
+    } | null;
+  }>;
+
+  // Get primary 1-year goal (most recent active one)
+  const oneYearGoals = (oneYearGoalsData?.goals || []) as Array<{
+    id: string;
+    title: string;
+    description?: string | null;
+    category: GoalCategory;
+    progress: number;
+    threeYearGoal?: {
+      id: string;
+      title: string;
+      sevenYearVision?: { id: string; title: string } | null;
+    } | null;
+  }>;
+  const primaryOneYearGoal = oneYearGoals[0] || null;
+
+  // Get the most relevant weekly goal (one that links to the 1-year target if possible)
+  const primaryWeeklyGoal = weeklyGoals.find(
+    (wg) => wg.monthlyGoal?.oneYearGoal?.id === primaryOneYearGoal?.id
+  ) || weeklyGoals[0] || null;
+
   const aiRemaining = aiUsage?.remaining ?? 5;
   const aiLimit = aiUsage?.limit ?? 5;
 
@@ -407,6 +440,15 @@ export default function DashboardPage() {
         aiUsesRemaining={aiRemaining}
         aiUsesTotal={aiLimit}
         onAiClick={handleOpenTaskSuggest}
+      />
+
+      {/* 1-Year Target Header - The Decision Filter */}
+      <YearTargetHeader
+        oneYearGoal={primaryOneYearGoal}
+        weeklyGoal={primaryWeeklyGoal}
+        tasksCompleted={completedCount}
+        tasksTotal={todayFormattedTasks.length}
+        goalAlignedTasks={linkedTasks}
       />
 
       {/* Overdue Tasks Section - shown when there are overdue tasks */}

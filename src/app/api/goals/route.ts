@@ -69,7 +69,13 @@ export async function GET(request: NextRequest) {
           },
           include: {
             threeYearGoal: {
-              select: { id: true, title: true },
+              select: {
+                id: true,
+                title: true,
+                sevenYearVision: {
+                  select: { id: true, title: true },
+                },
+              },
             },
             monthlyGoals: {
               select: { id: true },
@@ -107,7 +113,13 @@ export async function GET(request: NextRequest) {
           },
           include: {
             monthlyGoal: {
-              select: { id: true, title: true },
+              select: {
+                id: true,
+                title: true,
+                oneYearGoal: {
+                  select: { id: true, title: true },
+                },
+              },
             },
             dailyTasks: {
               select: { id: true, status: true },
