@@ -22,8 +22,8 @@ const navItems = [
     icon: CalendarRange,
   },
   {
-    href: "/goals?view=dreams",
-    label: "Dreams",
+    href: "/goals?view=vision",
+    label: "Vision",
     icon: Star,
   },
   {
@@ -60,13 +60,13 @@ function MobileNavContent({ className }: MobileNavProps) {
       const hrefView = hrefParams.get("view");
       const currentView = searchParams.get("view");
 
-      // Dreams tab active ONLY when view=dreams
-      if (hrefView === "dreams") {
-        return currentView === "dreams";
+      // Vision tab active ONLY when view=vision
+      if (hrefView === "vision") {
+        return currentView === "vision";
       }
       // Goals tab active when view=goals or any other view (default)
       if (hrefView === "goals") {
-        return currentView !== "dreams";
+        return currentView !== "vision";
       }
     }
 

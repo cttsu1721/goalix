@@ -201,7 +201,7 @@ This builds the mental habit of filtering decisions through the 1-Year Target. O
 
 ### Lifestyle Insights (Conveyor Belt Reinforcement)
 
-The 1/5/10 framework emphasises that habits must become *instinctual* — the "side rails" of the ladder. When users hit streak milestones, surface insights that reinforce this:
+The cascading goals framework emphasises that habits must become *instinctual* — the "side rails" of the ladder. When users hit streak milestones, surface insights that reinforce this:
 
 | Streak | Message |
 |--------|----------|

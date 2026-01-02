@@ -63,8 +63,8 @@ const navGroups: NavGroup[] = [
     label: "Vision",
     items: [
       {
-        href: "/goals?view=dreams",
-        label: "Dreams",
+        href: "/goals?view=vision",
+        label: "7-Year Vision",
         icon: <Star className="w-5 h-5" />,
       },
       {
@@ -113,13 +113,13 @@ function SidebarContent({ className }: SidebarProps) {
       const hrefView = hrefParams.get("view");
       const currentView = searchParams.get("view");
 
-      // Dreams tab active ONLY when view=dreams
-      if (hrefView === "dreams") {
-        return currentView === "dreams";
+      // Vision tab active ONLY when view=vision
+      if (hrefView === "vision") {
+        return currentView === "vision";
       }
       // Goals tab active when view=goals, any goal level, or no view (default)
       if (hrefView === "goals") {
-        return currentView !== "dreams";
+        return currentView !== "vision";
       }
     }
 

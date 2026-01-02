@@ -79,8 +79,8 @@ export const BADGE_DEFINITIONS = {
   },
   dream_starter: {
     slug: "dream_starter",
-    name: "Dream Starter",
-    description: "Create your first 10-year dream",
+    name: "Vision Starter",
+    description: "Create your first 7-year vision",
     category: "achievement",
   },
   planner_pro: {
