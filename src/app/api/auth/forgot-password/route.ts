@@ -19,9 +19,9 @@ async function sendPasswordResetEmail(email: string, token: string) {
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      from: "Goalzenix <noreply@quantumdigitalplus.com>",
+      from: "Goalzenix <noreply@goalzenix.com>",
       to: email,
-      reply_to: "noreply@quantumdigitalplus.com",
+      reply_to: "noreply@goalzenix.com",
       subject: "Reset your Goalzenix password",
       html: `
         <!DOCTYPE html>

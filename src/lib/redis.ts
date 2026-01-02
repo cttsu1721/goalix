@@ -29,6 +29,7 @@ const AI_UNLIMITED_LIMIT = 9999;
 // Users with unlimited AI access (by email)
 const UNLIMITED_AI_USERS = [
   "thomas@quantumdigitalplus.com",
+  "chitoman21@gmail.com",
 ];
 
 export async function checkAIRateLimit(

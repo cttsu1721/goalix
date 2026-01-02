@@ -24,9 +24,9 @@ async function sendVerificationRequest({
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      from: "Goalzenix <noreply@quantumdigitalplus.com>",
+      from: "Goalzenix <noreply@goalzenix.com>",
       to: email,
-      reply_to: "noreply@quantumdigitalplus.com",
+      reply_to: "noreply@goalzenix.com",
       subject: "Sign in to Goalzenix",
       html: `
         <!DOCTYPE html>
