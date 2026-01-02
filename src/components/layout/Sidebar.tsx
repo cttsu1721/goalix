@@ -136,7 +136,7 @@ function SidebarContent({ className }: SidebarProps) {
       {/* Logo */}
       <div className="px-7 pb-10">
         <Link href="/dashboard" className="text-moon text-[1.375rem] font-medium tracking-wider">
-          goalix<span className="text-lantern font-light">.</span>
+          goalzenix<span className="text-lantern font-light">.</span>
         </Link>
       </div>
 
@@ -228,7 +228,7 @@ function SidebarFallback({ className }: SidebarProps) {
     >
       <div className="px-7 pb-10">
         <span className="text-moon text-[1.375rem] font-medium tracking-wider">
-          goalix<span className="text-lantern font-light">.</span>
+          goalzenix<span className="text-lantern font-light">.</span>
         </span>
       </div>
       <nav className="flex-1 px-4">

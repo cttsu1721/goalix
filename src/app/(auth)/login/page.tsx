@@ -169,7 +169,7 @@ function LoginForm() {
 
       {/* Sign up prompt */}
       <p className="text-center text-sm text-moon-dim">
-        New to Goalix?{" "}
+        New to Goalzenix?{" "}
         <Link href="/register" className="text-lantern hover:text-lantern/80 transition-colors">
           Create an account
         </Link>

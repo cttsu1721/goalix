@@ -24,17 +24,17 @@ async function sendVerificationRequest({
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      from: "Goalix <noreply@quantumdigitalplus.com>",
+      from: "Goalzenix <noreply@quantumdigitalplus.com>",
       to: email,
       reply_to: "noreply@quantumdigitalplus.com",
-      subject: "Sign in to Goalix",
+      subject: "Sign in to Goalzenix",
       html: `
         <!DOCTYPE html>
         <html>
           <head>
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Sign in to Goalix</title>
+            <title>Sign in to Goalzenix</title>
           </head>
           <body style="margin: 0; padding: 0; background-color: #08080c; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
             <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #08080c; padding: 40px 20px;">
@@ -45,12 +45,12 @@ async function sendVerificationRequest({
                       <td style="padding: 40px 32px; text-align: center;">
                         <!-- Logo -->
                         <h1 style="margin: 0 0 32px 0; font-size: 28px; font-weight: 500; letter-spacing: 2px; color: #f0eef8;">
-                          goalix<span style="color: #e8a857; font-weight: 300;">.</span>
+                          goalzenix<span style="color: #e8a857; font-weight: 300;">.</span>
                         </h1>
 
                         <!-- Heading -->
                         <h2 style="margin: 0 0 16px 0; font-size: 20px; font-weight: 500; color: #f0eef8;">
-                          Sign in to Goalix
+                          Sign in to Goalzenix
                         </h2>
 
                         <!-- Text -->
@@ -60,7 +60,7 @@ async function sendVerificationRequest({
 
                         <!-- Button -->
                         <a href="${url}" style="display: inline-block; padding: 14px 32px; background-color: #e8a857; color: #08080c; text-decoration: none; font-size: 14px; font-weight: 600; border-radius: 12px;">
-                          Sign in to Goalix
+                          Sign in to Goalzenix
                         </a>
 
                         <!-- Security note -->
@@ -81,7 +81,7 @@ async function sendVerificationRequest({
           </body>
         </html>
       `,
-      text: `Sign in to Goalix\n\nClick the link below to sign in:\n${url}\n\nThis link will expire in 24 hours.\n\nIf you didn't request this email, you can safely ignore it.`,
+      text: `Sign in to Goalzenix\n\nClick the link below to sign in:\n${url}\n\nThis link will expire in 24 hours.\n\nIf you didn't request this email, you can safely ignore it.`,
     }),
   });
 

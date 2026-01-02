@@ -30,7 +30,7 @@ export default function AuthLayout({
         href="/"
         className="relative z-10 mb-12 text-[1.75rem] font-medium tracking-wider text-moon animate-fade-in-delay-1"
       >
-        goalix<span className="text-lantern font-light">.</span>
+        goalzenix<span className="text-lantern font-light">.</span>
       </Link>
 
       {/* Card Container */}

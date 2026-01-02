@@ -19,17 +19,17 @@ async function sendPasswordResetEmail(email: string, token: string) {
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      from: "Goalix <noreply@quantumdigitalplus.com>",
+      from: "Goalzenix <noreply@quantumdigitalplus.com>",
       to: email,
       reply_to: "noreply@quantumdigitalplus.com",
-      subject: "Reset your Goalix password",
+      subject: "Reset your Goalzenix password",
       html: `
         <!DOCTYPE html>
         <html>
           <head>
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Reset your Goalix password</title>
+            <title>Reset your Goalzenix password</title>
           </head>
           <body style="margin: 0; padding: 0; background-color: #08080c; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
             <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #08080c; padding: 40px 20px;">
@@ -40,7 +40,7 @@ async function sendPasswordResetEmail(email: string, token: string) {
                       <td style="padding: 40px 32px; text-align: center;">
                         <!-- Logo -->
                         <h1 style="margin: 0 0 32px 0; font-size: 28px; font-weight: 500; letter-spacing: 2px; color: #f0eef8;">
-                          goalix<span style="color: #e8a857; font-weight: 300;">.</span>
+                          goalzenix<span style="color: #e8a857; font-weight: 300;">.</span>
                         </h1>
 
                         <!-- Heading -->
@@ -76,7 +76,7 @@ async function sendPasswordResetEmail(email: string, token: string) {
           </body>
         </html>
       `,
-      text: `Reset your Goalix password\n\nClick the link below to reset your password:\n${resetUrl}\n\nThis link will expire in 1 hour.\n\nIf you didn't request this email, you can safely ignore it.`,
+      text: `Reset your Goalzenix password\n\nClick the link below to reset your password:\n${resetUrl}\n\nThis link will expire in 1 hour.\n\nIf you didn't request this email, you can safely ignore it.`,
     }),
   });
 

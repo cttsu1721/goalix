@@ -1,6 +1,6 @@
 {
-  "name": "Goalix",
-  "short_name": "Goalix",
+  "name": "Goalzenix",
+  "short_name": "Goalzenix",
   "description": "Transform your 10-year dreams into daily action",
   "start_url": "/dashboard",
   "display": "standalone",

@@ -330,7 +330,7 @@ function AppearanceSection() {
       <SettingsSection
         icon={Palette}
         title="Appearance"
-        description="Customize how Goalix looks"
+        description="Customize how Goalzenix looks"
       >
         <div className="grid grid-cols-2 gap-4">
           <div className="aspect-[4/3] rounded-xl bg-night-soft animate-pulse" />
@@ -344,7 +344,7 @@ function AppearanceSection() {
     <SettingsSection
       icon={Palette}
       title="Appearance"
-      description="Customize how Goalix looks"
+      description="Customize how Goalzenix looks"
     >
       <div className="space-y-4">
         <p className="text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-moon-faint">
@@ -558,7 +558,7 @@ export default function SettingsPage() {
         <SettingsSection
           icon={Bell}
           title="Notifications"
-          description="Control how Goalix contacts you"
+          description="Control how Goalzenix contacts you"
         >
           <div className="divide-y divide-night-mist">
             <ToggleSwitch

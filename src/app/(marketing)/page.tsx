@@ -31,7 +31,7 @@ export default function LandingPage() {
       <header className="relative z-10 border-b border-night-mist/50">
         <div className="max-w-6xl mx-auto flex h-20 items-center justify-between px-6 lg:px-8">
           <Link href="/" className="text-[1.375rem] font-medium tracking-wider">
-            goalix<span className="text-lantern font-light">.</span>
+            goalzenix<span className="text-lantern font-light">.</span>
           </Link>
           <Link href="/login">
             <Button className="bg-lantern text-void hover:bg-lantern/90 font-medium px-6 rounded-xl">
@@ -232,7 +232,7 @@ export default function LandingPage() {
             Based on MJ DeMarco&apos;s 1/5/10 methodology
           </span>
           <Link href="/" className="text-moon-faint text-sm tracking-wider">
-            goalix<span className="text-lantern">.</span>
+            goalzenix<span className="text-lantern">.</span>
           </Link>
         </div>
       </footer>
