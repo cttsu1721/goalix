@@ -132,7 +132,18 @@ export async function POST(request: Request) {
       },
     });
 
-    // Send email
+    // Send email (only if API key is configured)
+    const apiKey = process.env.EMAILIT_API_KEY;
+    if (!apiKey) {
+      console.warn("EMAILIT_API_KEY not set - password reset email not sent");
+      console.log(`[DEV] Password reset link: ${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${token}`);
+      // Still return success to prevent email enumeration
+      return NextResponse.json({
+        success: true,
+        data: { message: "If an account exists, a password reset email has been sent" },
+      });
+    }
+
     await sendPasswordResetEmail(email, token);
 
     return NextResponse.json({
