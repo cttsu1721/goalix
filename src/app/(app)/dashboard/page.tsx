@@ -182,7 +182,7 @@ export default function DashboardPage() {
     const primaryTasks = todayTasks.filter((t) => t.priority === "PRIMARY");
     const secondaryTasks = todayTasks.filter((t) => t.priority === "SECONDARY");
 
-    // Transform task helper
+    // Transform task helper - includes goal chain for task-goal connection display
     const transformTask = (task: (typeof allTasks)[0], isOverdue = false) => ({
       id: task.id,
       title: task.title,
@@ -191,6 +191,12 @@ export default function DashboardPage() {
       points: TASK_PRIORITY_POINTS[task.priority],
       isOverdue,
       scheduledDate: formatLocalDate(new Date(task.scheduledDate)),
+      goalChain: task.weeklyGoal
+        ? {
+            weeklyGoal: { id: task.weeklyGoal.id, title: task.weeklyGoal.title },
+            oneYearGoal: task.weeklyGoal.monthlyGoal?.oneYearGoal || null,
+          }
+        : undefined,
     });
 
     return {
@@ -204,6 +210,12 @@ export default function DashboardPage() {
             category: getCategoryLabel(mitTask.weeklyGoal?.category || "OTHER"),
             estimatedMinutes: mitTask.estimatedMinutes || undefined,
             completed: mitTask.status === "COMPLETED",
+            goalChain: mitTask.weeklyGoal
+              ? {
+                  weeklyGoal: { id: mitTask.weeklyGoal.id, title: mitTask.weeklyGoal.title },
+                  oneYearGoal: mitTask.weeklyGoal.monthlyGoal?.oneYearGoal || null,
+                }
+              : undefined,
           }
         : undefined,
       primaryTasksFormatted: primaryTasks.map((t) => transformTask(t)),

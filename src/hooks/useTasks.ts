@@ -7,6 +7,14 @@ interface TaskWithGoal extends DailyTask {
     id: string;
     title: string;
     category: string;
+    monthlyGoal?: {
+      id: string;
+      title: string;
+      oneYearGoal?: {
+        id: string;
+        title: string;
+      } | null;
+    } | null;
   } | null;
 }
 

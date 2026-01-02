@@ -79,6 +79,18 @@ export async function GET(request: NextRequest) {
             id: true,
             title: true,
             category: true,
+            monthlyGoal: {
+              select: {
+                id: true,
+                title: true,
+                oneYearGoal: {
+                  select: {
+                    id: true,
+                    title: true,
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -236,6 +248,18 @@ export async function POST(request: NextRequest) {
             id: true,
             title: true,
             category: true,
+            monthlyGoal: {
+              select: {
+                id: true,
+                title: true,
+                oneYearGoal: {
+                  select: {
+                    id: true,
+                    title: true,
+                  },
+                },
+              },
+            },
           },
         },
       },

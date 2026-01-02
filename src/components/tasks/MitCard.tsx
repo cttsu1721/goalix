@@ -1,8 +1,19 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Check, Sparkles, Trophy } from "lucide-react";
+import { Check, Sparkles, Trophy, Target, Link2Off } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+interface GoalChain {
+  weeklyGoal?: {
+    id: string;
+    title: string;
+  } | null;
+  oneYearGoal?: {
+    id: string;
+    title: string;
+  } | null;
+}
 
 interface MitCardProps {
   task?: {
@@ -11,6 +22,7 @@ interface MitCardProps {
     category: string;
     estimatedMinutes?: number;
     completed: boolean;
+    goalChain?: GoalChain;
   };
   onToggle?: () => void;
   onAiSuggest?: () => void;
@@ -115,6 +127,29 @@ export function MitCard({ task, onToggle, onAiSuggest, className }: MitCardProps
               >
                 {task.title}
               </h3>
+
+              {/* Goal Chain Connection */}
+              {task.goalChain?.weeklyGoal ? (
+                <div className="flex items-center gap-1.5 text-xs sm:text-sm text-moon-dim mb-2">
+                  <Target className="w-3.5 h-3.5 text-zen-green flex-shrink-0" />
+                  <span className="truncate">
+                    <span className="text-moon-faint">Supports:</span>{" "}
+                    <span className="text-moon-soft">{task.goalChain.weeklyGoal.title}</span>
+                    {task.goalChain.oneYearGoal && (
+                      <>
+                        <span className="text-moon-faint"> → </span>
+                        <span className="text-lantern/80">{task.goalChain.oneYearGoal.title}</span>
+                      </>
+                    )}
+                  </span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 text-xs sm:text-sm text-moon-faint/70 mb-2">
+                  <Link2Off className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span>Standalone task</span>
+                </div>
+              )}
+
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs sm:text-sm text-moon-faint">
                 {task.estimatedMinutes && (
                   <span>

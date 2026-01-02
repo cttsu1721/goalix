@@ -2,7 +2,7 @@
 
 import { memo } from "react";
 import { cn } from "@/lib/utils";
-import { Check, ChevronRight, AlertTriangle } from "lucide-react";
+import { Check, ChevronRight, AlertTriangle, Target, Link2Off } from "lucide-react";
 
 // Format overdue date to show relative time (e.g., "Dec 30" or "Yesterday")
 function formatOverdueDate(dateString: string): string {
@@ -20,6 +20,17 @@ function formatOverdueDate(dateString: string): string {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
+interface GoalChain {
+  weeklyGoal?: {
+    id: string;
+    title: string;
+  } | null;
+  oneYearGoal?: {
+    id: string;
+    title: string;
+  } | null;
+}
+
 interface TaskItemProps {
   task: {
     id: string;
@@ -29,6 +40,7 @@ interface TaskItemProps {
     points: number;
     isOverdue?: boolean;
     scheduledDate?: string;
+    goalChain?: GoalChain;
   };
   onToggle?: () => void;
   onEdit?: () => void;
@@ -103,7 +115,25 @@ export const TaskItem = memo(function TaskItem({ task, onToggle, onEdit, classNa
               <span className="text-moon-faint/50">·</span>
             </>
           )}
-          {task.category}
+          {/* Goal Chain or Standalone indicator */}
+          {task.goalChain?.weeklyGoal ? (
+            <>
+              <Target className="w-3 h-3 text-zen-green flex-shrink-0" />
+              <span className="text-moon-dim truncate">
+                {task.goalChain.weeklyGoal.title}
+                {task.goalChain.oneYearGoal && (
+                  <span className="text-lantern/60"> → {task.goalChain.oneYearGoal.title}</span>
+                )}
+              </span>
+            </>
+          ) : (
+            <>
+              <Link2Off className="w-3 h-3 text-moon-faint/50 flex-shrink-0" />
+              <span className="text-moon-faint/70">Standalone</span>
+              <span className="text-moon-faint/30">·</span>
+              <span>{task.category}</span>
+            </>
+          )}
         </div>
       </button>
 
