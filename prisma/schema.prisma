@@ -53,6 +53,13 @@ enum AIInteractionType {
   VISION_BUILD
 }
 
+enum RecurrencePattern {
+  DAILY         // Every day
+  WEEKDAYS      // Monday to Friday
+  WEEKLY        // Specific days of the week
+  CUSTOM        // Every N days
+}
+
 // NextAuth.js Models
 model Account {
   id                String  @id @default(cuid())
@@ -118,20 +125,21 @@ model User {
   lastFreezeAt  DateTime? @map("last_freeze_at") // When last freeze was used
 
   // Relations
-  accounts          Account[]
-  sessions          Session[]
-  sevenYearVisions  SevenYearVision[]
-  threeYearGoals    ThreeYearGoal[]
-  oneYearGoals      OneYearGoal[]
-  monthlyGoals      MonthlyGoal[]
-  weeklyGoals       WeeklyGoal[]
-  dailyTasks        DailyTask[]
-  streaks           Streak[]
-  earnedBadges      EarnedBadge[]
-  aiInteractions    AIInteraction[]
-  kaizenCheckins    KaizenCheckin[]
-  weeklyReviews     WeeklyReview[]
-  monthlyReviews    MonthlyReview[]
+  accounts               Account[]
+  sessions               Session[]
+  sevenYearVisions       SevenYearVision[]
+  threeYearGoals         ThreeYearGoal[]
+  oneYearGoals           OneYearGoal[]
+  monthlyGoals           MonthlyGoal[]
+  weeklyGoals            WeeklyGoal[]
+  dailyTasks             DailyTask[]
+  recurringTaskTemplates RecurringTaskTemplate[]
+  streaks                Streak[]
+  earnedBadges           EarnedBadge[]
+  aiInteractions         AIInteraction[]
+  kaizenCheckins         KaizenCheckin[]
+  weeklyReviews          WeeklyReview[]
+  monthlyReviews         MonthlyReview[]
 
   @@map("users")
 }
@@ -236,9 +244,10 @@ model WeeklyGoal {
   createdAt     DateTime     @default(now()) @map("created_at")
   updatedAt     DateTime     @updatedAt @map("updated_at")
 
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  monthlyGoal MonthlyGoal? @relation(fields: [monthlyGoalId], references: [id], onDelete: SetNull)
-  dailyTasks  DailyTask[]
+  user                   User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  monthlyGoal            MonthlyGoal?            @relation(fields: [monthlyGoalId], references: [id], onDelete: SetNull)
+  dailyTasks             DailyTask[]
+  recurringTaskTemplates RecurringTaskTemplate[]
 
   @@index([userId])
   @@index([monthlyGoalId])
@@ -249,6 +258,7 @@ model DailyTask {
   id                     String       @id @default(cuid())
   userId                 String       @map("user_id")
   weeklyGoalId           String?      @map("weekly_goal_id")
+  recurringTemplateId    String?      @map("recurring_template_id")
   title                  String
   description            String?      @db.Text
   priority               TaskPriority
@@ -261,12 +271,48 @@ model DailyTask {
   createdAt              DateTime     @default(now()) @map("created_at")
   updatedAt              DateTime     @updatedAt @map("updated_at")
 
-  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  weeklyGoal WeeklyGoal? @relation(fields: [weeklyGoalId], references: [id], onDelete: SetNull)
+  user              User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  weeklyGoal        WeeklyGoal?             @relation(fields: [weeklyGoalId], references: [id], onDelete: SetNull)
+  recurringTemplate RecurringTaskTemplate?  @relation(fields: [recurringTemplateId], references: [id], onDelete: SetNull)
 
   @@index([userId, scheduledDate])
   @@index([userId, priority, scheduledDate])
+  @@index([recurringTemplateId])
   @@map("daily_tasks")
+}
+
+// Recurring Task Template
+model RecurringTaskTemplate {
+  id                String            @id @default(cuid())
+  userId            String            @map("user_id")
+  weeklyGoalId      String?           @map("weekly_goal_id")
+  title             String
+  description       String?           @db.Text
+  priority          TaskPriority
+  estimatedMinutes  Int?              @map("estimated_minutes")
+
+  // Recurrence settings
+  pattern           RecurrencePattern
+  daysOfWeek        String?           @map("days_of_week") // JSON array: ["MON", "WED", "FRI"]
+  customInterval    Int?              @map("custom_interval") // For CUSTOM: every N days
+
+  // Time range
+  startDate         DateTime          @map("start_date") @db.Date
+  endDate           DateTime?         @map("end_date") @db.Date
+
+  // Tracking
+  isActive          Boolean           @default(true) @map("is_active")
+  lastGeneratedAt   DateTime?         @map("last_generated_at")
+
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  weeklyGoal   WeeklyGoal? @relation(fields: [weeklyGoalId], references: [id], onDelete: SetNull)
+  dailyTasks   DailyTask[]
+
+  @@index([userId, isActive])
+  @@map("recurring_task_templates")
 }
 
 // Gamification Models

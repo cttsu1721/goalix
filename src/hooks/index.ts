@@ -55,3 +55,17 @@ export { useMonthlyReview, useSubmitMonthlyReview } from "./useMonthlyReview";
 
 // Gesture hooks
 export { useSwipeGesture } from "./useSwipeGesture";
+
+// Recurring Tasks hooks
+export {
+  useRecurringTemplates,
+  useRecurringTemplate,
+  useCreateRecurringTemplate,
+  useUpdateRecurringTemplate,
+  useDeleteRecurringTemplate,
+  useGenerateRecurringTasks,
+  formatRecurrencePattern,
+  type RecurringTemplateWithGoal,
+  type CreateRecurringTemplateInput,
+  type UpdateRecurringTemplateInput,
+} from "./useRecurringTasks";

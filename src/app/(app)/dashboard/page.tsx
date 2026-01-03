@@ -44,6 +44,7 @@ import {
   useKaizenCheckin,
   useSaveKaizenCheckin,
   useGoals,
+  useGenerateRecurringTasks,
 } from "@/hooks";
 import { useAIUsage } from "@/hooks/useAI";
 import { LEVELS } from "@/types/gamification";
@@ -176,6 +177,28 @@ export default function DashboardPage() {
   const saveKaizen = useSaveKaizenCheckin();
   const createTask = useCreateTask();
   const carryOverTasks = useCarryOverTasks();
+  const generateRecurring = useGenerateRecurringTasks();
+
+  // Generate recurring tasks for today (once per day)
+  useEffect(() => {
+    const RECURRING_GENERATED_KEY = "recurring_tasks_generated_date";
+    const lastGenerated = localStorage.getItem(RECURRING_GENERATED_KEY);
+
+    // Only generate if not already done today
+    if (lastGenerated !== today) {
+      generateRecurring.mutate(
+        { date: today },
+        {
+          onSuccess: (result) => {
+            localStorage.setItem(RECURRING_GENERATED_KEY, today);
+            if (result.createdCount > 0) {
+              // Silently generated - no toast needed, tasks will appear in list
+            }
+          },
+        }
+      );
+    }
+  }, [today, generateRecurring]);
 
   // Check for end-of-day carry-over prompt (after tasks load)
   useEffect(() => {

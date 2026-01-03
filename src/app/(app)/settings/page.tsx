@@ -24,7 +24,9 @@ import {
   LogOut,
   Loader2,
   Flower2,
+  Repeat,
 } from "lucide-react";
+import { RecurringTasksCard } from "@/components/tasks";
 import { useTheme } from "next-themes";
 import { THEME_NAMES, THEME_DESCRIPTIONS } from "@/components/theme-provider";
 
@@ -583,6 +585,15 @@ export default function SettingsPage() {
               disabled={updateSettings.isPending}
             />
           </div>
+        </SettingsSection>
+
+        {/* Recurring Tasks Section */}
+        <SettingsSection
+          icon={Repeat}
+          title="Recurring Tasks"
+          description="Manage tasks that repeat automatically"
+        >
+          <RecurringTasksCard className="bg-transparent p-0" showAddButton />
         </SettingsSection>
 
         {/* Appearance Section */}

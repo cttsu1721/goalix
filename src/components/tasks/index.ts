@@ -12,3 +12,5 @@ export {
   markAsDismissed,
   resetCarryOverDismissal,
 } from "./TaskCarryOverModal";
+export { RecurringTaskModal } from "./RecurringTaskModal";
+export { RecurringTasksCard } from "./RecurringTasksCard";
