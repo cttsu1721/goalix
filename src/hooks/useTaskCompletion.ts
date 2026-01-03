@@ -3,10 +3,19 @@ import { useCompleteTask, useUncompleteTask } from "./useTasks";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
 
+interface EarnedBadge {
+  slug: string;
+  name: string;
+  description: string;
+  icon?: string;
+  category?: string;
+}
+
 interface UseTaskCompletionOptions {
-  onLevelUp?: (newLevel: number) => void;
+  onLevelUp?: (previousLevel: number, newLevel: number) => void;
   onFirstMit?: (pointsEarned: number) => void;
   onStreakMilestone?: (milestone: number) => void;
+  onBadgeEarned?: (badge: EarnedBadge) => void;
 }
 
 // Check if user prefers reduced motion
@@ -113,13 +122,23 @@ export function useTaskCompletion(options: UseTaskCompletionOptions = {}) {
         // Handle level up
         if (result.leveledUp && result.newLevel !== undefined) {
           const newLevel = result.newLevel;
+          const previousLevel = newLevel - 1;
           setTimeout(() => {
-            toast.success(`Level Up!`, {
-              description: `You've reached Level ${newLevel}!`,
-              duration: 5000,
-            });
-            options.onLevelUp?.(newLevel);
+            // Call the callback instead of showing a toast
+            // The modal will handle the celebration
+            options.onLevelUp?.(previousLevel, newLevel);
           }, isMit ? 1500 : 500);
+        }
+
+        // Handle earned badges
+        if (result.badges && result.badges.length > 0) {
+          // Show badges after level up (or after completion if no level up)
+          const badgeDelay = result.leveledUp ? 3000 : (isMit ? 1500 : 500);
+          result.badges.forEach((badge, index) => {
+            setTimeout(() => {
+              options.onBadgeEarned?.(badge);
+            }, badgeDelay + index * 2000); // Stagger badges 2s apart
+          });
         }
 
         // Handle streak milestone

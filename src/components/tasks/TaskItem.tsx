@@ -156,12 +156,21 @@ export const TaskItem = memo(function TaskItem({ task, onToggle, onEdit, classNa
               "flex items-center justify-center",
               "transition-all duration-200",
               task.completed
-                ? "bg-zen-green border-zen-green"
-                : "border-night-glow"
+                ? "bg-zen-green border-zen-green scale-110"
+                : "border-night-glow hover:border-zen-green/50"
             )}
+            style={{
+              animation: task.completed ? "checkbox-pop 0.3s ease-out" : undefined,
+            }}
           >
             {task.completed && (
-              <Check className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-void" strokeWidth={2.5} />
+              <Check
+                className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-void"
+                strokeWidth={2.5}
+                style={{
+                  animation: "checkmark-draw 0.2s ease-out 0.1s both",
+                }}
+              />
             )}
           </div>
         </button>

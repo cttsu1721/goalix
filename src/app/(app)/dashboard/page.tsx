@@ -38,6 +38,14 @@ const KaizenCheckinDialog = dynamic(
   () => import("@/components/kaizen/KaizenCheckinDialog").then((m) => m.KaizenCheckinDialog),
   { ssr: false }
 );
+const LevelUpModal = dynamic(
+  () => import("@/components/gamification/LevelUpModal").then((m) => m.LevelUpModal),
+  { ssr: false }
+);
+const BadgeEarnedModal = dynamic(
+  () => import("@/components/gamification/BadgeEarnedModal").then((m) => m.BadgeEarnedModal),
+  { ssr: false }
+);
 import {
   useTasks,
   useCreateTask,
@@ -122,6 +130,21 @@ export default function DashboardPage() {
   const [isCarryOverModalOpen, setIsCarryOverModalOpen] = useState(false);
   const [isKaizenPromptOpen, setIsKaizenPromptOpen] = useState(false);
 
+  // Level up modal state
+  const [levelUpData, setLevelUpData] = useState<{
+    previousLevel: number;
+    newLevel: number;
+    newLevelName: string;
+  } | null>(null);
+
+  // Badge earned modal state (queue to handle multiple badges)
+  const [earnedBadge, setEarnedBadge] = useState<{
+    name: string;
+    description: string;
+    icon: string;
+    category: string;
+  } | null>(null);
+
   // Fetch data - include overdue tasks for Today's Focus
   const { data: tasksData, isLoading: tasksLoading, refetch: refetchTasks } = useTasks(today, { includeOverdue: true });
   const { data: statsData, isLoading: statsLoading, refetch: refetchStats } = useUserStats();
@@ -176,8 +199,35 @@ export default function DashboardPage() {
     setFirstMitPoints(pointsEarned);
     setIsFirstMitCelebrationOpen(true);
   }, []);
+
+  const handleLevelUp = useCallback((previousLevel: number, newLevel: number) => {
+    const levelInfo = LEVELS.find((l) => l.level === newLevel);
+    setLevelUpData({
+      previousLevel,
+      newLevel,
+      newLevelName: levelInfo?.name || `Level ${newLevel}`,
+    });
+  }, []);
+
+  const handleBadgeEarned = useCallback((badge: {
+    slug: string;
+    name: string;
+    description: string;
+    icon?: string;
+    category?: string;
+  }) => {
+    setEarnedBadge({
+      name: badge.name,
+      description: badge.description,
+      icon: badge.icon || "🏆",
+      category: badge.category || "achievement",
+    });
+  }, []);
+
   const { complete: completeTask, isPending: isCompleting } = useTaskCompletion({
     onFirstMit: handleFirstMit,
+    onLevelUp: handleLevelUp,
+    onBadgeEarned: handleBadgeEarned,
   });
   const updateTask = useUpdateTask();
   const saveKaizen = useSaveKaizenCheckin();
@@ -636,12 +686,15 @@ export default function DashboardPage() {
       {/* Empty State - No tasks planned */}
       {tasks.length === 0 && overdueTasksFormatted.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 px-4">
-          <div className="w-20 h-20 rounded-full bg-night-soft border border-night-glow flex items-center justify-center mb-6">
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-lantern/20 to-zen-green/10 border border-night-glow flex items-center justify-center mb-6 animate-pulse">
             <CalendarDays className="w-10 h-10 text-lantern" />
           </div>
-          <h3 className="text-xl font-light text-moon mb-2">No tasks planned yet</h3>
-          <p className="text-moon-dim text-center mb-8 max-w-sm">
-            Start your day with intention. Plan your MIT and key tasks to stay focused and productive.
+          <h3 className="text-xl font-light text-moon mb-2">Ready to make progress?</h3>
+          <p className="text-moon-dim text-center mb-4 max-w-sm">
+            Start your day with intention. What&apos;s the ONE thing that would make today a win?
+          </p>
+          <p className="text-xs text-moon-faint/60 italic mb-8">
+            &ldquo;Small daily improvements lead to stunning results.&rdquo;
           </p>
           <div className="flex gap-3">
             <Button
@@ -770,6 +823,26 @@ export default function DashboardPage() {
             });
           }
         }}
+      />
+
+      {/* Level Up Celebration Modal */}
+      <LevelUpModal
+        open={!!levelUpData}
+        onOpenChange={(open) => {
+          if (!open) setLevelUpData(null);
+        }}
+        previousLevel={levelUpData?.previousLevel ?? 1}
+        newLevel={levelUpData?.newLevel ?? 2}
+        newLevelName={levelUpData?.newLevelName ?? ""}
+      />
+
+      {/* Badge Earned Celebration Modal */}
+      <BadgeEarnedModal
+        open={!!earnedBadge}
+        onOpenChange={(open) => {
+          if (!open) setEarnedBadge(null);
+        }}
+        badge={earnedBadge}
       />
     </AppShell>
   );

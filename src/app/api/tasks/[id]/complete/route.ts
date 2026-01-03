@@ -178,9 +178,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       leveledUp,
       newLevel: leveledUp ? newLevel : undefined,
       badges: earnedBadges.map((b) => ({
-        slug: Object.entries(b.badge).find(([, v]) => v === b.badge.name)?.[0],
+        slug: b.badge.slug,
         name: b.badge.name,
         description: b.badge.description,
+        icon: b.badge.icon,
+        category: b.badge.category,
       })),
       streak: existingTask.priority === "MIT" ? {
         current: newStreak,

@@ -46,24 +46,28 @@ export const BADGE_DEFINITIONS = {
     name: "First Blood",
     description: "Complete your first task ever",
     category: "streak",
+    icon: "⚡",
   },
   on_fire_7: {
     slug: "on_fire_7",
     name: "On Fire",
     description: "Maintain a 7-day streak",
     category: "streak",
+    icon: "🔥",
   },
   on_fire_30: {
     slug: "on_fire_30",
     name: "Unstoppable",
     description: "Maintain a 30-day streak",
     category: "streak",
+    icon: "💪",
   },
   rockstar: {
     slug: "rockstar",
     name: "Rockstar",
     description: "Maintain an 80+ day streak",
     category: "streak",
+    icon: "🌟",
   },
   // Achievement badges
   century_club: {
@@ -71,30 +75,35 @@ export const BADGE_DEFINITIONS = {
     name: "Century Club",
     description: "Earn 100 points in one day",
     category: "achievement",
+    icon: "💯",
   },
   goal_getter: {
     slug: "goal_getter",
     name: "Goal Getter",
     description: "Complete your first goal",
     category: "achievement",
+    icon: "🎯",
   },
   dream_starter: {
     slug: "dream_starter",
     name: "Vision Starter",
     description: "Create your first 7-year vision",
     category: "achievement",
+    icon: "🔮",
   },
   planner_pro: {
     slug: "planner_pro",
     name: "Planner Pro",
     description: "Complete daily planning 7 days in a row",
     category: "achievement",
+    icon: "📋",
   },
   visionary: {
     slug: "visionary",
     name: "Visionary",
     description: "Have active goals at all 5 levels",
     category: "achievement",
+    icon: "👁️",
   },
   // Category badges
   health_nut: {
@@ -102,12 +111,14 @@ export const BADGE_DEFINITIONS = {
     name: "Health Nut",
     description: "Complete 10 health-related tasks",
     category: "category",
+    icon: "🏃",
   },
   wealth_builder: {
     slug: "wealth_builder",
     name: "Wealth Builder",
     description: "Complete 10 wealth-related tasks",
     category: "category",
+    icon: "💰",
   },
   // Kaizen badges
   kaizen_starter: {
@@ -115,6 +126,7 @@ export const BADGE_DEFINITIONS = {
     name: "Kaizen Starter",
     description: "Complete your first Kaizen check-in",
     category: "kaizen",
+    icon: "🧘",
   },
 } as const;
 
