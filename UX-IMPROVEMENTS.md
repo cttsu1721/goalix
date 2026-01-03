@@ -35,7 +35,7 @@ This document captures all identified UX improvements for Goalzenix, organized b
 | 1.2 | Interactive tutorial cards on empty dashboard | P1 | M | Todo |
 | 1.3 | "How it works" modal with visual cascade diagram | P1 | S | Todo |
 | 1.4 | "Try with sample goals" option for exploration | P2 | M | Todo |
-| 1.5 | First MIT completion celebration with explanation | P1 | S | Todo |
+| 1.5 | First MIT completion celebration with explanation | P1 | S | ✅ Done |
 | 1.6 | Contextual tips ("Why link tasks to goals?") | P2 | M | Todo |
 
 **Success Metrics**:
@@ -55,10 +55,10 @@ This document captures all identified UX improvements for Goalzenix, organized b
 | 2.2 | Floating action button for quick-add (mobile) | P0 | S | Todo |
 | 2.3 | Keyboard shortcut Cmd+N for new task | P1 | XS | Todo |
 | 2.4 | Timeline view option using time estimates | P2 | L | Todo |
-| 2.5 | End-of-day prompt: "Move X incomplete tasks to tomorrow?" | P1 | M | Todo |
+| 2.5 | End-of-day prompt: "Move X incomplete tasks to tomorrow?" | P1 | M | ✅ Done |
 | 2.6 | "Reschedule all" bulk action for overdue tasks | P1 | S | Todo |
 | 2.7 | Show note preview on task row, expand on tap | P2 | S | Todo |
-| 2.8 | Recurring tasks (daily, weekly, custom) | P1 | L | Todo |
+| 2.8 | Recurring tasks (daily, weekly, custom) | P1 | L | ✅ Done |
 | 2.9 | Subtasks/checklist items within tasks | P2 | L | Todo |
 | 2.10 | Drag-to-calendar for time blocking | P3 | XL | Todo |
 
@@ -99,12 +99,12 @@ This document captures all identified UX improvements for Goalzenix, organized b
 |----|-------------|----------|--------|--------|
 | 4.1 | "What can I do with points?" explanation (level unlocks) | P2 | S | Todo |
 | 4.2 | Streak freeze (1 per week) to prevent frustration | P0 | M | Todo |
-| 4.3 | "Next badge to earn" with progress hints | P1 | M | Todo |
+| 4.3 | "Next badge to earn" with progress hints | P1 | M | ✅ Done |
 | 4.4 | Daily/weekly challenges for bonus XP | P2 | L | Todo |
 | 4.5 | Anonymous leaderboards or friend challenges | P3 | XL | Todo |
-| 4.6 | Confetti animation for MIT/streak milestones | P1 | S | Todo |
+| 4.6 | Confetti animation for MIT/streak milestones | P1 | S | ✅ Done |
 | 4.7 | "Share badge" to social media | P3 | M | Todo |
-| 4.8 | Evening Kaizen check-in prompt/notification | P1 | M | Todo |
+| 4.8 | Evening Kaizen check-in prompt/notification | P1 | M | ✅ Done |
 
 **Success Metrics**:
 - 7-day streak retention > 60%
@@ -161,7 +161,7 @@ This document captures all identified UX improvements for Goalzenix, organized b
 
 | ID | Improvement | Priority | Effort | Status |
 |----|-------------|----------|--------|--------|
-| 7.1 | Alignment score on dashboard ("85% aligned today") | P1 | S | Todo |
+| 7.1 | Alignment score on dashboard ("85% aligned today") | P1 | S | ✅ Done |
 | 7.2 | Weekly alignment trend sparkline in Progress | P2 | M | Todo |
 | 7.3 | "Life maintenance" category (exempt from alignment) | P1 | S | Todo |
 | 7.4 | "Perfect alignment" badge for 100% days | P2 | S | Todo |
@@ -180,9 +180,9 @@ This document captures all identified UX improvements for Goalzenix, organized b
 
 | ID | Improvement | Priority | Effort | Status |
 |----|-------------|----------|--------|--------|
-| 8.1 | Structured weekly review prompts ("What went well?") | P1 | M | Todo |
+| 8.1 | Structured weekly review prompts ("What went well?") | P1 | M | ✅ Done |
 | 8.2 | Push notification on Sunday evening for review | P1 | S | Todo |
-| 8.3 | 3-section monthly review: Reflect, Celebrate, Plan | P2 | L | Todo |
+| 8.3 | 3-section monthly review: Reflect, Celebrate, Plan | P2 | L | ✅ Done |
 | 8.4 | Past reviews timeline view | P2 | M | Todo |
 | 8.5 | Separate "Review" (past) from "Plan" (future) flows | P2 | M | Todo |
 | 8.6 | Allow goal edit/pause/abandon during review | P1 | M | Todo |
@@ -223,7 +223,7 @@ This document captures all identified UX improvements for Goalzenix, organized b
 | 10.1 | Add icons/patterns alongside color indicators | P1 | M | Todo |
 | 10.2 | Respect `prefers-reduced-motion` for animations | P0 | S | Todo |
 | 10.3 | aria-live regions for dynamic content updates | P1 | M | Todo |
-| 10.4 | Improve logical tab sequence/focus order | P1 | M | Todo |
+| 10.4 | Improve logical tab sequence/focus order | P1 | M | ✅ Done |
 | 10.5 | Increase touch targets to 48px minimum (WCAG AAA) | P1 | M | Todo |
 | 10.6 | Support `forced-colors` media query | P2 | S | Todo |
 
@@ -241,7 +241,7 @@ This document captures all identified UX improvements for Goalzenix, organized b
 | ID | Improvement | Priority | Effort | Status |
 |----|-------------|----------|--------|--------|
 | 11.1 | Sound effects on completion (optional setting) | P2 | S | Todo |
-| 11.2 | Bigger celebration animations for milestones | P1 | M | Todo |
+| 11.2 | Bigger celebration animations for milestones | P1 | M | ✅ Done |
 | 11.3 | "Recovery" message after streak loss: "Start fresh today!" | P1 | XS | Todo |
 | 11.4 | "This month so far" progress summary card | P2 | M | Todo |
 | 11.5 | Vision board with images/inspiration | P3 | L | Todo |
@@ -281,10 +281,10 @@ This document captures all identified UX improvements for Goalzenix, organized b
 
 | ID | Improvement | Priority | Effort | Status |
 |----|-------------|----------|--------|--------|
-| 13.1 | Skeleton loaders for all data-heavy pages | P0 | M | Todo |
+| 13.1 | Skeleton loaders for all data-heavy pages | P0 | M | ✅ Done |
 | 13.2 | Optimistic UI updates (immediate, rollback on error) | P1 | L | Todo |
 | 13.3 | "Unsaved changes" warning on modal close | P1 | S | Todo |
-| 13.4 | 5-second "Undo" toast after task completion | P0 | S | Todo |
+| 13.4 | 5-second "Undo" toast after task completion | P0 | S | ✅ Done |
 | 13.5 | Reduced-motion fallback for drag-drop (buttons) | P2 | M | Todo |
 
 **Success Metrics**:
@@ -417,13 +417,39 @@ Grab these whenever you have spare time:
 ## Tracking
 
 ### Completed
-_None yet_
+
+#### Phase 1: Foundation
+- [x] **13.1** Skeleton loaders for goals/vision pages
+- [x] **13.4** 5-second "Undo" toast after task completion (already existed)
+- [x] **10.4** Keyboard shortcuts for task navigation (Space/Enter to toggle/edit)
+
+#### Phase 2: Engagement
+- [x] **1.5** First MIT celebration modal with confetti
+- [x] **2.5** End-of-day task carry-over modal
+- [x] **2.8** Recurring tasks (daily, weekly, custom)
+- [x] **4.3** Next badge to earn card on Progress page
+- [x] **4.6** Confetti animations for level-up and badges
+- [x] **4.8** Kaizen evening prompt (6-11pm reminder)
+- [x] **7.1** Alignment score on dashboard with status badges
+- [x] **8.1** Structured weekly review prompts (Wins/Challenges/Next Week)
+- [x] **8.3** Enhanced monthly review with data-driven prompts
+- [x] **11.3** Streak recovery messaging (via Lifestyle Insight cards)
+
+#### Accessibility
+- [x] **10.4** Keyboard navigation for tasks (Space/c=toggle, Enter/e=edit)
+- [x] Focus-visible ring styling for keyboard users
+- [x] ARIA labels on interactive elements
+- [x] tabIndex management to prevent double-tabbing
+
+#### Mobile
+- [x] **5.x** MobileStatsBar component (streak, points, alignment, level)
+- [x] Links to /progress on tap for full stats access
 
 ### In Progress
-_None yet_
+_None currently_
 
 ### Blocked
-_None yet_
+_None currently_
 
 ---
 
@@ -443,4 +469,13 @@ Before implementing some features, validate with users:
 
 | Date | Change |
 |------|--------|
+| 2026-01-03 | **UX Improvements Round 1** - Keyboard shortcuts, skeleton loaders, mobile stats bar |
+| 2026-01-03 | **Monthly Review Enhancement** - Data-driven prompts for Steps 3 (Learnings) and 4 (Next Month) |
+| 2026-01-03 | **Celebration Modals** - LevelUpModal and BadgeEarnedModal with confetti animations |
+| 2026-01-03 | **Weekly Review Enhancement** - Structured prompts with Wins, Challenges, Next Week sections |
+| 2026-01-03 | **Goal Alignment** - Color-coded percentage, linked/total counts, status badges |
+| 2026-01-03 | **Kaizen Evening Prompt** - 6-11pm reminder if no check-in completed |
+| 2026-01-03 | **Recurring Tasks** - Daily, weekly, and custom recurrence patterns |
+| 2026-01-03 | **Phase 2 Engagement** - First MIT celebration, task carry-over, next badge card |
+| 2026-01-03 | **Phase 1 Foundation** - Swipe gestures, goal chain display, undo toasts |
 | 2026-01-03 | Initial plan created with 95 improvements across 15 categories |
