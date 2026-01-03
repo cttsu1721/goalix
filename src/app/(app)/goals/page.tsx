@@ -20,6 +20,7 @@ import {
   Wand2,
   Star,
 } from "lucide-react";
+import { GoalCardSkeleton } from "@/components/skeletons/DashboardSkeleton";
 
 type UIGoalLevel = "vision" | "3-year" | "1-year" | "monthly" | "weekly";
 type GoalsOnlyLevel = Exclude<UIGoalLevel, "vision">;
@@ -263,8 +264,21 @@ function VisionPageContent() {
 
       {/* Content */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-16">
-          <Loader2 className="w-8 h-8 animate-spin text-lantern" />
+        <div className="grid gap-6 md:grid-cols-2">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <div key={i} className="bg-gradient-to-br from-night via-night to-night-soft border border-lantern/20 rounded-2xl p-6 animate-pulse">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-xl bg-night-mist" />
+                <div className="flex-1">
+                  <div className="h-5 w-3/4 bg-night-mist rounded mb-2" />
+                  <div className="h-3 w-1/2 bg-night-mist rounded" />
+                </div>
+              </div>
+              <div className="h-4 w-full bg-night-mist rounded mb-2" />
+              <div className="h-4 w-2/3 bg-night-mist rounded mb-4" />
+              <div className="h-2 w-full bg-night-mist rounded-full" />
+            </div>
+          ))}
         </div>
       ) : visions.length === 0 ? (
         <EmptyState
@@ -374,8 +388,10 @@ function GoalsOnlyPageContent() {
 
       {/* Content */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-16">
-          <Loader2 className="w-8 h-8 animate-spin text-lantern" />
+        <div className="grid gap-4 sm:grid-cols-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <GoalCardSkeleton key={i} />
+          ))}
         </div>
       ) : goals.length === 0 ? (
         <div className="bg-night border border-night-mist rounded-2xl p-8 text-center">

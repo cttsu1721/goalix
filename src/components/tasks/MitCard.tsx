@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { Check, Sparkles, Trophy, Target, Link2Off } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,18 @@ interface MitCardProps {
 }
 
 export function MitCard({ task, onToggle, onAiSuggest, className }: MitCardProps) {
+  // Keyboard handler for accessibility
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      // Space or 'c' to toggle completion
+      if (e.key === " " || e.key === "c") {
+        e.preventDefault();
+        onToggle?.();
+      }
+    },
+    [onToggle]
+  );
+
   if (!task) {
     return (
       <section className={cn("mb-8 sm:mb-12", className)}>
@@ -63,7 +76,17 @@ export function MitCard({ task, onToggle, onAiSuggest, className }: MitCardProps
 
   return (
     <section className={cn("mb-8 sm:mb-12", className)}>
-      <div className="bg-night border border-night-mist rounded-2xl sm:rounded-[20px] p-5 sm:p-8 relative overflow-hidden">
+      <div
+        tabIndex={0}
+        role="button"
+        aria-label={`${task.completed ? "Completed" : "Incomplete"} MIT: ${task.title}. Press space to toggle completion.`}
+        onKeyDown={handleKeyDown}
+        className={cn(
+          "bg-night border border-night-mist rounded-2xl sm:rounded-[20px] p-5 sm:p-8 relative overflow-hidden",
+          // Focus ring for keyboard navigation
+          "focus:outline-none focus-visible:ring-2 focus-visible:ring-lantern focus-visible:ring-offset-2 focus-visible:ring-offset-night"
+        )}
+      >
         {/* Accent bar - adjusted for mobile */}
         <div className="absolute left-0 top-0 bottom-0 w-1 sm:w-[3px] bg-gradient-to-b from-lantern via-lantern/50 to-transparent" />
 
@@ -91,6 +114,7 @@ export function MitCard({ task, onToggle, onAiSuggest, className }: MitCardProps
           <div className="flex items-start gap-4">
             {/* Checkbox - 44px touch target */}
             <button
+              tabIndex={-1}
               onClick={onToggle}
               className={cn(
                 // Large touch target

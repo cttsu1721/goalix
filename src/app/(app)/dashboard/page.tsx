@@ -7,6 +7,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { MitCard, TaskList, shouldShowCarryOverPrompt } from "@/components/tasks";
 import { StatsPanel } from "@/components/gamification/StatsPanel";
+import { MobileStatsBar } from "@/components/gamification/MobileStatsBar";
 import { YearTargetHeader } from "@/components/dashboard";
 
 // Lazy load modal components to reduce initial bundle size
@@ -612,6 +613,14 @@ export default function DashboardPage() {
         aiUsesRemaining={aiRemaining}
         aiUsesTotal={aiLimit}
         onAiClick={handleOpenTaskSuggest}
+      />
+
+      {/* Mobile Stats Bar - tap to see full Progress page */}
+      <MobileStatsBar
+        streak={mitStreak?.currentCount || 0}
+        todayPoints={statsData?.todayStats?.pointsEarned || pointsEarned}
+        goalAlignment={goalAlignment}
+        levelName={currentLevel.name}
       />
 
       {/* 1-Year Target Header - The Decision Filter */}

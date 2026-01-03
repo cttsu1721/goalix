@@ -1,6 +1,6 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { Check, ChevronRight, AlertTriangle, Target, Link2Off, X } from "lucide-react";
 import { useSwipeGesture } from "@/hooks";
@@ -63,15 +63,39 @@ export const TaskItem = memo(function TaskItem({ task, onToggle, onEdit, classNa
     },
   });
 
+  // Keyboard handler for accessibility
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      // Space or 'c' to toggle completion
+      if (e.key === " " || e.key === "c") {
+        e.preventDefault();
+        onToggle?.();
+      }
+      // Enter or 'e' to edit
+      if (e.key === "Enter" || e.key === "e") {
+        e.preventDefault();
+        onEdit?.();
+      }
+    },
+    [onToggle, onEdit]
+  );
+
   // Calculate opacity for action indicators based on progress
   const actionOpacity = Math.min(progress * 1.5, 1);
 
   return (
     <div
       ref={ref}
+      tabIndex={0}
+      role="button"
+      aria-label={`${task.completed ? "Completed" : "Incomplete"} task: ${task.title}. Press space to toggle, enter to edit.`}
+      onKeyDown={handleKeyDown}
       className={cn(
         "relative overflow-hidden",
         "border-b border-night-soft last:border-b-0",
+        // Focus ring for keyboard navigation
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-lantern/50 focus-visible:ring-offset-2 focus-visible:ring-offset-night",
+        "rounded-sm",
         className
       )}
       style={{ touchAction: "pan-y" }}
@@ -137,6 +161,7 @@ export const TaskItem = memo(function TaskItem({ task, onToggle, onEdit, classNa
       >
         {/* Checkbox - larger touch target for mobile */}
         <button
+          tabIndex={-1}
           className={cn(
             // 44px minimum touch target with visual 24px checkbox
             "w-11 h-11 sm:w-10 sm:h-10 flex-shrink-0",
@@ -177,6 +202,7 @@ export const TaskItem = memo(function TaskItem({ task, onToggle, onEdit, classNa
 
         {/* Content - tap to edit */}
         <button
+          tabIndex={-1}
           className="flex-1 text-left min-w-0"
           onClick={onEdit}
         >

@@ -10,6 +10,7 @@ export { BadgeEarnedModal } from "./BadgeEarnedModal";
 export { LifestyleInsight } from "./LifestyleInsight";
 export { KaizenHeatmap } from "./KaizenHeatmap";
 export { NextBadgeCard } from "./NextBadgeCard";
+export { MobileStatsBar } from "./MobileStatsBar";
 export {
   FirstMitCelebration,
   hasSeenFirstMitCelebration,
