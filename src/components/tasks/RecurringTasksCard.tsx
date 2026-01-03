@@ -31,7 +31,6 @@ import {
   Pause,
   Play,
   Trash2,
-  ChevronRight,
   Loader2,
 } from "lucide-react";
 import { toast } from "sonner";

@@ -34,6 +34,10 @@ const TaskCarryOverModal = dynamic(
   () => import("@/components/tasks/TaskCarryOverModal").then((m) => m.TaskCarryOverModal),
   { ssr: false }
 );
+const KaizenCheckinDialog = dynamic(
+  () => import("@/components/kaizen/KaizenCheckinDialog").then((m) => m.KaizenCheckinDialog),
+  { ssr: false }
+);
 import {
   useTasks,
   useCreateTask,
@@ -54,6 +58,7 @@ import { Sparkles, CalendarDays, AlertTriangle } from "lucide-react";
 import { DashboardSkeleton, StatsPanelSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { shouldShowKaizenPrompt, markKaizenPromptDismissed } from "@/lib/kaizen/prompt";
 import type { TaskPriority, GoalCategory } from "@prisma/client";
 import type { SuggestedTask } from "@/lib/ai/schemas";
 
@@ -115,6 +120,7 @@ export default function DashboardPage() {
   const [isFirstMitCelebrationOpen, setIsFirstMitCelebrationOpen] = useState(false);
   const [firstMitPoints, setFirstMitPoints] = useState(100);
   const [isCarryOverModalOpen, setIsCarryOverModalOpen] = useState(false);
+  const [isKaizenPromptOpen, setIsKaizenPromptOpen] = useState(false);
 
   // Fetch data - include overdue tasks for Today's Focus
   const { data: tasksData, isLoading: tasksLoading, refetch: refetchTasks } = useTasks(today, { includeOverdue: true });
@@ -223,6 +229,37 @@ export default function DashboardPage() {
       }
     }
   }, [tasksLoading, tasksData?.tasks, today]);
+
+  // Check for evening Kaizen reflection prompt
+  useEffect(() => {
+    // Wait for Kaizen data to load
+    if (kaizenData === undefined) return;
+
+    // Check if Kaizen check-in is incomplete (no areas checked)
+    const hasKaizenCheckin = kaizenData?.checkin && (
+      kaizenData.checkin.health ||
+      kaizenData.checkin.relationships ||
+      kaizenData.checkin.wealth ||
+      kaizenData.checkin.career ||
+      kaizenData.checkin.personalGrowth ||
+      kaizenData.checkin.lifestyle
+    );
+
+    // Show Kaizen prompt if:
+    // 1. It's evening (6pm - 11pm)
+    // 2. User hasn't completed Kaizen today
+    // 3. User hasn't dismissed the prompt today
+    if (!hasKaizenCheckin && shouldShowKaizenPrompt()) {
+      // Delay slightly longer than carry-over to stagger prompts
+      const timer = setTimeout(() => {
+        // Don't show if carry-over is already open
+        if (!isCarryOverModalOpen) {
+          setIsKaizenPromptOpen(true);
+        }
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [kaizenData, isCarryOverModalOpen]);
 
   // Uncomplete a task (revert to pending)
   const uncompleteTask = useCallback(async (taskId: string) => {
@@ -707,6 +744,30 @@ export default function DashboardPage() {
           refetchTasks();
         }}
         onSkip={() => setIsCarryOverModalOpen(false)}
+      />
+
+      {/* Evening Kaizen Reflection Prompt */}
+      <KaizenCheckinDialog
+        open={isKaizenPromptOpen}
+        onOpenChange={(open) => {
+          setIsKaizenPromptOpen(open);
+          if (!open) {
+            // Mark as dismissed when closed (skip or complete)
+            markKaizenPromptDismissed();
+          }
+        }}
+        existingCheckin={kaizenData?.checkin || null}
+        onComplete={(data) => {
+          if (data.isBalancedDay) {
+            toast.success("Balanced day! +35 points earned", {
+              icon: "🌟",
+            });
+          } else if (data.pointsEarned > 0) {
+            toast.success(`+${data.pointsEarned} points for reflecting`, {
+              icon: "🌱",
+            });
+          }
+        }}
       />
     </AppShell>
   );
