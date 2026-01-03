@@ -502,6 +502,69 @@ function ReviewWizard({ monthData, onComplete }: {
                 What were your biggest achievements this month?
               </p>
             </div>
+
+            {/* Data-driven accomplishments */}
+            {monthData && (
+              <div className="bg-night-soft rounded-xl p-4 mb-4">
+                <p className="text-xs font-medium uppercase tracking-wider text-moon-faint mb-3">
+                  This Month&apos;s Highlights
+                </p>
+                <div className="space-y-2">
+                  {monthData.stats.tasksCompleted > 0 && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <CheckCircle2 className="w-4 h-4 text-zen-green" />
+                      <span className="text-moon-soft">
+                        Completed <span className="text-zen-green font-medium">{monthData.stats.tasksCompleted} tasks</span>
+                        {monthData.stats.completionRate >= 80 && " with excellent focus"}
+                      </span>
+                    </div>
+                  )}
+                  {monthData.stats.goalsCompleted > 0 && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Target className="w-4 h-4 text-zen-blue" />
+                      <span className="text-moon-soft">
+                        Achieved <span className="text-zen-blue font-medium">{monthData.stats.goalsCompleted} goals</span>
+                      </span>
+                    </div>
+                  )}
+                  {monthData.stats.mitCompletionRate >= 70 && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Flame className="w-4 h-4 text-zen-red" />
+                      <span className="text-moon-soft">
+                        Strong MIT discipline at <span className="text-zen-red font-medium">{monthData.stats.mitCompletionRate}%</span>
+                      </span>
+                    </div>
+                  )}
+                  {monthData.kaizen.balancedDays > 0 && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Star className="w-4 h-4 text-zen-purple" />
+                      <span className="text-moon-soft">
+                        <span className="text-zen-purple font-medium">{monthData.kaizen.balancedDays} balanced days</span> (all 6 life areas)
+                      </span>
+                    </div>
+                  )}
+                  {monthData.goalAlignment.alignmentRate >= 70 && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Link2 className="w-4 h-4 text-lantern" />
+                      <span className="text-moon-soft">
+                        <span className="text-lantern font-medium">{monthData.goalAlignment.alignmentRate}%</span> goal-aligned focus
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Reflection prompts */}
+            <div className="bg-night border border-night-mist rounded-lg p-3 mb-3">
+              <p className="text-xs text-moon-faint mb-2">Reflect on:</p>
+              <ul className="text-sm text-moon-dim space-y-1">
+                <li>• What goal achievement are you most proud of?</li>
+                <li>• Which habit stuck this month?</li>
+                <li>• What milestone did you hit?</li>
+              </ul>
+            </div>
+
             <textarea
               value={wins}
               onChange={(e) => setWins(e.target.value)}
@@ -522,6 +585,99 @@ function ReviewWizard({ monthData, onComplete }: {
                 What did you learn? What patterns did you notice?
               </p>
             </div>
+
+            {/* Data-driven pattern insights */}
+            {monthData && (
+              <div className="bg-night-soft rounded-xl p-4 mb-4">
+                <p className="text-xs font-medium uppercase tracking-wider text-moon-faint mb-3">
+                  Patterns to Consider
+                </p>
+                <div className="space-y-2">
+                  {/* Best performing week */}
+                  {monthData.weeklyBreakdowns && monthData.weeklyBreakdowns.length > 1 && (() => {
+                    const bestWeek = monthData.weeklyBreakdowns.reduce((best, week) => {
+                      const weekRate = week.totalTasks > 0 ? week.tasksCompleted / week.totalTasks : 0;
+                      const bestRate = best.totalTasks > 0 ? best.tasksCompleted / best.totalTasks : 0;
+                      return weekRate > bestRate ? week : best;
+                    });
+                    const worstWeek = monthData.weeklyBreakdowns.reduce((worst, week) => {
+                      const weekRate = week.totalTasks > 0 ? week.tasksCompleted / week.totalTasks : 1;
+                      const worstRate = worst.totalTasks > 0 ? worst.tasksCompleted / worst.totalTasks : 1;
+                      return weekRate < worstRate ? week : worst;
+                    });
+                    const bestRate = bestWeek.totalTasks > 0 ? Math.round((bestWeek.tasksCompleted / bestWeek.totalTasks) * 100) : 0;
+                    const worstRate = worstWeek.totalTasks > 0 ? Math.round((worstWeek.tasksCompleted / worstWeek.totalTasks) * 100) : 0;
+
+                    return bestWeek.weekNumber !== worstWeek.weekNumber ? (
+                      <div className="flex items-start gap-2 text-sm">
+                        <BarChart3 className="w-4 h-4 text-zen-blue mt-0.5" />
+                        <span className="text-moon-soft">
+                          Week {bestWeek.weekNumber} was strongest ({bestRate}%),
+                          Week {worstWeek.weekNumber} was weakest ({worstRate}%).
+                          <span className="text-moon-faint"> What was different?</span>
+                        </span>
+                      </div>
+                    ) : null;
+                  })()}
+
+                  {/* Kaizen patterns */}
+                  {monthData.kaizen.strongestArea && monthData.kaizen.weakestArea && (
+                    <div className="flex items-start gap-2 text-sm">
+                      <Star className="w-4 h-4 text-zen-green mt-0.5" />
+                      <span className="text-moon-soft">
+                        You thrived in <span className="text-zen-green">{formatAreaName(monthData.kaizen.strongestArea.area)}</span> but
+                        struggled with <span className="text-amber-400">{formatAreaName(monthData.kaizen.weakestArea.area)}</span>.
+                        <span className="text-moon-faint"> Why the gap?</span>
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Goal alignment insight */}
+                  {monthData.goalAlignment.alignmentRate < 60 && monthData.goalAlignment.unlinkedCompleted > 3 && (
+                    <div className="flex items-start gap-2 text-sm">
+                      <Link2Off className="w-4 h-4 text-moon-dim mt-0.5" />
+                      <span className="text-moon-soft">
+                        {monthData.goalAlignment.unlinkedCompleted} tasks were not goal-linked.
+                        <span className="text-moon-faint"> Were they necessary distractions or hidden priorities?</span>
+                      </span>
+                    </div>
+                  )}
+
+                  {/* MIT pattern */}
+                  {monthData.stats.mitCompletionRate < 70 && (
+                    <div className="flex items-start gap-2 text-sm">
+                      <Flame className="w-4 h-4 text-zen-red mt-0.5" />
+                      <span className="text-moon-soft">
+                        MIT completion was at {monthData.stats.mitCompletionRate}%.
+                        <span className="text-moon-faint"> What blocked your most important tasks?</span>
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Kaizen frequency */}
+                  {monthData.kaizen.completionRate < 50 && (
+                    <div className="flex items-start gap-2 text-sm">
+                      <Star className="w-4 h-4 text-zen-purple mt-0.5" />
+                      <span className="text-moon-soft">
+                        You reflected on only {monthData.kaizen.checkinsCompleted} of {monthData.stats.daysInMonth} days.
+                        <span className="text-moon-faint"> What would help you reflect more consistently?</span>
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Reflection prompts */}
+            <div className="bg-night border border-night-mist rounded-lg p-3 mb-3">
+              <p className="text-xs text-moon-faint mb-2">Reflect on:</p>
+              <ul className="text-sm text-moon-dim space-y-1">
+                <li>• What worked well that you should repeat?</li>
+                <li>• What didn&apos;t work that you should stop?</li>
+                <li>• What new insight did you gain about yourself?</li>
+              </ul>
+            </div>
+
             <textarea
               value={learnings}
               onChange={(e) => setLearnings(e.target.value)}
@@ -542,6 +698,100 @@ function ReviewWizard({ monthData, onComplete }: {
                 What are your top priorities for next month?
               </p>
             </div>
+
+            {/* Data-driven focus suggestions */}
+            {monthData && (
+              <div className="bg-night-soft rounded-xl p-4 mb-4">
+                <p className="text-xs font-medium uppercase tracking-wider text-moon-faint mb-3">
+                  Suggested Focus Areas
+                </p>
+                <div className="space-y-2">
+                  {/* Incomplete goals to carry forward */}
+                  {monthData.goals && monthData.goals.filter(g => g.status === "ACTIVE" && g.progress < 100).length > 0 && (
+                    <div className="flex items-start gap-2 text-sm">
+                      <Target className="w-4 h-4 text-zen-blue mt-0.5" />
+                      <span className="text-moon-soft">
+                        <span className="text-zen-blue font-medium">
+                          {monthData.goals.filter(g => g.status === "ACTIVE" && g.progress < 100).length} goal{monthData.goals.filter(g => g.status === "ACTIVE" && g.progress < 100).length > 1 ? "s" : ""} in progress
+                        </span>
+                        {" "}to carry forward
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Weakest Kaizen area to improve */}
+                  {monthData.kaizen.weakestArea && monthData.kaizen.weakestArea.count < monthData.stats.daysInMonth * 0.5 && (() => {
+                    const Icon = AREA_ICONS[monthData.kaizen.weakestArea.area] || Star;
+                    return (
+                      <div className="flex items-start gap-2 text-sm">
+                        <Icon className="w-4 h-4 text-amber-400 mt-0.5" />
+                        <span className="text-moon-soft">
+                          Prioritize <span className="text-amber-400 font-medium">{formatAreaName(monthData.kaizen.weakestArea.area)}</span>
+                          {" "}— only improved {monthData.kaizen.weakestArea.count} days this month
+                        </span>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Goal alignment improvement */}
+                  {monthData.goalAlignment.alignmentRate < 70 && (
+                    <div className="flex items-start gap-2 text-sm">
+                      <Link2 className="w-4 h-4 text-lantern mt-0.5" />
+                      <span className="text-moon-soft">
+                        Improve <span className="text-lantern font-medium">goal alignment</span>
+                        {" "}— link more tasks to weekly goals
+                      </span>
+                    </div>
+                  )}
+
+                  {/* MIT discipline */}
+                  {monthData.stats.mitCompletionRate < 80 && (
+                    <div className="flex items-start gap-2 text-sm">
+                      <Flame className="w-4 h-4 text-zen-red mt-0.5" />
+                      <span className="text-moon-soft">
+                        Boost <span className="text-zen-red font-medium">MIT completion</span>
+                        {" "}— protect time for your most important task
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Kaizen consistency */}
+                  {monthData.kaizen.completionRate < 70 && (
+                    <div className="flex items-start gap-2 text-sm">
+                      <Star className="w-4 h-4 text-zen-purple mt-0.5" />
+                      <span className="text-moon-soft">
+                        Build <span className="text-zen-purple font-medium">daily reflection</span>
+                        {" "}habit — aim for evening Kaizen check-ins
+                      </span>
+                    </div>
+                  )}
+
+                  {/* All metrics strong - maintenance mode */}
+                  {monthData.stats.mitCompletionRate >= 80 &&
+                   monthData.goalAlignment.alignmentRate >= 70 &&
+                   monthData.kaizen.completionRate >= 70 && (
+                    <div className="flex items-start gap-2 text-sm">
+                      <Trophy className="w-4 h-4 text-zen-green mt-0.5" />
+                      <span className="text-moon-soft">
+                        <span className="text-zen-green font-medium">Strong month!</span>
+                        {" "}Maintain momentum and stretch your goals
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Planning prompts */}
+            <div className="bg-night border border-night-mist rounded-lg p-3 mb-3">
+              <p className="text-xs text-moon-faint mb-2">Consider:</p>
+              <ul className="text-sm text-moon-dim space-y-1">
+                <li>• What&apos;s the ONE thing that would make next month a success?</li>
+                <li>• Which habit do you want to build or strengthen?</li>
+                <li>• What will you stop doing to make room for priorities?</li>
+              </ul>
+            </div>
+
             <textarea
               value={nextMonthFocus}
               onChange={(e) => setNextMonthFocus(e.target.value)}
