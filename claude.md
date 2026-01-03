@@ -972,3 +972,32 @@ Or for errors:
 - AI interactions are logged for usage tracking and prompt improvement
 - **Decision Compass:** Track goal alignment ratio per user per week; surface in Weekly Review and Progress page
 - Unlinked tasks are allowed but require explicit acknowledgement to prevent unconscious "action faking"
+
+---
+
+## UX Improvements (Active Work)
+
+**See `UX-IMPROVEMENTS.md` for the full tracking document.**
+
+### Recent Completions (2026-01-03)
+- ✅ Keyboard shortcuts for tasks (Space/c=toggle, Enter/e=edit)
+- ✅ Skeleton loaders for goals/vision pages
+- ✅ MobileStatsBar component (streak, points, alignment, level)
+- ✅ First MIT celebration modal with confetti
+- ✅ Level-up and badge celebration modals
+- ✅ Structured weekly/monthly review prompts
+- ✅ Kaizen evening prompt (6-11pm reminder)
+- ✅ Recurring tasks (daily, weekly, custom)
+- ✅ Goal alignment score with status badges
+- ✅ Undo toast for task completion
+
+### Next Priorities
+1. **P0 Critical:** Onboarding wizard, streak freeze, breadcrumbs, pull-to-refresh
+2. **Quick wins:** Cmd+N shortcut, streak recovery message, settings icon
+3. **High impact:** Command palette (Cmd+K), swipe gesture hints
+
+### Key Patterns Established
+- Keyboard shortcuts: See `TaskItem.tsx` for Space/Enter handlers
+- Mobile components: See `MobileStatsBar.tsx` for responsive pattern
+- Celebration modals: See `LevelUpModal.tsx` and `BadgeEarnedModal.tsx`
+- Review prompts: See `weekly/page.tsx` and `monthly/page.tsx`
