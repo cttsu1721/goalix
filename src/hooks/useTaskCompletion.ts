@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useCompleteTask } from "./useTasks";
+import { useCompleteTask, useUncompleteTask } from "./useTasks";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
 
@@ -7,10 +7,20 @@ interface UseTaskCompletionOptions {
   onLevelUp?: (newLevel: number) => void;
 }
 
+// Check if user prefers reduced motion
+function prefersReducedMotion(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
 export function useTaskCompletion(options: UseTaskCompletionOptions = {}) {
   const completeTask = useCompleteTask();
+  const uncompleteTask = useUncompleteTask();
 
   const triggerConfetti = useCallback(() => {
+    // Skip confetti if user prefers reduced motion
+    if (prefersReducedMotion()) return;
+
     // Burst from the left
     confetti({
       particleCount: 100,
@@ -28,6 +38,23 @@ export function useTaskCompletion(options: UseTaskCompletionOptions = {}) {
     });
   }, []);
 
+  const handleUndo = useCallback(
+    async (taskId: string) => {
+      try {
+        const result = await uncompleteTask.mutateAsync(taskId);
+        toast.success("Task restored", {
+          description: `${result.pointsRemoved} points removed`,
+          duration: 2000,
+        });
+      } catch (error) {
+        toast.error("Failed to undo", {
+          description: error instanceof Error ? error.message : "Please try again",
+        });
+      }
+    },
+    [uncompleteTask]
+  );
+
   const complete = useCallback(
     async (taskId: string, isMit: boolean = false) => {
       try {
@@ -42,12 +69,20 @@ export function useTaskCompletion(options: UseTaskCompletionOptions = {}) {
                 ? ` (including +${result.points.streakBonus} streak bonus)`
                 : ""
             }`,
-            duration: 4000,
+            duration: 5000,
+            action: {
+              label: "Undo",
+              onClick: () => handleUndo(taskId),
+            },
           });
         } else {
           toast.success("Task completed", {
             description: `+${result.points.earned} points`,
-            duration: 2000,
+            duration: 5000,
+            action: {
+              label: "Undo",
+              onClick: () => handleUndo(taskId),
+            },
           });
         }
 
@@ -55,7 +90,7 @@ export function useTaskCompletion(options: UseTaskCompletionOptions = {}) {
         if (result.leveledUp && result.newLevel !== undefined) {
           const newLevel = result.newLevel;
           setTimeout(() => {
-            toast.success(`Level Up! 🎉`, {
+            toast.success(`Level Up!`, {
               description: `You've reached Level ${newLevel}!`,
               duration: 5000,
             });
@@ -71,11 +106,20 @@ export function useTaskCompletion(options: UseTaskCompletionOptions = {}) {
         throw error;
       }
     },
-    [completeTask, triggerConfetti, options]
+    [completeTask, triggerConfetti, handleUndo, options]
+  );
+
+  const uncomplete = useCallback(
+    async (taskId: string) => {
+      return handleUndo(taskId);
+    },
+    [handleUndo]
   );
 
   return {
     complete,
+    uncomplete,
     isPending: completeTask.isPending,
+    isUndoing: uncompleteTask.isPending,
   };
 }

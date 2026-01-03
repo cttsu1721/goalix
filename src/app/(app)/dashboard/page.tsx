@@ -40,7 +40,8 @@ import { useAIUsage } from "@/hooks/useAI";
 import { LEVELS } from "@/types/gamification";
 import { TASK_PRIORITY_POINTS } from "@/types/tasks";
 import { formatLocalDate } from "@/lib/utils";
-import { Loader2, Sparkles, CalendarDays, AlertTriangle } from "lucide-react";
+import { Sparkles, CalendarDays, AlertTriangle } from "lucide-react";
+import { DashboardSkeleton, StatsPanelSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import type { TaskPriority, GoalCategory } from "@prisma/client";
@@ -104,7 +105,12 @@ export default function DashboardPage() {
 
   // Fetch data - include overdue tasks for Today's Focus
   const { data: tasksData, isLoading: tasksLoading, refetch: refetchTasks } = useTasks(today, { includeOverdue: true });
-  const { data: statsData, isLoading: statsLoading } = useUserStats();
+  const { data: statsData, isLoading: statsLoading, refetch: refetchStats } = useUserStats();
+
+  // Pull-to-refresh handler
+  const handleRefresh = useCallback(async () => {
+    await Promise.all([refetchTasks(), refetchStats()]);
+  }, [refetchTasks, refetchStats]);
   const { data: kaizenData } = useKaizenCheckin(today);
   const { data: goalsData } = useGoals("weekly");
   const { data: oneYearGoalsData } = useGoals("oneYear", undefined, "ACTIVE");
@@ -288,13 +294,11 @@ export default function DashboardPage() {
     setIsEditModalOpen(true);
   };
 
-  // Loading state (after all hooks)
+  // Loading state (after all hooks) - show skeleton
   if (tasksLoading || statsLoading) {
     return (
-      <AppShell>
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="w-8 h-8 animate-spin text-lantern" />
-        </div>
+      <AppShell rightPanel={<StatsPanelSkeleton />}>
+        <DashboardSkeleton />
       </AppShell>
     );
   }
@@ -443,7 +447,7 @@ export default function DashboardPage() {
   );
 
   return (
-    <AppShell rightPanel={statsPanel}>
+    <AppShell rightPanel={statsPanel} onRefresh={handleRefresh}>
       <PageHeader
         greeting={`${getGreeting()}, ${userName}`}
         title="Today's Focus"

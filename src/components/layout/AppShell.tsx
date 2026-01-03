@@ -1,16 +1,101 @@
 "use client";
 
+import { useCallback, useRef, useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Sidebar } from "./Sidebar";
 import { MobileNav } from "./MobileNav";
+import { QuickAddFab } from "./QuickAddFab";
+import { Loader2, ArrowDown } from "lucide-react";
 
 interface AppShellProps {
   children: React.ReactNode;
   rightPanel?: React.ReactNode;
   className?: string;
+  onRefresh?: () => Promise<void>;
 }
 
-export function AppShell({ children, rightPanel, className }: AppShellProps) {
+export function AppShell({ children, rightPanel, className, onRefresh }: AppShellProps) {
+  const mainRef = useRef<HTMLElement>(null);
+  const [pullDistance, setPullDistance] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isPulling, setIsPulling] = useState(false);
+  const startY = useRef(0);
+  const threshold = 80;
+  const maxPull = 120;
+
+  // Check if device is touch-enabled
+  const isTouchDevice = typeof window !== "undefined" && "ontouchstart" in window;
+
+  const handleTouchStart = useCallback(
+    (e: TouchEvent) => {
+      if (!onRefresh || isRefreshing) return;
+      const main = mainRef.current;
+      if (!main || main.scrollTop > 0) return;
+
+      startY.current = e.touches[0].clientY;
+      setIsPulling(true);
+    },
+    [onRefresh, isRefreshing]
+  );
+
+  const handleTouchMove = useCallback(
+    (e: TouchEvent) => {
+      if (!isPulling || !onRefresh || isRefreshing) return;
+      const main = mainRef.current;
+      if (!main || main.scrollTop > 0) {
+        setPullDistance(0);
+        return;
+      }
+
+      const currentY = e.touches[0].clientY;
+      const diff = currentY - startY.current;
+
+      if (diff > 0) {
+        const resistance = 0.5;
+        const distance = Math.min(diff * resistance, maxPull);
+        setPullDistance(distance);
+        if (distance > 0) e.preventDefault();
+      }
+    },
+    [isPulling, onRefresh, isRefreshing]
+  );
+
+  const handleTouchEnd = useCallback(async () => {
+    if (!isPulling || !onRefresh) return;
+    setIsPulling(false);
+
+    if (pullDistance >= threshold && !isRefreshing) {
+      setIsRefreshing(true);
+      try {
+        await onRefresh();
+      } finally {
+        setIsRefreshing(false);
+        setPullDistance(0);
+      }
+    } else {
+      setPullDistance(0);
+    }
+  }, [isPulling, onRefresh, pullDistance, isRefreshing]);
+
+  useEffect(() => {
+    const main = mainRef.current;
+    if (!main || !onRefresh || !isTouchDevice) return;
+
+    main.addEventListener("touchstart", handleTouchStart, { passive: true });
+    main.addEventListener("touchmove", handleTouchMove, { passive: false });
+    main.addEventListener("touchend", handleTouchEnd);
+
+    return () => {
+      main.removeEventListener("touchstart", handleTouchStart);
+      main.removeEventListener("touchmove", handleTouchMove);
+      main.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [handleTouchStart, handleTouchMove, handleTouchEnd, onRefresh, isTouchDevice]);
+
+  const showIndicator = (pullDistance > 0 || isRefreshing) && onRefresh;
+  const progress = Math.min(pullDistance / threshold, 1);
+  const rotation = progress * 180;
+
   return (
     <div
       className={cn(
@@ -28,7 +113,43 @@ export function AppShell({ children, rightPanel, className }: AppShellProps) {
       <Sidebar className="hidden lg:flex" />
 
       {/* Main Content */}
-      <main className="bg-void overflow-y-auto overflow-x-hidden min-h-screen min-w-0">
+      <main
+        ref={mainRef}
+        className="bg-void overflow-y-auto overflow-x-hidden min-h-screen min-w-0 relative"
+      >
+        {/* Pull-to-refresh indicator */}
+        {showIndicator && (
+          <div
+            className={cn(
+              "absolute left-1/2 -translate-x-1/2 z-50 flex items-center justify-center",
+              "transition-opacity duration-200 opacity-100"
+            )}
+            style={{
+              top: Math.max(pullDistance - 32, 16),
+              transition: isPulling ? "none" : "top 0.2s ease-out, opacity 0.2s ease-out",
+            }}
+          >
+            <div
+              className={cn(
+                "w-10 h-10 rounded-full bg-night-soft border border-night-mist",
+                "flex items-center justify-center shadow-lg"
+              )}
+            >
+              {isRefreshing ? (
+                <Loader2 className="w-5 h-5 text-lantern animate-spin" />
+              ) : (
+                <ArrowDown
+                  className={cn(
+                    "w-5 h-5 transition-transform duration-100",
+                    progress >= 1 ? "text-lantern" : "text-moon-dim"
+                  )}
+                  style={{ transform: `rotate(${rotation}deg)` }}
+                />
+              )}
+            </div>
+          </div>
+        )}
+
         <div
           className={cn(
             // Desktop padding
@@ -42,6 +163,10 @@ export function AppShell({ children, rightPanel, className }: AppShellProps) {
             // Prevent content from overflowing
             "w-full max-w-full overflow-x-hidden"
           )}
+          style={{
+            paddingTop: showIndicator ? `calc(1.5rem + ${pullDistance}px)` : undefined,
+            transition: isPulling ? "none" : "padding-top 0.2s ease-out",
+          }}
         >
           <div className="w-full max-w-full min-w-0">
             {children}
@@ -55,6 +180,9 @@ export function AppShell({ children, rightPanel, className }: AppShellProps) {
           <div className="p-7">{rightPanel}</div>
         </aside>
       )}
+
+      {/* Quick Add FAB - Mobile only */}
+      <QuickAddFab />
 
       {/* Mobile Navigation */}
       <MobileNav className="lg:hidden" />

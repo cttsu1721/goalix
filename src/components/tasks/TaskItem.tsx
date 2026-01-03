@@ -2,7 +2,8 @@
 
 import { memo } from "react";
 import { cn } from "@/lib/utils";
-import { Check, ChevronRight, AlertTriangle, Target, Link2Off } from "lucide-react";
+import { Check, ChevronRight, AlertTriangle, Target, Link2Off, X } from "lucide-react";
+import { useSwipeGesture } from "@/hooks";
 
 // Format overdue date to show relative time (e.g., "Dec 30" or "Yesterday")
 function formatOverdueDate(dateString: string): string {
@@ -48,113 +49,189 @@ interface TaskItemProps {
 }
 
 export const TaskItem = memo(function TaskItem({ task, onToggle, onEdit, className }: TaskItemProps) {
+  const { ref, offset, isSwiping, direction, progress } = useSwipeGesture<HTMLDivElement>({
+    threshold: 80,
+    onSwipeRight: () => {
+      if (!task.completed) {
+        onToggle?.();
+      }
+    },
+    onSwipeLeft: () => {
+      if (task.completed) {
+        onToggle?.(); // Uncomplete
+      }
+    },
+  });
+
+  // Calculate opacity for action indicators based on progress
+  const actionOpacity = Math.min(progress * 1.5, 1);
+
   return (
     <div
+      ref={ref}
       className={cn(
-        "group flex items-center gap-3 sm:gap-4 py-4",
+        "relative overflow-hidden",
         "border-b border-night-soft last:border-b-0",
-        "transition-all duration-200",
-        // Touch feedback
-        "active:bg-night-soft/50",
         className
       )}
+      style={{ touchAction: "pan-y" }}
     >
-      {/* Checkbox - larger touch target for mobile */}
-      <button
+      {/* Swipe action backgrounds */}
+      <div className="absolute inset-0 flex">
+        {/* Left side - Complete action (swipe right) */}
+        <div
+          className={cn(
+            "flex items-center justify-start pl-4 w-1/2",
+            "bg-zen-green/20 transition-opacity duration-100"
+          )}
+          style={{ opacity: direction === "right" ? actionOpacity : 0 }}
+        >
+          <div
+            className={cn(
+              "w-10 h-10 rounded-full bg-zen-green flex items-center justify-center",
+              "transition-transform duration-100"
+            )}
+            style={{
+              transform: `scale(${0.5 + progress * 0.5})`,
+            }}
+          >
+            <Check className="w-5 h-5 text-void" strokeWidth={2.5} />
+          </div>
+        </div>
+
+        {/* Right side - Uncomplete action (swipe left) */}
+        <div
+          className={cn(
+            "flex items-center justify-end pr-4 w-1/2",
+            "bg-night-mist/50 transition-opacity duration-100"
+          )}
+          style={{ opacity: direction === "left" ? actionOpacity : 0 }}
+        >
+          <div
+            className={cn(
+              "w-10 h-10 rounded-full bg-night-glow flex items-center justify-center",
+              "transition-transform duration-100"
+            )}
+            style={{
+              transform: `scale(${0.5 + progress * 0.5})`,
+            }}
+          >
+            <X className="w-5 h-5 text-moon" strokeWidth={2} />
+          </div>
+        </div>
+      </div>
+
+      {/* Task content - slides with swipe */}
+      <div
         className={cn(
-          // 44px minimum touch target with visual 24px checkbox
-          "w-11 h-11 sm:w-10 sm:h-10 flex-shrink-0",
-          "flex items-center justify-center",
-          "-ml-2 sm:-ml-1", // Negative margin to maintain visual alignment
-          "rounded-xl",
-          "transition-all duration-200 active:scale-90"
+          "relative bg-night",
+          "group flex items-center gap-3 sm:gap-4 py-4",
+          "transition-transform",
+          isSwiping ? "duration-0" : "duration-200 ease-out",
+          // Touch feedback
+          "active:bg-night-soft/50"
         )}
-        onClick={(e) => {
-          e.stopPropagation();
-          onToggle?.();
+        style={{
+          transform: `translateX(${offset}px)`,
         }}
       >
-        <div
+        {/* Checkbox - larger touch target for mobile */}
+        <button
           className={cn(
-            "w-6 h-6 sm:w-[22px] sm:h-[22px] rounded-lg border-2",
+            // 44px minimum touch target with visual 24px checkbox
+            "w-11 h-11 sm:w-10 sm:h-10 flex-shrink-0",
             "flex items-center justify-center",
-            "transition-all duration-200",
-            task.completed
-              ? "bg-zen-green border-zen-green"
-              : "border-night-glow"
+            "-ml-2 sm:-ml-1", // Negative margin to maintain visual alignment
+            "rounded-xl",
+            "transition-all duration-200 active:scale-90"
           )}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggle?.();
+          }}
         >
-          {task.completed && (
-            <Check className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-void" strokeWidth={2.5} />
-          )}
-        </div>
-      </button>
+          <div
+            className={cn(
+              "w-6 h-6 sm:w-[22px] sm:h-[22px] rounded-lg border-2",
+              "flex items-center justify-center",
+              "transition-all duration-200",
+              task.completed
+                ? "bg-zen-green border-zen-green"
+                : "border-night-glow"
+            )}
+          >
+            {task.completed && (
+              <Check className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-void" strokeWidth={2.5} />
+            )}
+          </div>
+        </button>
 
-      {/* Content - tap to edit */}
-      <button
-        className="flex-1 text-left min-w-0"
-        onClick={onEdit}
-      >
-        <div
-          className={cn(
-            "text-[0.9375rem] font-normal mb-0.5 truncate",
-            task.completed
-              ? "line-through text-moon-faint"
-              : "text-moon"
-          )}
+        {/* Content - tap to edit */}
+        <button
+          className="flex-1 text-left min-w-0"
+          onClick={onEdit}
         >
-          {task.title}
-        </div>
-        <div className="text-xs text-moon-faint truncate flex items-center gap-1.5">
-          {task.isOverdue && !task.completed && (
-            <>
-              <AlertTriangle className="w-3 h-3 text-zen-red flex-shrink-0" />
-              <span className="text-zen-red">
-                {task.scheduledDate ? formatOverdueDate(task.scheduledDate) : "Overdue"}
-              </span>
-              <span className="text-moon-faint/50">·</span>
-            </>
-          )}
-          {/* Goal Chain or Standalone indicator */}
-          {task.goalChain?.weeklyGoal ? (
-            <>
-              <Target className="w-3 h-3 text-zen-green flex-shrink-0" />
-              <span className="text-moon-dim truncate">
-                {task.goalChain.weeklyGoal.title}
-                {task.goalChain.oneYearGoal && (
-                  <span className="text-lantern/60"> → {task.goalChain.oneYearGoal.title}</span>
-                )}
-              </span>
-            </>
-          ) : (
-            <>
-              <Link2Off className="w-3 h-3 text-moon-faint/50 flex-shrink-0" />
-              <span className="text-moon-faint/70">Standalone</span>
-              <span className="text-moon-faint/30">·</span>
-              <span>{task.category}</span>
-            </>
-          )}
-        </div>
-      </button>
+          <div
+            className={cn(
+              "text-[0.9375rem] font-normal mb-0.5 truncate",
+              task.completed
+                ? "line-through text-moon-faint"
+                : "text-moon"
+            )}
+          >
+            {task.title}
+          </div>
+          <div className="text-xs text-moon-faint truncate flex items-center gap-1.5">
+            {task.isOverdue && !task.completed && (
+              <>
+                <AlertTriangle className="w-3 h-3 text-zen-red flex-shrink-0" />
+                <span className="text-zen-red">
+                  {task.scheduledDate ? formatOverdueDate(task.scheduledDate) : "Overdue"}
+                </span>
+                <span className="text-moon-faint/50">·</span>
+              </>
+            )}
+            {/* Goal Chain or Standalone indicator */}
+            {task.goalChain?.weeklyGoal ? (
+              <>
+                <Target className="w-3 h-3 text-zen-green flex-shrink-0" />
+                <span className="text-moon-dim truncate">
+                  {task.goalChain.weeklyGoal.title}
+                  {task.goalChain.oneYearGoal && (
+                    <span className="text-lantern/60"> → {task.goalChain.oneYearGoal.title}</span>
+                  )}
+                </span>
+              </>
+            ) : (
+              <>
+                <Link2Off className="w-3 h-3 text-moon-faint/50 flex-shrink-0" />
+                <span className="text-moon-faint/70">Standalone</span>
+                <span className="text-moon-faint/30">·</span>
+                <span>{task.category}</span>
+              </>
+            )}
+          </div>
+        </button>
 
-      {/* Points + Edit indicator */}
-      <div className="flex items-center gap-2 flex-shrink-0">
-        <span
-          className={cn(
-            "text-sm font-medium tabular-nums",
-            task.completed ? "text-zen-green" : "text-moon-faint"
-          )}
-        >
-          {task.completed ? `+${task.points}` : task.points}
-        </span>
-        {/* Chevron hint for edit - always visible on mobile */}
-        <ChevronRight
-          className={cn(
-            "w-4 h-4 text-moon-faint/50",
-            "sm:opacity-0 sm:group-hover:opacity-100",
-            "transition-opacity"
-          )}
-        />
+        {/* Points + Edit indicator */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <span
+            className={cn(
+              "text-sm font-medium tabular-nums",
+              task.completed ? "text-zen-green" : "text-moon-faint"
+            )}
+          >
+            {task.completed ? `+${task.points}` : task.points}
+          </span>
+          {/* Chevron hint for edit - always visible on mobile */}
+          <ChevronRight
+            className={cn(
+              "w-4 h-4 text-moon-faint/50",
+              "sm:opacity-0 sm:group-hover:opacity-100",
+              "transition-opacity"
+            )}
+          />
+        </div>
       </div>
     </div>
   );

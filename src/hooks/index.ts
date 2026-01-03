@@ -51,3 +51,6 @@ export { useWeeklyReview, useSubmitWeeklyReview, formatAreaName } from "./useWee
 
 // Monthly Review hook
 export { useMonthlyReview, useSubmitMonthlyReview } from "./useMonthlyReview";
+
+// Gesture hooks
+export { useSwipeGesture } from "./useSwipeGesture";

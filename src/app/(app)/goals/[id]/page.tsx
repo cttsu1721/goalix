@@ -3,14 +3,13 @@
 import { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
-import { GoalCard, GoalCategoryBadge, GoalCreateModal, GoalEditModal } from "@/components/goals";
+import { GoalCard, GoalCategoryBadge, GoalCreateModal, GoalEditModal, GoalBreadcrumb } from "@/components/goals";
 import { Button } from "@/components/ui/button";
 import { useGoal, useUpdateGoal, useDeleteGoal } from "@/hooks";
 import { GOAL_CATEGORY_LABELS, GOAL_STATUS_LABELS } from "@/types/goals";
 import type { GoalLevel } from "@/types/goals";
 import type { GoalCategory, GoalStatus } from "@prisma/client";
 import {
-  ArrowLeft,
   Plus,
   MoreHorizontal,
   Pencil,
@@ -24,6 +23,7 @@ import {
   Pause,
   Play,
   CheckCircle,
+  ArrowLeft,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -128,6 +128,7 @@ export default function GoalDetailPage() {
 
   const goal = data?.goal as Record<string, unknown> | undefined;
   const level = data?.level as GoalLevel | undefined;
+  const breadcrumb = (data?.breadcrumb as Array<{ id: string; title: string; level: GoalLevel }>) || [];
 
   if (isLoading) {
     return (
@@ -162,10 +163,6 @@ export default function GoalDetailPage() {
   const status = (goal.status as GoalStatus) || "ACTIVE";
   const progress = (goal.progress as number) || 0;
 
-  const handleBack = () => {
-    router.push("/goals");
-  };
-
   const handleChildClick = (childId: string) => {
     router.push(`/goals/${childId}`);
   };
@@ -198,14 +195,12 @@ export default function GoalDetailPage() {
     <AppShell>
       {/* Header */}
       <div className="mb-6">
-        {/* Back button */}
-        <button
-          onClick={handleBack}
-          className="flex items-center gap-2 text-moon-dim hover:text-moon transition-colors mb-4"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span className="text-sm">Back to Goals</span>
-        </button>
+        {/* Breadcrumb navigation */}
+        <GoalBreadcrumb
+          breadcrumb={breadcrumb}
+          currentTitle={goal.title as string}
+          currentLevel={level}
+        />
 
         {/* Level badge */}
         <div className="flex items-center gap-2 mb-3">

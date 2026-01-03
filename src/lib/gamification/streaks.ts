@@ -56,13 +56,46 @@ export function isStreakActive(
 }
 
 /**
+ * Check if a date was N days ago
+ */
+function isDaysAgo(date: Date | null, days: number, timezone: string = "UTC"): boolean {
+  if (!date) return false;
+
+  const now = new Date();
+  const targetStart = new Date(now.toLocaleString("en-US", { timeZone: timezone }));
+  targetStart.setDate(targetStart.getDate() - days);
+  targetStart.setHours(0, 0, 0, 0);
+
+  const actionDate = new Date(date.toLocaleString("en-US", { timeZone: timezone }));
+  actionDate.setHours(0, 0, 0, 0);
+
+  return actionDate.getTime() === targetStart.getTime();
+}
+
+/**
+ * Check how many days ago the last action was
+ */
+function daysSinceAction(date: Date | null, timezone: string = "UTC"): number {
+  if (!date) return Infinity;
+
+  const now = new Date();
+  const todayStart = new Date(now.toLocaleString("en-US", { timeZone: timezone }));
+  todayStart.setHours(0, 0, 0, 0);
+
+  const actionDate = new Date(date.toLocaleString("en-US", { timeZone: timezone }));
+  actionDate.setHours(0, 0, 0, 0);
+
+  return Math.floor((todayStart.getTime() - actionDate.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+/**
  * Update or create a streak for a user
  */
 export async function updateStreak(
   userId: string,
   type: StreakType,
   timezone: string = "UTC"
-): Promise<{ streak: Streak; isNewStreak: boolean; levelUp: boolean }> {
+): Promise<{ streak: Streak; isNewStreak: boolean; levelUp: boolean; freezeUsed: boolean }> {
   const existingStreak = await prisma.streak.findUnique({
     where: {
       userId_type: { userId, type },
@@ -72,6 +105,7 @@ export async function updateStreak(
   const now = new Date();
   let isNewStreak = false;
   let levelUp = false;
+  let freezeUsed = false;
 
   if (!existingStreak) {
     // Create new streak
@@ -85,21 +119,48 @@ export async function updateStreak(
       },
     });
     isNewStreak = true;
-    return { streak, isNewStreak, levelUp };
+    return { streak, isNewStreak, levelUp, freezeUsed };
   }
 
   // Check if action already done today
   if (isToday(existingStreak.lastActionAt, timezone)) {
-    return { streak: existingStreak, isNewStreak: false, levelUp: false };
+    return { streak: existingStreak, isNewStreak: false, levelUp: false, freezeUsed: false };
   }
 
-  // Check if streak should continue or reset
+  // Check if streak should continue, use freeze, or reset
   let newCount: number;
-  if (isYesterday(existingStreak.lastActionAt, timezone)) {
-    // Continue streak
+  const daysMissed = daysSinceAction(existingStreak.lastActionAt, timezone);
+
+  if (daysMissed === 1) {
+    // Yesterday - continue streak normally
     newCount = existingStreak.currentCount + 1;
+  } else if (daysMissed === 2) {
+    // Missed yesterday - try to use a streak freeze
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { streakFreezes: true, lastFreezeAt: true },
+    });
+
+    const canUseFreeze = user && user.streakFreezes > 0 && !isToday(user.lastFreezeAt, timezone);
+
+    if (canUseFreeze) {
+      // Use a freeze to save the streak
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          streakFreezes: { decrement: 1 },
+          lastFreezeAt: now,
+        },
+      });
+      newCount = existingStreak.currentCount + 1;
+      freezeUsed = true;
+    } else {
+      // No freeze available - reset streak
+      newCount = 1;
+      isNewStreak = true;
+    }
   } else {
-    // Reset streak (missed a day)
+    // Missed more than 1 day - reset streak (freeze only covers 1 missed day)
     newCount = 1;
     isNewStreak = true;
   }
@@ -119,7 +180,32 @@ export async function updateStreak(
     },
   });
 
-  return { streak, isNewStreak, levelUp };
+  return { streak, isNewStreak, levelUp, freezeUsed };
+}
+
+/**
+ * Get user's streak freeze count
+ */
+export async function getUserStreakFreezes(userId: string): Promise<number> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { streakFreezes: true },
+  });
+  return user?.streakFreezes ?? 0;
+}
+
+/**
+ * Award a streak freeze to user (e.g., from completing weekly review)
+ */
+export async function awardStreakFreeze(userId: string, count: number = 1): Promise<number> {
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      streakFreezes: { increment: count },
+    },
+    select: { streakFreezes: true },
+  });
+  return user.streakFreezes;
 }
 
 /**

@@ -7,9 +7,16 @@ interface GoalsResponse {
   level: GoalLevel;
 }
 
+interface BreadcrumbItem {
+  id: string;
+  title: string;
+  level: GoalLevel;
+}
+
 interface GoalResponse {
   goal: unknown;
   level: GoalLevel;
+  breadcrumb: BreadcrumbItem[];
 }
 
 interface CreateGoalInput {

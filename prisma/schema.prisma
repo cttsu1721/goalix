@@ -112,8 +112,10 @@ model User {
   notifyAchievements   Boolean @default(true) @map("notify_achievements")
 
   // Gamification
-  totalPoints Int @default(0) @map("total_points")
-  level       Int @default(1)
+  totalPoints   Int       @default(0) @map("total_points")
+  level         Int       @default(1)
+  streakFreezes Int       @default(2) @map("streak_freezes") // Number of available freezes
+  lastFreezeAt  DateTime? @map("last_freeze_at") // When last freeze was used
 
   // Relations
   accounts          Account[]

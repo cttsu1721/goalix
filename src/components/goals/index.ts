@@ -6,3 +6,4 @@ export { GoalEditModal } from "./GoalEditModal";
 export { VisionBuilderModal, DreamBuilderModal } from "./VisionBuilderModal";
 export { VisionBuilderPreview, DreamBuilderPreview } from "./VisionBuilderPreview";
 export { GoalSelector } from "./GoalSelector";
+export { GoalBreadcrumb } from "./GoalBreadcrumb";

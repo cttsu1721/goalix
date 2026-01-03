@@ -16,6 +16,7 @@ export async function GET() {
       select: {
         totalPoints: true,
         level: true,
+        streakFreezes: true,
         streaks: true,
         earnedBadges: {
           include: {
@@ -99,6 +100,7 @@ export async function GET() {
       levelName: currentLevel.name,
       pointsToNextLevel,
       levelProgress,
+      streakFreezes: user.streakFreezes,
       streaks: user.streaks,
       badges: user.earnedBadges,
       todayStats,

@@ -223,3 +223,31 @@ export function useCompleteTask() {
     },
   });
 }
+
+interface UncompleteTaskResponse {
+  task: TaskWithGoal;
+  pointsRemoved: number;
+}
+
+// Uncomplete a task (undo completion)
+export function useUncompleteTask() {
+  const queryClient = useQueryClient();
+
+  return useMutation<UncompleteTaskResponse, Error, string>({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/tasks/${id}/uncomplete`, {
+        method: "POST",
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to uncomplete task");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["user", "stats"] });
+      queryClient.invalidateQueries({ queryKey: ["user", "streaks"] });
+    },
+  });
+}
