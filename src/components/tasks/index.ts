@@ -6,3 +6,9 @@ export { TaskCreateModal } from "./TaskCreateModal";
 export { TaskEditModal } from "./TaskEditModal";
 export { PlanDayModal } from "./PlanDayModal";
 export { DecisionCompassDialog } from "./DecisionCompassDialog";
+export {
+  TaskCarryOverModal,
+  shouldShowCarryOverPrompt,
+  markAsDismissed,
+  resetCarryOverDismissal,
+} from "./TaskCarryOverModal";

@@ -7,6 +7,7 @@ export interface UserStats {
   level: number;
   levelName: string;
   pointsToNextLevel: number;
+  streakFreezes: number;
   streaks: Streak[];
   badges: (EarnedBadge & { badge: Badge })[];
 }

@@ -159,6 +159,14 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       category: task.weeklyGoal?.category || undefined,
     });
 
+    // Check for streak milestone (7, 14, 30, 60, 90 days)
+    const STREAK_MILESTONES = [7, 14, 30, 60, 90];
+    const previousStreak = mitStreak?.currentCount || 0;
+    const newStreak = currentMitStreak?.currentCount || 0;
+    const streakMilestone = existingTask.priority === "MIT"
+      ? STREAK_MILESTONES.find(m => previousStreak < m && newStreak >= m)
+      : undefined;
+
     return NextResponse.json({
       task,
       points: {
@@ -174,6 +182,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         name: b.badge.name,
         description: b.badge.description,
       })),
+      streak: existingTask.priority === "MIT" ? {
+        current: newStreak,
+        milestone: streakMilestone,
+      } : undefined,
     });
   } catch (error) {
     console.error("Error completing task:", error);

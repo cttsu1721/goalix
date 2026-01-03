@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import { StreakDisplay } from "./StreakDisplay";
 import { LevelProgress } from "./LevelProgress";
+import { NextBadgeCard } from "./NextBadgeCard";
 import { TodayStats } from "./TodayStats";
 import { GoalAlignment } from "./GoalAlignment";
 import { KaizenCheckin } from "./KaizenCheckin";
@@ -10,6 +11,7 @@ import { BadgeGrid } from "./BadgeGrid";
 
 interface StatsPanelProps {
   streak?: number;
+  streakFreezes?: number;
   level?: {
     name: string;
     currentXp: number;
@@ -40,6 +42,7 @@ interface StatsPanelProps {
 
 export function StatsPanel({
   streak = 0,
+  streakFreezes = 0,
   level = { name: "Beginner", currentXp: 0, requiredXp: 500 },
   today = { tasksCompleted: 0, tasksTotal: 0, pointsEarned: 0 },
   goalAlignment = 0,
@@ -55,13 +58,15 @@ export function StatsPanel({
         Your Journey
       </div>
 
-      <StreakDisplay days={streak} />
+      <StreakDisplay days={streak} freezesAvailable={streakFreezes} />
 
       <LevelProgress
         levelName={level.name}
         currentXp={level.currentXp}
         requiredXp={level.requiredXp}
       />
+
+      <NextBadgeCard className="mb-6" />
 
       <TodayStats
         tasksCompleted={today.tasksCompleted}

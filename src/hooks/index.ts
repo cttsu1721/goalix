@@ -7,6 +7,7 @@ export {
   useUpdateTask,
   useDeleteTask,
   useCompleteTask,
+  useCarryOverTasks,
 } from "./useTasks";
 
 export { useTaskCompletion } from "./useTaskCompletion";

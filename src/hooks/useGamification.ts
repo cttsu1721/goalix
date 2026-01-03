@@ -7,6 +7,7 @@ interface UserStats {
   levelName: string;
   pointsToNextLevel: number;
   levelProgress: number;
+  streakFreezes: number;
   streaks: Streak[];
   badges: (EarnedBadge & { badge: Badge })[];
   todayStats: {
@@ -151,6 +152,38 @@ export function useUserBadges() {
       const res = await fetch("/api/user/badges");
       if (!res.ok) {
         throw new Error("Failed to fetch user badges");
+      }
+      return res.json();
+    },
+  });
+}
+
+// Next badge progress interface
+interface BadgeProgress {
+  slug: string;
+  name: string;
+  description: string;
+  icon: string;
+  category: string;
+  current: number;
+  target: number;
+  percentage: number;
+}
+
+interface NextBadgeResponse {
+  nextBadges: BadgeProgress[];
+  totalEarned: number;
+  totalBadges: number;
+}
+
+// Fetch next badges to earn with progress
+export function useNextBadges() {
+  return useQuery<NextBadgeResponse>({
+    queryKey: ["user", "next-badge"],
+    queryFn: async () => {
+      const res = await fetch("/api/user/next-badge");
+      if (!res.ok) {
+        throw new Error("Failed to fetch next badges");
       }
       return res.json();
     },

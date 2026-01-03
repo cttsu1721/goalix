@@ -61,6 +61,15 @@ interface CompleteTaskResponse {
   };
   leveledUp: boolean;
   newLevel?: number;
+  badges?: Array<{
+    slug: string;
+    name: string;
+    description: string;
+  }>;
+  streak?: {
+    current: number;
+    milestone?: number;
+  };
 }
 
 interface UseTasksOptions {
@@ -248,6 +257,35 @@ export function useUncompleteTask() {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["user", "stats"] });
       queryClient.invalidateQueries({ queryKey: ["user", "streaks"] });
+    },
+  });
+}
+
+interface CarryOverResponse {
+  success: boolean;
+  movedCount: number;
+  taskIds: string[];
+}
+
+// Carry over tasks to tomorrow
+export function useCarryOverTasks() {
+  const queryClient = useQueryClient();
+
+  return useMutation<CarryOverResponse, Error, string[]>({
+    mutationFn: async (taskIds: string[]) => {
+      const res = await fetch("/api/tasks/carry-over", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ taskIds }),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to carry over tasks");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
   });
 }

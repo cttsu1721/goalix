@@ -5,12 +5,21 @@ import confetti from "canvas-confetti";
 
 interface UseTaskCompletionOptions {
   onLevelUp?: (newLevel: number) => void;
+  onFirstMit?: (pointsEarned: number) => void;
+  onStreakMilestone?: (milestone: number) => void;
 }
 
 // Check if user prefers reduced motion
 function prefersReducedMotion(): boolean {
   if (typeof window === "undefined") return false;
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+// Check if this is the first MIT celebration
+const FIRST_MIT_CELEBRATION_KEY = "goalzenix_first_mit_celebrated";
+function hasSeenFirstMitCelebration(): boolean {
+  if (typeof window === "undefined") return true;
+  return localStorage.getItem(FIRST_MIT_CELEBRATION_KEY) === "true";
 }
 
 export function useTaskCompletion(options: UseTaskCompletionOptions = {}) {
@@ -35,6 +44,21 @@ export function useTaskCompletion(options: UseTaskCompletionOptions = {}) {
       spread: 70,
       origin: { x: 0.8, y: 0.6 },
       colors: ["#e8a857", "#7dd3a8", "#f0eef8", "#c4c2d0"],
+    });
+  }, []);
+
+  const triggerStreakMilestoneConfetti = useCallback(() => {
+    // Skip confetti if user prefers reduced motion
+    if (prefersReducedMotion()) return;
+
+    // Flame-colored confetti for streak milestones - more intense burst
+    confetti({
+      particleCount: 200,
+      spread: 120,
+      origin: { x: 0.5, y: 0.5 },
+      colors: ["#f97316", "#ea580c", "#fb923c", "#fbbf24", "#f59e0b"],
+      gravity: 0.6,
+      scalar: 1.3,
     });
   }, []);
 
@@ -98,6 +122,35 @@ export function useTaskCompletion(options: UseTaskCompletionOptions = {}) {
           }, isMit ? 1500 : 500);
         }
 
+        // Handle streak milestone
+        if (result.streak?.milestone) {
+          const milestone = result.streak.milestone;
+          const milestoneMessages: Record<number, string> = {
+            7: "One week consistent. You're building momentum!",
+            14: "Two weeks strong! This is becoming a habit.",
+            30: "30 days! This is no longer effort — it's becoming lifestyle.",
+            60: "60 days. Your conveyor belt is producing results.",
+            90: "90 days! This habit is now instinctual.",
+          };
+
+          setTimeout(() => {
+            triggerStreakMilestoneConfetti();
+            toast.success(`🔥 ${milestone}-Day Streak!`, {
+              description: milestoneMessages[milestone] || `Amazing ${milestone}-day streak!`,
+              duration: 6000,
+            });
+            options.onStreakMilestone?.(milestone);
+          }, result.leveledUp ? 2500 : (isMit ? 1500 : 500));
+        }
+
+        // Check for first MIT celebration
+        if (isMit && !hasSeenFirstMitCelebration()) {
+          // Delay slightly so the confetti and toast appear first
+          setTimeout(() => {
+            options.onFirstMit?.(result.points.earned);
+          }, 2000);
+        }
+
         return result;
       } catch (error) {
         toast.error("Failed to complete task", {
@@ -106,7 +159,7 @@ export function useTaskCompletion(options: UseTaskCompletionOptions = {}) {
         throw error;
       }
     },
-    [completeTask, triggerConfetti, handleUndo, options]
+    [completeTask, triggerConfetti, triggerStreakMilestoneConfetti, handleUndo, options]
   );
 
   const uncomplete = useCallback(

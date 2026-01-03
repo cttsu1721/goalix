@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { MitCard, TaskList } from "@/components/tasks";
+import { MitCard, TaskList, shouldShowCarryOverPrompt } from "@/components/tasks";
 import { StatsPanel } from "@/components/gamification/StatsPanel";
 import { YearTargetHeader } from "@/components/dashboard";
 
@@ -26,11 +26,20 @@ const TaskSuggestModal = dynamic(
   () => import("@/components/ai/TaskSuggestModal").then((m) => m.TaskSuggestModal),
   { ssr: false }
 );
+const FirstMitCelebration = dynamic(
+  () => import("@/components/gamification/FirstMitCelebration").then((m) => m.FirstMitCelebration),
+  { ssr: false }
+);
+const TaskCarryOverModal = dynamic(
+  () => import("@/components/tasks/TaskCarryOverModal").then((m) => m.TaskCarryOverModal),
+  { ssr: false }
+);
 import {
   useTasks,
   useCreateTask,
   useUpdateTask,
   useTaskCompletion,
+  useCarryOverTasks,
   useUserStats,
   useKaizenCheckin,
   useSaveKaizenCheckin,
@@ -102,6 +111,9 @@ export default function DashboardPage() {
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [isPlanDayModalOpen, setIsPlanDayModalOpen] = useState(false);
   const [isTaskSuggestModalOpen, setIsTaskSuggestModalOpen] = useState(false);
+  const [isFirstMitCelebrationOpen, setIsFirstMitCelebrationOpen] = useState(false);
+  const [firstMitPoints, setFirstMitPoints] = useState(100);
+  const [isCarryOverModalOpen, setIsCarryOverModalOpen] = useState(false);
 
   // Fetch data - include overdue tasks for Today's Focus
   const { data: tasksData, isLoading: tasksLoading, refetch: refetchTasks } = useTasks(today, { includeOverdue: true });
@@ -153,10 +165,41 @@ export default function DashboardPage() {
   const aiLimit = aiUsage?.limit ?? 5;
 
   // Mutations
-  const { complete: completeTask, isPending: isCompleting } = useTaskCompletion();
+  const handleFirstMit = useCallback((pointsEarned: number) => {
+    setFirstMitPoints(pointsEarned);
+    setIsFirstMitCelebrationOpen(true);
+  }, []);
+  const { complete: completeTask, isPending: isCompleting } = useTaskCompletion({
+    onFirstMit: handleFirstMit,
+  });
   const updateTask = useUpdateTask();
   const saveKaizen = useSaveKaizenCheckin();
   const createTask = useCreateTask();
+  const carryOverTasks = useCarryOverTasks();
+
+  // Check for end-of-day carry-over prompt (after tasks load)
+  useEffect(() => {
+    if (!tasksLoading && tasksData?.tasks) {
+      const incompleteTodayTasks = tasksData.tasks.filter(
+        (t) => t.status !== "COMPLETED" && formatLocalDate(new Date(t.scheduledDate)) === today
+      );
+
+      // Show carry-over modal if:
+      // 1. It's evening time (6pm - 11pm)
+      // 2. There are incomplete tasks
+      // 3. User hasn't dismissed it today
+      if (
+        incompleteTodayTasks.length > 0 &&
+        shouldShowCarryOverPrompt()
+      ) {
+        // Small delay to not interrupt page load
+        const timer = setTimeout(() => {
+          setIsCarryOverModalOpen(true);
+        }, 2000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [tasksLoading, tasksData?.tasks, today]);
 
   // Uncomplete a task (revert to pending)
   const uncompleteTask = useCallback(async (taskId: string) => {
@@ -428,6 +471,7 @@ export default function DashboardPage() {
   const statsPanel = (
     <StatsPanel
       streak={mitStreak?.currentCount || 0}
+      streakFreezes={statsData?.streakFreezes || 0}
       level={{
         name: currentLevel.name,
         currentXp: statsData?.totalPoints || 0,
@@ -613,6 +657,33 @@ export default function DashboardPage() {
         onOpenChange={setIsTaskSuggestModalOpen}
         weeklyGoals={weeklyGoals}
         onApply={handleApplySuggestedTasks}
+      />
+
+      {/* First MIT Celebration Modal */}
+      <FirstMitCelebration
+        open={isFirstMitCelebrationOpen}
+        onOpenChange={setIsFirstMitCelebrationOpen}
+        pointsEarned={firstMitPoints}
+      />
+
+      {/* Task Carry-Over Modal (End of Day) */}
+      <TaskCarryOverModal
+        open={isCarryOverModalOpen}
+        onOpenChange={setIsCarryOverModalOpen}
+        incompleteTasks={tasks
+          .filter((t) => t.status !== "COMPLETED")
+          .map((t) => ({
+            id: t.id,
+            title: t.title,
+            priority: t.priority,
+            category: getCategoryLabel(t.weeklyGoal?.category || "OTHER"),
+          }))}
+        onCarryOver={async (taskIds) => {
+          await carryOverTasks.mutateAsync(taskIds);
+          toast.success(`Moved ${taskIds.length} task${taskIds.length !== 1 ? "s" : ""} to tomorrow`);
+          refetchTasks();
+        }}
+        onSkip={() => setIsCarryOverModalOpen(false)}
       />
     </AppShell>
   );
