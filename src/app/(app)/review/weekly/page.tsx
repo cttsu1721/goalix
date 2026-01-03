@@ -437,63 +437,192 @@ function ReviewWizard({ weekData, streaks, onComplete }: {
           </div>
         )}
 
-        {currentStep === 2 && (
-          <div className="space-y-4">
+        {currentStep === 2 && weekData && (
+          <div className="space-y-5">
             <div className="text-center mb-6">
               <div className="w-12 h-12 rounded-xl bg-lantern-soft flex items-center justify-center mx-auto mb-3">
                 <Award className="w-6 h-6 text-lantern" />
               </div>
               <h3 className="text-lg font-medium text-moon mb-2">Celebrate Your Wins</h3>
               <p className="text-sm text-moon-dim">
-                What went well this week? What are you proud of?
+                Reflect on what went well this week
               </p>
             </div>
+
+            {/* Data-driven prompts */}
+            <div className="space-y-3 p-4 bg-night-soft rounded-xl border border-night-mist">
+              <p className="text-xs font-medium uppercase tracking-wider text-moon-faint">This week you...</p>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm">
+                  <CheckCircle2 className="w-4 h-4 text-zen-green flex-shrink-0" />
+                  <span className="text-moon-soft">
+                    Completed <span className="text-zen-green font-medium">{weekData.stats.tasksCompleted}</span> tasks
+                    {weekData.stats.mitCompletionRate >= 70 && (
+                      <span className="text-moon-faint"> with a strong MIT rate</span>
+                    )}
+                  </span>
+                </div>
+                {weekData.stats.pointsEarned > 0 && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <TrendingUp className="w-4 h-4 text-lantern flex-shrink-0" />
+                    <span className="text-moon-soft">
+                      Earned <span className="text-lantern font-medium">{weekData.stats.pointsEarned}</span> points
+                    </span>
+                  </div>
+                )}
+                {weekData.goalAlignment.alignmentRate >= 60 && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Target className="w-4 h-4 text-zen-blue flex-shrink-0" />
+                    <span className="text-moon-soft">
+                      Stayed <span className="text-zen-blue font-medium">{weekData.goalAlignment.alignmentRate}%</span> goal-aligned
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Guided questions */}
+            <div className="space-y-3">
+              <label className="text-xs font-medium uppercase tracking-wider text-moon-faint">
+                Reflection Prompts
+              </label>
+              <div className="space-y-2 text-sm text-moon-dim">
+                <p>• What task or goal are you most proud of completing?</p>
+                <p>• What habit are you successfully building?</p>
+                <p>• What decision did you make that moved you toward your 1-year target?</p>
+              </div>
+            </div>
+
             <textarea
               value={wins}
               onChange={(e) => setWins(e.target.value)}
-              placeholder="I completed my MIT every day, finished the quarterly report ahead of schedule..."
-              className="w-full h-32 bg-night-soft border border-night-mist rounded-xl p-4 text-moon placeholder:text-moon-faint resize-none focus:border-lantern focus:ring-1 focus:ring-lantern/20 outline-none"
+              placeholder="This week I'm proud of... The habit I'm building is... I made progress toward my goal by..."
+              className="w-full h-28 bg-night-soft border border-night-mist rounded-xl p-4 text-moon placeholder:text-moon-faint resize-none focus:border-lantern focus:ring-1 focus:ring-lantern/20 outline-none"
             />
           </div>
         )}
 
-        {currentStep === 3 && (
-          <div className="space-y-4">
+        {currentStep === 3 && weekData && (
+          <div className="space-y-5">
             <div className="text-center mb-6">
               <div className="w-12 h-12 rounded-xl bg-zen-red-soft flex items-center justify-center mx-auto mb-3">
                 <Target className="w-6 h-6 text-zen-red" />
               </div>
               <h3 className="text-lg font-medium text-moon mb-2">Identify Challenges</h3>
               <p className="text-sm text-moon-dim">
-                What obstacles did you face? What could be improved?
+                Honest reflection leads to real improvement
               </p>
             </div>
+
+            {/* Data-driven insights */}
+            {(weekData.stats.completionRate < 70 || weekData.goalAlignment.unlinkedCompleted > 3 || weekData.stats.mitCompletionRate < 60) && (
+              <div className="space-y-3 p-4 bg-night-soft rounded-xl border border-zen-red/20">
+                <p className="text-xs font-medium uppercase tracking-wider text-moon-faint">Areas to reflect on...</p>
+                <div className="space-y-2">
+                  {weekData.stats.completionRate < 70 && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <CheckCircle2 className="w-4 h-4 text-zen-red flex-shrink-0" />
+                      <span className="text-moon-soft">
+                        Only <span className="text-zen-red font-medium">{weekData.stats.completionRate}%</span> task completion rate
+                      </span>
+                    </div>
+                  )}
+                  {weekData.goalAlignment.unlinkedCompleted > 3 && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Link2Off className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                      <span className="text-moon-soft">
+                        <span className="text-amber-400 font-medium">{weekData.goalAlignment.unlinkedCompleted}</span> tasks were not linked to goals
+                      </span>
+                    </div>
+                  )}
+                  {weekData.stats.mitCompletionRate < 60 && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Flame className="w-4 h-4 text-zen-red flex-shrink-0" />
+                      <span className="text-moon-soft">
+                        MIT completion at <span className="text-zen-red font-medium">{weekData.stats.mitCompletionRate}%</span>
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Guided questions */}
+            <div className="space-y-3">
+              <label className="text-xs font-medium uppercase tracking-wider text-moon-faint">
+                Reflection Prompts
+              </label>
+              <div className="space-y-2 text-sm text-moon-dim">
+                <p>• What distracted you from your most important tasks?</p>
+                <p>• Were there tasks that didn&apos;t actually move you toward your goals?</p>
+                <p>• What environment or habit needs to change?</p>
+              </div>
+            </div>
+
             <textarea
               value={challenges}
               onChange={(e) => setChallenges(e.target.value)}
-              placeholder="Got distracted by social media, struggled to wake up early on Wednesday..."
-              className="w-full h-32 bg-night-soft border border-night-mist rounded-xl p-4 text-moon placeholder:text-moon-faint resize-none focus:border-lantern focus:ring-1 focus:ring-lantern/20 outline-none"
+              placeholder="I struggled with... What distracted me was... Next week I will avoid..."
+              className="w-full h-28 bg-night-soft border border-night-mist rounded-xl p-4 text-moon placeholder:text-moon-faint resize-none focus:border-zen-red focus:ring-1 focus:ring-zen-red/20 outline-none"
             />
           </div>
         )}
 
-        {currentStep === 4 && (
-          <div className="space-y-4">
+        {currentStep === 4 && weekData && (
+          <div className="space-y-5">
             <div className="text-center mb-6">
               <div className="w-12 h-12 rounded-xl bg-zen-green-soft flex items-center justify-center mx-auto mb-3">
                 <Sparkles className="w-6 h-6 text-zen-green" />
               </div>
               <h3 className="text-lg font-medium text-moon mb-2">Plan Next Week</h3>
               <p className="text-sm text-moon-dim">
-                What&apos;s your main focus for the upcoming week?
+                Set your intention for the week ahead
               </p>
             </div>
+
+            {/* Kaizen focus suggestion */}
+            {weekData.kaizen?.weakestArea && weekData.kaizen.weakestArea.count < weekData.kaizen.checkinsCompleted && (
+              <div className="p-4 bg-night-soft rounded-xl border border-zen-purple/20">
+                <div className="flex items-center gap-2 mb-2">
+                  <Star className="w-4 h-4 text-zen-purple" />
+                  <span className="text-xs font-medium uppercase tracking-wider text-moon-faint">Suggested Focus</span>
+                </div>
+                <p className="text-sm text-moon-soft">
+                  Your <span className="text-zen-purple font-medium">{formatAreaName(weekData.kaizen.weakestArea.area)}</span> area
+                  {" "}could use more attention. Consider adding tasks that improve this area.
+                </p>
+              </div>
+            )}
+
+            {/* Guided questions */}
+            <div className="space-y-3">
+              <label className="text-xs font-medium uppercase tracking-wider text-moon-faint">
+                Planning Prompts
+              </label>
+              <div className="space-y-2 text-sm text-moon-dim">
+                <p>• What ONE thing would make next week a success?</p>
+                <p>• What will your MIT focus on?</p>
+                <p>• What habit will you protect or build?</p>
+                <p>• How will you stay aligned with your 1-year target?</p>
+              </div>
+            </div>
+
             <textarea
               value={nextWeekFocus}
               onChange={(e) => setNextWeekFocus(e.target.value)}
-              placeholder="Focus on the product launch, maintain morning workout routine, limit social media to 30 min/day..."
-              className="w-full h-32 bg-night-soft border border-night-mist rounded-xl p-4 text-moon placeholder:text-moon-faint resize-none focus:border-lantern focus:ring-1 focus:ring-lantern/20 outline-none"
+              placeholder="My #1 priority is... I will protect time for... To stay aligned I will..."
+              className="w-full h-28 bg-night-soft border border-night-mist rounded-xl p-4 text-moon placeholder:text-moon-faint resize-none focus:border-zen-green focus:ring-1 focus:ring-zen-green/20 outline-none"
             />
+
+            {/* Streak reminder */}
+            {currentStreak > 0 && (
+              <div className="flex items-center gap-2 p-3 bg-lantern/10 rounded-xl border border-lantern/20">
+                <Flame className="w-4 h-4 text-lantern" />
+                <span className="text-sm text-moon-soft">
+                  You&apos;re on a <span className="text-lantern font-medium">{currentStreak}-week</span> review streak! Keep it going.
+                </span>
+              </div>
+            )}
           </div>
         )}
       </div>
