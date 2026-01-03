@@ -543,6 +543,8 @@ export default function DashboardPage() {
         pointsEarned: statsData?.todayStats?.pointsEarned || pointsEarned,
       }}
       goalAlignment={goalAlignment}
+      linkedTasks={linkedTasks}
+      totalTasks={tasks.length}
       kaizenComplete={kaizenComplete}
       kaizenAreas={kaizenAreas}
       badges={badges}

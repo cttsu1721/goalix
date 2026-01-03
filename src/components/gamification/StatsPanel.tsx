@@ -23,6 +23,8 @@ interface StatsPanelProps {
     pointsEarned: number;
   };
   goalAlignment?: number;
+  linkedTasks?: number;
+  totalTasks?: number;
   kaizenComplete?: boolean;
   kaizenAreas?: Array<{
     id: string;
@@ -46,6 +48,8 @@ export function StatsPanel({
   level = { name: "Beginner", currentXp: 0, requiredXp: 500 },
   today = { tasksCompleted: 0, tasksTotal: 0, pointsEarned: 0 },
   goalAlignment = 0,
+  linkedTasks = 0,
+  totalTasks = 0,
   kaizenComplete = false,
   kaizenAreas,
   badges = [],
@@ -74,7 +78,11 @@ export function StatsPanel({
         pointsEarned={today.pointsEarned}
       />
 
-      <GoalAlignment percentage={goalAlignment} />
+      <GoalAlignment
+        percentage={goalAlignment}
+        linkedCount={linkedTasks}
+        totalCount={totalTasks}
+      />
 
       <KaizenCheckin
         areas={kaizenAreas}
