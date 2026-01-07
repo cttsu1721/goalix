@@ -163,20 +163,44 @@ jobs:
       - name: Wait for deployment to stabilize
         run: sleep 15
 
-      - name: Health check
-        run: |
-          response=$(curl -s -o /dev/null -w "%{http_code}" https://goalzenix.com/api/health)
-          if [ "$response" != "200" ]; then
-            echo "Health check failed with status: $response"
-            exit 1
-          fi
-          echo "Health check passed!"
+      # Use SSH to verify - bypasses Cloudflare blocking GitHub Actions IPs
+      - name: Health check (via SSH)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ env.VPS_HOST }}
+          username: ${{ env.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            # Check health endpoint from inside the server
+            response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/health 2>/dev/null || \
+                       docker compose -f /opt/apps/goalix/docker-compose.yml exec -T app wget -q -O /dev/null --server-response http://127.0.0.1:3000/api/health 2>&1 | grep "HTTP/" | awk '{print $2}')
 
-      - name: Smoke test - Landing page
-        run: |
-          response=$(curl -s -o /dev/null -w "%{http_code}" https://goalzenix.com)
-          if [ "$response" != "200" ]; then
-            echo "Landing page check failed with status: $response"
-            exit 1
-          fi
-          echo "Landing page check passed!"
+            # Fallback: check container health status
+            if [ -z "$response" ] || [ "$response" != "200" ]; then
+              echo "Direct curl failed, checking Docker health..."
+              health=$(docker inspect goalix --format='{{.State.Health.Status}}' 2>/dev/null)
+              if [ "$health" = "healthy" ]; then
+                echo "Container health check: healthy"
+                exit 0
+              else
+                echo "Container health: $health"
+                docker logs goalix --tail 20
+                exit 1
+              fi
+            fi
+            echo "Health check passed with status: $response"
+
+      - name: Smoke test - Landing page (via SSH)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ env.VPS_HOST }}
+          username: ${{ env.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            # Verify landing page returns 200
+            response=$(docker compose -f /opt/apps/goalix/docker-compose.yml exec -T app wget -q --spider --server-response http://127.0.0.1:3000 2>&1 | grep "HTTP/" | tail -1 | awk '{print $2}')
+            if [ "$response" != "200" ]; then
+              echo "Landing page check failed with status: $response"
+              exit 1
+            fi
+            echo "Landing page check passed!"
