@@ -103,15 +103,26 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
 
-            # Clean up any stale containers first
-            echo "Cleaning up containers..."
-            docker rm -f goalix goalix-redis 2>/dev/null || true
-            docker compose down --remove-orphans 2>/dev/null || true
+            # CAPA: Robust container cleanup to prevent stale state issues
+            echo "Cleaning up containers (robust)..."
 
-            # Build and restart containers
+            # 1. Stop and remove by name (catches running containers)
+            docker stop goalix goalix-redis 2>/dev/null || true
+            docker rm -f goalix goalix-redis 2>/dev/null || true
+
+            # 2. Remove any containers with goalix in the name (catches renamed/orphaned)
+            docker ps -a --filter "name=goalix" -q | xargs -r docker rm -f 2>/dev/null || true
+
+            # 3. Docker compose down with all cleanup flags
+            docker compose down --volumes=false --remove-orphans --timeout 30 2>/dev/null || true
+
+            # 4. Remove any dangling containers from this project
+            docker container prune -f --filter "label=com.docker.compose.project=goalix" 2>/dev/null || true
+
+            # Build and restart containers with force-recreate
             echo "Building and restarting containers..."
             docker compose build --no-cache
-            docker compose up -d
+            docker compose up -d --force-recreate --remove-orphans
 
             # Note: For schema changes, run migrations manually:
             # docker run --rm --network n8n-docker-caddy_n8n_network \
