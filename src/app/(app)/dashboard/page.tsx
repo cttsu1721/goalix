@@ -53,6 +53,7 @@ import {
   useUpdateTask,
   useTaskCompletion,
   useCarryOverTasks,
+  useRescheduleOverdue,
   useUserStats,
   useKaizenCheckin,
   useSaveKaizenCheckin,
@@ -63,7 +64,7 @@ import { useAIUsage } from "@/hooks/useAI";
 import { LEVELS } from "@/types/gamification";
 import { TASK_PRIORITY_POINTS } from "@/types/tasks";
 import { formatLocalDate } from "@/lib/utils";
-import { Sparkles, CalendarDays, AlertTriangle } from "lucide-react";
+import { Sparkles, CalendarDays, AlertTriangle, CalendarCheck } from "lucide-react";
 import { DashboardSkeleton, StatsPanelSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -234,6 +235,7 @@ export default function DashboardPage() {
   const saveKaizen = useSaveKaizenCheckin();
   const createTask = useCreateTask();
   const carryOverTasks = useCarryOverTasks();
+  const rescheduleOverdue = useRescheduleOverdue();
   const generateRecurring = useGenerateRecurringTasks();
 
   // Generate recurring tasks for today (once per day)
@@ -708,6 +710,29 @@ export default function DashboardPage() {
             <span className="text-xs text-zen-red/70">
               {overdueTasksFormatted.length} task{overdueTasksFormatted.length !== 1 ? "s" : ""} from previous days
             </span>
+            <div className="flex-1" />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-xs text-zen-red hover:text-zen-red hover:bg-zen-red/10"
+              onClick={async () => {
+                try {
+                  const result = await rescheduleOverdue.mutateAsync(undefined);
+                  if (result.rescheduledCount > 0) {
+                    toast.success(`Rescheduled ${result.rescheduledCount} task${result.rescheduledCount !== 1 ? "s" : ""} to today`);
+                    refetchTasks();
+                  } else {
+                    toast.info("No overdue tasks to reschedule");
+                  }
+                } catch {
+                  toast.error("Failed to reschedule tasks");
+                }
+              }}
+              disabled={rescheduleOverdue.isPending}
+            >
+              <CalendarCheck className="w-3.5 h-3.5 mr-1" />
+              {rescheduleOverdue.isPending ? "Moving..." : "Move All to Today"}
+            </Button>
           </div>
           <div className="flex flex-col bg-zen-red/5 rounded-xl border border-zen-red/20 px-4">
             {overdueTasksFormatted.map((task) => (

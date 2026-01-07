@@ -289,3 +289,33 @@ export function useCarryOverTasks() {
     },
   });
 }
+
+interface RescheduleOverdueResponse {
+  success: boolean;
+  rescheduledCount: number;
+  taskIds: string[];
+  targetDate: string;
+}
+
+// Reschedule all overdue tasks to today (or a specific date)
+export function useRescheduleOverdue() {
+  const queryClient = useQueryClient();
+
+  return useMutation<RescheduleOverdueResponse, Error, string | undefined>({
+    mutationFn: async (targetDate?: string) => {
+      const res = await fetch("/api/tasks/reschedule-overdue", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetDate }),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to reschedule overdue tasks");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    },
+  });
+}

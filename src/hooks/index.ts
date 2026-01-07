@@ -7,7 +7,9 @@ export {
   useUpdateTask,
   useDeleteTask,
   useCompleteTask,
+  useUncompleteTask,
   useCarryOverTasks,
+  useRescheduleOverdue,
 } from "./useTasks";
 
 export { useTaskCompletion } from "./useTaskCompletion";
@@ -69,3 +71,6 @@ export {
   type CreateRecurringTemplateInput,
   type UpdateRecurringTemplateInput,
 } from "./useRecurringTasks";
+
+// Accessibility hooks
+export { useReducedMotion, prefersReducedMotion } from "./useReducedMotion";
