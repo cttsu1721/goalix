@@ -1,8 +1,8 @@
 "use client";
 
-import { memo, useCallback } from "react";
+import { memo, useCallback, useState } from "react";
 import { cn } from "@/lib/utils";
-import { Check, ChevronRight, AlertTriangle, Target, Link2Off, X } from "lucide-react";
+import { Check, ChevronRight, AlertTriangle, Target, Link2Off, X, GripVertical } from "lucide-react";
 import { useSwipeGesture } from "@/hooks";
 
 // Format overdue date to show relative time (e.g., "Dec 30" or "Yesterday")
@@ -42,13 +42,27 @@ interface TaskItemProps {
     isOverdue?: boolean;
     scheduledDate?: string;
     goalChain?: GoalChain;
+    priority?: "MIT" | "PRIMARY" | "SECONDARY";
   };
   onToggle?: () => void;
   onEdit?: () => void;
+  onDragStart?: (taskId: string, title: string, priority: "PRIMARY" | "SECONDARY") => void;
+  onDragEnd?: () => void;
+  draggable?: boolean;
   className?: string;
 }
 
-export const TaskItem = memo(function TaskItem({ task, onToggle, onEdit, className }: TaskItemProps) {
+export const TaskItem = memo(function TaskItem({
+  task,
+  onToggle,
+  onEdit,
+  onDragStart,
+  onDragEnd,
+  draggable = false,
+  className
+}: TaskItemProps) {
+  const [isDragging, setIsDragging] = useState(false);
+
   const { ref, offset, isSwiping, direction, progress } = useSwipeGesture<HTMLDivElement>({
     threshold: 80,
     onSwipeRight: () => {
@@ -83,19 +97,55 @@ export const TaskItem = memo(function TaskItem({ task, onToggle, onEdit, classNa
   // Calculate opacity for action indicators based on progress
   const actionOpacity = Math.min(progress * 1.5, 1);
 
+  // Drag handlers
+  const handleDragStart = useCallback(
+    (e: React.DragEvent) => {
+      if (!draggable || task.completed) return;
+
+      const priority = task.priority as "PRIMARY" | "SECONDARY";
+      if (priority !== "PRIMARY" && priority !== "SECONDARY") return;
+
+      setIsDragging(true);
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", JSON.stringify({
+        id: task.id,
+        title: task.title,
+        priority,
+      }));
+
+      onDragStart?.(task.id, task.title, priority);
+    },
+    [draggable, task, onDragStart]
+  );
+
+  const handleDragEnd = useCallback(() => {
+    setIsDragging(false);
+    onDragEnd?.();
+  }, [onDragEnd]);
+
+  // Check if task is draggable (not completed, not MIT)
+  const canDrag = draggable && !task.completed && task.priority !== "MIT";
+
   return (
     <div
       ref={ref}
       tabIndex={0}
       role="button"
-      aria-label={`${task.completed ? "Completed" : "Incomplete"} task: ${task.title}. Press space to toggle, enter to edit.`}
+      aria-label={`${task.completed ? "Completed" : "Incomplete"} task: ${task.title}. Press space to toggle, enter to edit.${canDrag ? " Drag to promote to MIT." : ""}`}
       onKeyDown={handleKeyDown}
+      draggable={canDrag}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
       className={cn(
         "relative overflow-hidden",
         "border-b border-night-soft last:border-b-0",
         // Focus ring for keyboard navigation
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-lantern/50 focus-visible:ring-offset-2 focus-visible:ring-offset-night",
         "rounded-sm",
+        // Dragging state
+        isDragging && "opacity-50 scale-[0.98]",
+        // Draggable cursor
+        canDrag && "cursor-grab active:cursor-grabbing",
         className
       )}
       style={{ touchAction: "pan-y" }}
@@ -159,6 +209,13 @@ export const TaskItem = memo(function TaskItem({ task, onToggle, onEdit, classNa
           transform: `translateX(${offset}px)`,
         }}
       >
+        {/* Drag handle - only visible on hover when draggable */}
+        {canDrag && (
+          <div className="hidden sm:flex items-center justify-center w-4 -ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <GripVertical className="w-4 h-4 text-moon-faint/50" />
+          </div>
+        )}
+
         {/* Checkbox - larger touch target for mobile */}
         <button
           tabIndex={-1}

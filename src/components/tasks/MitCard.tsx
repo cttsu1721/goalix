@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { cn } from "@/lib/utils";
-import { Check, Sparkles, Trophy, Target, Link2Off } from "lucide-react";
+import { Check, Sparkles, Trophy, Target, Link2Off, ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface GoalChain {
@@ -16,6 +16,12 @@ interface GoalChain {
   } | null;
 }
 
+interface DroppedTask {
+  id: string;
+  title: string;
+  priority: "PRIMARY" | "SECONDARY";
+}
+
 interface MitCardProps {
   task?: {
     id: string;
@@ -27,10 +33,14 @@ interface MitCardProps {
   };
   onToggle?: () => void;
   onAiSuggest?: () => void;
+  onDrop?: (droppedTask: DroppedTask) => void;
+  isDraggingOver?: boolean;
   className?: string;
 }
 
-export function MitCard({ task, onToggle, onAiSuggest, className }: MitCardProps) {
+export function MitCard({ task, onToggle, onAiSuggest, onDrop, className }: MitCardProps) {
+  const [isDropTarget, setIsDropTarget] = useState(false);
+
   // Keyboard handler for accessibility
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -43,12 +53,58 @@ export function MitCard({ task, onToggle, onAiSuggest, className }: MitCardProps
     [onToggle]
   );
 
+  // Drag and drop handlers
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setIsDropTarget(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    // Only set to false if we're actually leaving the card (not entering a child)
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+      setIsDropTarget(false);
+    }
+  }, []);
+
+  const handleDropEvent = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDropTarget(false);
+
+    try {
+      const data = e.dataTransfer.getData("text/plain");
+      const droppedTask: DroppedTask = JSON.parse(data);
+      onDrop?.(droppedTask);
+    } catch {
+      // Invalid drop data
+    }
+  }, [onDrop]);
+
   if (!task) {
     return (
       <section className={cn("mb-8 sm:mb-12", className)}>
-        <div className="bg-night border border-night-mist rounded-2xl sm:rounded-[20px] p-5 sm:p-8 relative overflow-hidden">
+        <div
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDropEvent}
+          className={cn(
+            "bg-night border rounded-2xl sm:rounded-[20px] p-5 sm:p-8 relative overflow-hidden",
+            "transition-all duration-200",
+            isDropTarget
+              ? "border-lantern border-dashed scale-[1.02] shadow-lg shadow-lantern/20"
+              : "border-night-mist"
+          )}
+        >
           {/* Subtle gradient background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-lantern/5 to-transparent pointer-events-none" />
+          <div className={cn(
+            "absolute inset-0 pointer-events-none transition-opacity duration-200",
+            isDropTarget
+              ? "bg-gradient-to-br from-lantern/20 to-transparent"
+              : "bg-gradient-to-br from-lantern/5 to-transparent"
+          )} />
 
           <div className="relative">
             <div className="flex items-center gap-2 mb-4">
@@ -58,15 +114,28 @@ export function MitCard({ task, onToggle, onAiSuggest, className }: MitCardProps
               </span>
             </div>
             <div className="text-center py-6 sm:py-8">
-              <p className="text-moon-dim mb-4 text-sm sm:text-base">No MIT set for today</p>
-              <Button
-                variant="outline"
-                onClick={onAiSuggest}
-                className="bg-night-soft border-night-mist text-moon-soft hover:border-lantern hover:text-lantern hover:bg-lantern/5 h-11 px-5 rounded-xl"
-              >
-                <Sparkles className="w-4 h-4 mr-2" />
-                AI Suggest MIT
-              </Button>
+              {isDropTarget ? (
+                <>
+                  <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-lantern/20 flex items-center justify-center animate-pulse">
+                    <ArrowUp className="w-6 h-6 text-lantern" />
+                  </div>
+                  <p className="text-lantern font-medium mb-2">Drop to promote to MIT</p>
+                  <p className="text-moon-faint text-sm">This will become your #1 priority</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-moon-dim mb-2 text-sm sm:text-base">No MIT set for today</p>
+                  <p className="text-moon-faint/60 text-xs mb-4">Drag a task here to promote it</p>
+                  <Button
+                    variant="outline"
+                    onClick={onAiSuggest}
+                    className="bg-night-soft border-night-mist text-moon-soft hover:border-lantern hover:text-lantern hover:bg-lantern/5 h-11 px-5 rounded-xl"
+                  >
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    AI Suggest MIT
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -79,19 +148,50 @@ export function MitCard({ task, onToggle, onAiSuggest, className }: MitCardProps
       <div
         tabIndex={0}
         role="button"
-        aria-label={`${task.completed ? "Completed" : "Incomplete"} MIT: ${task.title}. Press space to toggle completion.`}
+        aria-label={`${task.completed ? "Completed" : "Incomplete"} MIT: ${task.title}. Press space to toggle completion. Drop a task here to swap.`}
         onKeyDown={handleKeyDown}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDropEvent}
         className={cn(
-          "bg-night border border-night-mist rounded-2xl sm:rounded-[20px] p-5 sm:p-8 relative overflow-hidden",
+          "bg-night border rounded-2xl sm:rounded-[20px] p-5 sm:p-8 relative overflow-hidden",
+          "transition-all duration-200",
           // Focus ring for keyboard navigation
-          "focus:outline-none focus-visible:ring-2 focus-visible:ring-lantern focus-visible:ring-offset-2 focus-visible:ring-offset-night"
+          "focus:outline-none focus-visible:ring-2 focus-visible:ring-lantern focus-visible:ring-offset-2 focus-visible:ring-offset-night",
+          // Drop target styling
+          isDropTarget
+            ? "border-lantern border-dashed scale-[1.02] shadow-lg shadow-lantern/20"
+            : "border-night-mist"
         )}
       >
         {/* Accent bar - adjusted for mobile */}
-        <div className="absolute left-0 top-0 bottom-0 w-1 sm:w-[3px] bg-gradient-to-b from-lantern via-lantern/50 to-transparent" />
+        <div className={cn(
+          "absolute left-0 top-0 bottom-0 w-1 sm:w-[3px] transition-all duration-200",
+          isDropTarget
+            ? "bg-lantern"
+            : "bg-gradient-to-b from-lantern via-lantern/50 to-transparent"
+        )} />
 
         {/* Subtle gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-lantern/5 to-transparent pointer-events-none" />
+        <div className={cn(
+          "absolute inset-0 pointer-events-none transition-opacity duration-200",
+          isDropTarget
+            ? "bg-gradient-to-br from-lantern/20 to-transparent"
+            : "bg-gradient-to-br from-lantern/5 to-transparent"
+        )} />
+
+        {/* Drop overlay when dragging over */}
+        {isDropTarget && (
+          <div className="absolute inset-0 flex items-center justify-center bg-night/80 z-10 rounded-2xl sm:rounded-[20px]">
+            <div className="text-center">
+              <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-lantern/20 flex items-center justify-center animate-pulse">
+                <ArrowUp className="w-6 h-6 text-lantern" />
+              </div>
+              <p className="text-lantern font-medium mb-1">Drop to swap</p>
+              <p className="text-moon-faint text-sm">Current MIT will move to the dropped task&apos;s priority</p>
+            </div>
+          </div>
+        )}
 
         <div className="relative pl-4 sm:pl-6">
           {/* Label */}
