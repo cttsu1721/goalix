@@ -15,6 +15,7 @@ enum GoalCategory {
   CAREER
   PERSONAL_GROWTH
   LIFESTYLE
+  LIFE_MAINTENANCE
   OTHER
 }
 

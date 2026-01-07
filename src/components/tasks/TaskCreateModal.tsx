@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn, formatLocalDate } from "@/lib/utils";
-import { Loader2, Sparkles, Clock, AlertCircle, Lightbulb } from "lucide-react";
+import { Loader2, Sparkles, Clock, AlertCircle, Lightbulb, ChevronDown, ChevronUp } from "lucide-react";
 import type { TaskPriority, GoalCategory } from "@prisma/client";
 import { AiButton, TaskSuggestModal } from "@/components/ai";
 // DecisionCompassDialog removed - flexible hierarchy allows standalone tasks
@@ -88,6 +88,10 @@ export function TaskCreateModal({
   const [weeklyGoalId, setWeeklyGoalId] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [showSuggestModal, setShowSuggestModal] = useState(false);
+  const [showMoreOptions, setShowMoreOptions] = useState(false);
+
+  // Auto-expand if any optional field has content
+  const hasOptionalContent = description.trim() || estimatedMinutes || (weeklyGoalId && weeklyGoalId !== "none");
 
   const createTask = useCreateTask();
   const { data: weeklyGoalsData } = useGoals("weekly");
@@ -156,6 +160,7 @@ export function TaskCreateModal({
     setEstimatedMinutes("");
     setWeeklyGoalId("");
     setError(null);
+    setShowMoreOptions(false);
   };
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -203,10 +208,10 @@ export function TaskCreateModal({
             />
           </div>
 
-          {/* Priority */}
-          <div className="space-y-3">
+          {/* Priority - Compact inline buttons */}
+          <div className="space-y-2">
             <Label className="text-moon-soft text-sm">Priority</Label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="flex gap-2">
               {(Object.keys(PRIORITY_CONFIG) as TaskPriority[]).map((p) => {
                 const config = PRIORITY_CONFIG[p];
                 const isSelected = priority === p;
@@ -216,7 +221,7 @@ export function TaskCreateModal({
                     type="button"
                     onClick={() => setPriority(p)}
                     className={cn(
-                      "flex flex-col items-center gap-0.5 p-3 rounded-xl border transition-all",
+                      "flex items-center gap-1.5 px-3 py-2 rounded-lg border transition-all text-sm",
                       isSelected
                         ? "border-lantern bg-lantern/10"
                         : "border-night-mist bg-night-soft hover:border-night-glow"
@@ -224,86 +229,108 @@ export function TaskCreateModal({
                   >
                     <span
                       className={cn(
-                        "text-sm font-medium",
+                        "font-medium",
                         isSelected ? "text-lantern" : config.color
                       )}
                     >
                       {config.label}
                     </span>
                     <span className="text-[10px] text-moon-faint">
-                      {config.shortDesc}
-                    </span>
-                    <span className="text-[10px] text-moon-faint/70">
-                      +{config.points} pts
+                      +{config.points}
                     </span>
                   </button>
                 );
               })}
             </div>
-            {/* Priority description - more prominent */}
-            <div className={cn(
-              "p-3 rounded-lg border text-xs leading-relaxed",
-              priority === "MIT" && "bg-lantern/5 border-lantern/20 text-lantern/90",
-              priority === "PRIMARY" && "bg-zen-green/5 border-zen-green/20 text-zen-green/90",
-              priority === "SECONDARY" && "bg-night-soft border-night-mist text-moon-dim"
-            )}>
-              {selectedPriorityConfig.description}
-            </div>
           </div>
 
-          {/* Description */}
-          <div className="space-y-2">
-            <Label htmlFor="description" className="text-moon-soft text-sm">
-              Description{" "}
-              <span className="text-moon-faint font-normal">(optional)</span>
-            </Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Add details or notes..."
-              rows={3}
-              className="bg-night-soft border-night-mist text-moon placeholder:text-moon-faint focus:border-lantern focus:ring-lantern/20 resize-none"
-            />
-          </div>
+          {/* More Options Toggle */}
+          <button
+            type="button"
+            onClick={() => setShowMoreOptions(!showMoreOptions)}
+            className="flex items-center gap-2 text-sm text-moon-faint hover:text-moon-soft transition-colors w-full py-2"
+          >
+            {showMoreOptions || hasOptionalContent ? (
+              <ChevronUp className="w-4 h-4" />
+            ) : (
+              <ChevronDown className="w-4 h-4" />
+            )}
+            <span>
+              {showMoreOptions || hasOptionalContent ? "Hide" : "Show"} more options
+              {hasOptionalContent && !showMoreOptions && (
+                <span className="text-lantern ml-1.5">•</span>
+              )}
+            </span>
+          </button>
 
-          {/* Estimated Time & Weekly Goal */}
-          <div className="grid grid-cols-2 gap-4">
-            {/* Estimated Time */}
-            <div className="space-y-2">
-              <Label className="text-moon-soft text-sm flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5" />
-                Time Estimate
-              </Label>
-              <Select value={estimatedMinutes} onValueChange={setEstimatedMinutes}>
-                <SelectTrigger className="bg-night-soft border-night-mist text-moon focus:ring-lantern/20">
-                  <SelectValue placeholder="Select time" />
-                </SelectTrigger>
-                <SelectContent className="bg-night border-night-mist">
-                  {ESTIMATED_TIME_OPTIONS.map((option) => (
-                    <SelectItem
-                      key={option.value}
-                      value={option.value}
-                      className="text-moon-soft focus:bg-night-mist focus:text-moon"
-                    >
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          {/* Collapsible Options */}
+          {(showMoreOptions || hasOptionalContent) && (
+            <div className="space-y-4 animate-in slide-in-from-top-2 duration-200">
+              {/* Priority description */}
+              <div className={cn(
+                "p-3 rounded-lg border text-xs leading-relaxed",
+                priority === "MIT" && "bg-lantern/5 border-lantern/20 text-lantern/90",
+                priority === "PRIMARY" && "bg-zen-green/5 border-zen-green/20 text-zen-green/90",
+                priority === "SECONDARY" && "bg-night-soft border-night-mist text-moon-dim"
+              )}>
+                {selectedPriorityConfig.description}
+              </div>
 
-            {/* Weekly Goal Link */}
-            <div className="space-y-2">
-              <Label className="text-moon-soft text-sm">Link to Goal</Label>
-              <GoalSelector
-                goals={weeklyGoals}
-                value={weeklyGoalId}
-                onChange={setWeeklyGoalId}
-                placeholder="Select goal..."
-              />
+              {/* Description */}
+              <div className="space-y-2">
+                <Label htmlFor="description" className="text-moon-soft text-sm">
+                  Notes{" "}
+                  <span className="text-moon-faint font-normal">(optional)</span>
+                </Label>
+                <Textarea
+                  id="description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Add details or notes..."
+                  rows={2}
+                  className="bg-night-soft border-night-mist text-moon placeholder:text-moon-faint focus:border-lantern focus:ring-lantern/20 resize-none"
+                />
+              </div>
+
+              {/* Estimated Time & Weekly Goal */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* Estimated Time */}
+                <div className="space-y-2">
+                  <Label className="text-moon-soft text-sm flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5" />
+                    Time Estimate
+                  </Label>
+                  <Select value={estimatedMinutes} onValueChange={setEstimatedMinutes}>
+                    <SelectTrigger className="bg-night-soft border-night-mist text-moon focus:ring-lantern/20">
+                      <SelectValue placeholder="Select time" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-night border-night-mist">
+                      {ESTIMATED_TIME_OPTIONS.map((option) => (
+                        <SelectItem
+                          key={option.value}
+                          value={option.value}
+                          className="text-moon-soft focus:bg-night-mist focus:text-moon"
+                        >
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Weekly Goal Link */}
+                <div className="space-y-2">
+                  <Label className="text-moon-soft text-sm">Link to Goal</Label>
+                  <GoalSelector
+                    goals={weeklyGoals}
+                    value={weeklyGoalId}
+                    onChange={setWeeklyGoalId}
+                    placeholder="Select goal..."
+                  />
+                </div>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* AI Suggest Button - shows when goal is selected but no title yet */}
           {selectedWeeklyGoal && !title.trim() && (

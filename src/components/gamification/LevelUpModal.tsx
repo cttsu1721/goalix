@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Trophy, Sparkles, ArrowUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useReducedMotion } from "@/hooks";
 
 interface LevelUpModalProps {
   open: boolean;
@@ -26,13 +27,20 @@ export function LevelUpModal({
   newLevelName,
 }: LevelUpModalProps) {
   const [showContent, setShowContent] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
     if (open) {
+      // For reduced motion: show content immediately
+      if (prefersReducedMotion) {
+        setShowContent(true);
+        return;
+      }
+
       // Delay content animation
       const timer = setTimeout(() => setShowContent(true), 100);
 
-      // Fire celebratory confetti
+      // Fire celebratory confetti (skip if reduced motion)
       const duration = 3000;
       const end = Date.now() + duration;
 
@@ -63,7 +71,7 @@ export function LevelUpModal({
     } else {
       setShowContent(false);
     }
-  }, [open]);
+  }, [open, prefersReducedMotion]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

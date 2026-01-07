@@ -9,6 +9,7 @@ import { MitCard, TaskList, shouldShowCarryOverPrompt, FloatingActionButton } fr
 import { StatsPanel } from "@/components/gamification/StatsPanel";
 import { MobileStatsBar } from "@/components/gamification/MobileStatsBar";
 import { YearTargetHeader } from "@/components/dashboard";
+import { ReviewDuePromptAuto } from "@/components/review";
 
 // Lazy load modal components to reduce initial bundle size
 const TaskCreateModal = dynamic(
@@ -45,6 +46,10 @@ const LevelUpModal = dynamic(
 );
 const BadgeEarnedModal = dynamic(
   () => import("@/components/gamification/BadgeEarnedModal").then((m) => m.BadgeEarnedModal),
+  { ssr: false }
+);
+const TutorialCards = dynamic(
+  () => import("@/components/onboarding/TutorialCards").then((m) => m.TutorialCards),
   { ssr: false }
 );
 import {
@@ -639,8 +644,10 @@ export default function DashboardPage() {
   };
 
   // Calculate goal alignment (percentage of tasks linked to goals)
-  const linkedTasks = tasks.filter((t) => t.weeklyGoalId).length;
-  const goalAlignment = tasks.length > 0 ? Math.round((linkedTasks / tasks.length) * 100) : 0;
+  // Exclude LIFE_MAINTENANCE tasks from alignment calculation - they're necessary but don't need goals
+  const alignableTasks = tasks.filter((t) => t.weeklyGoal?.category !== "LIFE_MAINTENANCE");
+  const linkedTasks = alignableTasks.filter((t) => t.weeklyGoalId).length;
+  const goalAlignment = alignableTasks.length > 0 ? Math.round((linkedTasks / alignableTasks.length) * 100) : 0;
 
   // Get user's first name
   const userName = session?.user?.name?.split(" ")[0] || "there";
@@ -661,7 +668,7 @@ export default function DashboardPage() {
       }}
       goalAlignment={goalAlignment}
       linkedTasks={linkedTasks}
-      totalTasks={tasks.length}
+      totalTasks={alignableTasks.length}
       kaizenComplete={kaizenComplete}
       kaizenAreas={kaizenAreas}
       badges={badges}
@@ -689,6 +696,9 @@ export default function DashboardPage() {
         goalAlignment={goalAlignment}
         levelName={currentLevel.name}
       />
+
+      {/* Review Due Prompt - shows when weekly/monthly review is due */}
+      <ReviewDuePromptAuto className="mb-6" />
 
       {/* 1-Year Target Header - The Decision Filter */}
       <YearTargetHeader
@@ -784,33 +794,41 @@ export default function DashboardPage() {
 
       {/* Empty State - No tasks planned */}
       {tasks.length === 0 && overdueTasksFormatted.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 px-4">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-lantern/20 to-zen-green/10 border border-night-glow flex items-center justify-center mb-6 animate-pulse">
-            <CalendarDays className="w-10 h-10 text-lantern" />
-          </div>
-          <h3 className="text-xl font-light text-moon mb-2">Ready to make progress?</h3>
-          <p className="text-moon-dim text-center mb-4 max-w-sm">
-            Start your day with intention. What&apos;s the ONE thing that would make today a win?
-          </p>
-          <p className="text-xs text-moon-faint/60 italic mb-8">
-            &ldquo;Small daily improvements lead to stunning results.&rdquo;
-          </p>
-          <div className="flex gap-3">
-            <Button
-              onClick={() => setIsPlanDayModalOpen(true)}
-              variant="outline"
-              className="border-night-glow text-moon hover:bg-night-soft h-12 px-6"
-            >
-              <CalendarDays className="w-4 h-4 mr-2" />
-              Plan Manually
-            </Button>
-            <Button
-              onClick={handleOpenTaskSuggest}
-              className="bg-zen-purple text-void hover:bg-zen-purple/90 h-12 px-6"
-            >
-              <Sparkles className="w-4 h-4 mr-2" />
-              AI Suggest Tasks
-            </Button>
+        <div className="space-y-8">
+          {/* Tutorial Cards */}
+          <TutorialCards
+            onCreateTask={() => openCreateModal("MIT")}
+          />
+
+          {/* Empty state CTA */}
+          <div className="flex flex-col items-center justify-center py-12 px-4">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-lantern/20 to-zen-green/10 border border-night-glow flex items-center justify-center mb-6 animate-pulse">
+              <CalendarDays className="w-10 h-10 text-lantern" />
+            </div>
+            <h3 className="text-xl font-light text-moon mb-2">Ready to make progress?</h3>
+            <p className="text-moon-dim text-center mb-4 max-w-sm">
+              Start your day with intention. What&apos;s the ONE thing that would make today a win?
+            </p>
+            <p className="text-xs text-moon-faint/60 italic mb-8">
+              &ldquo;Small daily improvements lead to stunning results.&rdquo;
+            </p>
+            <div className="flex gap-3">
+              <Button
+                onClick={() => setIsPlanDayModalOpen(true)}
+                variant="outline"
+                className="border-night-glow text-moon hover:bg-night-soft h-12 px-6"
+              >
+                <CalendarDays className="w-4 h-4 mr-2" />
+                Plan Manually
+              </Button>
+              <Button
+                onClick={handleOpenTaskSuggest}
+                className="bg-zen-purple text-void hover:bg-zen-purple/90 h-12 px-6"
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                AI Suggest Tasks
+              </Button>
+            </div>
           </div>
         </div>
       ) : tasks.length > 0 ? (

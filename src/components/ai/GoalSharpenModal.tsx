@@ -20,6 +20,7 @@ import {
   Clock,
   Footprints,
   ArrowRight,
+  RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -201,13 +202,24 @@ export function GoalSharpenModal({
           )}
 
           {result && (
-            <Button
-              onClick={handleApply}
-              className="bg-zen-green text-void hover:bg-zen-green/90"
-            >
-              Apply Changes
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
+            <>
+              <Button
+                onClick={handleSharpen}
+                disabled={sharpen.isPending}
+                variant="outline"
+                className="border-zen-purple/30 text-zen-purple hover:bg-zen-purple/10"
+              >
+                <RefreshCw className={cn("w-4 h-4 mr-2", sharpen.isPending && "animate-spin")} />
+                Regenerate
+              </Button>
+              <Button
+                onClick={handleApply}
+                className="bg-zen-green text-void hover:bg-zen-green/90"
+              >
+                Apply Changes
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </>
           )}
         </div>
       </DialogContent>

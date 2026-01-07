@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
           },
           include: {
             threeYearGoals: {
-              select: { id: true },
+              select: { id: true, status: true },
             },
           },
           orderBy: { createdAt: "desc" },
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
               select: { id: true, title: true },
             },
             oneYearGoals: {
-              select: { id: true },
+              select: { id: true, status: true },
             },
           },
           orderBy: { createdAt: "desc" },
@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
               },
             },
             monthlyGoals: {
-              select: { id: true },
+              select: { id: true, status: true },
             },
           },
           orderBy: { createdAt: "desc" },
@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
               select: { id: true, title: true },
             },
             weeklyGoals: {
-              select: { id: true },
+              select: { id: true, status: true },
             },
           },
           orderBy: { targetMonth: "desc" },

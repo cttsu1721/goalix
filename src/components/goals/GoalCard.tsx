@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Plus } from "lucide-react";
 import { GoalCategoryBadge } from "./GoalCategoryBadge";
 import type { GoalCategory, GoalStatus } from "@prisma/client";
 
@@ -16,6 +16,8 @@ interface GoalCardProps {
   completedChildren?: number;
   parentTitle?: string;
   onClick?: () => void;
+  onCreateChild?: () => void;
+  childLabel?: string;
   className?: string;
 }
 
@@ -29,10 +31,17 @@ export function GoalCard({
   completedChildren = 0,
   parentTitle,
   onClick,
+  onCreateChild,
+  childLabel = "sub-goal",
   className,
 }: GoalCardProps) {
   const isCompleted = status === "COMPLETED";
   const isPaused = status === "PAUSED";
+
+  const handleCreateChild = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onCreateChild?.();
+  };
 
   return (
     <button
@@ -58,7 +67,24 @@ export function GoalCard({
       {/* Category indicator */}
       <div className="flex items-center justify-between mb-3">
         <GoalCategoryBadge category={category} />
-        <ChevronRight className="w-4 h-4 text-moon-faint group-hover:text-lantern transition-colors" />
+        <div className="flex items-center gap-1">
+          {onCreateChild && (
+            <button
+              onClick={handleCreateChild}
+              className={cn(
+                "w-7 h-7 rounded-lg flex items-center justify-center",
+                "text-moon-faint hover:text-lantern hover:bg-lantern/10",
+                "opacity-0 group-hover:opacity-100 transition-all duration-200",
+                "focus:outline-none focus:ring-2 focus:ring-lantern/50 focus:opacity-100"
+              )}
+              title={`Add ${childLabel}`}
+              aria-label={`Add ${childLabel} to ${title}`}
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+          )}
+          <ChevronRight className="w-4 h-4 text-moon-faint group-hover:text-lantern transition-colors" />
+        </div>
       </div>
 
       {/* Title */}

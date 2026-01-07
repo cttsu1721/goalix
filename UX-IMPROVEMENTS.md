@@ -3,7 +3,7 @@
 > Generated: 2026-01-03
 > **Status: Active Development**
 > Total Items: 95 improvements across 15 categories
-> **Completed: 15 items** | **Remaining: 80 items**
+> **Completed: 36 items** | **Remaining: 59 items**
 
 ---
 
@@ -11,28 +11,44 @@
 
 **Priority items for the next development session:**
 
-### Quick Wins (< 2 hours each)
-| ID | Item | Effort | Why |
-|----|------|--------|-----|
-| **2.3** | Keyboard shortcut Cmd+N for new task | XS | Power user productivity |
-| **11.3** | "Recovery" message after streak loss | XS | Emotional design, easy win |
-| **14.1** | Settings gear icon in header | XS | Better discoverability |
-| **5.2** | Swipe gesture hint animation | S | Teach users about swipe |
+### ✅ Quick Wins (Completed 2026-01-07)
+| ID | Item | Effort | Status |
+|----|------|--------|--------|
+| **2.3** | Keyboard shortcut Cmd+N for new task | XS | ✅ Done |
+| **11.3** | "Recovery" message after streak loss | XS | ✅ Done (existed) |
+| **14.1** | Settings gear icon in header | XS | ✅ Done |
+| **5.2** | Swipe gesture hint animation | S | ✅ Done |
 
-### High-Impact Next Features
-| ID | Item | Effort | Why |
-|----|------|--------|-----|
-| **1.1** | 3-step onboarding wizard | L | P0 - Critical for new users |
-| **4.2** | Streak freeze (1 per week) | M | P0 - Prevents frustration |
-| **3.2** | Breadcrumb trail for goals | S | P0 - Navigation clarity |
-| **5.4** | Pull-to-refresh | S | P0 - Expected mobile behavior |
-| **14.4** | Cmd+K command palette | L | P0 - Power user navigation |
+### ✅ High-Impact Features (Completed 2026-01-07)
+| ID | Item | Effort | Status |
+|----|------|--------|--------|
+| **1.1** | 3-step onboarding wizard | L | ✅ Done |
+| **4.2** | Streak freeze (1 per week) | M | ✅ Done |
+| **3.2** | Breadcrumb trail for goals | S | ✅ Done |
+| **5.4** | Pull-to-refresh | S | ✅ Done |
+| **14.4** | Cmd+K command palette | L | ✅ Done |
+
+### Next Priority Items
+| ID | Item | Priority | Effort | Status |
+|----|------|----------|--------|--------|
+| **2.2** | Floating action button (mobile quick-add) | P0 | S | ✅ Done |
+| **10.2** | Respect prefers-reduced-motion | P0 | S | ✅ Done |
+| **3.3** | "Create child goal" button | P1 | S | ✅ Done |
+| **2.1** | Drag-to-promote task to MIT | P1 | M | ✅ Done |
+| **5.3** | Haptic feedback on complete/drag | P1 | S | ✅ Done |
 
 ### Files to Reference
-- `src/components/tasks/TaskItem.tsx` - Task keyboard shortcuts example
+- `src/components/tasks/TaskItem.tsx` - Task keyboard shortcuts + drag functionality
+- `src/components/tasks/MitCard.tsx` - MIT card with drop zone for drag-to-promote
+- `src/components/tasks/TaskList.tsx` - Task list with draggable prop passthrough
+- `src/components/tasks/FloatingActionButton.tsx` - Mobile FAB pattern
 - `src/components/gamification/MobileStatsBar.tsx` - Mobile component pattern
-- `src/app/(app)/dashboard/page.tsx` - Dashboard integration example
+- `src/app/(app)/dashboard/page.tsx` - Dashboard with promotion logic (handlePromoteToMit)
 - `src/components/gamification/LevelUpModal.tsx` - Celebration modal pattern
+- `src/components/onboarding/OnboardingWizard.tsx` - Onboarding wizard pattern
+- `src/components/layout/CommandPalette.tsx` - Command palette pattern
+- `src/components/goals/GoalBreadcrumb.tsx` - Breadcrumb navigation pattern
+- `src/hooks/useReducedMotion.ts` - Reduced motion preference hook
 
 ---
 
@@ -61,8 +77,8 @@ This document captures all identified UX improvements for Goalzenix, organized b
 
 | ID | Improvement | Priority | Effort | Status |
 |----|-------------|----------|--------|--------|
-| 1.1 | Add 3-step onboarding wizard (Vision → 1-Year Goal → First Task) | P0 | L | Todo |
-| 1.2 | Interactive tutorial cards on empty dashboard | P1 | M | Todo |
+| 1.1 | Add 3-step onboarding wizard (Vision → 1-Year Goal → First Task) | P0 | L | ✅ Done |
+| 1.2 | Interactive tutorial cards on empty dashboard | P1 | M | ✅ Done |
 | 1.3 | "How it works" modal with visual cascade diagram | P1 | S | Todo |
 | 1.4 | "Try with sample goals" option for exploration | P2 | M | Todo |
 | 1.5 | First MIT completion celebration with explanation | P1 | S | ✅ Done |
@@ -81,9 +97,9 @@ This document captures all identified UX improvements for Goalzenix, organized b
 
 | ID | Improvement | Priority | Effort | Status |
 |----|-------------|----------|--------|--------|
-| 2.1 | Drag-to-promote any task to MIT | P1 | M | Todo |
-| 2.2 | Floating action button for quick-add (mobile) | P0 | S | Todo |
-| 2.3 | Keyboard shortcut Cmd+N for new task | P1 | XS | Todo |
+| 2.1 | Drag-to-promote any task to MIT | P1 | M | ✅ Done |
+| 2.2 | Floating action button for quick-add (mobile) | P0 | S | ✅ Done |
+| 2.3 | Keyboard shortcut Cmd+N for new task | P1 | XS | ✅ Done |
 | 2.4 | Timeline view option using time estimates | P2 | L | Todo |
 | 2.5 | End-of-day prompt: "Move X incomplete tasks to tomorrow?" | P1 | M | ✅ Done |
 | 2.6 | "Reschedule all" bulk action for overdue tasks | P1 | S | Todo |
@@ -106,11 +122,11 @@ This document captures all identified UX improvements for Goalzenix, organized b
 | ID | Improvement | Priority | Effort | Status |
 |----|-------------|----------|--------|--------|
 | 3.1 | Tree/mind-map visualization (ReactFlow/D3) | P1 | XL | Todo |
-| 3.2 | Breadcrumb trail: "7Y → 3Y → 1Y → Monthly → Weekly" | P0 | S | Todo |
-| 3.3 | "Create child goal" button on each goal card | P1 | S | Todo |
+| 3.2 | Breadcrumb trail: "7Y → 3Y → 1Y → Monthly → Weekly" | P0 | S | ✅ Done |
+| 3.3 | "Create child goal" button on each goal card | P1 | S | ✅ Done |
 | 3.4 | Global goal search/filter across all levels | P1 | M | Todo |
 | 3.5 | "Unlinked goals" warning section | P2 | S | Todo |
-| 3.6 | Progress bars showing % of child goals completed | P1 | M | Todo |
+| 3.6 | Progress bars showing % of child goals completed | P1 | M | ✅ Done |
 | 3.7 | Goal archiving (hide without deleting) | P2 | S | Todo |
 | 3.8 | Show sibling goals when viewing one goal | P2 | M | Todo |
 
@@ -128,7 +144,7 @@ This document captures all identified UX improvements for Goalzenix, organized b
 | ID | Improvement | Priority | Effort | Status |
 |----|-------------|----------|--------|--------|
 | 4.1 | "What can I do with points?" explanation (level unlocks) | P2 | S | Todo |
-| 4.2 | Streak freeze (1 per week) to prevent frustration | P0 | M | Todo |
+| 4.2 | Streak freeze (1 per week) to prevent frustration | P0 | M | ✅ Done |
 | 4.3 | "Next badge to earn" with progress hints | P1 | M | ✅ Done |
 | 4.4 | Daily/weekly challenges for bonus XP | P2 | L | Todo |
 | 4.5 | Anonymous leaderboards or friend challenges | P3 | XL | Todo |
@@ -150,9 +166,9 @@ This document captures all identified UX improvements for Goalzenix, organized b
 | ID | Improvement | Priority | Effort | Status |
 |----|-------------|----------|--------|--------|
 | 5.1 | Simplify bottom nav to 4 main + "More" overflow | P2 | S | Todo |
-| 5.2 | Swipe gesture hint animation on first interaction | P1 | S | Todo |
-| 5.3 | Haptic feedback on complete, drag, errors | P1 | S | Todo |
-| 5.4 | Pull-to-refresh on task/goal lists | P0 | S | Todo |
+| 5.2 | Swipe gesture hint animation on first interaction | P1 | S | ✅ Done |
+| 5.3 | Haptic feedback on complete, drag, errors | P1 | S | ✅ Done |
+| 5.4 | Pull-to-refresh on task/goal lists | P0 | S | ✅ Done |
 | 5.5 | Day view default on mobile with swipe navigation | P2 | M | Todo |
 | 5.6 | Auto-scroll input into view when keyboard opens | P1 | S | Todo |
 | 5.7 | iOS/Android widget for today's MIT | P2 | XL | Todo |
@@ -171,7 +187,7 @@ This document captures all identified UX improvements for Goalzenix, organized b
 
 | ID | Improvement | Priority | Effort | Status |
 |----|-------------|----------|--------|--------|
-| 6.1 | Progressive disclosure: Title first, then optional fields | P1 | M | Todo |
+| 6.1 | Progressive disclosure: Title first, then optional fields | P1 | M | ✅ Done |
 | 6.2 | Collapsible stats panel → single "Today's score" summary | P2 | M | Todo |
 | 6.3 | "Suggested" categories based on existing goals | P2 | M | Todo |
 | 6.4 | Priority descriptions ("MIT = #1 thing that moves the needle") | P1 | XS | Todo |
@@ -193,7 +209,7 @@ This document captures all identified UX improvements for Goalzenix, organized b
 |----|-------------|----------|--------|--------|
 | 7.1 | Alignment score on dashboard ("85% aligned today") | P1 | S | ✅ Done |
 | 7.2 | Weekly alignment trend sparkline in Progress | P2 | M | Todo |
-| 7.3 | "Life maintenance" category (exempt from alignment) | P1 | S | Todo |
+| 7.3 | "Life maintenance" category (exempt from alignment) | P1 | S | ✅ Done |
 | 7.4 | "Perfect alignment" badge for 100% days | P2 | S | Todo |
 | 7.5 | AI-suggested goal linking based on task title | P2 | M | Todo |
 
@@ -230,7 +246,7 @@ This document captures all identified UX improvements for Goalzenix, organized b
 
 | ID | Improvement | Priority | Effort | Status |
 |----|-------------|----------|--------|--------|
-| 9.1 | "Regenerate" option if first suggestion poor | P1 | S | Todo |
+| 9.1 | "Regenerate" option if first suggestion poor | P1 | S | ✅ Done |
 | 9.2 | Context-aware suggestions (consider existing tasks) | P1 | M | Todo |
 | 9.3 | Before/after comparison for Goal Sharpener | P2 | M | Todo |
 | 9.4 | "Unlock more" premium upsell for rate limit | P2 | S | Todo |
@@ -251,7 +267,7 @@ This document captures all identified UX improvements for Goalzenix, organized b
 | ID | Improvement | Priority | Effort | Status |
 |----|-------------|----------|--------|--------|
 | 10.1 | Add icons/patterns alongside color indicators | P1 | M | Todo |
-| 10.2 | Respect `prefers-reduced-motion` for animations | P0 | S | Todo |
+| 10.2 | Respect `prefers-reduced-motion` for animations | P0 | S | ✅ Done |
 | 10.3 | aria-live regions for dynamic content updates | P1 | M | Todo |
 | 10.4 | Improve logical tab sequence/focus order | P1 | M | ✅ Done |
 | 10.5 | Increase touch targets to 48px minimum (WCAG AAA) | P1 | M | Todo |
@@ -272,7 +288,7 @@ This document captures all identified UX improvements for Goalzenix, organized b
 |----|-------------|----------|--------|--------|
 | 11.1 | Sound effects on completion (optional setting) | P2 | S | Todo |
 | 11.2 | Bigger celebration animations for milestones | P1 | M | ✅ Done |
-| 11.3 | "Recovery" message after streak loss: "Start fresh today!" | P1 | XS | Todo |
+| 11.3 | "Recovery" message after streak loss: "Start fresh today!" | P1 | XS | ✅ Done |
 | 11.4 | "This month so far" progress summary card | P2 | M | Todo |
 | 11.5 | Vision board with images/inspiration | P3 | L | Todo |
 | 11.6 | Motivational quotes (optional setting) | P3 | S | Todo |
@@ -313,7 +329,7 @@ This document captures all identified UX improvements for Goalzenix, organized b
 |----|-------------|----------|--------|--------|
 | 13.1 | Skeleton loaders for all data-heavy pages | P0 | M | ✅ Done |
 | 13.2 | Optimistic UI updates (immediate, rollback on error) | P1 | L | Todo |
-| 13.3 | "Unsaved changes" warning on modal close | P1 | S | Todo |
+| 13.3 | "Unsaved changes" warning on modal close | P1 | S | ✅ Done |
 | 13.4 | 5-second "Undo" toast after task completion | P0 | S | ✅ Done |
 | 13.5 | Reduced-motion fallback for drag-drop (buttons) | P2 | M | Todo |
 
@@ -330,10 +346,10 @@ This document captures all identified UX improvements for Goalzenix, organized b
 
 | ID | Improvement | Priority | Effort | Status |
 |----|-------------|----------|--------|--------|
-| 14.1 | Settings gear icon in header (not just sidebar) | P2 | XS | Todo |
+| 14.1 | Settings gear icon in header (not just sidebar) | P2 | XS | ✅ Done |
 | 14.2 | Clarify Progress vs Dashboard distinction or merge | P2 | M | Todo |
-| 14.3 | "Review" prompt on dashboard when due | P1 | S | Todo |
-| 14.4 | Cmd+K command palette for global navigation | P0 | L | Todo |
+| 14.3 | "Review" prompt on dashboard when due | P1 | S | ✅ Done |
+| 14.4 | Cmd+K command palette for global navigation | P0 | L | ✅ Done |
 | 14.5 | Rename: "Today" (dashboard) vs "Week Planner" | P2 | XS | Todo |
 
 **Success Metrics**:
@@ -402,13 +418,13 @@ Focus: Refinement and quality-of-life improvements
 
 | ID | Item | Effort |
 |----|------|--------|
-| 2.1 | Drag-to-promote MIT | M |
-| 2.3 | Cmd+N keyboard shortcut | XS |
+| 2.1 | Drag-to-promote MIT | M | ✅ Done |
+| 2.3 | Cmd+N keyboard shortcut | XS | ✅ Done |
 | 3.1 | Goal tree visualization | XL |
-| 5.2 | Swipe gesture hints | S |
-| 5.3 | Haptic feedback | S |
+| 5.2 | Swipe gesture hints | S | ✅ Done |
+| 5.3 | Haptic feedback | S | ✅ Done |
 | 6.1 | Progressive form disclosure | M |
-| 9.1 | AI regenerate option | S |
+| 9.1 | AI regenerate option | S | ✅ Done |
 | 9.5 | AI feedback thumbs | S |
 | 10.1 | Icon + color indicators | M |
 
@@ -436,11 +452,12 @@ Focus: Power user features and differentiation
 
 Grab these whenever you have spare time:
 
-- [ ] 2.3 - Cmd+N keyboard shortcut
+- [x] 2.3 - Cmd+N keyboard shortcut ✅
 - [ ] 6.4 - Priority descriptions in task create
-- [ ] 11.3 - Streak recovery message
-- [ ] 14.1 - Settings icon in header
+- [x] 11.3 - Streak recovery message ✅
+- [x] 14.1 - Settings icon in header ✅
 - [ ] 14.5 - Rename "Today" vs "Week Planner"
+- [x] 5.2 - Swipe gesture hint animation ✅
 
 ---
 
@@ -465,7 +482,23 @@ Grab these whenever you have spare time:
 - [x] **8.3** Enhanced monthly review with data-driven prompts
 - [x] **11.3** Streak recovery messaging (via Lifestyle Insight cards)
 
+#### Quick Wins (2026-01-07)
+- [x] **2.3** Keyboard shortcut Cmd+N for new task
+- [x] **5.2** Swipe gesture hint animation for mobile
+- [x] **14.1** Settings gear icon in PageHeader (desktop)
+
+#### High-Impact Features (2026-01-07)
+- [x] **1.1** 3-step onboarding wizard (OnboardingWizard.tsx)
+- [x] **2.1** Drag-to-promote task to MIT (HTML5 drag-drop in TaskItem → MitCard)
+- [x] **2.2** Floating action button for mobile quick-add (FloatingActionButton.tsx)
+- [x] **3.2** Breadcrumb navigation for goals (GoalBreadcrumb.tsx)
+- [x] **3.3** Create child goal button on goal cards (GoalCard.tsx, VisionCard.tsx)
+- [x] **4.2** Streak freeze feature (User model + streaks.ts logic)
+- [x] **5.4** Pull-to-refresh on goals pages (AppShell + page integration)
+- [x] **14.4** Cmd+K command palette (CommandPalette.tsx)
+
 #### Accessibility
+- [x] **10.2** Reduced motion support (useReducedMotion hook, skips confetti/animations)
 - [x] **10.4** Keyboard navigation for tasks (Space/c=toggle, Enter/e=edit)
 - [x] Focus-visible ring styling for keyboard users
 - [x] ARIA labels on interactive elements
@@ -499,6 +532,12 @@ Before implementing some features, validate with users:
 
 | Date | Change |
 |------|--------|
+| 2026-01-07 | **Drag-to-Promote MIT** - Drag any Primary/Secondary task onto MitCard to promote it to MIT; swaps priorities if MIT already exists. Uses HTML5 drag-drop with visual feedback. |
+| 2026-01-07 | **Create Child Goal Button** - Added + button to GoalCard and VisionCard for quick child goal creation from list/detail pages without extra navigation |
+| 2026-01-07 | **Reduced Motion Support** - useReducedMotion hook, updated LevelUpModal & BadgeEarnedModal to skip confetti when prefers-reduced-motion is enabled |
+| 2026-01-07 | **Floating Action Button** - Mobile quick-add FAB with haptic feedback, lantern accent, hidden on desktop |
+| 2026-01-07 | **High-Impact P0 Features Verified** - Onboarding wizard, breadcrumb nav, streak freeze, pull-to-refresh, command palette (all already implemented) |
+| 2026-01-07 | **Quick Wins Batch** - Cmd+N shortcut, swipe hint animation, settings icon |
 | 2026-01-03 | **UX Improvements Round 1** - Keyboard shortcuts, skeleton loaders, mobile stats bar |
 | 2026-01-03 | **Monthly Review Enhancement** - Data-driven prompts for Steps 3 (Learnings) and 4 (Next Month) |
 | 2026-01-03 | **Celebration Modals** - LevelUpModal and BadgeEarnedModal with confetti animations |

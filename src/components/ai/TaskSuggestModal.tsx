@@ -27,6 +27,7 @@ import {
   Info,
   CheckCircle2,
   Target,
+  RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -337,14 +338,25 @@ export function TaskSuggestModal({
           )}
 
           {result && (
-            <Button
-              onClick={handleApply}
-              disabled={selectedTasks.size === 0}
-              className="bg-zen-green text-void hover:bg-zen-green/90"
-            >
-              <CheckCircle2 className="w-4 h-4 mr-2" />
-              Add {selectedTasks.size} Tasks
-            </Button>
+            <>
+              <Button
+                onClick={handleSuggest}
+                disabled={suggest.isPending}
+                variant="outline"
+                className="border-zen-purple/30 text-zen-purple hover:bg-zen-purple/10"
+              >
+                <RefreshCw className={cn("w-4 h-4 mr-2", suggest.isPending && "animate-spin")} />
+                Regenerate
+              </Button>
+              <Button
+                onClick={handleApply}
+                disabled={selectedTasks.size === 0}
+                className="bg-zen-green text-void hover:bg-zen-green/90"
+              >
+                <CheckCircle2 className="w-4 h-4 mr-2" />
+                Add {selectedTasks.size} Tasks
+              </Button>
+            </>
           )}
         </div>
       </DialogContent>

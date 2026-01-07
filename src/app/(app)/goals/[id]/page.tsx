@@ -121,6 +121,12 @@ export default function GoalDetailPage() {
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  // For creating grandchildren from child cards
+  const [createChildTarget, setCreateChildTarget] = useState<{
+    parentId: string;
+    parentTitle: string;
+    level: GoalLevel;
+  } | null>(null);
 
   const { data, isLoading, refetch } = useGoal(id);
   const updateGoal = useUpdateGoal();
@@ -130,9 +136,13 @@ export default function GoalDetailPage() {
   const level = data?.level as GoalLevel | undefined;
   const breadcrumb = (data?.breadcrumb as Array<{ id: string; title: string; level: GoalLevel }>) || [];
 
+  const handleRefresh = async () => {
+    await refetch();
+  };
+
   if (isLoading) {
     return (
-      <AppShell>
+      <AppShell onRefresh={handleRefresh}>
         <div className="flex items-center justify-center py-16">
           <Loader2 className="w-8 h-8 animate-spin text-lantern" />
         </div>
@@ -142,7 +152,7 @@ export default function GoalDetailPage() {
 
   if (!goal || !level) {
     return (
-      <AppShell>
+      <AppShell onRefresh={handleRefresh}>
         <div className="text-center py-16">
           <p className="text-moon-dim mb-4">Goal not found</p>
           <Button
@@ -165,6 +175,23 @@ export default function GoalDetailPage() {
 
   const handleChildClick = (childId: string) => {
     router.push(`/goals/${childId}`);
+  };
+
+  // Get the grandchild level (child's child level) for creating from a child card
+  const getGrandchildLevel = (): GoalLevel | null => {
+    if (!config.childLevel) return null;
+    return LEVEL_CONFIG[config.childLevel].childLevel;
+  };
+
+  const handleCreateGrandchild = (child: Record<string, unknown>) => {
+    const grandchildLevel = getGrandchildLevel();
+    if (!grandchildLevel) return;
+
+    setCreateChildTarget({
+      parentId: child.id as string,
+      parentTitle: child.title as string,
+      level: grandchildLevel,
+    });
   };
 
   const handleStatusChange = async (newStatus: GoalStatus) => {
@@ -192,7 +219,7 @@ export default function GoalDetailPage() {
   };
 
   return (
-    <AppShell>
+    <AppShell onRefresh={handleRefresh}>
       {/* Header */}
       <div className="mb-6">
         {/* Breadcrumb navigation */}
@@ -358,13 +385,22 @@ export default function GoalDetailPage() {
             </div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2">
-              {children.map((child) => (
-                <GoalCard
-                  key={child.id as string}
-                  {...transformChild(child)}
-                  onClick={() => handleChildClick(child.id as string)}
-                />
-              ))}
+              {children.map((child) => {
+                const grandchildLevel = getGrandchildLevel();
+                const grandchildLabel = grandchildLevel
+                  ? LEVEL_CONFIG[grandchildLevel].childLabel.replace(/s$/, "").toLowerCase()
+                  : undefined;
+
+                return (
+                  <GoalCard
+                    key={child.id as string}
+                    {...transformChild(child)}
+                    onClick={() => handleChildClick(child.id as string)}
+                    onCreateChild={grandchildLevel ? () => handleCreateGrandchild(child) : undefined}
+                    childLabel={grandchildLabel}
+                  />
+                );
+              })}
             </div>
           )}
         </div>
@@ -446,6 +482,21 @@ export default function GoalDetailPage() {
         level={level}
         onSuccess={() => refetch()}
       />
+
+      {/* Create grandchild goal modal (from child card's + button) */}
+      {createChildTarget && (
+        <GoalCreateModal
+          open={!!createChildTarget}
+          onOpenChange={(open) => !open && setCreateChildTarget(null)}
+          level={createChildTarget.level}
+          parentId={createChildTarget.parentId}
+          parentTitle={createChildTarget.parentTitle}
+          onSuccess={() => {
+            refetch();
+            setCreateChildTarget(null);
+          }}
+        />
+      )}
     </AppShell>
   );
 }

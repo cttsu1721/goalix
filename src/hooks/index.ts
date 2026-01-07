@@ -74,3 +74,6 @@ export {
 
 // Accessibility hooks
 export { useReducedMotion, prefersReducedMotion } from "./useReducedMotion";
+
+// Form helpers
+export { useUnsavedChanges } from "./useUnsavedChanges";

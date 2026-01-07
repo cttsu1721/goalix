@@ -27,37 +27,47 @@ type GoalsOnlyLevel = Exclude<UIGoalLevel, "vision">;
 
 const levelConfig: Record<
   UIGoalLevel,
-  { label: string; color: string; icon: React.ReactNode; apiLevel: GoalLevel }
+  { label: string; color: string; icon: React.ReactNode; apiLevel: GoalLevel; childLevel: GoalLevel | null; childLabel: string }
 > = {
   vision: {
     label: "7-Year Vision",
     color: "bg-lantern",
     icon: <Sparkles className="w-4 h-4" />,
     apiLevel: "sevenYear",
+    childLevel: "threeYear",
+    childLabel: "3-Year Goal",
   },
   "3-year": {
     label: "3-Year Goals",
     color: "bg-lantern",
     icon: <Target className="w-4 h-4" />,
     apiLevel: "threeYear",
+    childLevel: "oneYear",
+    childLabel: "1-Year Goal",
   },
   "1-year": {
     label: "1-Year Goals",
     color: "bg-moon-soft",
     icon: <Calendar className="w-4 h-4" />,
     apiLevel: "oneYear",
+    childLevel: "monthly",
+    childLabel: "Monthly Goal",
   },
   monthly: {
     label: "Monthly Goals",
     color: "bg-moon-soft",
     icon: <Layers className="w-4 h-4" />,
     apiLevel: "monthly",
+    childLevel: "weekly",
+    childLabel: "Weekly Goal",
   },
   weekly: {
     label: "Weekly Goals",
     color: "bg-moon-dim",
     icon: <CheckCircle2 className="w-4 h-4" />,
     apiLevel: "weekly",
+    childLevel: null,
+    childLabel: "Daily Task",
   },
 };
 
@@ -163,20 +173,34 @@ function transformGoals(goals: unknown[], level: GoalLevel): DisplayGoal[] {
     let completedChildren = 0;
     let parentTitle: string | undefined;
 
+    // Helper to count completed goals from an array with status
+    const countCompleted = (items: { status: string }[] | undefined) => {
+      if (!items) return 0;
+      return items.filter((item) => item.status === "COMPLETED").length;
+    };
+
     switch (level) {
       case "sevenYear":
-        childrenCount = (goal.threeYearGoals as unknown[])?.length || 0;
+        const threeYearGoals = (goal.threeYearGoals as { status: string }[]) || [];
+        childrenCount = threeYearGoals.length;
+        completedChildren = countCompleted(threeYearGoals);
         break;
       case "threeYear":
-        childrenCount = (goal.oneYearGoals as unknown[])?.length || 0;
+        const oneYearGoals = (goal.oneYearGoals as { status: string }[]) || [];
+        childrenCount = oneYearGoals.length;
+        completedChildren = countCompleted(oneYearGoals);
         parentTitle = (goal.sevenYearVision as { title?: string })?.title;
         break;
       case "oneYear":
-        childrenCount = (goal.monthlyGoals as unknown[])?.length || 0;
+        const monthlyGoals = (goal.monthlyGoals as { status: string }[]) || [];
+        childrenCount = monthlyGoals.length;
+        completedChildren = countCompleted(monthlyGoals);
         parentTitle = (goal.threeYearGoal as { title?: string })?.title;
         break;
       case "monthly":
-        childrenCount = (goal.weeklyGoals as unknown[])?.length || 0;
+        const weeklyGoals = (goal.weeklyGoals as { status: string }[]) || [];
+        childrenCount = weeklyGoals.length;
+        completedChildren = countCompleted(weeklyGoals);
         parentTitle = (goal.oneYearGoal as { title?: string })?.title;
         break;
       case "weekly":
@@ -187,7 +211,7 @@ function transformGoals(goals: unknown[], level: GoalLevel): DisplayGoal[] {
         break;
     }
 
-    // Calculate progress (simplified - real implementation would be more sophisticated)
+    // Calculate progress based on completed children
     const progress =
       childrenCount > 0
         ? Math.round((completedChildren / childrenCount) * 100)
@@ -213,6 +237,11 @@ function VisionPageContent() {
   const router = useRouter();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isVisionBuilderOpen, setIsVisionBuilderOpen] = useState(false);
+  // For creating 3-year goals from vision cards
+  const [createChildTarget, setCreateChildTarget] = useState<{
+    parentId: string;
+    parentTitle: string;
+  } | null>(null);
 
   const { data, isLoading, refetch } = useVisions();
   const visions = transformGoals(data?.goals || [], "sevenYear");
@@ -221,8 +250,19 @@ function VisionPageContent() {
     router.push(`/goals/${id}`);
   };
 
+  const handleCreateChild = (vision: DisplayGoal) => {
+    setCreateChildTarget({
+      parentId: vision.id,
+      parentTitle: vision.title,
+    });
+  };
+
+  const handleRefresh = async () => {
+    await refetch();
+  };
+
   return (
-    <AppShell>
+    <AppShell onRefresh={handleRefresh}>
       {/* Hero Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
@@ -292,6 +332,7 @@ function VisionPageContent() {
               key={vision.id}
               {...vision}
               onClick={() => handleVisionClick(vision.id)}
+              onCreateChild={() => handleCreateChild(vision)}
             />
           ))}
         </div>
@@ -310,6 +351,21 @@ function VisionPageContent() {
         open={isVisionBuilderOpen}
         onOpenChange={setIsVisionBuilderOpen}
       />
+
+      {/* Create 3-Year Goal Modal (from vision card's + button) */}
+      {createChildTarget && (
+        <GoalCreateModal
+          open={!!createChildTarget}
+          onOpenChange={(open) => !open && setCreateChildTarget(null)}
+          level="threeYear"
+          parentId={createChildTarget.parentId}
+          parentTitle={createChildTarget.parentTitle}
+          onSuccess={() => {
+            refetch();
+            setCreateChildTarget(null);
+          }}
+        />
+      )}
     </AppShell>
   );
 }
@@ -331,6 +387,12 @@ function GoalsOnlyPageContent() {
 
   const [activeLevel, setActiveLevel] = useState<GoalsOnlyLevel>(getInitialLevel);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  // For creating child goals from goal cards
+  const [createChildTarget, setCreateChildTarget] = useState<{
+    parentId: string;
+    parentTitle: string;
+    level: GoalLevel;
+  } | null>(null);
 
   // Update active level when URL changes
   useEffect(() => {
@@ -351,8 +413,23 @@ function GoalsOnlyPageContent() {
     router.push(`/goals/${id}`);
   };
 
+  const handleCreateChild = (goal: DisplayGoal) => {
+    const childLevel = levelConfig[activeLevel].childLevel;
+    if (!childLevel) return;
+
+    setCreateChildTarget({
+      parentId: goal.id,
+      parentTitle: goal.title,
+      level: childLevel,
+    });
+  };
+
+  const handleRefresh = async () => {
+    await refetch();
+  };
+
   return (
-    <AppShell>
+    <AppShell onRefresh={handleRefresh}>
       <PageHeader
         title="Goals"
         subtitle="Your milestones from 3-year targets to weekly actions"
@@ -413,6 +490,8 @@ function GoalsOnlyPageContent() {
               key={goal.id}
               {...goal}
               onClick={() => handleGoalClick(goal.id)}
+              onCreateChild={levelConfig[activeLevel].childLevel ? () => handleCreateChild(goal) : undefined}
+              childLabel={levelConfig[activeLevel].childLabel.toLowerCase()}
             />
           ))}
         </div>
@@ -433,13 +512,28 @@ function GoalsOnlyPageContent() {
         </div>
       )}
 
-      {/* Create Goal Modal */}
+      {/* Create Goal Modal (new goal at current level) */}
       <GoalCreateModal
         open={isCreateModalOpen}
         onOpenChange={setIsCreateModalOpen}
         level={apiLevel}
         onSuccess={() => refetch()}
       />
+
+      {/* Create Child Goal Modal (from goal card's + button) */}
+      {createChildTarget && (
+        <GoalCreateModal
+          open={!!createChildTarget}
+          onOpenChange={(open) => !open && setCreateChildTarget(null)}
+          level={createChildTarget.level}
+          parentId={createChildTarget.parentId}
+          parentTitle={createChildTarget.parentTitle}
+          onSuccess={() => {
+            refetch();
+            setCreateChildTarget(null);
+          }}
+        />
+      )}
     </AppShell>
   );
 }

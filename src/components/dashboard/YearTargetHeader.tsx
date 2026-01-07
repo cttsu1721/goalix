@@ -52,6 +52,7 @@ const CATEGORY_COLORS: Record<GoalCategory, string> = {
   CAREER: "text-zen-blue",
   PERSONAL_GROWTH: "text-zen-purple",
   LIFESTYLE: "text-moon-soft",
+  LIFE_MAINTENANCE: "text-moon-faint",
   OTHER: "text-moon-dim",
 };
 
@@ -62,6 +63,7 @@ const CATEGORY_BG: Record<GoalCategory, string> = {
   CAREER: "bg-zen-blue/10 border-zen-blue/20",
   PERSONAL_GROWTH: "bg-zen-purple/10 border-zen-purple/20",
   LIFESTYLE: "bg-moon-soft/10 border-moon-soft/20",
+  LIFE_MAINTENANCE: "bg-moon-faint/10 border-moon-faint/20",
   OTHER: "bg-moon-dim/10 border-moon-dim/20",
 };
 

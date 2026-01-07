@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { ChevronRight, Sparkles, Target } from "lucide-react";
+import { ChevronRight, Sparkles, Target, Plus } from "lucide-react";
 import { GoalCategoryBadge } from "./GoalCategoryBadge";
 import type { GoalCategory, GoalStatus } from "@prisma/client";
 
@@ -17,6 +17,7 @@ interface VisionCardProps {
   completedChildren?: number;
   targetDate?: Date | string | null;
   onClick?: () => void;
+  onCreateChild?: () => void;
   className?: string;
 }
 
@@ -30,10 +31,16 @@ export function VisionCard({
   completedChildren = 0,
   targetDate,
   onClick,
+  onCreateChild,
   className,
 }: VisionCardProps) {
   const isCompleted = status === "COMPLETED";
   const isPaused = status === "PAUSED";
+
+  const handleCreateChild = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onCreateChild?.();
+  };
 
   // Calculate years remaining - memoized to avoid hydration mismatch
   // Uses current year comparison instead of Date.now() for stable SSR
@@ -63,8 +70,23 @@ export function VisionCard({
       {/* Glow effect */}
       <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-lantern/[0.04] to-transparent pointer-events-none" />
 
-      {/* Sparkle icon */}
-      <div className="absolute top-4 right-4">
+      {/* Top right icons */}
+      <div className="absolute top-4 right-4 flex items-center gap-1">
+        {onCreateChild && (
+          <button
+            onClick={handleCreateChild}
+            className={cn(
+              "w-7 h-7 rounded-lg flex items-center justify-center",
+              "text-moon-faint hover:text-lantern hover:bg-lantern/10",
+              "opacity-0 group-hover:opacity-100 transition-all duration-200",
+              "focus:outline-none focus:ring-2 focus:ring-lantern/50 focus:opacity-100"
+            )}
+            title="Add 3-year goal"
+            aria-label={`Add 3-year goal to ${title}`}
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+        )}
         <Sparkles className="w-5 h-5 text-lantern/40" />
       </div>
 

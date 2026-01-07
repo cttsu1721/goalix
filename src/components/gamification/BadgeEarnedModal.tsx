@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Award, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useReducedMotion } from "@/hooks";
 
 interface BadgeEarnedModalProps {
   open: boolean;
@@ -26,14 +27,22 @@ interface BadgeEarnedModalProps {
 function BadgeEarnedContent({
   badge,
   onClose,
+  prefersReducedMotion,
 }: {
   badge: NonNullable<BadgeEarnedModalProps["badge"]>;
   onClose: () => void;
+  prefersReducedMotion: boolean;
 }) {
-  const [showContent, setShowContent] = useState(false);
+  const [showContent, setShowContent] = useState(prefersReducedMotion);
 
   // Trigger animation and confetti on mount
   useEffect(() => {
+    // For reduced motion: show content immediately, skip confetti
+    if (prefersReducedMotion) {
+      setShowContent(true);
+      return;
+    }
+
     // Delay content animation
     const timer = setTimeout(() => setShowContent(true), 100);
 
@@ -46,7 +55,7 @@ function BadgeEarnedContent({
     });
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [prefersReducedMotion]);
 
   const categoryColors: Record<string, string> = {
     streak: "from-zen-red/20 to-transparent",
@@ -130,6 +139,8 @@ export function BadgeEarnedModal({
   onOpenChange,
   badge,
 }: BadgeEarnedModalProps) {
+  const prefersReducedMotion = useReducedMotion();
+
   if (!badge) return null;
 
   return (
@@ -140,6 +151,7 @@ export function BadgeEarnedModal({
           key={badge.name}
           badge={badge}
           onClose={() => onOpenChange(false)}
+          prefersReducedMotion={prefersReducedMotion}
         />
       </DialogContent>
     </Dialog>

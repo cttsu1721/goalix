@@ -23,6 +23,7 @@ import {
   Calendar,
   Layers,
   CheckCircle2,
+  RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -255,14 +256,25 @@ export function GoalSuggestModal({
           </Button>
 
           {result && (
-            <Button
-              onClick={handleSelect}
-              disabled={selectedIndex === null}
-              className="bg-lantern text-void hover:bg-lantern/90 disabled:opacity-50"
-            >
-              Use This Suggestion
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
+            <>
+              <Button
+                onClick={handleSuggest}
+                disabled={suggest.isPending}
+                variant="outline"
+                className="border-lantern/30 text-lantern hover:bg-lantern/10"
+              >
+                <RefreshCw className={cn("w-4 h-4 mr-2", suggest.isPending && "animate-spin")} />
+                Regenerate
+              </Button>
+              <Button
+                onClick={handleSelect}
+                disabled={selectedIndex === null}
+                className="bg-lantern text-void hover:bg-lantern/90 disabled:opacity-50"
+              >
+                Use This Suggestion
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </>
           )}
         </div>
       </DialogContent>

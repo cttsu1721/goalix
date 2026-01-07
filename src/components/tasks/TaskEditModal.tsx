@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useUpdateTask, useDeleteTask, useGoals } from "@/hooks";
+import { useUpdateTask, useDeleteTask, useGoals, useUnsavedChanges } from "@/hooks";
 import {
   Dialog,
   DialogContent,
@@ -105,6 +105,16 @@ function TaskEditForm({ task, onClose }: { task: Task; onClose: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  // Track unsaved changes
+  const { markChanged, markSaved, canClose } = useUnsavedChanges();
+
+  // Wrapped close handler that checks for unsaved changes
+  const handleClose = () => {
+    if (canClose()) {
+      onClose();
+    }
+  };
+
   const today = formatLocalDate();
   const isOverdue = scheduledDate < today;
 
@@ -135,6 +145,7 @@ function TaskEditForm({ task, onClose }: { task: Task; onClose: () => void }) {
         scheduledDate,
       });
 
+      markSaved();
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update task");
@@ -168,7 +179,7 @@ function TaskEditForm({ task, onClose }: { task: Task; onClose: () => void }) {
         <Input
           id="edit-title"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => { setTitle(e.target.value); markChanged(); }}
           placeholder="What do you need to do?"
           className="bg-night-soft border-night-mist text-moon placeholder:text-moon-faint focus:border-lantern focus:ring-lantern/20"
         />
@@ -179,7 +190,7 @@ function TaskEditForm({ task, onClose }: { task: Task; onClose: () => void }) {
         {/* Priority */}
         <div className="space-y-2">
           <Label className="text-moon-soft text-sm">Priority</Label>
-          <Select value={priority} onValueChange={(v) => setPriority(v as TaskPriority)}>
+          <Select value={priority} onValueChange={(v) => { setPriority(v as TaskPriority); markChanged(); }}>
             <SelectTrigger className="bg-night-soft border-night-mist text-moon focus:ring-lantern/20">
               <SelectValue />
             </SelectTrigger>
@@ -215,7 +226,7 @@ function TaskEditForm({ task, onClose }: { task: Task; onClose: () => void }) {
         {/* Status */}
         <div className="space-y-2">
           <Label className="text-moon-soft text-sm">Status</Label>
-          <Select value={status} onValueChange={(v) => setStatus(v as TaskStatus)}>
+          <Select value={status} onValueChange={(v) => { setStatus(v as TaskStatus); markChanged(); }}>
             <SelectTrigger className="bg-night-soft border-night-mist text-moon focus:ring-lantern/20">
               <SelectValue />
             </SelectTrigger>
@@ -243,7 +254,7 @@ function TaskEditForm({ task, onClose }: { task: Task; onClose: () => void }) {
         <Textarea
           id="edit-description"
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          onChange={(e) => { setDescription(e.target.value); markChanged(); }}
           placeholder="Add details or notes..."
           rows={3}
           className="bg-night-soft border-night-mist text-moon placeholder:text-moon-faint focus:border-lantern focus:ring-lantern/20 resize-none"
@@ -261,7 +272,7 @@ function TaskEditForm({ task, onClose }: { task: Task; onClose: () => void }) {
             id="edit-scheduled-date"
             type="date"
             value={scheduledDate}
-            onChange={(e) => setScheduledDate(e.target.value)}
+            onChange={(e) => { setScheduledDate(e.target.value); markChanged(); }}
             className="bg-night-soft border-night-mist text-moon focus:border-lantern focus:ring-lantern/20 [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-50"
           />
           {isOverdue && (
@@ -281,7 +292,7 @@ function TaskEditForm({ task, onClose }: { task: Task; onClose: () => void }) {
             <Clock className="w-3.5 h-3.5" />
             Time Estimate
           </Label>
-          <Select value={estimatedMinutes} onValueChange={setEstimatedMinutes}>
+          <Select value={estimatedMinutes} onValueChange={(v) => { setEstimatedMinutes(v); markChanged(); }}>
             <SelectTrigger className="bg-night-soft border-night-mist text-moon focus:ring-lantern/20">
               <SelectValue placeholder="Select time" />
             </SelectTrigger>
@@ -305,7 +316,7 @@ function TaskEditForm({ task, onClose }: { task: Task; onClose: () => void }) {
           <GoalSelector
             goals={weeklyGoals}
             value={weeklyGoalId}
-            onChange={setWeeklyGoalId}
+            onChange={(v) => { setWeeklyGoalId(v); markChanged(); }}
             placeholder="Select goal..."
           />
         </div>
@@ -356,7 +367,7 @@ function TaskEditForm({ task, onClose }: { task: Task; onClose: () => void }) {
           <Button
             type="button"
             variant="outline"
-            onClick={onClose}
+            onClick={handleClose}
             className="bg-transparent border-night-mist text-moon-soft hover:bg-night-soft hover:text-moon"
           >
             Cancel

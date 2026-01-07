@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { useCompleteTask, useUncompleteTask } from "./useTasks";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
+import { haptics } from "@/lib/haptics";
 
 interface EarnedBadge {
   slug: string;
@@ -75,11 +76,13 @@ export function useTaskCompletion(options: UseTaskCompletionOptions = {}) {
     async (taskId: string) => {
       try {
         const result = await uncompleteTask.mutateAsync(taskId);
+        haptics.taskUncomplete(); // Haptic feedback on undo
         toast.success("Task restored", {
           description: `${result.pointsRemoved} points removed`,
           duration: 2000,
         });
       } catch (error) {
+        haptics.error(); // Haptic feedback on error
         toast.error("Failed to undo", {
           description: error instanceof Error ? error.message : "Please try again",
         });
@@ -92,6 +95,7 @@ export function useTaskCompletion(options: UseTaskCompletionOptions = {}) {
     async (taskId: string, isMit: boolean = false) => {
       try {
         const result = await completeTask.mutateAsync(taskId);
+        haptics.taskComplete(); // Haptic feedback on completion
 
         // Show confetti for MIT completion
         if (isMit) {
@@ -172,6 +176,7 @@ export function useTaskCompletion(options: UseTaskCompletionOptions = {}) {
 
         return result;
       } catch (error) {
+        haptics.error(); // Haptic feedback on error
         toast.error("Failed to complete task", {
           description: error instanceof Error ? error.message : "Please try again",
         });

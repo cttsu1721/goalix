@@ -18,6 +18,7 @@ const CATEGORY_COLORS: Record<GoalCategory, { bg: string; dot: string }> = {
   CAREER: { bg: "bg-zen-blue/10", dot: "bg-zen-blue" },
   PERSONAL_GROWTH: { bg: "bg-zen-purple/10", dot: "bg-zen-purple" },
   LIFESTYLE: { bg: "bg-lantern/10", dot: "bg-lantern" },
+  LIFE_MAINTENANCE: { bg: "bg-moon-faint/10", dot: "bg-moon-faint" },
   OTHER: { bg: "bg-moon-dim/10", dot: "bg-moon-dim" },
 };
 

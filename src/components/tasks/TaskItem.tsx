@@ -2,6 +2,7 @@
 
 import { memo, useCallback, useState } from "react";
 import { cn } from "@/lib/utils";
+import { haptics } from "@/lib/haptics";
 import { Check, ChevronRight, AlertTriangle, Target, Link2Off, X, GripVertical } from "lucide-react";
 import { useSwipeGesture } from "@/hooks";
 
@@ -106,6 +107,7 @@ export const TaskItem = memo(function TaskItem({
       if (priority !== "PRIMARY" && priority !== "SECONDARY") return;
 
       setIsDragging(true);
+      haptics.dragStart(); // Haptic feedback on drag start
       e.dataTransfer.effectAllowed = "move";
       e.dataTransfer.setData("text/plain", JSON.stringify({
         id: task.id,
@@ -120,6 +122,7 @@ export const TaskItem = memo(function TaskItem({
 
   const handleDragEnd = useCallback(() => {
     setIsDragging(false);
+    haptics.dragEnd(); // Haptic feedback on drag end
     onDragEnd?.();
   }, [onDragEnd]);
 

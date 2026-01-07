@@ -20,6 +20,7 @@ const CATEGORY_CONFIG: Record<GoalCategory, { label: string; emoji: string; colo
   CAREER: { label: "Career", emoji: "💼", color: "text-blue-400" },
   PERSONAL_GROWTH: { label: "Growth", emoji: "📚", color: "text-purple-400" },
   LIFESTYLE: { label: "Lifestyle", emoji: "🌿", color: "text-emerald-400" },
+  LIFE_MAINTENANCE: { label: "Life Maintenance", emoji: "🏠", color: "text-moon-faint" },
   OTHER: { label: "Other", emoji: "⭐", color: "text-moon-dim" },
 };
 
@@ -117,6 +118,7 @@ export function GoalSelector({
       CAREER: [],
       PERSONAL_GROWTH: [],
       LIFESTYLE: [],
+      LIFE_MAINTENANCE: [],
       OTHER: [],
     };
 

@@ -56,8 +56,17 @@ export const GOAL_CATEGORY_LABELS: Record<GoalCategory, string> = {
   CAREER: "Career",
   PERSONAL_GROWTH: "Personal Growth",
   LIFESTYLE: "Lifestyle",
+  LIFE_MAINTENANCE: "Life Maintenance",
   OTHER: "Other",
 };
+
+/**
+ * Categories that are exempt from goal alignment tracking.
+ * Tasks in these categories are necessary but don't need to be tied to goals.
+ */
+export const ALIGNMENT_EXEMPT_CATEGORIES: GoalCategory[] = [
+  "LIFE_MAINTENANCE",
+];
 
 export const GOAL_STATUS_LABELS: Record<GoalStatus, string> = {
   ACTIVE: "Active",
