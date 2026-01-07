@@ -1,8 +1,9 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 interface PageHeaderProps {
   greeting?: string;
@@ -12,6 +13,7 @@ interface PageHeaderProps {
   aiUsesRemaining?: number;
   aiUsesTotal?: number;
   onAiClick?: () => void;
+  showSettingsIcon?: boolean;
   className?: string;
   children?: React.ReactNode;
 }
@@ -24,6 +26,7 @@ export function PageHeader({
   aiUsesRemaining = 3,
   aiUsesTotal = 5,
   onAiClick,
+  showSettingsIcon = false,
   className,
   children,
 }: PageHeaderProps) {
@@ -71,6 +74,22 @@ export function PageHeader({
           </Button>
         )}
         {children}
+        {showSettingsIcon && (
+          <Link
+            href="/settings"
+            className={cn(
+              "w-10 h-10 rounded-xl",
+              "flex items-center justify-center",
+              "bg-night-soft border border-night-mist",
+              "text-moon-dim hover:text-moon hover:border-moon-dim",
+              "transition-all duration-200",
+              "hidden lg:flex" // Only show on desktop, mobile has nav
+            )}
+            aria-label="Settings"
+          >
+            <Settings className="w-5 h-5" />
+          </Link>
+        )}
       </div>
     </header>
   );
