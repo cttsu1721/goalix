@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { MitCard, TaskList, shouldShowCarryOverPrompt } from "@/components/tasks";
+import { MitCard, TaskList, shouldShowCarryOverPrompt, FloatingActionButton } from "@/components/tasks";
 import { StatsPanel } from "@/components/gamification/StatsPanel";
 import { MobileStatsBar } from "@/components/gamification/MobileStatsBar";
 import { YearTargetHeader } from "@/components/dashboard";
@@ -237,12 +237,23 @@ export default function DashboardPage() {
   const generateRecurring = useGenerateRecurringTasks();
 
   // Generate recurring tasks for today (once per day)
+  // Use ref to track if we've already started the mutation this session
+  const recurringGenerationStarted = useRef(false);
+
   useEffect(() => {
     const RECURRING_GENERATED_KEY = "recurring_tasks_generated_date";
     const lastGenerated = localStorage.getItem(RECURRING_GENERATED_KEY);
 
-    // Only generate if not already done today
-    if (lastGenerated !== today) {
+    // Only generate if:
+    // 1. Not already done today (localStorage check)
+    // 2. Not already started this session (ref check to prevent double-call)
+    // 3. Not currently pending (mutation check)
+    if (
+      lastGenerated !== today &&
+      !recurringGenerationStarted.current &&
+      !generateRecurring.isPending
+    ) {
+      recurringGenerationStarted.current = true;
       generateRecurring.mutate(
         { date: today },
         {
@@ -252,10 +263,15 @@ export default function DashboardPage() {
               // Silently generated - no toast needed, tasks will appear in list
             }
           },
+          onError: () => {
+            // Reset ref on error so it can retry
+            recurringGenerationStarted.current = false;
+          },
         }
       );
     }
-  }, [today, generateRecurring]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [today]); // Only depend on today - generateRecurring is stable enough with the ref guard
 
   // Check for end-of-day carry-over prompt (after tasks load)
   useEffect(() => {
@@ -312,6 +328,21 @@ export default function DashboardPage() {
     }
   }, [kaizenData, isCarryOverModalOpen]);
 
+  // Global keyboard shortcut: Cmd+N / Ctrl+N to open new task modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Cmd+N (Mac) or Ctrl+N (Windows/Linux)
+      if ((e.metaKey || e.ctrlKey) && e.key === "n") {
+        e.preventDefault();
+        setDefaultPriority("SECONDARY"); // Default to secondary for quick add
+        setIsCreateModalOpen(true);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   // Uncomplete a task (revert to pending)
   const uncompleteTask = useCallback(async (taskId: string) => {
     try {
@@ -351,6 +382,7 @@ export default function DashboardPage() {
       points: TASK_PRIORITY_POINTS[task.priority],
       isOverdue,
       scheduledDate: formatLocalDate(new Date(task.scheduledDate)),
+      priority: task.priority as "MIT" | "PRIMARY" | "SECONDARY",
       goalChain: task.weeklyGoal
         ? {
             weeklyGoal: { id: task.weeklyGoal.id, title: task.weeklyGoal.title },
@@ -435,6 +467,38 @@ export default function DashboardPage() {
       completeTask(taskId, task.priority === "MIT");
     }
   }, [overdueTasks, isCompleting, updateTask.isPending, completeTask, uncompleteTask]);
+
+  // Handle drag-to-promote: promote a task to MIT
+  const handlePromoteToMit = useCallback(async (droppedTask: { id: string; title: string; priority: "PRIMARY" | "SECONDARY" }) => {
+    if (updateTask.isPending) return;
+
+    try {
+      // If there's already an MIT, demote it to the dropped task's original priority
+      if (mitTask) {
+        await updateTask.mutateAsync({
+          id: mitTask.id,
+          priority: droppedTask.priority,
+        });
+      }
+
+      // Promote the dropped task to MIT
+      await updateTask.mutateAsync({
+        id: droppedTask.id,
+        priority: "MIT",
+      });
+
+      // Show success message
+      if (mitTask) {
+        toast.success(`Swapped! "${droppedTask.title}" is now your MIT`);
+      } else {
+        toast.success(`"${droppedTask.title}" promoted to MIT!`);
+      }
+
+      refetchTasks();
+    } catch {
+      toast.error("Failed to promote task");
+    }
+  }, [mitTask, updateTask, refetchTasks]);
 
   // Open create modal with specific priority
   const openCreateModal = (priority: TaskPriority) => {
@@ -613,6 +677,7 @@ export default function DashboardPage() {
         aiUsesRemaining={aiRemaining}
         aiUsesTotal={aiLimit}
         onAiClick={handleOpenTaskSuggest}
+        showSettingsIcon
       />
 
       {/* Mobile Stats Bar - tap to see full Progress page */}
@@ -729,6 +794,7 @@ export default function DashboardPage() {
             task={mit}
             onToggle={handleToggleMit}
             onAiSuggest={handleOpenTaskSuggest}
+            onDrop={handlePromoteToMit}
           />
 
           <TaskList
@@ -737,6 +803,7 @@ export default function DashboardPage() {
             onTaskToggle={handleTogglePrimary}
             onTaskEdit={openEditModal}
             onAddTask={() => openCreateModal("PRIMARY")}
+            draggable
           />
 
           <TaskList
@@ -745,6 +812,7 @@ export default function DashboardPage() {
             onTaskToggle={handleToggleSecondary}
             onTaskEdit={openEditModal}
             onAddTask={() => openCreateModal("SECONDARY")}
+            draggable
           />
         </>
       ) : null}
@@ -853,6 +921,9 @@ export default function DashboardPage() {
         }}
         badge={earnedBadge}
       />
+
+      {/* Floating Action Button - Mobile Quick Add */}
+      <FloatingActionButton onClick={() => openCreateModal("SECONDARY")} />
     </AppShell>
   );
 }
