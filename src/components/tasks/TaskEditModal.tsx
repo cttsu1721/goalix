@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2, Save, Trash2, Clock, AlertCircle, CalendarDays } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { TaskPriority, TaskStatus, GoalCategory } from "@prisma/client";
 import { GoalSelector } from "@/components/goals";
 import { formatLocalDate } from "@/lib/utils";
@@ -45,23 +46,26 @@ interface TaskEditModalProps {
 
 const PRIORITY_CONFIG: Record<
   TaskPriority,
-  { label: string; description: string; points: number; color: string }
+  { label: string; shortDesc: string; description: string; points: number; color: string }
 > = {
   MIT: {
     label: "MIT",
-    description: "Most Important Task (1 per day)",
+    shortDesc: "1 per day",
+    description: "The ONE thing that moves the needle most",
     points: 100,
     color: "text-lantern",
   },
   PRIMARY: {
     label: "Primary",
-    description: "Core tasks for the day (max 3)",
+    shortDesc: "Max 3",
+    description: "Core tasks that advance your goals",
     points: 50,
     color: "text-zen-green",
   },
   SECONDARY: {
     label: "Secondary",
-    description: "Bonus/supporting tasks",
+    shortDesc: "Unlimited",
+    description: "Supporting tasks and quick wins",
     points: 25,
     color: "text-moon-soft",
   },
@@ -186,13 +190,26 @@ function TaskEditForm({ task, onClose }: { task: Task; onClose: () => void }) {
                   value={p}
                   className="text-moon-soft focus:bg-night-mist focus:text-moon"
                 >
-                  <span className={PRIORITY_CONFIG[p].color}>
-                    {PRIORITY_CONFIG[p].label}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className={PRIORITY_CONFIG[p].color}>
+                      {PRIORITY_CONFIG[p].label}
+                    </span>
+                    <span className="text-moon-faint text-xs">
+                      ({PRIORITY_CONFIG[p].shortDesc})
+                    </span>
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
+          <p className={cn(
+            "text-[11px] leading-tight",
+            priority === "MIT" && "text-lantern/70",
+            priority === "PRIMARY" && "text-zen-green/70",
+            priority === "SECONDARY" && "text-moon-faint"
+          )}>
+            {PRIORITY_CONFIG[priority].description}
+          </p>
         </div>
 
         {/* Status */}

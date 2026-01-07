@@ -39,23 +39,26 @@ interface TaskCreateModalProps {
 
 const PRIORITY_CONFIG: Record<
   TaskPriority,
-  { label: string; description: string; points: number; color: string }
+  { label: string; shortDesc: string; description: string; points: number; color: string }
 > = {
   MIT: {
     label: "MIT",
-    description: "Most Important Task (1 per day)",
+    shortDesc: "1 per day",
+    description: "The ONE thing that moves the needle most. If you only complete one task today, this is it.",
     points: 100,
     color: "text-lantern",
   },
   PRIMARY: {
     label: "Primary",
-    description: "Core tasks for the day (max 3)",
+    shortDesc: "Max 3",
+    description: "Core tasks that meaningfully advance your goals. Keep it focused — less is more.",
     points: 50,
     color: "text-zen-green",
   },
   SECONDARY: {
     label: "Secondary",
-    description: "Bonus/supporting tasks",
+    shortDesc: "Unlimited",
+    description: "Supporting tasks, quick wins, or admin work. Nice to complete, but won't derail your day.",
     points: 25,
     color: "text-moon-soft",
   },
@@ -201,7 +204,7 @@ export function TaskCreateModal({
           </div>
 
           {/* Priority */}
-          <div className="space-y-2">
+          <div className="space-y-3">
             <Label className="text-moon-soft text-sm">Priority</Label>
             <div className="grid grid-cols-3 gap-2">
               {(Object.keys(PRIORITY_CONFIG) as TaskPriority[]).map((p) => {
@@ -213,7 +216,7 @@ export function TaskCreateModal({
                     type="button"
                     onClick={() => setPriority(p)}
                     className={cn(
-                      "flex flex-col items-center gap-1 p-3 rounded-xl border transition-all",
+                      "flex flex-col items-center gap-0.5 p-3 rounded-xl border transition-all",
                       isSelected
                         ? "border-lantern bg-lantern/10"
                         : "border-night-mist bg-night-soft hover:border-night-glow"
@@ -228,15 +231,24 @@ export function TaskCreateModal({
                       {config.label}
                     </span>
                     <span className="text-[10px] text-moon-faint">
+                      {config.shortDesc}
+                    </span>
+                    <span className="text-[10px] text-moon-faint/70">
                       +{config.points} pts
                     </span>
                   </button>
                 );
               })}
             </div>
-            <p className="text-xs text-moon-faint mt-1">
+            {/* Priority description - more prominent */}
+            <div className={cn(
+              "p-3 rounded-lg border text-xs leading-relaxed",
+              priority === "MIT" && "bg-lantern/5 border-lantern/20 text-lantern/90",
+              priority === "PRIMARY" && "bg-zen-green/5 border-zen-green/20 text-zen-green/90",
+              priority === "SECONDARY" && "bg-night-soft border-night-mist text-moon-dim"
+            )}>
               {selectedPriorityConfig.description}
-            </p>
+            </div>
           </div>
 
           {/* Description */}
