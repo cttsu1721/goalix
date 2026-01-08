@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useCreateTask, useGoals } from "@/hooks";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useCreateTask, useGoals, scrollInputIntoView, useGoalLinkSuggest } from "@/hooks";
 import {
   Dialog,
   DialogContent,
@@ -22,11 +22,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn, formatLocalDate } from "@/lib/utils";
-import { Loader2, Sparkles, Clock, AlertCircle, Lightbulb, ChevronDown, ChevronUp } from "lucide-react";
+import { Loader2, Sparkles, Clock, AlertCircle, Lightbulb, ChevronDown, ChevronUp, Target, X } from "lucide-react";
 import type { TaskPriority, GoalCategory } from "@prisma/client";
 import { AiButton, TaskSuggestModal } from "@/components/ai";
 // DecisionCompassDialog removed - flexible hierarchy allows standalone tasks
 import { GoalSelector } from "@/components/goals";
+import { ContextualTip } from "@/components/onboarding";
 import type { SuggestedTask } from "@/lib/ai/schemas";
 import { toast } from "sonner";
 
@@ -89,17 +90,97 @@ export function TaskCreateModal({
   const [error, setError] = useState<string | null>(null);
   const [showSuggestModal, setShowSuggestModal] = useState(false);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
+  const [goalSuggestion, setGoalSuggestion] = useState<{
+    goalId: string;
+    goalTitle: string;
+    reasoning: string;
+  } | null>(null);
+  const [suggestionDismissed, setSuggestionDismissed] = useState(false);
+  const suggestionDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
   // Auto-expand if any optional field has content
   const hasOptionalContent = description.trim() || estimatedMinutes || (weeklyGoalId && weeklyGoalId !== "none");
 
   const createTask = useCreateTask();
   const { data: weeklyGoalsData } = useGoals("weekly");
+  const goalLinkSuggest = useGoalLinkSuggest();
 
   const weeklyGoals = (weeklyGoalsData?.goals || []) as Array<{ id: string; title: string; description?: string; category: GoalCategory }>;
 
   // Get selected weekly goal details for AI suggest
   const selectedWeeklyGoal = weeklyGoals.find((g) => g.id === weeklyGoalId);
+
+  // Trigger goal link suggestion when title changes and no goal is selected
+  const fetchGoalSuggestion = useCallback(async (taskTitle: string) => {
+    if (!taskTitle || taskTitle.length < 5 || weeklyGoals.length === 0) return;
+
+    try {
+      const result = await goalLinkSuggest.mutateAsync({
+        taskTitle,
+        goals: weeklyGoals.map((g) => ({
+          id: g.id,
+          title: g.title,
+          description: g.description,
+          category: g.category,
+        })),
+      });
+
+      if (result.data.suggestion && result.data.suggestion.confidence !== "low") {
+        setGoalSuggestion({
+          goalId: result.data.suggestion.goalId,
+          goalTitle: result.data.suggestion.goalTitle,
+          reasoning: result.data.suggestion.reasoning,
+        });
+      }
+    } catch {
+      // Silently fail - suggestions are a nice-to-have
+    }
+  }, [weeklyGoals, goalLinkSuggest]);
+
+  // Debounced goal suggestion trigger
+  useEffect(() => {
+    // Only suggest if no goal is selected and suggestion not dismissed
+    if (weeklyGoalId || suggestionDismissed || !open) {
+      setGoalSuggestion(null);
+      return;
+    }
+
+    // Clear existing debounce
+    if (suggestionDebounceRef.current) {
+      clearTimeout(suggestionDebounceRef.current);
+    }
+
+    // Debounce the suggestion (wait 1.5s after user stops typing)
+    if (title.trim().length >= 5) {
+      suggestionDebounceRef.current = setTimeout(() => {
+        fetchGoalSuggestion(title.trim());
+      }, 1500);
+    } else {
+      setGoalSuggestion(null);
+    }
+
+    return () => {
+      if (suggestionDebounceRef.current) {
+        clearTimeout(suggestionDebounceRef.current);
+      }
+    };
+  }, [title, weeklyGoalId, suggestionDismissed, open, fetchGoalSuggestion]);
+
+  // Handle accepting the goal suggestion
+  const handleAcceptSuggestion = () => {
+    if (goalSuggestion) {
+      setWeeklyGoalId(goalSuggestion.goalId);
+      setGoalSuggestion(null);
+      setShowMoreOptions(true); // Show the goal field
+      toast.success("Goal linked!");
+    }
+  };
+
+  // Handle dismissing the suggestion
+  const handleDismissSuggestion = () => {
+    setGoalSuggestion(null);
+    setSuggestionDismissed(true);
+  };
 
   // Handle applying AI suggestion to form
   const handleApplySuggestion = (tasks: SuggestedTask[], goalId?: string) => {
@@ -161,6 +242,8 @@ export function TaskCreateModal({
     setWeeklyGoalId("");
     setError(null);
     setShowMoreOptions(false);
+    setGoalSuggestion(null);
+    setSuggestionDismissed(false);
   };
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -202,10 +285,57 @@ export function TaskCreateModal({
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              onFocus={scrollInputIntoView}
               placeholder="What do you need to do?"
               className="bg-night-soft border-night-mist text-moon placeholder:text-moon-faint focus:border-lantern focus:ring-lantern/20"
               autoFocus
             />
+
+            {/* AI Goal Link Suggestion Banner */}
+            {goalSuggestion && !weeklyGoalId && (
+              <div className="mt-3 p-3 bg-zen-purple/5 border border-zen-purple/20 rounded-lg animate-in slide-in-from-top-2 duration-200">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                    <Target className="w-4 h-4 text-zen-purple flex-shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <p className="text-sm text-moon font-medium">
+                        Link to &ldquo;{goalSuggestion.goalTitle}&rdquo;?
+                      </p>
+                      <p className="text-xs text-moon-faint mt-0.5 leading-relaxed">
+                        {goalSuggestion.reasoning}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={handleDismissSuggestion}
+                      className="h-7 w-7 p-0 text-moon-faint hover:text-moon hover:bg-night-mist"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={handleAcceptSuggestion}
+                      className="h-7 px-3 bg-zen-purple text-void hover:bg-zen-purple/90 text-xs font-medium"
+                    >
+                      Link
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Loading state for AI suggestion */}
+            {goalLinkSuggest.isPending && !goalSuggestion && !weeklyGoalId && title.trim().length >= 5 && (
+              <div className="mt-3 flex items-center gap-2 text-xs text-moon-faint">
+                <Loader2 className="w-3 h-3 animate-spin" />
+                <span>Finding matching goal...</span>
+              </div>
+            )}
           </div>
 
           {/* Priority - Compact inline buttons */}
@@ -286,6 +416,7 @@ export function TaskCreateModal({
                   id="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
+                  onFocus={scrollInputIntoView}
                   placeholder="Add details or notes..."
                   rows={2}
                   className="bg-night-soft border-night-mist text-moon placeholder:text-moon-faint focus:border-lantern focus:ring-lantern/20 resize-none"
@@ -329,6 +460,15 @@ export function TaskCreateModal({
                   />
                 </div>
               </div>
+
+              {/* Contextual tip about goal linking - shows when no goal selected */}
+              {!weeklyGoalId && (
+                <ContextualTip
+                  tipId="decision_compass"
+                  variant="inline"
+                  className="mt-2"
+                />
+              )}
             </div>
           )}
 

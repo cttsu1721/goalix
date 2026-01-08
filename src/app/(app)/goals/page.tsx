@@ -19,8 +19,13 @@ import {
   Loader2,
   Wand2,
   Star,
+  Archive,
+  Play,
 } from "lucide-react";
+import { ContextualTip } from "@/components/onboarding";
+import { toast } from "sonner";
 import { GoalCardSkeleton } from "@/components/skeletons/DashboardSkeleton";
+import { UnlinkedGoalsWarning } from "@/components/goals";
 
 type UIGoalLevel = "vision" | "3-year" | "1-year" | "monthly" | "weekly";
 type GoalsOnlyLevel = Exclude<UIGoalLevel, "vision">;
@@ -71,7 +76,7 @@ const levelConfig: Record<
   },
 };
 
-function EmptyState({ onCreateVision, onVisionBuilder }: { onCreateVision: () => void; onVisionBuilder: () => void }) {
+function EmptyState({ onCreateVision, onVisionBuilder, onTrySamples }: { onCreateVision: () => void; onVisionBuilder: () => void; onTrySamples: () => void }) {
   return (
     <div className="bg-night border border-night-mist rounded-2xl p-12 text-center">
       {/* Icon */}
@@ -87,7 +92,7 @@ function EmptyState({ onCreateVision, onVisionBuilder }: { onCreateVision: () =>
       </p>
 
       {/* CTAs */}
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
         <Button
           onClick={onVisionBuilder}
           className="bg-gradient-to-r from-lantern to-lantern/80 text-void hover:from-lantern/90 hover:to-lantern/70 font-medium px-6 h-11 rounded-xl shadow-lg shadow-lantern/20"
@@ -103,6 +108,19 @@ function EmptyState({ onCreateVision, onVisionBuilder }: { onCreateVision: () =>
         >
           <Plus className="w-4 h-4 mr-2" />
           Create Manually
+        </Button>
+      </div>
+
+      {/* Sample Goals Option */}
+      <div className="pt-6 border-t border-night-mist">
+        <p className="text-moon-faint text-sm mb-3">Want to explore the app first?</p>
+        <Button
+          onClick={onTrySamples}
+          variant="ghost"
+          className="text-moon-dim hover:text-moon hover:bg-night-soft"
+        >
+          <Play className="w-4 h-4 mr-2" />
+          Try with Sample Goals
         </Button>
       </div>
     </div>
@@ -237,13 +255,15 @@ function VisionPageContent() {
   const router = useRouter();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isVisionBuilderOpen, setIsVisionBuilderOpen] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
+  const [isLoadingSamples, setIsLoadingSamples] = useState(false);
   // For creating 3-year goals from vision cards
   const [createChildTarget, setCreateChildTarget] = useState<{
     parentId: string;
     parentTitle: string;
   } | null>(null);
 
-  const { data, isLoading, refetch } = useVisions();
+  const { data, isLoading, refetch } = useVisions(undefined, showArchived);
   const visions = transformGoals(data?.goals || [], "sevenYear");
 
   const handleVisionClick = (id: string) => {
@@ -259,6 +279,29 @@ function VisionPageContent() {
 
   const handleRefresh = async () => {
     await refetch();
+  };
+
+  const handleTrySamples = async () => {
+    setIsLoadingSamples(true);
+    try {
+      const response = await fetch("/api/sample-goals", {
+        method: "POST",
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success("Sample goals created! Explore the app with real examples.");
+        await refetch();
+        router.refresh();
+      } else {
+        toast.error(data.error?.message || "Failed to create sample goals");
+      }
+    } catch (error) {
+      toast.error("Failed to create sample goals");
+    } finally {
+      setIsLoadingSamples(false);
+    }
   };
 
   return (
@@ -278,11 +321,30 @@ function VisionPageContent() {
         </p>
       </div>
 
+      {/* Goal hierarchy tip for new users */}
+      <ContextualTip tipId="goal_hierarchy" variant="inline" className="mb-6" />
+
+      {/* Unlinked Goals Warning - show on Vision page too */}
+      <UnlinkedGoalsWarning className="mb-6" />
+
       {/* Action Bar */}
       <div className="flex items-center justify-between mb-8">
-        <span className="text-moon-faint text-sm">
-          {visions.length} {visions.length === 1 ? "vision" : "visions"}
-        </span>
+        <div className="flex items-center gap-4">
+          <span className="text-moon-faint text-sm">
+            {visions.length} {visions.length === 1 ? "vision" : "visions"}
+          </span>
+          <button
+            onClick={() => setShowArchived(!showArchived)}
+            className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg transition-colors ${
+              showArchived
+                ? "bg-moon-faint/20 text-moon-soft"
+                : "text-moon-faint hover:text-moon-soft hover:bg-night-soft"
+            }`}
+          >
+            <Archive className="w-3.5 h-3.5" />
+            {showArchived ? "Hide archived" : "Show archived"}
+          </button>
+        </div>
         <div className="flex items-center gap-2">
           <Button
             onClick={() => setIsVisionBuilderOpen(true)}
@@ -324,6 +386,7 @@ function VisionPageContent() {
         <EmptyState
           onCreateVision={() => setIsCreateModalOpen(true)}
           onVisionBuilder={() => setIsVisionBuilderOpen(true)}
+          onTrySamples={handleTrySamples}
         />
       ) : (
         <div className="grid gap-6 md:grid-cols-2">
@@ -387,6 +450,7 @@ function GoalsOnlyPageContent() {
 
   const [activeLevel, setActiveLevel] = useState<GoalsOnlyLevel>(getInitialLevel);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
   // For creating child goals from goal cards
   const [createChildTarget, setCreateChildTarget] = useState<{
     parentId: string;
@@ -406,7 +470,7 @@ function GoalsOnlyPageContent() {
   const apiLevel = levelConfig[activeLevel].apiLevel;
 
   // Fetch goals for the current level
-  const { data, isLoading, refetch } = useGoals(apiLevel);
+  const { data, isLoading, refetch } = useGoals(apiLevel, undefined, undefined, showArchived);
   const goals = transformGoals(data?.goals || [], apiLevel);
 
   const handleGoalClick = (id: string) => {
@@ -444,6 +508,12 @@ function GoalsOnlyPageContent() {
         />
       </div>
 
+      {/* Goal hierarchy tip for new users */}
+      <ContextualTip tipId="goal_hierarchy" variant="inline" className="mb-6" />
+
+      {/* Unlinked Goals Warning */}
+      <UnlinkedGoalsWarning className="mb-6" />
+
       {/* Action Bar */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
@@ -452,6 +522,17 @@ function GoalsOnlyPageContent() {
             {levelConfig[activeLevel].label}
           </h2>
           <span className="text-moon-faint text-sm">({goals.length})</span>
+          <button
+            onClick={() => setShowArchived(!showArchived)}
+            className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg transition-colors ml-2 ${
+              showArchived
+                ? "bg-moon-faint/20 text-moon-soft"
+                : "text-moon-faint hover:text-moon-soft hover:bg-night-soft"
+            }`}
+          >
+            <Archive className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">{showArchived ? "Hide archived" : "Show archived"}</span>
+          </button>
         </div>
         <Button
           onClick={() => setIsCreateModalOpen(true)}

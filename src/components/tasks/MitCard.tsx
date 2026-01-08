@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Check, Sparkles, Trophy, Target, Link2Off, ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ContextualTip } from "@/components/onboarding";
 
 interface GoalChain {
   weeklyGoal?: {
@@ -13,6 +14,11 @@ interface GoalChain {
   oneYearGoal?: {
     id: string;
     title: string;
+  } | null;
+  sevenYearVision?: {
+    id: string;
+    title: string;
+    description?: string | null;
   } | null;
 }
 
@@ -134,6 +140,9 @@ export function MitCard({ task, onToggle, onAiSuggest, onDrop, className }: MitC
                     <Sparkles className="w-4 h-4 mr-2" />
                     AI Suggest MIT
                   </Button>
+                  <div className="mt-4">
+                    <ContextualTip tipId="mit_importance" variant="inline" />
+                  </div>
                 </>
               )}
             </div>

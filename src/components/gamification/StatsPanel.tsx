@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { StreakDisplay } from "./StreakDisplay";
 import { LevelProgress } from "./LevelProgress";
@@ -8,6 +10,8 @@ import { TodayStats } from "./TodayStats";
 import { GoalAlignment } from "./GoalAlignment";
 import { KaizenCheckin } from "./KaizenCheckin";
 import { BadgeGrid } from "./BadgeGrid";
+import { TodayScoreSummary } from "../dashboard/TodayScoreSummary";
+import { ContextualTip } from "@/components/onboarding";
 
 interface StatsPanelProps {
   streak?: number;
@@ -56,41 +60,78 @@ export function StatsPanel({
   onKaizenSave,
   className,
 }: StatsPanelProps) {
+  // Collapsible state for detailed stats section (6.2)
+  const [showDetails, setShowDetails] = useState(true);
+
   return (
     <div className={cn(className)}>
-      <div className="text-[0.625rem] font-medium uppercase tracking-[0.2em] text-moon-faint mb-8">
+      <div className="text-[0.625rem] font-medium uppercase tracking-[0.2em] text-moon-faint mb-4">
         Your Journey
       </div>
 
-      <StreakDisplay days={streak} freezesAvailable={streakFreezes} />
-
-      <LevelProgress
-        levelName={level.name}
-        currentXp={level.currentXp}
-        requiredXp={level.requiredXp}
-      />
-
-      <NextBadgeCard className="mb-6" />
-
-      <TodayStats
+      {/* Today's Score Summary (6.2) - Collapsed view of key stats */}
+      <TodayScoreSummary
+        points={today.pointsEarned}
+        streak={streak}
+        alignmentPercentage={goalAlignment}
         tasksCompleted={today.tasksCompleted}
-        tasksTotal={today.tasksTotal}
-        pointsEarned={today.pointsEarned}
+        totalTasks={today.tasksTotal}
+        className="mb-6"
       />
 
-      <GoalAlignment
-        percentage={goalAlignment}
-        linkedCount={linkedTasks}
-        totalCount={totalTasks}
-      />
+      {/* Collapsible Details Section */}
+      <button
+        onClick={() => setShowDetails(!showDetails)}
+        className="w-full flex items-center justify-between py-2 mb-4 text-xs text-moon-dim hover:text-moon transition-colors"
+      >
+        <span className="font-medium uppercase tracking-wider">
+          {showDetails ? "Hide Details" : "Show Details"}
+        </span>
+        {showDetails ? (
+          <ChevronUp className="w-4 h-4" />
+        ) : (
+          <ChevronDown className="w-4 h-4" />
+        )}
+      </button>
 
-      <KaizenCheckin
-        areas={kaizenAreas}
-        isComplete={kaizenComplete}
-        onSave={onKaizenSave}
-      />
+      {showDetails && (
+        <div className="space-y-0">
+          <StreakDisplay days={streak} freezesAvailable={streakFreezes} />
 
-      {badges.length > 0 && <BadgeGrid badges={badges} />}
+          {/* Streak building tip - show when user is just starting out */}
+          {streak <= 3 && (
+            <ContextualTip tipId="streak_building" variant="inline" className="mb-4 px-1" />
+          )}
+
+          <LevelProgress
+            levelName={level.name}
+            currentXp={level.currentXp}
+            requiredXp={level.requiredXp}
+          />
+
+          <NextBadgeCard className="mb-6" />
+
+          <TodayStats
+            tasksCompleted={today.tasksCompleted}
+            tasksTotal={today.tasksTotal}
+            pointsEarned={today.pointsEarned}
+          />
+
+          <GoalAlignment
+            percentage={goalAlignment}
+            linkedCount={linkedTasks}
+            totalCount={totalTasks}
+          />
+
+          <KaizenCheckin
+            areas={kaizenAreas}
+            isComplete={kaizenComplete}
+            onSave={onKaizenSave}
+          />
+
+          {badges.length > 0 && <BadgeGrid badges={badges} />}
+        </div>
+      )}
     </div>
   );
 }
