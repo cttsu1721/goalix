@@ -851,7 +851,6 @@ export default function DashboardPage() {
       <YearTargetHeader
         oneYearGoal={primaryOneYearGoal}
         weeklyGoal={primaryWeeklyGoal}
-        tasksCompleted={completedCount}
         tasksTotal={todayFormattedTasks.length}
         goalAlignedTasks={linkedTasks}
       />

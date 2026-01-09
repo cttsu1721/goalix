@@ -74,12 +74,10 @@ export function TimelineView({
     .filter((t) => t.completed)
     .reduce((sum, t) => sum + (t.estimatedMinutes || 0), 0);
 
-  // Current time indicator (for future use)
-  // const now = new Date();
-  // const currentHour = now.getHours();
-  // const currentMinute = now.getMinutes();
-  // const currentTimePosition =
-  //   ((currentHour - 6) * 60 + currentMinute) / ((22 - 6) * 60);
+  // Current time indicator
+  const now = new Date();
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
 
   return (
     <div className={cn("space-y-4", className)}>
