@@ -67,19 +67,19 @@ function SettingsSection({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-night border border-night-mist rounded-2xl overflow-hidden">
-      <div className="p-5 border-b border-night-mist">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-night-soft flex items-center justify-center">
-            <Icon className="w-5 h-5 text-lantern" />
+    <div className="bg-night border border-night-mist rounded-xl sm:rounded-2xl overflow-hidden">
+      <div className="p-4 sm:p-5 border-b border-night-mist">
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-night-soft flex items-center justify-center">
+            <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-lantern" />
           </div>
           <div>
-            <h3 className="font-medium text-moon">{title}</h3>
-            <p className="text-sm text-moon-dim">{description}</p>
+            <h3 className="font-medium text-moon text-sm sm:text-base">{title}</h3>
+            <p className="text-xs sm:text-sm text-moon-dim">{description}</p>
           </div>
         </div>
       </div>
-      <div className="p-5">{children}</div>
+      <div className="p-4 sm:p-5">{children}</div>
     </div>
   );
 }
@@ -198,22 +198,22 @@ function TextField({
 
 function SettingsSkeleton() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {[1, 2, 3, 4].map((i) => (
-        <div key={i} className="bg-night border border-night-mist rounded-2xl overflow-hidden">
-          <div className="p-5 border-b border-night-mist">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-night-soft animate-pulse" />
-              <div className="space-y-2">
-                <div className="h-4 w-24 bg-night-soft rounded animate-pulse" />
-                <div className="h-3 w-40 bg-night-soft rounded animate-pulse" />
+        <div key={i} className="bg-night border border-night-mist rounded-xl sm:rounded-2xl overflow-hidden">
+          <div className="p-4 sm:p-5 border-b border-night-mist">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-night-soft animate-pulse" />
+              <div className="space-y-1.5 sm:space-y-2">
+                <div className="h-4 w-20 sm:w-24 bg-night-soft rounded animate-pulse" />
+                <div className="h-3 w-32 sm:w-40 bg-night-soft rounded animate-pulse" />
               </div>
             </div>
           </div>
-          <div className="p-5">
-            <div className="space-y-4">
-              <div className="h-11 bg-night-soft rounded-xl animate-pulse" />
-              <div className="h-11 bg-night-soft rounded-xl animate-pulse" />
+          <div className="p-4 sm:p-5">
+            <div className="space-y-3 sm:space-y-4">
+              <div className="h-10 sm:h-11 bg-night-soft rounded-lg sm:rounded-xl animate-pulse" />
+              <div className="h-10 sm:h-11 bg-night-soft rounded-lg sm:rounded-xl animate-pulse" />
             </div>
           </div>
         </div>
@@ -237,7 +237,7 @@ function ThemeCard({
     <button
       onClick={onSelect}
       className={`
-        relative flex-1 p-4 rounded-xl border-2 transition-all duration-300
+        relative flex-1 p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 transition-all duration-300
         ${isSelected
           ? "border-lantern shadow-lg shadow-lantern/20"
           : "border-night-mist hover:border-moon-dim"
@@ -247,7 +247,7 @@ function ThemeCard({
       {/* Theme preview */}
       <div
         className={`
-          w-full aspect-[4/3] rounded-lg overflow-hidden mb-3 relative
+          w-full aspect-[4/3] rounded-md sm:rounded-lg overflow-hidden mb-2 sm:mb-3 relative
           ${isDark
             ? "bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#334155]"
             : "bg-gradient-to-br from-[#fefdfb] via-[#faf8f4] to-[#f5f2eb]"
@@ -314,7 +314,7 @@ function ThemeCard({
             </span>
           )}
         </div>
-        <p className="text-xs text-moon-faint mt-1 line-clamp-2">
+        <p className="text-[0.625rem] sm:text-xs text-moon-faint mt-0.5 sm:mt-1 line-clamp-2">
           {THEME_DESCRIPTIONS[themeKey]}
         </p>
       </div>
@@ -339,9 +339,9 @@ function AppearanceSection() {
         title="Appearance"
         description="Customize how Goalzenix looks"
       >
-        <div className="grid grid-cols-2 gap-4">
-          <div className="aspect-[4/3] rounded-xl bg-night-soft animate-pulse" />
-          <div className="aspect-[4/3] rounded-xl bg-night-soft animate-pulse" />
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+          <div className="aspect-[4/3] rounded-lg sm:rounded-xl bg-night-soft animate-pulse" />
+          <div className="aspect-[4/3] rounded-lg sm:rounded-xl bg-night-soft animate-pulse" />
         </div>
       </SettingsSection>
     );
@@ -353,11 +353,11 @@ function AppearanceSection() {
       title="Appearance"
       description="Customize how Goalzenix looks"
     >
-      <div className="space-y-4">
-        <p className="text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-moon-faint">
+      <div className="space-y-3 sm:space-y-4">
+        <p className="text-[0.625rem] sm:text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-moon-faint">
           Theme
         </p>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
           <ThemeCard
             themeKey="dark"
             isSelected={theme === "dark"}
@@ -548,7 +548,7 @@ export default function SettingsPage() {
         subtitle="Manage your account and preferences"
       />
 
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Profile Section */}
         <SettingsSection
           icon={User}
@@ -818,21 +818,21 @@ export default function SettingsPage() {
         </SettingsSection>
 
         {/* Danger Zone */}
-        <div className="bg-night border border-zen-red/30 rounded-2xl overflow-hidden">
-          <div className="p-5 border-b border-zen-red/20 bg-zen-red-soft">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-zen-red/20 flex items-center justify-center">
-                <AlertTriangle className="w-5 h-5 text-zen-red" />
+        <div className="bg-night border border-zen-red/30 rounded-xl sm:rounded-2xl overflow-hidden">
+          <div className="p-4 sm:p-5 border-b border-zen-red/20 bg-zen-red-soft">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-zen-red/20 flex items-center justify-center">
+                <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-zen-red" />
               </div>
               <div>
-                <h3 className="font-medium text-moon">Danger Zone</h3>
-                <p className="text-sm text-moon-dim">
+                <h3 className="font-medium text-moon text-sm sm:text-base">Danger Zone</h3>
+                <p className="text-xs sm:text-sm text-moon-dim">
                   Irreversible actions for your account
                 </p>
               </div>
             </div>
           </div>
-          <div className="p-5">
+          <div className="p-4 sm:p-5">
             {!showDeleteConfirm ? (
               <div className="flex items-center justify-between">
                 <div>
@@ -851,17 +851,17 @@ export default function SettingsPage() {
                 </Button>
               </div>
             ) : (
-              <div className="space-y-4">
-                <div className="p-4 bg-zen-red-soft border border-zen-red/30 rounded-xl">
-                  <p className="text-sm text-moon mb-2">
+              <div className="space-y-3 sm:space-y-4">
+                <div className="p-3 sm:p-4 bg-zen-red-soft border border-zen-red/30 rounded-lg sm:rounded-xl">
+                  <p className="text-sm text-moon mb-1.5 sm:mb-2">
                     Are you sure you want to delete your account?
                   </p>
-                  <p className="text-xs text-moon-dim">
+                  <p className="text-[0.625rem] sm:text-xs text-moon-dim">
                     This will permanently delete all your goals, tasks, progress,
                     and achievements. This action cannot be undone.
                   </p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <Button
                     variant="outline"
                     onClick={() => setShowDeleteConfirm(false)}
