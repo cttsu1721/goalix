@@ -24,6 +24,13 @@
 .DS_Store
 *.pem
 
+# macOS duplicate files (created by Finder copy/paste)
+public/sw\ [0-9]*.js
+public/workbox*\ [0-9]*.js
+
+# playwright MCP screenshots
+.playwright-mcp/
+
 # debug
 npm-debug.log*
 yarn-debug.log*
