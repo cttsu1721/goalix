@@ -42,16 +42,16 @@ export default function ReviewHistoryPage() {
 
   return (
     <AppShell>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Header with back link */}
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
           <Link href="/review/weekly">
             <Button
               variant="ghost"
               size="sm"
-              className="text-moon-dim hover:text-moon"
+              className="text-moon-dim hover:text-moon h-9 sm:h-10 text-xs sm:text-sm"
             >
-              <ArrowLeft className="w-4 h-4 mr-2" />
+              <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
               Back to Review
             </Button>
           </Link>
@@ -64,16 +64,16 @@ export default function ReviewHistoryPage() {
 
         {/* Loading state */}
         {isLoading && (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="w-8 h-8 animate-spin text-lantern" />
+          <div className="flex items-center justify-center py-12 sm:py-16">
+            <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 animate-spin text-lantern" />
           </div>
         )}
 
         {/* Error state */}
         {error && (
-          <div className="text-center py-12">
-            <p className="text-zen-red mb-2">Failed to load review history</p>
-            <p className="text-sm text-moon-faint">Please try again later</p>
+          <div className="text-center py-8 sm:py-12">
+            <p className="text-zen-red text-sm sm:text-base mb-1.5 sm:mb-2">Failed to load review history</p>
+            <p className="text-xs sm:text-sm text-moon-faint">Please try again later</p>
           </div>
         )}
 

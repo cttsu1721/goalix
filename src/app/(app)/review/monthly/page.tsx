@@ -71,15 +71,15 @@ function StatCard({
   iconColor?: string;
 }) {
   return (
-    <div className="bg-night border border-night-mist rounded-xl p-4">
-      <div className="flex items-center gap-3">
-        <div className={`w-10 h-10 rounded-lg bg-night-soft flex items-center justify-center ${iconColor}`}>
-          <Icon className="w-5 h-5" />
+    <div className="bg-night border border-night-mist rounded-lg sm:rounded-xl p-3 sm:p-4">
+      <div className="flex items-center gap-2.5 sm:gap-3">
+        <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-night-soft flex items-center justify-center ${iconColor}`}>
+          <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
         </div>
         <div>
-          <p className="text-xl font-semibold text-moon">{value}</p>
-          <p className="text-xs text-moon-dim">{label}</p>
-          {subvalue && <p className="text-xs text-moon-faint">{subvalue}</p>}
+          <p className="text-lg sm:text-xl font-semibold text-moon">{value}</p>
+          <p className="text-[0.625rem] sm:text-xs text-moon-dim">{label}</p>
+          {subvalue && <p className="text-[0.625rem] sm:text-xs text-moon-faint">{subvalue}</p>}
         </div>
       </div>
     </div>
@@ -106,34 +106,34 @@ function WeeklyBreakdownCard({ weeklyBreakdowns }: {
   };
 
   return (
-    <div className="bg-night border border-night-mist rounded-2xl p-6">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 rounded-xl bg-zen-blue/10 flex items-center justify-center">
-          <BarChart3 className="w-5 h-5 text-zen-blue" />
+    <div className="bg-night border border-night-mist rounded-xl sm:rounded-2xl p-4 sm:p-6">
+      <div className="flex items-center gap-2.5 sm:gap-3 mb-3 sm:mb-4">
+        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-zen-blue/10 flex items-center justify-center">
+          <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 text-zen-blue" />
         </div>
         <div>
-          <h3 className="text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-moon-faint">
+          <h3 className="text-[0.625rem] sm:text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-moon-faint">
             Weekly Breakdown
           </h3>
-          <p className="text-lg font-semibold text-moon">Performance by Week</p>
+          <p className="text-base sm:text-lg font-semibold text-moon">Performance by Week</p>
         </div>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2 sm:space-y-3">
         {weeklyBreakdowns.map((week) => {
           const completionRate = week.totalTasks > 0
             ? Math.round((week.tasksCompleted / week.totalTasks) * 100)
             : 0;
 
           return (
-            <div key={week.weekNumber} className="p-3 bg-night-soft rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-moon">Week {week.weekNumber}</span>
-                <span className="text-xs text-moon-faint">{formatWeekRange(week.startDate, week.endDate)}</span>
+            <div key={week.weekNumber} className="p-2.5 sm:p-3 bg-night-soft rounded-lg">
+              <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                <span className="text-xs sm:text-sm font-medium text-moon">Week {week.weekNumber}</span>
+                <span className="text-[0.625rem] sm:text-xs text-moon-faint">{formatWeekRange(week.startDate, week.endDate)}</span>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 sm:gap-4">
                 <div className="flex-1">
-                  <div className="h-2 bg-night-mist rounded-full overflow-hidden">
+                  <div className="h-1.5 sm:h-2 bg-night-mist rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all ${
                         completionRate >= 80 ? "bg-zen-green" :
@@ -143,16 +143,16 @@ function WeeklyBreakdownCard({ weeklyBreakdowns }: {
                     />
                   </div>
                 </div>
-                <div className="flex items-center gap-3 text-xs">
+                <div className="flex items-center gap-2 sm:gap-3 text-[0.625rem] sm:text-xs">
                   <span className="text-moon-soft">
-                    {week.tasksCompleted}/{week.totalTasks} tasks
+                    {week.tasksCompleted}/{week.totalTasks} <span className="hidden sm:inline">tasks</span>
                   </span>
                   {week.mitCompleted > 0 && (
                     <span className="text-lantern">
                       {week.mitCompleted}/{week.mitTotal} MIT
                     </span>
                   )}
-                  <span className="text-zen-green">+{week.pointsEarned} pts</span>
+                  <span className="text-zen-green">+{week.pointsEarned}</span>
                 </div>
               </div>
             </div>
@@ -175,44 +175,44 @@ function MonthlyGoalsCard({ goals }: {
   const activeGoals = goals.filter((g) => g.status === "ACTIVE");
 
   return (
-    <div className="bg-night border border-night-mist rounded-2xl p-6">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 rounded-xl bg-lantern/10 flex items-center justify-center">
-          <Target className="w-5 h-5 text-lantern" />
+    <div className="bg-night border border-night-mist rounded-xl sm:rounded-2xl p-4 sm:p-6">
+      <div className="flex items-center gap-2.5 sm:gap-3 mb-3 sm:mb-4">
+        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-lantern/10 flex items-center justify-center">
+          <Target className="w-4 h-4 sm:w-5 sm:h-5 text-lantern" />
         </div>
         <div>
-          <h3 className="text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-moon-faint">
+          <h3 className="text-[0.625rem] sm:text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-moon-faint">
             Monthly Goals
           </h3>
-          <p className="text-lg font-semibold text-moon">
+          <p className="text-base sm:text-lg font-semibold text-moon">
             {completedGoals.length} / {goals.length} Completed
           </p>
         </div>
       </div>
 
       {goals.length === 0 ? (
-        <p className="text-sm text-moon-faint py-4 text-center">
+        <p className="text-xs sm:text-sm text-moon-faint py-3 sm:py-4 text-center">
           No monthly goals set for this period
         </p>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
           {/* Completed goals */}
           {completedGoals.map((goal) => (
-            <div key={goal.id} className="flex items-center gap-3 p-3 bg-zen-green/5 border border-zen-green/20 rounded-lg">
-              <CheckCircle2 className="w-5 h-5 text-zen-green flex-shrink-0" />
-              <span className="text-sm text-moon flex-1">{goal.title}</span>
-              <span className="text-xs text-zen-green">Completed</span>
+            <div key={goal.id} className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 bg-zen-green/5 border border-zen-green/20 rounded-lg">
+              <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-zen-green flex-shrink-0" />
+              <span className="text-xs sm:text-sm text-moon flex-1">{goal.title}</span>
+              <span className="text-[0.625rem] sm:text-xs text-zen-green">Completed</span>
             </div>
           ))}
 
           {/* Active/In-progress goals */}
           {activeGoals.map((goal) => (
-            <div key={goal.id} className="p-3 bg-night-soft rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-moon">{goal.title}</span>
-                <span className="text-xs text-moon-faint">{goal.progress}%</span>
+            <div key={goal.id} className="p-2.5 sm:p-3 bg-night-soft rounded-lg">
+              <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                <span className="text-xs sm:text-sm text-moon">{goal.title}</span>
+                <span className="text-[0.625rem] sm:text-xs text-moon-faint">{goal.progress}%</span>
               </div>
-              <div className="h-1.5 bg-night-mist rounded-full overflow-hidden">
+              <div className="h-1 sm:h-1.5 bg-night-mist rounded-full overflow-hidden">
                 <div
                   className="h-full bg-lantern rounded-full"
                   style={{ width: `${goal.progress}%` }}
@@ -239,61 +239,61 @@ function KaizenMonthlyCard({ kaizen, daysInMonth }: {
   daysInMonth: number;
 }) {
   return (
-    <div className="bg-night border border-night-mist rounded-2xl p-6">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 rounded-xl bg-zen-green/10 flex items-center justify-center">
-          <Star className="w-5 h-5 text-zen-green" />
+    <div className="bg-night border border-night-mist rounded-xl sm:rounded-2xl p-4 sm:p-6">
+      <div className="flex items-center gap-2.5 sm:gap-3 mb-3 sm:mb-4">
+        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-zen-green/10 flex items-center justify-center">
+          <Star className="w-4 h-4 sm:w-5 sm:h-5 text-zen-green" />
         </div>
         <div>
-          <h3 className="text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-moon-faint">
+          <h3 className="text-[0.625rem] sm:text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-moon-faint">
             Kaizen Reflections
           </h3>
-          <p className="text-lg font-semibold text-moon">
+          <p className="text-base sm:text-lg font-semibold text-moon">
             {kaizen.checkinsCompleted} / {daysInMonth} Days ({kaizen.completionRate}%)
           </p>
         </div>
       </div>
 
       {/* Area breakdown */}
-      <div className="space-y-2 mb-4">
+      <div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4">
         {Object.entries(kaizen.areaBreakdown).map(([area, count]) => {
           const Icon = AREA_ICONS[area] || Star;
           const color = AREA_COLORS[area] || "text-moon-soft";
           const percentage = Math.round((count / daysInMonth) * 100);
 
           return (
-            <div key={area} className="flex items-center gap-2">
-              <Icon className={`w-4 h-4 ${color}`} />
-              <span className="text-xs text-moon-soft flex-1">{formatAreaName(area)}</span>
-              <div className="w-24 h-1.5 bg-night-mist rounded-full overflow-hidden">
+            <div key={area} className="flex items-center gap-1.5 sm:gap-2">
+              <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${color}`} />
+              <span className="text-[0.625rem] sm:text-xs text-moon-soft flex-1">{formatAreaName(area)}</span>
+              <div className="w-16 sm:w-24 h-1 sm:h-1.5 bg-night-mist rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full ${percentage >= 70 ? "bg-zen-green" : "bg-lantern"}`}
                   style={{ width: `${percentage}%` }}
                 />
               </div>
-              <span className="text-xs text-moon-faint w-12 text-right">{count} days</span>
+              <span className="text-[0.625rem] sm:text-xs text-moon-faint w-10 sm:w-12 text-right">{count} <span className="hidden sm:inline">days</span><span className="sm:hidden">d</span></span>
             </div>
           );
         })}
       </div>
 
       {/* Insights */}
-      <div className="space-y-2 pt-4 border-t border-night-mist">
+      <div className="space-y-1.5 sm:space-y-2 pt-3 sm:pt-4 border-t border-night-mist">
         {kaizen.balancedDays > 0 && (
-          <p className="text-xs text-moon-soft">
-            <span className="text-zen-purple">Balanced days:</span> {kaizen.balancedDays} (all 6 areas improved)
+          <p className="text-[0.625rem] sm:text-xs text-moon-soft">
+            <span className="text-zen-purple">Balanced days:</span> {kaizen.balancedDays} <span className="hidden sm:inline">(all 6 areas improved)</span>
           </p>
         )}
         {kaizen.strongestArea && (
-          <p className="text-xs text-moon-soft">
+          <p className="text-[0.625rem] sm:text-xs text-moon-soft">
             <span className="text-zen-green">Strongest:</span>{" "}
-            {formatAreaName(kaizen.strongestArea.area)} ({kaizen.strongestArea.count} days)
+            {formatAreaName(kaizen.strongestArea.area)} ({kaizen.strongestArea.count}<span className="hidden sm:inline"> days</span><span className="sm:hidden">d</span>)
           </p>
         )}
         {kaizen.weakestArea && (
-          <p className="text-xs text-moon-soft">
+          <p className="text-[0.625rem] sm:text-xs text-moon-soft">
             <span className="text-amber-400">Needs attention:</span>{" "}
-            {formatAreaName(kaizen.weakestArea.area)} ({kaizen.weakestArea.count} days)
+            {formatAreaName(kaizen.weakestArea.area)} ({kaizen.weakestArea.count}<span className="hidden sm:inline"> days</span><span className="sm:hidden">d</span>)
           </p>
         )}
       </div>
@@ -311,48 +311,48 @@ function GoalAlignmentCard({ goalAlignment }: {
   }
 }) {
   return (
-    <div className="bg-night border border-night-mist rounded-2xl p-6">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 rounded-xl bg-zen-blue/10 flex items-center justify-center">
-          <Link2 className="w-5 h-5 text-zen-blue" />
+    <div className="bg-night border border-night-mist rounded-xl sm:rounded-2xl p-4 sm:p-6">
+      <div className="flex items-center gap-2.5 sm:gap-3 mb-3 sm:mb-4">
+        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-zen-blue/10 flex items-center justify-center">
+          <Link2 className="w-4 h-4 sm:w-5 sm:h-5 text-zen-blue" />
         </div>
         <div>
-          <h3 className="text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-moon-faint">
+          <h3 className="text-[0.625rem] sm:text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-moon-faint">
             Goal Alignment
           </h3>
-          <p className="text-lg font-semibold text-moon">{goalAlignment.alignmentRate}% Aligned</p>
+          <p className="text-base sm:text-lg font-semibold text-moon">{goalAlignment.alignmentRate}% Aligned</p>
         </div>
       </div>
 
-      <div className="space-y-3">
-        <div className="flex items-center justify-between p-3 bg-night-soft rounded-lg">
-          <div className="flex items-center gap-2">
-            <Link2 className="w-4 h-4 text-zen-green" />
-            <span className="text-sm text-moon-soft">Goal-linked tasks</span>
+      <div className="space-y-2 sm:space-y-3">
+        <div className="flex items-center justify-between p-2.5 sm:p-3 bg-night-soft rounded-lg">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <Link2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zen-green" />
+            <span className="text-xs sm:text-sm text-moon-soft">Goal-linked tasks</span>
           </div>
-          <span className="text-sm font-medium text-moon">
+          <span className="text-xs sm:text-sm font-medium text-moon">
             {goalAlignment.linkedCompleted} / {goalAlignment.totalLinked}
           </span>
         </div>
 
-        <div className="flex items-center justify-between p-3 bg-night-soft rounded-lg">
-          <div className="flex items-center gap-2">
-            <Link2Off className="w-4 h-4 text-moon-faint" />
-            <span className="text-sm text-moon-soft">Unlinked tasks</span>
+        <div className="flex items-center justify-between p-2.5 sm:p-3 bg-night-soft rounded-lg">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <Link2Off className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-moon-faint" />
+            <span className="text-xs sm:text-sm text-moon-soft">Unlinked tasks</span>
           </div>
-          <span className="text-sm font-medium text-moon">
+          <span className="text-xs sm:text-sm font-medium text-moon">
             {goalAlignment.unlinkedCompleted} / {goalAlignment.totalUnlinked}
           </span>
         </div>
       </div>
 
       {goalAlignment.alignmentRate >= 80 && (
-        <p className="mt-4 text-xs text-zen-green">
+        <p className="mt-3 sm:mt-4 text-[0.625rem] sm:text-xs text-zen-green">
           Great job staying focused on your goals this month!
         </p>
       )}
       {goalAlignment.alignmentRate < 50 && goalAlignment.totalUnlinked > 0 && (
-        <p className="mt-4 text-xs text-moon-faint">
+        <p className="mt-3 sm:mt-4 text-[0.625rem] sm:text-xs text-moon-faint">
           Consider linking more tasks to goals to improve focus and alignment.
         </p>
       )}
@@ -401,16 +401,16 @@ function ReviewWizard({ monthData, onComplete }: {
   };
 
   return (
-    <div className="bg-night border border-night-mist rounded-2xl overflow-hidden">
+    <div className="bg-night border border-night-mist rounded-xl sm:rounded-2xl overflow-hidden">
       {/* Step Indicator */}
-      <div className="p-4 border-b border-night-mist bg-night-soft">
+      <div className="p-3 sm:p-4 border-b border-night-mist bg-night-soft">
         <div className="flex items-center justify-between">
           {reviewSteps.map((step, index) => (
             <div key={step.id} className="flex items-center">
               <div className="flex flex-col items-center">
                 <div
                   className={`
-                    w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
+                    w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-medium
                     ${
                       currentStep === step.id
                         ? "bg-lantern text-void"
@@ -420,16 +420,16 @@ function ReviewWizard({ monthData, onComplete }: {
                     }
                   `}
                 >
-                  {currentStep > step.id ? <CheckCircle2 className="w-4 h-4" /> : step.id}
+                  {currentStep > step.id ? <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : step.id}
                 </div>
-                <span className="text-[0.625rem] text-moon-faint mt-1 hidden sm:block">
+                <span className="text-[0.5rem] sm:text-[0.625rem] text-moon-faint mt-1 hidden sm:block">
                   {step.title}
                 </span>
               </div>
               {index < reviewSteps.length - 1 && (
                 <div
                   className={`
-                    w-12 h-0.5 mx-2
+                    w-6 sm:w-12 h-0.5 mx-1 sm:mx-2
                     ${currentStep > step.id ? "bg-zen-green" : "bg-night-mist"}
                   `}
                 />
@@ -440,16 +440,16 @@ function ReviewWizard({ monthData, onComplete }: {
       </div>
 
       {/* Step Content */}
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         {currentStep === 1 && monthData && (
-          <div className="space-y-4">
-            <div className="text-center mb-6">
-              <h3 className="text-lg font-medium text-moon mb-2">Month in Review</h3>
-              <p className="text-sm text-moon-dim">
+          <div className="space-y-3 sm:space-y-4">
+            <div className="text-center mb-4 sm:mb-6">
+              <h3 className="text-base sm:text-lg font-medium text-moon mb-1.5 sm:mb-2">Month in Review</h3>
+              <p className="text-xs sm:text-sm text-moon-dim">
                 Here&apos;s how you performed in {monthData.monthRange.monthName}
               </p>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2 sm:gap-3">
               <StatCard
                 icon={CheckCircle2}
                 label="Tasks Completed"
@@ -478,12 +478,12 @@ function ReviewWizard({ monthData, onComplete }: {
             </div>
 
             {/* Key metrics summary */}
-            <div className="mt-4 p-4 bg-night-soft rounded-xl space-y-2">
-              <p className="text-sm text-moon-soft">
+            <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-night-soft rounded-lg sm:rounded-xl space-y-1.5 sm:space-y-2">
+              <p className="text-xs sm:text-sm text-moon-soft">
                 <span className="text-zen-blue font-medium">Goal Alignment:</span>{" "}
                 {monthData.goalAlignment.alignmentRate}% of completed tasks were goal-linked
               </p>
-              <p className="text-sm text-moon-soft">
+              <p className="text-xs sm:text-sm text-moon-soft">
                 <span className="text-zen-green font-medium">Kaizen Rate:</span>{" "}
                 You reflected on {monthData.kaizen.checkinsCompleted} of {monthData.stats.daysInMonth} days
               </p>
@@ -492,27 +492,27 @@ function ReviewWizard({ monthData, onComplete }: {
         )}
 
         {currentStep === 2 && (
-          <div className="space-y-4">
-            <div className="text-center mb-6">
-              <div className="w-12 h-12 rounded-xl bg-lantern-soft flex items-center justify-center mx-auto mb-3">
-                <Trophy className="w-6 h-6 text-lantern" />
+          <div className="space-y-3 sm:space-y-4">
+            <div className="text-center mb-4 sm:mb-6">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-lantern-soft flex items-center justify-center mx-auto mb-2.5 sm:mb-3">
+                <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-lantern" />
               </div>
-              <h3 className="text-lg font-medium text-moon mb-2">Celebrate Your Wins</h3>
-              <p className="text-sm text-moon-dim">
+              <h3 className="text-base sm:text-lg font-medium text-moon mb-1.5 sm:mb-2">Celebrate Your Wins</h3>
+              <p className="text-xs sm:text-sm text-moon-dim">
                 What were your biggest achievements this month?
               </p>
             </div>
 
             {/* Data-driven accomplishments */}
             {monthData && (
-              <div className="bg-night-soft rounded-xl p-4 mb-4">
-                <p className="text-xs font-medium uppercase tracking-wider text-moon-faint mb-3">
+              <div className="bg-night-soft rounded-lg sm:rounded-xl p-3 sm:p-4 mb-3 sm:mb-4">
+                <p className="text-[0.625rem] sm:text-xs font-medium uppercase tracking-wider text-moon-faint mb-2.5 sm:mb-3">
                   This Month&apos;s Highlights
                 </p>
-                <div className="space-y-2">
+                <div className="space-y-1.5 sm:space-y-2">
                   {monthData.stats.tasksCompleted > 0 && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <CheckCircle2 className="w-4 h-4 text-zen-green" />
+                    <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                      <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zen-green" />
                       <span className="text-moon-soft">
                         Completed <span className="text-zen-green font-medium">{monthData.stats.tasksCompleted} tasks</span>
                         {monthData.stats.completionRate >= 80 && " with excellent focus"}
@@ -520,32 +520,32 @@ function ReviewWizard({ monthData, onComplete }: {
                     </div>
                   )}
                   {monthData.stats.goalsCompleted > 0 && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Target className="w-4 h-4 text-zen-blue" />
+                    <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                      <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zen-blue" />
                       <span className="text-moon-soft">
                         Achieved <span className="text-zen-blue font-medium">{monthData.stats.goalsCompleted} goals</span>
                       </span>
                     </div>
                   )}
                   {monthData.stats.mitCompletionRate >= 70 && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Flame className="w-4 h-4 text-zen-red" />
+                    <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                      <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zen-red" />
                       <span className="text-moon-soft">
                         Strong MIT discipline at <span className="text-zen-red font-medium">{monthData.stats.mitCompletionRate}%</span>
                       </span>
                     </div>
                   )}
                   {monthData.kaizen.balancedDays > 0 && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Star className="w-4 h-4 text-zen-purple" />
+                    <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                      <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zen-purple" />
                       <span className="text-moon-soft">
-                        <span className="text-zen-purple font-medium">{monthData.kaizen.balancedDays} balanced days</span> (all 6 life areas)
+                        <span className="text-zen-purple font-medium">{monthData.kaizen.balancedDays} balanced days</span> <span className="hidden sm:inline">(all 6 life areas)</span>
                       </span>
                     </div>
                   )}
                   {monthData.goalAlignment.alignmentRate >= 70 && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Link2 className="w-4 h-4 text-lantern" />
+                    <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                      <Link2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-lantern" />
                       <span className="text-moon-soft">
                         <span className="text-lantern font-medium">{monthData.goalAlignment.alignmentRate}%</span> goal-aligned focus
                       </span>
@@ -556,9 +556,9 @@ function ReviewWizard({ monthData, onComplete }: {
             )}
 
             {/* Reflection prompts */}
-            <div className="bg-night border border-night-mist rounded-lg p-3 mb-3">
-              <p className="text-xs text-moon-faint mb-2">Reflect on:</p>
-              <ul className="text-sm text-moon-dim space-y-1">
+            <div className="bg-night border border-night-mist rounded-lg p-2.5 sm:p-3 mb-2.5 sm:mb-3">
+              <p className="text-[0.625rem] sm:text-xs text-moon-faint mb-1.5 sm:mb-2">Reflect on:</p>
+              <ul className="text-xs sm:text-sm text-moon-dim space-y-0.5 sm:space-y-1">
                 <li>• What goal achievement are you most proud of?</li>
                 <li>• Which habit stuck this month?</li>
                 <li>• What milestone did you hit?</li>
@@ -569,30 +569,30 @@ function ReviewWizard({ monthData, onComplete }: {
               value={wins}
               onChange={(e) => setWins(e.target.value)}
               placeholder="Completed the project ahead of deadline, maintained a 3-week workout streak, read 4 books..."
-              className="w-full h-32 bg-night-soft border border-night-mist rounded-xl p-4 text-moon placeholder:text-moon-faint resize-none focus:border-lantern focus:ring-1 focus:ring-lantern/20 outline-none"
+              className="w-full h-24 sm:h-32 bg-night-soft border border-night-mist rounded-lg sm:rounded-xl p-3 sm:p-4 text-sm sm:text-base text-moon placeholder:text-moon-faint resize-none focus:border-lantern focus:ring-1 focus:ring-lantern/20 outline-none"
             />
           </div>
         )}
 
         {currentStep === 3 && (
-          <div className="space-y-4">
-            <div className="text-center mb-6">
-              <div className="w-12 h-12 rounded-xl bg-zen-purple-soft flex items-center justify-center mx-auto mb-3">
-                <Brain className="w-6 h-6 text-zen-purple" />
+          <div className="space-y-3 sm:space-y-4">
+            <div className="text-center mb-4 sm:mb-6">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-zen-purple-soft flex items-center justify-center mx-auto mb-2.5 sm:mb-3">
+                <Brain className="w-5 h-5 sm:w-6 sm:h-6 text-zen-purple" />
               </div>
-              <h3 className="text-lg font-medium text-moon mb-2">Key Learnings</h3>
-              <p className="text-sm text-moon-dim">
+              <h3 className="text-base sm:text-lg font-medium text-moon mb-1.5 sm:mb-2">Key Learnings</h3>
+              <p className="text-xs sm:text-sm text-moon-dim">
                 What did you learn? What patterns did you notice?
               </p>
             </div>
 
             {/* Data-driven pattern insights */}
             {monthData && (
-              <div className="bg-night-soft rounded-xl p-4 mb-4">
-                <p className="text-xs font-medium uppercase tracking-wider text-moon-faint mb-3">
+              <div className="bg-night-soft rounded-lg sm:rounded-xl p-3 sm:p-4 mb-3 sm:mb-4">
+                <p className="text-[0.625rem] sm:text-xs font-medium uppercase tracking-wider text-moon-faint mb-2.5 sm:mb-3">
                   Patterns to Consider
                 </p>
-                <div className="space-y-2">
+                <div className="space-y-1.5 sm:space-y-2">
                   {/* Best performing week */}
                   {monthData.weeklyBreakdowns && monthData.weeklyBreakdowns.length > 1 && (() => {
                     const bestWeek = monthData.weeklyBreakdowns.reduce((best, week) => {
@@ -609,12 +609,12 @@ function ReviewWizard({ monthData, onComplete }: {
                     const worstRate = worstWeek.totalTasks > 0 ? Math.round((worstWeek.tasksCompleted / worstWeek.totalTasks) * 100) : 0;
 
                     return bestWeek.weekNumber !== worstWeek.weekNumber ? (
-                      <div className="flex items-start gap-2 text-sm">
-                        <BarChart3 className="w-4 h-4 text-zen-blue mt-0.5" />
+                      <div className="flex items-start gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                        <BarChart3 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zen-blue mt-0.5" />
                         <span className="text-moon-soft">
                           Week {bestWeek.weekNumber} was strongest ({bestRate}%),
                           Week {worstWeek.weekNumber} was weakest ({worstRate}%).
-                          <span className="text-moon-faint"> What was different?</span>
+                          <span className="text-moon-faint hidden sm:inline"> What was different?</span>
                         </span>
                       </div>
                     ) : null;
@@ -622,45 +622,45 @@ function ReviewWizard({ monthData, onComplete }: {
 
                   {/* Kaizen patterns */}
                   {monthData.kaizen.strongestArea && monthData.kaizen.weakestArea && (
-                    <div className="flex items-start gap-2 text-sm">
-                      <Star className="w-4 h-4 text-zen-green mt-0.5" />
+                    <div className="flex items-start gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                      <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zen-green mt-0.5" />
                       <span className="text-moon-soft">
                         You thrived in <span className="text-zen-green">{formatAreaName(monthData.kaizen.strongestArea.area)}</span> but
                         struggled with <span className="text-amber-400">{formatAreaName(monthData.kaizen.weakestArea.area)}</span>.
-                        <span className="text-moon-faint"> Why the gap?</span>
+                        <span className="text-moon-faint hidden sm:inline"> Why the gap?</span>
                       </span>
                     </div>
                   )}
 
                   {/* Goal alignment insight */}
                   {monthData.goalAlignment.alignmentRate < 60 && monthData.goalAlignment.unlinkedCompleted > 3 && (
-                    <div className="flex items-start gap-2 text-sm">
-                      <Link2Off className="w-4 h-4 text-moon-dim mt-0.5" />
+                    <div className="flex items-start gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                      <Link2Off className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-moon-dim mt-0.5" />
                       <span className="text-moon-soft">
                         {monthData.goalAlignment.unlinkedCompleted} tasks were not goal-linked.
-                        <span className="text-moon-faint"> Were they necessary distractions or hidden priorities?</span>
+                        <span className="text-moon-faint hidden sm:inline"> Were they necessary distractions or hidden priorities?</span>
                       </span>
                     </div>
                   )}
 
                   {/* MIT pattern */}
                   {monthData.stats.mitCompletionRate < 70 && (
-                    <div className="flex items-start gap-2 text-sm">
-                      <Flame className="w-4 h-4 text-zen-red mt-0.5" />
+                    <div className="flex items-start gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                      <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zen-red mt-0.5" />
                       <span className="text-moon-soft">
                         MIT completion was at {monthData.stats.mitCompletionRate}%.
-                        <span className="text-moon-faint"> What blocked your most important tasks?</span>
+                        <span className="text-moon-faint hidden sm:inline"> What blocked your most important tasks?</span>
                       </span>
                     </div>
                   )}
 
                   {/* Kaizen frequency */}
                   {monthData.kaizen.completionRate < 50 && (
-                    <div className="flex items-start gap-2 text-sm">
-                      <Star className="w-4 h-4 text-zen-purple mt-0.5" />
+                    <div className="flex items-start gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                      <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zen-purple mt-0.5" />
                       <span className="text-moon-soft">
                         You reflected on only {monthData.kaizen.checkinsCompleted} of {monthData.stats.daysInMonth} days.
-                        <span className="text-moon-faint"> What would help you reflect more consistently?</span>
+                        <span className="text-moon-faint hidden sm:inline"> What would help you reflect more consistently?</span>
                       </span>
                     </div>
                   )}
@@ -669,9 +669,9 @@ function ReviewWizard({ monthData, onComplete }: {
             )}
 
             {/* Reflection prompts */}
-            <div className="bg-night border border-night-mist rounded-lg p-3 mb-3">
-              <p className="text-xs text-moon-faint mb-2">Reflect on:</p>
-              <ul className="text-sm text-moon-dim space-y-1">
+            <div className="bg-night border border-night-mist rounded-lg p-2.5 sm:p-3 mb-2.5 sm:mb-3">
+              <p className="text-[0.625rem] sm:text-xs text-moon-faint mb-1.5 sm:mb-2">Reflect on:</p>
+              <ul className="text-xs sm:text-sm text-moon-dim space-y-0.5 sm:space-y-1">
                 <li>• What worked well that you should repeat?</li>
                 <li>• What didn&apos;t work that you should stop?</li>
                 <li>• What new insight did you gain about yourself?</li>
@@ -682,34 +682,34 @@ function ReviewWizard({ monthData, onComplete }: {
               value={learnings}
               onChange={(e) => setLearnings(e.target.value)}
               placeholder="Morning routines work best for deep work, need to batch meetings better, social media is a bigger time drain than I realized..."
-              className="w-full h-32 bg-night-soft border border-night-mist rounded-xl p-4 text-moon placeholder:text-moon-faint resize-none focus:border-lantern focus:ring-1 focus:ring-lantern/20 outline-none"
+              className="w-full h-24 sm:h-32 bg-night-soft border border-night-mist rounded-lg sm:rounded-xl p-3 sm:p-4 text-sm sm:text-base text-moon placeholder:text-moon-faint resize-none focus:border-lantern focus:ring-1 focus:ring-lantern/20 outline-none"
             />
           </div>
         )}
 
         {currentStep === 4 && (
-          <div className="space-y-4">
-            <div className="text-center mb-6">
-              <div className="w-12 h-12 rounded-xl bg-zen-green-soft flex items-center justify-center mx-auto mb-3">
-                <Sparkles className="w-6 h-6 text-zen-green" />
+          <div className="space-y-3 sm:space-y-4">
+            <div className="text-center mb-4 sm:mb-6">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-zen-green-soft flex items-center justify-center mx-auto mb-2.5 sm:mb-3">
+                <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-zen-green" />
               </div>
-              <h3 className="text-lg font-medium text-moon mb-2">Plan Next Month</h3>
-              <p className="text-sm text-moon-dim">
+              <h3 className="text-base sm:text-lg font-medium text-moon mb-1.5 sm:mb-2">Plan Next Month</h3>
+              <p className="text-xs sm:text-sm text-moon-dim">
                 What are your top priorities for next month?
               </p>
             </div>
 
             {/* Data-driven focus suggestions */}
             {monthData && (
-              <div className="bg-night-soft rounded-xl p-4 mb-4">
-                <p className="text-xs font-medium uppercase tracking-wider text-moon-faint mb-3">
+              <div className="bg-night-soft rounded-lg sm:rounded-xl p-3 sm:p-4 mb-3 sm:mb-4">
+                <p className="text-[0.625rem] sm:text-xs font-medium uppercase tracking-wider text-moon-faint mb-2.5 sm:mb-3">
                   Suggested Focus Areas
                 </p>
-                <div className="space-y-2">
+                <div className="space-y-1.5 sm:space-y-2">
                   {/* Incomplete goals to carry forward */}
                   {monthData.goals && monthData.goals.filter(g => g.status === "ACTIVE" && g.progress < 100).length > 0 && (
-                    <div className="flex items-start gap-2 text-sm">
-                      <Target className="w-4 h-4 text-zen-blue mt-0.5" />
+                    <div className="flex items-start gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                      <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zen-blue mt-0.5" />
                       <span className="text-moon-soft">
                         <span className="text-zen-blue font-medium">
                           {monthData.goals.filter(g => g.status === "ACTIVE" && g.progress < 100).length} goal{monthData.goals.filter(g => g.status === "ACTIVE" && g.progress < 100).length > 1 ? "s" : ""} in progress
@@ -723,11 +723,11 @@ function ReviewWizard({ monthData, onComplete }: {
                   {monthData.kaizen.weakestArea && monthData.kaizen.weakestArea.count < monthData.stats.daysInMonth * 0.5 && (() => {
                     const Icon = AREA_ICONS[monthData.kaizen.weakestArea.area] || Star;
                     return (
-                      <div className="flex items-start gap-2 text-sm">
-                        <Icon className="w-4 h-4 text-amber-400 mt-0.5" />
+                      <div className="flex items-start gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                        <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 mt-0.5" />
                         <span className="text-moon-soft">
                           Prioritize <span className="text-amber-400 font-medium">{formatAreaName(monthData.kaizen.weakestArea.area)}</span>
-                          {" "}— only improved {monthData.kaizen.weakestArea.count} days this month
+                          <span className="hidden sm:inline"> — only improved {monthData.kaizen.weakestArea.count} days this month</span>
                         </span>
                       </div>
                     );
@@ -735,33 +735,33 @@ function ReviewWizard({ monthData, onComplete }: {
 
                   {/* Goal alignment improvement */}
                   {monthData.goalAlignment.alignmentRate < 70 && (
-                    <div className="flex items-start gap-2 text-sm">
-                      <Link2 className="w-4 h-4 text-lantern mt-0.5" />
+                    <div className="flex items-start gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                      <Link2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-lantern mt-0.5" />
                       <span className="text-moon-soft">
                         Improve <span className="text-lantern font-medium">goal alignment</span>
-                        {" "}— link more tasks to weekly goals
+                        <span className="hidden sm:inline"> — link more tasks to weekly goals</span>
                       </span>
                     </div>
                   )}
 
                   {/* MIT discipline */}
                   {monthData.stats.mitCompletionRate < 80 && (
-                    <div className="flex items-start gap-2 text-sm">
-                      <Flame className="w-4 h-4 text-zen-red mt-0.5" />
+                    <div className="flex items-start gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                      <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zen-red mt-0.5" />
                       <span className="text-moon-soft">
                         Boost <span className="text-zen-red font-medium">MIT completion</span>
-                        {" "}— protect time for your most important task
+                        <span className="hidden sm:inline"> — protect time for your most important task</span>
                       </span>
                     </div>
                   )}
 
                   {/* Kaizen consistency */}
                   {monthData.kaizen.completionRate < 70 && (
-                    <div className="flex items-start gap-2 text-sm">
-                      <Star className="w-4 h-4 text-zen-purple mt-0.5" />
+                    <div className="flex items-start gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                      <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zen-purple mt-0.5" />
                       <span className="text-moon-soft">
                         Build <span className="text-zen-purple font-medium">daily reflection</span>
-                        {" "}habit — aim for evening Kaizen check-ins
+                        <span className="hidden sm:inline"> habit — aim for evening Kaizen check-ins</span>
                       </span>
                     </div>
                   )}
@@ -770,11 +770,11 @@ function ReviewWizard({ monthData, onComplete }: {
                   {monthData.stats.mitCompletionRate >= 80 &&
                    monthData.goalAlignment.alignmentRate >= 70 &&
                    monthData.kaizen.completionRate >= 70 && (
-                    <div className="flex items-start gap-2 text-sm">
-                      <Trophy className="w-4 h-4 text-zen-green mt-0.5" />
+                    <div className="flex items-start gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                      <Trophy className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zen-green mt-0.5" />
                       <span className="text-moon-soft">
                         <span className="text-zen-green font-medium">Strong month!</span>
-                        {" "}Maintain momentum and stretch your goals
+                        {" "}Maintain momentum<span className="hidden sm:inline"> and stretch your goals</span>
                       </span>
                     </div>
                   )}
@@ -783,9 +783,9 @@ function ReviewWizard({ monthData, onComplete }: {
             )}
 
             {/* Planning prompts */}
-            <div className="bg-night border border-night-mist rounded-lg p-3 mb-3">
-              <p className="text-xs text-moon-faint mb-2">Consider:</p>
-              <ul className="text-sm text-moon-dim space-y-1">
+            <div className="bg-night border border-night-mist rounded-lg p-2.5 sm:p-3 mb-2.5 sm:mb-3">
+              <p className="text-[0.625rem] sm:text-xs text-moon-faint mb-1.5 sm:mb-2">Consider:</p>
+              <ul className="text-xs sm:text-sm text-moon-dim space-y-0.5 sm:space-y-1">
                 <li>• What&apos;s the ONE thing that would make next month a success?</li>
                 <li>• Which habit do you want to build or strengthen?</li>
                 <li>• What will you stop doing to make room for priorities?</li>
@@ -796,46 +796,48 @@ function ReviewWizard({ monthData, onComplete }: {
               value={nextMonthFocus}
               onChange={(e) => setNextMonthFocus(e.target.value)}
               placeholder="Launch the new feature, establish daily meditation habit, read 2 books, improve sleep schedule..."
-              className="w-full h-32 bg-night-soft border border-night-mist rounded-xl p-4 text-moon placeholder:text-moon-faint resize-none focus:border-lantern focus:ring-1 focus:ring-lantern/20 outline-none"
+              className="w-full h-24 sm:h-32 bg-night-soft border border-night-mist rounded-lg sm:rounded-xl p-3 sm:p-4 text-sm sm:text-base text-moon placeholder:text-moon-faint resize-none focus:border-lantern focus:ring-1 focus:ring-lantern/20 outline-none"
             />
           </div>
         )}
       </div>
 
       {/* Navigation */}
-      <div className="p-4 border-t border-night-mist flex items-center justify-between">
+      <div className="p-3 sm:p-4 border-t border-night-mist flex items-center justify-between">
         <Button
           variant="outline"
           onClick={handlePrev}
           disabled={currentStep === 1}
-          className="border-night-mist bg-night-soft text-moon hover:border-moon-dim disabled:opacity-30 rounded-xl"
+          className="border-night-mist bg-night-soft text-moon hover:border-moon-dim disabled:opacity-30 rounded-lg sm:rounded-xl text-xs sm:text-sm h-9 sm:h-10"
         >
-          <ChevronLeft className="w-4 h-4 mr-1" />
+          <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
           Back
         </Button>
         {currentStep < 4 ? (
           <Button
             onClick={handleNext}
-            className="bg-lantern text-void hover:bg-lantern/90 rounded-xl"
+            className="bg-lantern text-void hover:bg-lantern/90 rounded-lg sm:rounded-xl text-xs sm:text-sm h-9 sm:h-10"
           >
             Next
-            <ChevronRight className="w-4 h-4 ml-1" />
+            <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-0.5 sm:ml-1" />
           </Button>
         ) : (
           <Button
             onClick={handleSubmit}
             disabled={submitReview.isPending}
-            className="bg-zen-green text-void hover:bg-zen-green/90 rounded-xl disabled:opacity-50"
+            className="bg-zen-green text-void hover:bg-zen-green/90 rounded-lg sm:rounded-xl disabled:opacity-50 text-xs sm:text-sm h-9 sm:h-10"
           >
             {submitReview.isPending ? (
               <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Saving...
+                <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2 animate-spin" />
+                <span className="hidden sm:inline">Saving...</span>
+                <span className="sm:hidden">Save</span>
               </>
             ) : (
               <>
-                <CheckCircle2 className="w-4 h-4 mr-2" />
-                Complete Review
+                <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+                <span className="hidden sm:inline">Complete Review</span>
+                <span className="sm:hidden">Complete</span>
               </>
             )}
           </Button>
@@ -847,18 +849,18 @@ function ReviewWizard({ monthData, onComplete }: {
 
 function EmptyReviewState({ onStartReview, monthName }: { onStartReview: () => void; monthName: string }) {
   return (
-    <div className="bg-night border border-night-mist rounded-2xl p-12 text-center">
-      <div className="w-20 h-20 rounded-2xl bg-lantern-soft flex items-center justify-center mx-auto mb-6">
-        <Calendar className="w-10 h-10 text-lantern" />
+    <div className="bg-night border border-night-mist rounded-xl sm:rounded-2xl p-8 sm:p-12 text-center">
+      <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl bg-lantern-soft flex items-center justify-center mx-auto mb-4 sm:mb-6">
+        <Calendar className="w-8 h-8 sm:w-10 sm:h-10 text-lantern" />
       </div>
-      <h3 className="text-xl font-medium text-moon mb-3">Complete Your Monthly Review</h3>
-      <p className="text-moon-dim max-w-md mx-auto mb-8 leading-relaxed">
+      <h3 className="text-lg sm:text-xl font-medium text-moon mb-2 sm:mb-3">Complete Your Monthly Review</h3>
+      <p className="text-sm sm:text-base text-moon-dim max-w-md mx-auto mb-6 sm:mb-8 leading-relaxed">
         Reflect on {monthName}, celebrate your progress, identify patterns, and set intentions
-        for the month ahead. Monthly reviews build long-term momentum.
+        for the month ahead.
       </p>
       <Button
         onClick={onStartReview}
-        className="bg-lantern text-void hover:bg-lantern/90 font-medium px-6 h-11 rounded-xl"
+        className="bg-lantern text-void hover:bg-lantern/90 font-medium px-5 sm:px-6 h-10 sm:h-11 rounded-lg sm:rounded-xl text-sm sm:text-base"
       >
         <Sparkles className="w-4 h-4 mr-2" />
         Start Monthly Review
@@ -923,7 +925,7 @@ export default function MonthlyReviewPage() {
       />
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
         <StatCard
           icon={CheckCircle2}
           label="Tasks Completed"
@@ -953,13 +955,13 @@ export default function MonthlyReviewPage() {
 
       {/* Weekly Breakdown */}
       {monthData?.weeklyBreakdowns && monthData.weeklyBreakdowns.length > 0 && (
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <WeeklyBreakdownCard weeklyBreakdowns={monthData.weeklyBreakdowns} />
         </div>
       )}
 
       {/* Monthly Goals, Kaizen & Alignment */}
-      <div className="grid lg:grid-cols-2 gap-6 mb-6">
+      <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
         {monthData?.goals && (
           <MonthlyGoalsCard goals={monthData.goals} />
         )}
@@ -969,36 +971,36 @@ export default function MonthlyReviewPage() {
       </div>
 
       {monthData?.goalAlignment && (
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <GoalAlignmentCard goalAlignment={monthData.goalAlignment} />
         </div>
       )}
 
       {/* Goal Review Section - Edit/Pause/Abandon Monthly Goals */}
-      <GoalReviewSection level="monthly" className="mb-6" />
+      <GoalReviewSection level="monthly" className="mb-4 sm:mb-6" />
 
       {/* Review Wizard, Completed State, or Empty State */}
       {isCompleted ? (
-        <div className="bg-night border border-night-mist rounded-2xl p-12 text-center">
-          <div className="w-20 h-20 rounded-2xl bg-zen-green/10 flex items-center justify-center mx-auto mb-6">
-            <CheckCircle2 className="w-10 h-10 text-zen-green" />
+        <div className="bg-night border border-night-mist rounded-xl sm:rounded-2xl p-8 sm:p-12 text-center">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl bg-zen-green/10 flex items-center justify-center mx-auto mb-4 sm:mb-6">
+            <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10 text-zen-green" />
           </div>
-          <h3 className="text-xl font-medium text-moon mb-3">Monthly Review Completed!</h3>
-          <p className="text-moon-dim max-w-md mx-auto mb-8 leading-relaxed">
+          <h3 className="text-lg sm:text-xl font-medium text-moon mb-2 sm:mb-3">Monthly Review Completed!</h3>
+          <p className="text-sm sm:text-base text-moon-dim max-w-md mx-auto mb-6 sm:mb-8 leading-relaxed">
             Great job reflecting on {monthName}. Your insights have been saved and you&apos;ve
             earned points for completing your monthly review.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center">
             <Button
               onClick={() => router.push("/dashboard")}
-              className="bg-lantern text-void hover:bg-lantern/90 font-medium px-6 h-11 rounded-xl"
+              className="bg-lantern text-void hover:bg-lantern/90 font-medium px-5 sm:px-6 h-10 sm:h-11 rounded-lg sm:rounded-xl text-sm sm:text-base"
             >
               Back to Dashboard
             </Button>
             <Button
               onClick={() => router.push("/progress")}
               variant="outline"
-              className="border-night-mist bg-night-soft text-moon hover:border-moon-dim font-medium px-6 h-11 rounded-xl"
+              className="border-night-mist bg-night-soft text-moon hover:border-moon-dim font-medium px-5 sm:px-6 h-10 sm:h-11 rounded-lg sm:rounded-xl text-sm sm:text-base"
             >
               <Award className="w-4 h-4 mr-2" />
               View Progress

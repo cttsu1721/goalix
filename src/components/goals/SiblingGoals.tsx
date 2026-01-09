@@ -50,16 +50,21 @@ export function SiblingGoals({
   if (siblings.length === 0) return null;
 
   return (
-    <div className={cn("space-y-3", className)}>
-      <div className="flex items-center gap-2">
-        <Target className="w-4 h-4 text-moon-faint" />
-        <h4 className="text-sm font-medium text-moon-dim">
-          {parentTitle ? `Other goals under "${parentTitle}"` : "Related Goals"}
+    <div className={cn("space-y-2 sm:space-y-3", className)}>
+      <div className="flex items-center gap-1.5 sm:gap-2">
+        <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-moon-faint" />
+        <h4 className="text-xs sm:text-sm font-medium text-moon-dim">
+          {parentTitle ? (
+            <>
+              <span className="hidden sm:inline">Other goals under &quot;{parentTitle}&quot;</span>
+              <span className="sm:hidden">Related Goals</span>
+            </>
+          ) : "Related Goals"}
         </h4>
-        <span className="text-xs text-moon-faint">({siblings.length})</span>
+        <span className="text-[0.625rem] sm:text-xs text-moon-faint">({siblings.length})</span>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-1.5 sm:space-y-2">
         {siblings.map((goal) => {
           const config = STATUS_CONFIG[goal.status];
           const StatusIcon = config.icon;
@@ -69,23 +74,23 @@ export function SiblingGoals({
               key={goal.id}
               href={`/goals/${goal.id}`}
               className={cn(
-                "flex items-center gap-3 p-3 rounded-lg",
+                "flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-lg",
                 "bg-night-soft border border-night-mist",
                 "hover:bg-night hover:border-night-glow transition-colors",
                 "group"
               )}
             >
-              <div className={cn("p-1.5 rounded-md", config.bg)}>
-                <StatusIcon className={cn("w-3.5 h-3.5", config.color)} />
+              <div className={cn("p-1 sm:p-1.5 rounded-md", config.bg)}>
+                <StatusIcon className={cn("w-3 h-3 sm:w-3.5 sm:h-3.5", config.color)} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-moon truncate">{goal.title}</p>
-                <div className="flex items-center gap-2 mt-1">
+                <p className="text-xs sm:text-sm text-moon truncate">{goal.title}</p>
+                <div className="flex items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1">
                   <Progress value={goal.progress} className="h-1 flex-1" />
-                  <span className="text-xs text-moon-faint">{goal.progress}%</span>
+                  <span className="text-[0.625rem] sm:text-xs text-moon-faint">{goal.progress}%</span>
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-moon-faint group-hover:text-moon transition-colors" />
+              <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-moon-faint group-hover:text-moon transition-colors" />
             </Link>
           );
         })}
@@ -158,9 +163,9 @@ export function SiblingGoalsSection({
   // Don't render anything if loading or no siblings
   if (isLoading) {
     return (
-      <div className={cn("flex items-center gap-2 p-4 bg-night-soft/50 rounded-xl", className)}>
-        <Loader2 className="w-4 h-4 animate-spin text-moon-faint" />
-        <span className="text-sm text-moon-faint">Loading related goals...</span>
+      <div className={cn("flex items-center gap-1.5 sm:gap-2 p-3 sm:p-4 bg-night-soft/50 rounded-lg sm:rounded-xl", className)}>
+        <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin text-moon-faint" />
+        <span className="text-xs sm:text-sm text-moon-faint">Loading related goals...</span>
       </div>
     );
   }

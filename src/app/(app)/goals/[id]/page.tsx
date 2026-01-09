@@ -223,7 +223,7 @@ export default function GoalDetailPage() {
   return (
     <AppShell onRefresh={handleRefresh}>
       {/* Header */}
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         {/* Breadcrumb navigation */}
         <GoalBreadcrumb
           breadcrumb={breadcrumb}
@@ -232,23 +232,23 @@ export default function GoalDetailPage() {
         />
 
         {/* Level badge */}
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-8 h-8 rounded-lg bg-lantern/10 flex items-center justify-center text-lantern">
+        <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-lantern/10 flex items-center justify-center text-lantern [&>svg]:w-4 [&>svg]:h-4 sm:[&>svg]:w-5 sm:[&>svg]:h-5">
             {config.icon}
           </div>
-          <span className="text-xs font-medium uppercase tracking-wider text-moon-faint">
+          <span className="text-[0.625rem] sm:text-xs font-medium uppercase tracking-wider text-moon-faint">
             {config.singularLabel}
           </span>
         </div>
 
         {/* Title and actions */}
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1">
-            <h1 className="text-2xl font-medium text-moon mb-2">
+        <div className="flex items-start justify-between gap-3 sm:gap-4">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl sm:text-2xl font-medium text-moon mb-1.5 sm:mb-2">
               {goal.title as string}
             </h1>
             {(goal.description as string) && (
-              <p className="text-moon-dim leading-relaxed">
+              <p className="text-sm sm:text-base text-moon-dim leading-relaxed">
                 {goal.description as string}
               </p>
             )}
@@ -334,11 +334,11 @@ export default function GoalDetailPage() {
       </div>
 
       {/* Meta info */}
-      <div className="flex flex-wrap items-center gap-4 mb-8">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-4 mb-5 sm:mb-8">
         <GoalCategoryBadge category={goal.category as GoalCategory} size="md" />
         <div
           className={cn(
-            "text-xs font-medium uppercase tracking-wider px-3 py-1 rounded-full",
+            "text-[0.625rem] sm:text-xs font-medium uppercase tracking-wider px-2 sm:px-3 py-0.5 sm:py-1 rounded-full",
             status === "ACTIVE" && "bg-zen-green/10 text-zen-green",
             status === "COMPLETED" && "bg-zen-green/20 text-zen-green",
             status === "PAUSED" && "bg-moon-dim/20 text-moon-dim",
@@ -350,12 +350,12 @@ export default function GoalDetailPage() {
       </div>
 
       {/* Progress section */}
-      <div className="bg-night border border-night-mist rounded-2xl p-6 mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-medium text-moon-soft">Overall Progress</h3>
-          <span className="text-2xl font-medium text-lantern">{Math.round(progress)}%</span>
+      <div className="bg-night border border-night-mist rounded-xl sm:rounded-2xl p-4 sm:p-6 mb-5 sm:mb-8">
+        <div className="flex items-center justify-between mb-3 sm:mb-4">
+          <h3 className="text-xs sm:text-sm font-medium text-moon-soft">Overall Progress</h3>
+          <span className="text-xl sm:text-2xl font-medium text-lantern">{Math.round(progress)}%</span>
         </div>
-        <div className="h-3 bg-night-mist rounded-full overflow-hidden">
+        <div className="h-2 sm:h-3 bg-night-mist rounded-full overflow-hidden">
           <div
             className={cn(
               "h-full rounded-full transition-all duration-700",
@@ -366,7 +366,7 @@ export default function GoalDetailPage() {
             style={{ width: `${Math.min(100, progress)}%` }}
           />
         </div>
-        <div className="flex items-center justify-between mt-3 text-xs text-moon-faint">
+        <div className="flex items-center justify-between mt-2 sm:mt-3 text-[0.625rem] sm:text-xs text-moon-faint">
           <span>{children.length} {config.childLabel}</span>
           <span>
             {children.filter((c) => c.status === "COMPLETED").length} completed
@@ -378,39 +378,39 @@ export default function GoalDetailPage() {
       <SiblingGoalsSection
         goalId={id}
         parentTitle={breadcrumb.length > 0 ? breadcrumb[breadcrumb.length - 1].title : undefined}
-        className="mb-8"
+        className="mb-5 sm:mb-8"
       />
 
       {/* Children section */}
       {config.childLevel && (
         <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-medium text-moon">{config.childLabel}</h2>
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h2 className="text-base sm:text-lg font-medium text-moon">{config.childLabel}</h2>
             <Button
               onClick={() => setIsCreateModalOpen(true)}
               variant="outline"
-              className="border-night-mist bg-night-soft text-moon hover:border-lantern hover:text-lantern hover:bg-lantern/5 rounded-xl h-9"
+              className="border-night-mist bg-night-soft text-moon hover:border-lantern hover:text-lantern hover:bg-lantern/5 rounded-lg sm:rounded-xl h-8 sm:h-9 px-3 sm:px-4 text-xs sm:text-sm"
             >
-              <Plus className="w-4 h-4 mr-2" />
+              <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
               Add
             </Button>
           </div>
 
           {children.length === 0 ? (
-            <div className="bg-night border border-night-mist border-dashed rounded-2xl p-8 text-center">
-              <p className="text-moon-dim mb-4">
+            <div className="bg-night border border-night-mist border-dashed rounded-xl sm:rounded-2xl p-5 sm:p-8 text-center">
+              <p className="text-sm sm:text-base text-moon-dim mb-3 sm:mb-4">
                 No {config.childLabel.toLowerCase()} yet. Break down this goal into smaller steps.
               </p>
               <Button
                 onClick={() => setIsCreateModalOpen(true)}
-                className="bg-lantern text-void hover:bg-lantern/90"
+                className="bg-lantern text-void hover:bg-lantern/90 h-9 sm:h-10 text-sm rounded-lg sm:rounded-xl"
               >
-                <Plus className="w-4 h-4 mr-2" />
+                <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                 Create First {config.childLabel.replace(/s$/, "")}
               </Button>
             </div>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
               {children.map((child) => {
                 const grandchildLevel = getGrandchildLevel();
                 const grandchildLabel = grandchildLevel
@@ -435,41 +435,41 @@ export default function GoalDetailPage() {
       {/* Weekly goal shows tasks instead */}
       {level === "weekly" && (
         <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-medium text-moon">Daily Tasks</h2>
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h2 className="text-base sm:text-lg font-medium text-moon">Daily Tasks</h2>
           </div>
 
           {children.length === 0 ? (
-            <div className="bg-night border border-night-mist border-dashed rounded-2xl p-8 text-center">
-              <p className="text-moon-dim">
+            <div className="bg-night border border-night-mist border-dashed rounded-xl sm:rounded-2xl p-5 sm:p-8 text-center">
+              <p className="text-sm sm:text-base text-moon-dim">
                 No tasks linked to this weekly goal yet.
               </p>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-1.5 sm:space-y-2">
               {children.map((task) => (
                 <div
                   key={task.id as string}
                   className={cn(
-                    "flex items-center gap-3 p-4 bg-night border border-night-mist rounded-xl",
+                    "flex items-center gap-2.5 sm:gap-3 p-3 sm:p-4 bg-night border border-night-mist rounded-lg sm:rounded-xl",
                     task.status === "COMPLETED" && "opacity-60"
                   )}
                 >
                   <div
                     className={cn(
-                      "w-5 h-5 rounded-lg border-2 flex items-center justify-center",
+                      "w-4 h-4 sm:w-5 sm:h-5 rounded-md sm:rounded-lg border-2 flex items-center justify-center flex-shrink-0",
                       task.status === "COMPLETED"
                         ? "bg-zen-green border-zen-green"
                         : "border-night-glow"
                     )}
                   >
                     {task.status === "COMPLETED" && (
-                      <CheckCircle2 className="w-3 h-3 text-void" />
+                      <CheckCircle2 className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-void" />
                     )}
                   </div>
                   <span
                     className={cn(
-                      "flex-1 text-moon",
+                      "flex-1 text-sm sm:text-base text-moon",
                       task.status === "COMPLETED" && "line-through text-moon-dim"
                     )}
                   >
