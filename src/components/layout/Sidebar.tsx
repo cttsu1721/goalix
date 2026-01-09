@@ -35,21 +35,21 @@ interface NavGroup {
 
 const navGroups: NavGroup[] = [
   {
+    label: "Plan",
     items: [
       {
         href: "/dashboard",
         label: "Today",
         icon: <CheckCircle className="w-5 h-5" />,
-        count: 6,
       },
       {
         href: "/week",
-        label: "Week",
+        label: "This Week",
         icon: <Calendar className="w-5 h-5" />,
       },
       {
         href: "/month",
-        label: "Month",
+        label: "Month View",
         icon: <CalendarRange className="w-5 h-5" />,
       },
       {
@@ -79,7 +79,7 @@ const navGroups: NavGroup[] = [
     items: [
       {
         href: "/progress",
-        label: "Progress",
+        label: "Stats & Streaks",
         icon: <TrendingUp className="w-5 h-5" />,
       },
       {

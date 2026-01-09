@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   CommandDialog,
@@ -25,7 +25,17 @@ import {
   Moon,
   Layers,
   CalendarRange,
+  Loader2,
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+
+// Minimal goal type for search
+interface SearchableGoal {
+  id: string;
+  title: string;
+  type: "vision" | "three_year" | "one_year" | "monthly" | "weekly";
+  category?: string;
+}
 
 interface CommandPaletteProps {
   onCreateTask?: () => void;
@@ -34,7 +44,45 @@ interface CommandPaletteProps {
 
 export function CommandPalette({ onCreateTask, onCreateGoal }: CommandPaletteProps) {
   const [open, setOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
+
+  // Fetch all goals for search (only when palette is open)
+  const { data: goalsData, isLoading: goalsLoading } = useQuery({
+    queryKey: ["goals-search"],
+    queryFn: async () => {
+      const res = await fetch("/api/goals/search");
+      if (!res.ok) throw new Error("Failed to fetch goals");
+      return res.json() as Promise<{ success: boolean; data: SearchableGoal[] }>;
+    },
+    enabled: open, // Only fetch when palette is open
+    staleTime: 30000, // Cache for 30 seconds
+  });
+
+  // Filter goals based on search query
+  const filteredGoals = useMemo(() => {
+    if (!goalsData?.data || !searchQuery.trim()) return [];
+    const query = searchQuery.toLowerCase();
+    return goalsData.data
+      .filter((goal) => goal.title.toLowerCase().includes(query))
+      .slice(0, 8); // Limit to 8 results
+  }, [goalsData?.data, searchQuery]);
+
+  const GOAL_TYPE_LABELS: Record<SearchableGoal["type"], string> = {
+    vision: "Vision",
+    three_year: "3-Year",
+    one_year: "1-Year",
+    monthly: "Monthly",
+    weekly: "Weekly",
+  };
+
+  const GOAL_TYPE_ICONS: Record<SearchableGoal["type"], typeof Star> = {
+    vision: Star,
+    three_year: Target,
+    one_year: Target,
+    monthly: CalendarRange,
+    weekly: CalendarDays,
+  };
 
   // Listen for Cmd+K / Ctrl+K
   useEffect(() => {
@@ -57,7 +105,7 @@ export function CommandPalette({ onCreateTask, onCreateGoal }: CommandPalettePro
   const navigationItems = [
     {
       icon: CheckCircle,
-      label: "Today's Focus",
+      label: "Today",
       shortcut: "D",
       action: () => router.push("/dashboard"),
     },
@@ -69,7 +117,7 @@ export function CommandPalette({ onCreateTask, onCreateGoal }: CommandPalettePro
     },
     {
       icon: CalendarDays,
-      label: "Week View",
+      label: "This Week",
       shortcut: "W",
       action: () => router.push("/week"),
     },
@@ -118,6 +166,24 @@ export function CommandPalette({ onCreateTask, onCreateGoal }: CommandPalettePro
     },
   ];
 
+  // Reset search when closing
+  useEffect(() => {
+    if (!open) {
+      setSearchQuery("");
+    }
+  }, [open]);
+
+  const navigateToGoal = (goal: SearchableGoal) => {
+    const routes: Record<SearchableGoal["type"], string> = {
+      vision: `/goals/${goal.id}?type=vision`,
+      three_year: `/goals/${goal.id}?type=three_year`,
+      one_year: `/goals/${goal.id}?type=one_year`,
+      monthly: `/goals/${goal.id}?type=monthly`,
+      weekly: `/goals/${goal.id}?type=weekly`,
+    };
+    runCommand(() => router.push(routes[goal.type]));
+  };
+
   return (
     <CommandDialog
       open={open}
@@ -126,13 +192,47 @@ export function CommandPalette({ onCreateTask, onCreateGoal }: CommandPalettePro
       description="Search and navigate quickly"
     >
       <CommandInput
-        placeholder="Type a command or search..."
+        placeholder="Type a command or search goals..."
         className="border-0 focus:ring-0 text-moon placeholder:text-moon-faint"
+        value={searchQuery}
+        onValueChange={setSearchQuery}
       />
       <CommandList className="bg-night text-moon">
         <CommandEmpty className="text-moon-dim">
-          No results found.
+          {goalsLoading ? (
+            <div className="flex items-center justify-center gap-2 py-6">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Searching...</span>
+            </div>
+          ) : (
+            "No results found."
+          )}
         </CommandEmpty>
+
+        {/* Goal Search Results */}
+        {filteredGoals.length > 0 && (
+          <>
+            <CommandGroup heading="Goals" className="text-moon-faint">
+              {filteredGoals.map((goal) => {
+                const Icon = GOAL_TYPE_ICONS[goal.type];
+                return (
+                  <CommandItem
+                    key={`${goal.type}-${goal.id}`}
+                    onSelect={() => navigateToGoal(goal)}
+                    className="text-moon hover:bg-night-soft data-[selected=true]:bg-night-soft data-[selected=true]:text-moon"
+                  >
+                    <Icon className="mr-2 h-4 w-4 text-lantern" />
+                    <span className="flex-1 truncate">{goal.title}</span>
+                    <span className="text-[0.625rem] px-1.5 py-0.5 rounded bg-night-mist text-moon-faint ml-2">
+                      {GOAL_TYPE_LABELS[goal.type]}
+                    </span>
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+            <CommandSeparator className="bg-night-mist" />
+          </>
+        )}
 
         <CommandGroup heading="Navigation" className="text-moon-faint">
           {navigationItems.map((item) => (

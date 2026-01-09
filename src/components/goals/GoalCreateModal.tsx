@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useCreateGoal } from "@/hooks";
+import { useCreateGoal, useCategoryStats } from "@/hooks";
 import { GOAL_CATEGORY_LABELS } from "@/types/goals";
 import type { GoalLevel } from "@/types/goals";
 import type { GoalCategory } from "@prisma/client";
@@ -96,7 +96,11 @@ export function GoalCreateModal({
   const [showSuggestModal, setShowSuggestModal] = useState(false);
 
   const createGoal = useCreateGoal();
+  const { data: categoryStats } = useCategoryStats();
   const config = LEVEL_CONFIG[level];
+
+  // Suggested categories based on user's existing goals (6.3)
+  const suggestedCategories = categoryStats?.suggested || [];
 
   // Map GoalLevel to GoalLevelForSuggestion (they're the same, but typed differently)
   const levelForSuggestion: GoalLevelForSuggestion = level as GoalLevelForSuggestion;
@@ -313,6 +317,28 @@ export function GoalCreateModal({
               <Label className="text-moon-soft text-sm font-medium">
                 Category <span className="text-lantern">*</span>
               </Label>
+
+              {/* Suggested Categories (6.3) */}
+              {suggestedCategories.length > 0 && !category && (
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  <span className="text-xs text-moon-faint mr-1">Suggested:</span>
+                  {suggestedCategories.map((cat) => (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setCategory(cat as GoalCategory)}
+                      className={cn(
+                        "px-2.5 py-1 text-xs rounded-lg transition-all",
+                        "bg-lantern/10 text-lantern border border-lantern/20",
+                        "hover:bg-lantern/20 hover:border-lantern/30"
+                      )}
+                    >
+                      {GOAL_CATEGORY_LABELS[cat as GoalCategory] || cat}
+                    </button>
+                  ))}
+                </div>
+              )}
+
               <Select
                 value={category}
                 onValueChange={(val) => setCategory(val as GoalCategory)}

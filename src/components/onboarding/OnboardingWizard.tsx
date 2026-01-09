@@ -19,7 +19,10 @@ import {
   Trophy,
   Flame,
   ChevronRight,
+  Loader2,
+  Play,
 } from "lucide-react";
+import { toast } from "sonner";
 
 interface OnboardingStep {
   title: string;
@@ -33,6 +36,7 @@ const ONBOARDING_KEY = "goalzenix_onboarding_complete";
 export function OnboardingWizard() {
   const [open, setOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const [isLoadingSamples, setIsLoadingSamples] = useState(false);
   const router = useRouter();
 
   // Check if onboarding is needed
@@ -162,7 +166,33 @@ export function OnboardingWizard() {
     setOpen(false);
   };
 
+  const handleTrySampleGoals = async () => {
+    setIsLoadingSamples(true);
+    try {
+      const response = await fetch("/api/sample-goals", {
+        method: "POST",
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        localStorage.setItem(ONBOARDING_KEY, "true");
+        toast.success("Sample goals created! Explore the app with real examples.");
+        setOpen(false);
+        router.push("/goals?view=vision");
+        router.refresh();
+      } else {
+        toast.error(data.error?.message || "Failed to create sample goals");
+      }
+    } catch (error) {
+      toast.error("Failed to create sample goals");
+    } finally {
+      setIsLoadingSamples(false);
+    }
+  };
+
   const step = steps[currentStep];
+  const isLastStep = currentStep === steps.length - 1;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -204,28 +234,60 @@ export function OnboardingWizard() {
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3">
-            <Button
-              variant="ghost"
-              onClick={handleSkip}
-              className="flex-1 text-moon-dim hover:text-moon"
-            >
-              Skip
-            </Button>
-            <Button
-              onClick={handleNext}
-              className="flex-1 bg-lantern text-void hover:bg-lantern/90"
-            >
-              {currentStep === steps.length - 1 ? (
-                "Get Started"
-              ) : (
-                <>
-                  Next
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </>
-              )}
-            </Button>
-          </div>
+          {isLastStep ? (
+            <div className="space-y-3">
+              {/* Primary: Create your own */}
+              <Button
+                onClick={handleComplete}
+                className="w-full bg-lantern text-void hover:bg-lantern/90"
+                disabled={isLoadingSamples}
+              >
+                Create My Own Vision
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+
+              {/* Secondary: Try sample goals */}
+              <Button
+                variant="outline"
+                onClick={handleTrySampleGoals}
+                disabled={isLoadingSamples}
+                className="w-full border-night-mist text-moon hover:bg-night-soft"
+              >
+                {isLoadingSamples ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creating sample goals...
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-4 h-4 mr-2" />
+                    Try with Sample Goals
+                  </>
+                )}
+              </Button>
+
+              <p className="text-xs text-moon-faint text-center">
+                Sample goals let you explore the app with pre-filled examples
+              </p>
+            </div>
+          ) : (
+            <div className="flex gap-3">
+              <Button
+                variant="ghost"
+                onClick={handleSkip}
+                className="flex-1 text-moon-dim hover:text-moon"
+              >
+                Skip
+              </Button>
+              <Button
+                onClick={handleNext}
+                className="flex-1 bg-lantern text-void hover:bg-lantern/90"
+              >
+                Next
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

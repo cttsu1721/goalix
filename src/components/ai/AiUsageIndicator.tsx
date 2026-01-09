@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { useAIUsage } from "@/hooks/useAI";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PremiumUpsell } from "./PremiumUpsell";
 
 interface AiUsageIndicatorProps {
   className?: string;
@@ -14,6 +16,7 @@ export function AiUsageIndicator({
   variant = "sidebar",
 }: AiUsageIndicatorProps) {
   const { data: usage, isLoading } = useAIUsage();
+  const [showUpsell, setShowUpsell] = useState(false);
 
   const remaining = usage?.remaining ?? 5;
   const limit = usage?.limit ?? 5;
@@ -46,49 +49,69 @@ export function AiUsageIndicator({
   }
 
   return (
-    <div
-      className={cn(
-        "px-4 py-3 bg-night-soft rounded-xl border border-night-mist",
-        className
-      )}
-    >
-      {/* Header */}
-      <div className="flex items-center justify-between mb-2.5">
-        <div className="flex items-center gap-2">
-          <Sparkles className={cn("w-4 h-4", `text-${statusColor}`)} />
-          <span className="text-xs font-medium text-moon-soft">AI Uses</span>
+    <>
+      <div
+        className={cn(
+          "px-4 py-3 bg-night-soft rounded-xl border border-night-mist",
+          className
+        )}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between mb-2.5">
+          <div className="flex items-center gap-2">
+            <Sparkles className={cn("w-4 h-4", `text-${statusColor}`)} />
+            <span className="text-xs font-medium text-moon-soft">AI Uses</span>
+          </div>
+          <span
+            className={cn(
+              "text-xs font-medium",
+              remaining === 0 ? "text-zen-red" : `text-${statusColor}`
+            )}
+          >
+            {isLoading ? "..." : `${remaining}/${limit}`}
+          </span>
         </div>
-        <span
-          className={cn(
-            "text-xs font-medium",
-            remaining === 0 ? "text-zen-red" : `text-${statusColor}`
-          )}
-        >
-          {isLoading ? "..." : `${remaining}/${limit}`}
-        </span>
+
+        {/* Progress bar */}
+        <div className="h-1.5 bg-night-mist rounded-full overflow-hidden">
+          <div
+            className={cn(
+              "h-full rounded-full transition-all duration-500",
+              remaining === 0 && "bg-zen-red",
+              remaining > 0 && remaining <= 2 && "bg-lantern",
+              remaining > 2 && "bg-zen-purple"
+            )}
+            style={{ width: `${percentage}%` }}
+          />
+        </div>
+
+        {/* Helper text + Unlock more */}
+        <div className="flex items-center justify-between mt-2">
+          <p className="text-[0.625rem] text-moon-faint">
+            {remaining === 0
+              ? "Resets at midnight"
+              : remaining === 1
+              ? "1 AI use remaining"
+              : `${remaining} AI uses remaining`}
+          </p>
+          <button
+            onClick={() => setShowUpsell(true)}
+            className="flex items-center gap-1 text-[0.625rem] text-lantern hover:text-lantern/80 transition-colors"
+          >
+            <Crown className="w-3 h-3" />
+            Unlock more
+          </button>
+        </div>
       </div>
 
-      {/* Progress bar */}
-      <div className="h-1.5 bg-night-mist rounded-full overflow-hidden">
-        <div
-          className={cn(
-            "h-full rounded-full transition-all duration-500",
-            remaining === 0 && "bg-zen-red",
-            remaining > 0 && remaining <= 2 && "bg-lantern",
-            remaining > 2 && "bg-zen-purple"
-          )}
-          style={{ width: `${percentage}%` }}
-        />
-      </div>
-
-      {/* Helper text */}
-      <p className="text-[0.625rem] text-moon-faint mt-2">
-        {remaining === 0
-          ? "Resets at midnight"
-          : remaining === 1
-          ? "1 AI use remaining today"
-          : `${remaining} AI uses remaining today`}
-      </p>
-    </div>
+      {/* Premium Upsell Modal */}
+      <PremiumUpsell
+        open={showUpsell}
+        onOpenChange={setShowUpsell}
+        feature="general"
+        usesRemaining={remaining}
+        dailyLimit={limit}
+      />
+    </>
   );
 }

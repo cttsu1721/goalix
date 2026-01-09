@@ -37,6 +37,7 @@ export function GoalCard({
 }: GoalCardProps) {
   const isCompleted = status === "COMPLETED";
   const isPaused = status === "PAUSED";
+  const isArchived = status === "ARCHIVED";
 
   const handleCreateChild = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -54,6 +55,7 @@ export function GoalCard({
         "focus:outline-none focus:ring-2 focus:ring-lantern/50 focus:ring-offset-2 focus:ring-offset-void",
         isCompleted && "opacity-70",
         isPaused && "opacity-50",
+        isArchived && "opacity-40 grayscale",
         className
       )}
     >
@@ -72,9 +74,9 @@ export function GoalCard({
             <button
               onClick={handleCreateChild}
               className={cn(
-                "w-7 h-7 rounded-lg flex items-center justify-center",
+                "w-11 h-11 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center",
                 "text-moon-faint hover:text-lantern hover:bg-lantern/10",
-                "opacity-0 group-hover:opacity-100 transition-all duration-200",
+                "sm:opacity-0 group-hover:opacity-100 transition-all duration-200",
                 "focus:outline-none focus:ring-2 focus:ring-lantern/50 focus:opacity-100"
               )}
               title={`Add ${childLabel}`}
@@ -132,13 +134,14 @@ export function GoalCard({
       )}
 
       {/* Status badge */}
-      {(isPaused || status === "ABANDONED") && (
+      {(isPaused || status === "ABANDONED" || isArchived) && (
         <div className="absolute top-3 right-3">
           <span
             className={cn(
               "text-[0.625rem] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full",
               isPaused && "bg-moon-dim/20 text-moon-dim",
-              status === "ABANDONED" && "bg-zen-red/20 text-zen-red"
+              status === "ABANDONED" && "bg-zen-red/20 text-zen-red",
+              isArchived && "bg-moon-faint/20 text-moon-faint"
             )}
           >
             {status.toLowerCase()}

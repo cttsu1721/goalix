@@ -11,6 +11,7 @@ import {
   validateTaskSuggestResponse,
   type TaskSuggestResponse,
   type CascadingContext,
+  type ExistingTaskContext,
 } from "@/lib/ai";
 
 // POST /api/ai/suggest - Suggest tasks for a weekly goal
@@ -50,6 +51,7 @@ export async function POST(request: NextRequest) {
     let goalDescription = weeklyGoalDescription;
     let parentTitle = parentGoalTitle;
     let cascadingContext: CascadingContext | undefined;
+    let existingTasks: ExistingTaskContext[] = [];
 
     if (weeklyGoalId) {
       const weeklyGoal = await prisma.weeklyGoal.findUnique({
@@ -76,6 +78,16 @@ export async function POST(request: NextRequest) {
               },
             },
           },
+          // Fetch existing tasks linked to this weekly goal
+          dailyTasks: {
+            select: {
+              title: true,
+              priority: true,
+              status: true,
+            },
+            orderBy: { createdAt: "desc" },
+            take: 20, // Limit to prevent token overflow
+          },
         },
       });
 
@@ -89,6 +101,13 @@ export async function POST(request: NextRequest) {
       goalTitle = weeklyGoal.title;
       goalDescription = weeklyGoal.description || undefined;
       parentTitle = weeklyGoal.monthlyGoal?.title || undefined;
+
+      // Map existing tasks for context
+      existingTasks = weeklyGoal.dailyTasks.map(task => ({
+        title: task.title,
+        priority: task.priority as "MIT" | "PRIMARY" | "SECONDARY",
+        status: task.status as "PENDING" | "IN_PROGRESS" | "COMPLETED" | "SKIPPED",
+      }));
 
       // Build cascading context for better AI suggestions
       cascadingContext = {
@@ -121,12 +140,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Call Anthropic API with cascading context
+    // Call Anthropic API with cascading context and existing tasks
     const userMessage = createTaskSuggestMessage(
       goalTitle,
       goalDescription,
       parentTitle,
-      cascadingContext
+      cascadingContext,
+      existingTasks.length > 0 ? existingTasks : undefined
     );
 
     const response = await anthropic.messages.create({

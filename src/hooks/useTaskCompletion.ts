@@ -3,6 +3,7 @@ import { useCompleteTask, useUncompleteTask } from "./useTasks";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
 import { haptics } from "@/lib/haptics";
+import { useCompletionFeedback } from "./useSoundEffects";
 
 interface EarnedBadge {
   slug: string;
@@ -35,6 +36,7 @@ function hasSeenFirstMitCelebration(): boolean {
 export function useTaskCompletion(options: UseTaskCompletionOptions = {}) {
   const completeTask = useCompleteTask();
   const uncompleteTask = useUncompleteTask();
+  const { onTaskComplete, onBadgeEarned: playSoundBadge, onLevelUp: playSoundLevelUp, onUndo } = useCompletionFeedback();
 
   const triggerConfetti = useCallback(() => {
     // Skip confetti if user prefers reduced motion
@@ -77,6 +79,7 @@ export function useTaskCompletion(options: UseTaskCompletionOptions = {}) {
       try {
         const result = await uncompleteTask.mutateAsync(taskId);
         haptics.taskUncomplete(); // Haptic feedback on undo
+        onUndo(); // Sound effect for undo
         toast.success("Task restored", {
           description: `${result.pointsRemoved} points removed`,
           duration: 2000,
@@ -88,7 +91,7 @@ export function useTaskCompletion(options: UseTaskCompletionOptions = {}) {
         });
       }
     },
-    [uncompleteTask]
+    [uncompleteTask, onUndo]
   );
 
   const complete = useCallback(
@@ -96,6 +99,7 @@ export function useTaskCompletion(options: UseTaskCompletionOptions = {}) {
       try {
         const result = await completeTask.mutateAsync(taskId);
         haptics.taskComplete(); // Haptic feedback on completion
+        onTaskComplete(isMit); // Sound effect for completion
 
         // Show confetti for MIT completion
         if (isMit) {
@@ -128,6 +132,7 @@ export function useTaskCompletion(options: UseTaskCompletionOptions = {}) {
           const newLevel = result.newLevel;
           const previousLevel = newLevel - 1;
           setTimeout(() => {
+            playSoundLevelUp(); // Sound effect for level up
             // Call the callback instead of showing a toast
             // The modal will handle the celebration
             options.onLevelUp?.(previousLevel, newLevel);
@@ -140,6 +145,7 @@ export function useTaskCompletion(options: UseTaskCompletionOptions = {}) {
           const badgeDelay = result.leveledUp ? 3000 : (isMit ? 1500 : 500);
           result.badges.forEach((badge, index) => {
             setTimeout(() => {
+              playSoundBadge(); // Sound effect for badge earned
               options.onBadgeEarned?.(badge);
             }, badgeDelay + index * 2000); // Stagger badges 2s apart
           });
@@ -183,7 +189,7 @@ export function useTaskCompletion(options: UseTaskCompletionOptions = {}) {
         throw error;
       }
     },
-    [completeTask, triggerConfetti, triggerStreakMilestoneConfetti, handleUndo, options]
+    [completeTask, triggerConfetti, triggerStreakMilestoneConfetti, handleUndo, options, onTaskComplete, playSoundLevelUp, playSoundBadge]
   );
 
   const uncomplete = useCallback(

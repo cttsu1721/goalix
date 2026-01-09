@@ -23,6 +23,8 @@ export {
   useCreateGoal,
   useUpdateGoal,
   useDeleteGoal,
+  useUnlinkedGoals,
+  useSiblingGoals,
 } from "./useGoals";
 
 // Gamification hooks
@@ -31,6 +33,7 @@ export {
   useUserStreaks,
   useUserSettings,
   useUpdateUserSettings,
+  useCategoryStats,
 } from "./useGamification";
 
 // Kaizen hooks
@@ -50,7 +53,13 @@ export {
 } from "./useVisionBuilder";
 
 // Weekly Review hook
-export { useWeeklyReview, useSubmitWeeklyReview, formatAreaName } from "./useWeeklyReview";
+export {
+  useWeeklyReview,
+  useSubmitWeeklyReview,
+  formatAreaName,
+  useReviewHistory,
+  useAllReviewHistory,
+} from "./useWeeklyReview";
 
 // Monthly Review hook
 export { useMonthlyReview, useSubmitMonthlyReview } from "./useMonthlyReview";
@@ -77,3 +86,56 @@ export { useReducedMotion, prefersReducedMotion } from "./useReducedMotion";
 
 // Form helpers
 export { useUnsavedChanges } from "./useUnsavedChanges";
+export { useScrollIntoView, scrollInputIntoView, useAutoScrollForm } from "./useScrollIntoView";
+
+// Notification hooks
+export {
+  useNotifications,
+  isSundayEvening,
+  shouldShowWeeklyNotification,
+  markWeeklyNotificationShown,
+} from "./useNotifications";
+
+// Sound effects hooks
+export {
+  useSoundEffects,
+  useCompletionFeedback,
+  type SoundEffect,
+} from "./useSoundEffects";
+
+// Optimistic update hooks
+export {
+  useOptimisticUpdate,
+  useOptimisticTaskComplete,
+  useOptimisticList,
+} from "./useOptimisticUpdate";
+
+// Mobile view hooks
+export {
+  useMobileView,
+  useViewMode,
+  useDaySwipeNavigation,
+  type ViewToggleProps,
+} from "./useMobileView";
+
+// Focus mode hook
+export { useFocusMode } from "./useFocusMode";
+
+// Subtask hooks
+export {
+  useSubtasks,
+  useCreateSubtask,
+  useUpdateSubtask,
+  useDeleteSubtask,
+  useReorderSubtasks,
+  type Subtask,
+} from "./useSubtasks";
+
+// AI hooks
+export {
+  useAIUsage,
+  useGoalSharpen,
+  useTaskSuggest,
+  useGoalSuggest,
+  useGoalLinkSuggest,
+} from "./useAI";

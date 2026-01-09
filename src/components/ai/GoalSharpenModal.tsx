@@ -23,6 +23,8 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AIFeedback } from "./AIFeedback";
+import { PremiumUpsell } from "./PremiumUpsell";
 
 interface GoalSharpenModalProps {
   open: boolean;
@@ -42,7 +44,12 @@ export function GoalSharpenModal({
   onApply,
 }: GoalSharpenModalProps) {
   const [result, setResult] = useState<GoalSharpenResponse | null>(null);
+  const [showUpsell, setShowUpsell] = useState(false);
   const sharpen = useGoalSharpen();
+
+  // Check if the error is a rate limit error
+  const isRateLimited = sharpen.error?.message?.includes("Daily AI limit") ||
+    sharpen.error?.message?.includes("limit reached");
 
   const handleSharpen = async () => {
     try {
@@ -89,13 +96,45 @@ export function GoalSharpenModal({
           </div>
         </DialogHeader>
 
-        {/* Original Goal */}
-        <div className="mt-4 p-4 bg-night-soft border border-night-mist rounded-xl">
-          <div className="text-xs font-medium uppercase tracking-wider text-moon-faint mb-2">
-            Your Goal
+        {/* Before/After Comparison - Side by side when result available */}
+        {result ? (
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Before (Original) */}
+            <div className="p-4 bg-night-soft border border-night-mist rounded-xl">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-xs px-2 py-0.5 bg-moon-faint/20 text-moon-dim rounded font-medium uppercase tracking-wider">
+                  Before
+                </span>
+              </div>
+              <p className="text-moon-dim">{goalTitle}</p>
+              {goalContext && (
+                <p className="text-sm text-moon-faint mt-2">{goalContext}</p>
+              )}
+            </div>
+
+            {/* After (Sharpened) */}
+            <div className="p-4 bg-zen-purple/5 border border-zen-purple/20 rounded-xl">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-xs px-2 py-0.5 bg-zen-purple/20 text-zen-purple rounded font-medium uppercase tracking-wider">
+                  After
+                </span>
+                <Sparkles className="w-3 h-3 text-zen-purple" />
+              </div>
+              <p className="text-moon font-medium">{result.sharpened_title}</p>
+              {result.description && (
+                <p className="text-sm text-moon-soft mt-2">{result.description}</p>
+              )}
+            </div>
           </div>
-          <p className="text-moon">{goalTitle}</p>
-        </div>
+        ) : (
+          /* Original Goal - when no result yet */
+          <div className="mt-4 p-4 bg-night-soft border border-night-mist rounded-xl">
+            <div className="text-xs font-medium uppercase tracking-wider text-moon-faint mb-2">
+              Your Goal
+            </div>
+            <p className="text-moon">{goalTitle}</p>
+          </div>
+        )}
 
         {/* Loading State */}
         {sharpen.isPending && (
@@ -111,36 +150,48 @@ export function GoalSharpenModal({
         {/* Error State */}
         {sharpen.isError && !sharpen.isPending && (
           <div className="py-8 text-center">
-            <div className="w-12 h-12 rounded-full bg-zen-red/10 flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl">😕</span>
-            </div>
-            <p className="text-moon mb-2">Something went wrong</p>
-            <p className="text-sm text-zen-red mb-4">{sharpen.error.message}</p>
-            <Button
-              onClick={handleSharpen}
-              variant="outline"
-              className="border-zen-purple/30 text-zen-purple"
-            >
-              Try Again
-            </Button>
+            {isRateLimited ? (
+              <>
+                <div className="w-12 h-12 rounded-full bg-lantern/10 flex items-center justify-center mx-auto mb-4">
+                  <Sparkles className="w-6 h-6 text-lantern" />
+                </div>
+                <p className="text-moon mb-2">Daily limit reached</p>
+                <p className="text-sm text-moon-dim mb-4">
+                  You've used all your AI credits for today
+                </p>
+                <Button
+                  onClick={() => setShowUpsell(true)}
+                  className="bg-gradient-to-r from-lantern to-zen-purple text-void"
+                >
+                  Unlock Unlimited AI
+                </Button>
+              </>
+            ) : (
+              <>
+                <div className="w-12 h-12 rounded-full bg-zen-red/10 flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">😕</span>
+                </div>
+                <p className="text-moon mb-2">Something went wrong</p>
+                <p className="text-sm text-zen-red mb-4">{sharpen.error.message}</p>
+                <Button
+                  onClick={handleSharpen}
+                  variant="outline"
+                  className="border-zen-purple/30 text-zen-purple"
+                >
+                  Try Again
+                </Button>
+              </>
+            )}
           </div>
         )}
 
-        {/* Result */}
+        {/* Result Details */}
         {result && !sharpen.isPending && (
           <div className="space-y-4 mt-4">
-            {/* Sharpened Title */}
-            <div className="p-4 bg-zen-purple/5 border border-zen-purple/20 rounded-xl">
-              <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-zen-purple mb-2">
-                <Target className="w-3 h-3" />
-                Sharpened Goal
-              </div>
-              <p className="text-moon font-medium">{result.sharpened_title}</p>
-              {result.description && (
-                <p className="text-moon-soft text-sm mt-2">
-                  {result.description}
-                </p>
-              )}
+            {/* What's Improved Header */}
+            <div className="flex items-center gap-2 text-sm font-medium text-moon">
+              <Target className="w-4 h-4 text-zen-green" />
+              What's improved
             </div>
 
             {/* Measurable Outcomes */}
@@ -175,6 +226,11 @@ export function GoalSharpenModal({
                 </div>
                 <p className="text-moon text-sm">{result.first_step}</p>
               </div>
+            </div>
+
+            {/* AI Feedback */}
+            <div className="pt-3 border-t border-night-mist">
+              <AIFeedback context="goal_sharpen" />
             </div>
           </div>
         )}
@@ -223,6 +279,15 @@ export function GoalSharpenModal({
           )}
         </div>
       </DialogContent>
+
+      {/* Premium Upsell Modal */}
+      <PremiumUpsell
+        open={showUpsell}
+        onOpenChange={setShowUpsell}
+        feature="goal_sharpener"
+        usesRemaining={0}
+        dailyLimit={5}
+      />
     </Dialog>
   );
 }

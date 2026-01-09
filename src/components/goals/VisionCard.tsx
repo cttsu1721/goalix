@@ -76,9 +76,9 @@ export function VisionCard({
           <button
             onClick={handleCreateChild}
             className={cn(
-              "w-7 h-7 rounded-lg flex items-center justify-center",
+              "w-11 h-11 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center",
               "text-moon-faint hover:text-lantern hover:bg-lantern/10",
-              "opacity-0 group-hover:opacity-100 transition-all duration-200",
+              "sm:opacity-0 group-hover:opacity-100 transition-all duration-200",
               "focus:outline-none focus:ring-2 focus:ring-lantern/50 focus:opacity-100"
             )}
             title="Add 3-year goal"

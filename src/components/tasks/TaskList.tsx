@@ -32,6 +32,7 @@ interface TaskListProps {
   draggable?: boolean;
   onDragStart?: (taskId: string, title: string, priority: "PRIMARY" | "SECONDARY") => void;
   onDragEnd?: () => void;
+  onPromoteToMit?: (task: { id: string; title: string; priority: "PRIMARY" | "SECONDARY" }) => void;
   className?: string;
 }
 
@@ -46,6 +47,7 @@ export function TaskList({
   draggable = false,
   onDragStart,
   onDragEnd,
+  onPromoteToMit,
   className,
 }: TaskListProps) {
   const completed = completedCount ?? tasks.filter((t) => t.completed).length;
@@ -94,6 +96,7 @@ export function TaskList({
             draggable={draggable}
             onDragStart={onDragStart}
             onDragEnd={onDragEnd}
+            onPromoteToMit={onPromoteToMit}
           />
         ))}
       </div>

@@ -8,6 +8,7 @@ interface UserStats {
   pointsToNextLevel: number;
   levelProgress: number;
   streakFreezes: number;
+  maxMitCount: number;
   streaks: Streak[];
   badges: (EarnedBadge & { badge: Badge })[];
   todayStats: {
@@ -50,6 +51,9 @@ interface UserSettings {
   notifyDailyReminder: boolean;
   notifyWeeklyReview: boolean;
   notifyAchievements: boolean;
+  enableSoundEffects: boolean;
+  maxMitCount: number;
+  showMotivationalQuotes: boolean;
   createdAt: string;
 }
 
@@ -106,6 +110,9 @@ export function useUpdateUserSettings() {
       notifyDailyReminder?: boolean;
       notifyWeeklyReview?: boolean;
       notifyAchievements?: boolean;
+      enableSoundEffects?: boolean;
+      maxMitCount?: number;
+      showMotivationalQuotes?: boolean;
     }) => {
       const res = await fetch("/api/user/settings", {
         method: "PATCH",
@@ -187,5 +194,30 @@ export function useNextBadges() {
       }
       return res.json();
     },
+  });
+}
+
+// Category stats for suggested categories (6.3)
+interface CategoryStatsResponse {
+  suggested: string[];
+  categoryCounts: Array<{
+    category: string;
+    count: number;
+  }>;
+  totalGoals: number;
+}
+
+// Fetch user's category usage stats for suggested categories
+export function useCategoryStats() {
+  return useQuery<CategoryStatsResponse>({
+    queryKey: ["user", "category-stats"],
+    queryFn: async () => {
+      const res = await fetch("/api/user/category-stats");
+      if (!res.ok) {
+        throw new Error("Failed to fetch category stats");
+      }
+      return res.json();
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes - doesn't change often
   });
 }

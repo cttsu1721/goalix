@@ -21,6 +21,9 @@ export async function GET() {
         notifyDailyReminder: true,
         notifyWeeklyReview: true,
         notifyAchievements: true,
+        enableSoundEffects: true,
+        maxMitCount: true,
+        showMotivationalQuotes: true,
         createdAt: true,
       },
     });
@@ -48,7 +51,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, timezone, notifyDailyReminder, notifyWeeklyReview, notifyAchievements } = body;
+    const { name, timezone, notifyDailyReminder, notifyWeeklyReview, notifyAchievements, enableSoundEffects, maxMitCount, showMotivationalQuotes } = body;
 
     // Build update data
     const updateData: {
@@ -57,6 +60,9 @@ export async function PATCH(request: NextRequest) {
       notifyDailyReminder?: boolean;
       notifyWeeklyReview?: boolean;
       notifyAchievements?: boolean;
+      enableSoundEffects?: boolean;
+      maxMitCount?: number;
+      showMotivationalQuotes?: boolean;
     } = {};
 
     if (name !== undefined) {
@@ -91,6 +97,24 @@ export async function PATCH(request: NextRequest) {
       updateData.notifyAchievements = Boolean(notifyAchievements);
     }
 
+    // Handle UX preferences
+    if (enableSoundEffects !== undefined) {
+      updateData.enableSoundEffects = Boolean(enableSoundEffects);
+    }
+    if (maxMitCount !== undefined) {
+      const mitCount = Number(maxMitCount);
+      if (isNaN(mitCount) || mitCount < 1 || mitCount > 3) {
+        return NextResponse.json(
+          { error: "MIT limit must be between 1 and 3" },
+          { status: 400 }
+        );
+      }
+      updateData.maxMitCount = mitCount;
+    }
+    if (showMotivationalQuotes !== undefined) {
+      updateData.showMotivationalQuotes = Boolean(showMotivationalQuotes);
+    }
+
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json(
         { error: "No valid fields to update" },
@@ -110,6 +134,9 @@ export async function PATCH(request: NextRequest) {
         notifyDailyReminder: true,
         notifyWeeklyReview: true,
         notifyAchievements: true,
+        enableSoundEffects: true,
+        maxMitCount: true,
+        showMotivationalQuotes: true,
         createdAt: true,
       },
     });

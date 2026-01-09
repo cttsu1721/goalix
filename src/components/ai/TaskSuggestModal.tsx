@@ -30,6 +30,8 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AIFeedback } from "./AIFeedback";
+import { PremiumUpsell } from "./PremiumUpsell";
 
 interface WeeklyGoal {
   id: string;
@@ -76,7 +78,12 @@ export function TaskSuggestModal({
   const [selectedGoalId, setSelectedGoalId] = useState<string>("");
   const [result, setResult] = useState<TaskSuggestResponse | null>(null);
   const [selectedTasks, setSelectedTasks] = useState<Set<number>>(new Set());
+  const [showUpsell, setShowUpsell] = useState(false);
   const suggest = useTaskSuggest();
+
+  // Check if the error is a rate limit error
+  const isRateLimited = suggest.error?.message?.includes("Daily AI limit") ||
+    suggest.error?.message?.includes("limit reached");
 
   // Set initial goal when modal opens
   useEffect(() => {
@@ -206,18 +213,38 @@ export function TaskSuggestModal({
         {/* Error State */}
         {suggest.isError && !suggest.isPending && (
           <div className="py-8 text-center">
-            <div className="w-12 h-12 rounded-full bg-zen-red/10 flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl">😕</span>
-            </div>
-            <p className="text-moon mb-2">Something went wrong</p>
-            <p className="text-sm text-zen-red mb-4">{suggest.error.message}</p>
-            <Button
-              onClick={handleSuggest}
-              variant="outline"
-              className="border-zen-purple/30 text-zen-purple"
-            >
-              Try Again
-            </Button>
+            {isRateLimited ? (
+              <>
+                <div className="w-12 h-12 rounded-full bg-lantern/10 flex items-center justify-center mx-auto mb-4">
+                  <Sparkles className="w-6 h-6 text-lantern" />
+                </div>
+                <p className="text-moon mb-2">Daily limit reached</p>
+                <p className="text-sm text-moon-dim mb-4">
+                  You've used all your AI credits for today
+                </p>
+                <Button
+                  onClick={() => setShowUpsell(true)}
+                  className="bg-gradient-to-r from-lantern to-zen-purple text-void"
+                >
+                  Unlock Unlimited AI
+                </Button>
+              </>
+            ) : (
+              <>
+                <div className="w-12 h-12 rounded-full bg-zen-red/10 flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">😕</span>
+                </div>
+                <p className="text-moon mb-2">Something went wrong</p>
+                <p className="text-sm text-zen-red mb-4">{suggest.error.message}</p>
+                <Button
+                  onClick={handleSuggest}
+                  variant="outline"
+                  className="border-zen-purple/30 text-zen-purple"
+                >
+                  Try Again
+                </Button>
+              </>
+            )}
           </div>
         )}
 
@@ -312,6 +339,11 @@ export function TaskSuggestModal({
                   : "Select all"}
               </button>
             </div>
+
+            {/* AI Feedback */}
+            <div className="pt-3 border-t border-night-mist">
+              <AIFeedback context="task_suggest" />
+            </div>
           </div>
         )}
 
@@ -360,6 +392,15 @@ export function TaskSuggestModal({
           )}
         </div>
       </DialogContent>
+
+      {/* Premium Upsell Modal */}
+      <PremiumUpsell
+        open={showUpsell}
+        onOpenChange={setShowUpsell}
+        feature="task_suggester"
+        usesRemaining={0}
+        dailyLimit={5}
+      />
     </Dialog>
   );
 }

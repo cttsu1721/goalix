@@ -142,9 +142,16 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         scheduledDate: { gte: today, lte: endOfDay },
         status: "COMPLETED",
       },
-      select: { pointsEarned: true },
+      select: { pointsEarned: true, weeklyGoalId: true },
     });
     const todayPoints = todayTasks.reduce((sum, t) => sum + t.pointsEarned, 0);
+
+    // Calculate daily alignment percentage for badge checking
+    const linkedTasks = todayTasks.filter((t) => t.weeklyGoalId !== null).length;
+    const totalCompletedToday = todayTasks.length;
+    const dailyAlignmentPercentage = totalCompletedToday > 0
+      ? Math.round((linkedTasks / totalCompletedToday) * 100)
+      : 0;
 
     // Get current MIT streak for badge checking
     const currentMitStreak = await prisma.streak.findFirst({
@@ -157,6 +164,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       todayPoints,
       currentStreak: currentMitStreak?.currentCount || 0,
       category: task.weeklyGoal?.category || undefined,
+      dailyAlignmentPercentage,
     });
 
     // Check for streak milestone (7, 14, 30, 60, 90 days)

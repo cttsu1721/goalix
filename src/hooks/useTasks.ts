@@ -13,6 +13,15 @@ interface TaskWithGoal extends DailyTask {
       oneYearGoal?: {
         id: string;
         title: string;
+        threeYearGoal?: {
+          id: string;
+          title: string;
+          sevenYearVision?: {
+            id: string;
+            title: string;
+            description: string | null;
+          } | null;
+        } | null;
       } | null;
     } | null;
   } | null;
@@ -165,7 +174,7 @@ export function useCreateTask() {
   });
 }
 
-// Update a task
+// Update a task (with optimistic update)
 export function useUpdateTask() {
   const queryClient = useQueryClient();
 
@@ -182,14 +191,100 @@ export function useUpdateTask() {
       }
       return res.json();
     },
-    onSuccess: () => {
+    // Optimistic update: immediately apply changes
+    onMutate: async ({ id, ...input }: UpdateTaskInput & { id: string }) => {
+      await queryClient.cancelQueries({ queryKey: ["tasks"] });
+      await queryClient.cancelQueries({ queryKey: ["task", id] });
+
+      const previousTasksData = queryClient.getQueriesData<TasksResponse | WeekTasksResponse>({ queryKey: ["tasks"] });
+      const previousTaskData = queryClient.getQueryData<{ task: TaskWithGoal }>(["task", id]);
+
+      // Prepare updates with proper type conversions
+      const updates: Partial<TaskWithGoal> = {};
+      if (input.title !== undefined) updates.title = input.title;
+      if (input.description !== undefined) updates.description = input.description;
+      if (input.priority !== undefined) updates.priority = input.priority;
+      if (input.status !== undefined) updates.status = input.status;
+      if (input.estimatedMinutes !== undefined) updates.estimatedMinutes = input.estimatedMinutes;
+      if (input.weeklyGoalId !== undefined) updates.weeklyGoalId = input.weeklyGoalId;
+      // Convert scheduledDate string to Date if provided
+      if (input.scheduledDate !== undefined) {
+        updates.scheduledDate = new Date(input.scheduledDate);
+      }
+
+      // Update all task list queries
+      queryClient.setQueriesData<TasksResponse | WeekTasksResponse>(
+        { queryKey: ["tasks"] },
+        (old) => {
+          if (!old) return old;
+
+          // Handle daily tasks response
+          if ("tasks" in old && !("tasksByDate" in old)) {
+            const dailyData = old as TasksResponse;
+            return {
+              ...dailyData,
+              tasks: dailyData.tasks.map((task) =>
+                task.id === id ? { ...task, ...updates } : task
+              ),
+            };
+          }
+
+          // Handle week tasks response
+          if ("tasksByDate" in old) {
+            const weekData = old as WeekTasksResponse;
+            return {
+              ...weekData,
+              tasks: weekData.tasks.map((task) =>
+                task.id === id ? { ...task, ...updates } : task
+              ),
+              tasksByDate: Object.fromEntries(
+                Object.entries(weekData.tasksByDate).map(([date, tasks]) => [
+                  date,
+                  tasks.map((task) =>
+                    task.id === id ? { ...task, ...updates } : task
+                  ),
+                ])
+              ),
+            };
+          }
+
+          return old;
+        }
+      );
+
+      // Update single task query if it exists
+      if (previousTaskData) {
+        queryClient.setQueryData<{ task: TaskWithGoal }>(["task", id], (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            task: { ...old.task, ...updates },
+          };
+        });
+      }
+
+      return { previousTasksData, previousTaskData };
+    },
+    onError: (_err, variables, context) => {
+      if (context?.previousTasksData) {
+        context.previousTasksData.forEach(([queryKey, data]) => {
+          if (data) {
+            queryClient.setQueryData(queryKey, data);
+          }
+        });
+      }
+      if (context?.previousTaskData) {
+        queryClient.setQueryData(["task", variables.id], context.previousTaskData);
+      }
+    },
+    onSettled: (_data, _error, variables) => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
-      queryClient.invalidateQueries({ queryKey: ["task"] });
+      queryClient.invalidateQueries({ queryKey: ["task", variables.id] });
     },
   });
 }
 
-// Delete a task
+// Delete a task (with optimistic update)
 export function useDeleteTask() {
   const queryClient = useQueryClient();
 
@@ -204,17 +299,86 @@ export function useDeleteTask() {
       }
       return res.json();
     },
-    onSuccess: () => {
+    // Optimistic update: immediately remove task from list
+    onMutate: async (taskId: string) => {
+      await queryClient.cancelQueries({ queryKey: ["tasks"] });
+
+      const previousData = queryClient.getQueriesData<TasksResponse | WeekTasksResponse>({ queryKey: ["tasks"] });
+
+      queryClient.setQueriesData<TasksResponse | WeekTasksResponse>(
+        { queryKey: ["tasks"] },
+        (old) => {
+          if (!old) return old;
+
+          // Handle daily tasks response
+          if ("tasks" in old && !("tasksByDate" in old)) {
+            const dailyData = old as TasksResponse;
+            const deletedTask = dailyData.tasks.find((t) => t.id === taskId);
+            const wasCompleted = deletedTask?.status === "COMPLETED";
+            return {
+              ...dailyData,
+              tasks: dailyData.tasks.filter((task) => task.id !== taskId),
+              stats: {
+                ...dailyData.stats,
+                total: Math.max(0, dailyData.stats.total - 1),
+                completed: wasCompleted ? Math.max(0, dailyData.stats.completed - 1) : dailyData.stats.completed,
+              },
+            };
+          }
+
+          // Handle week tasks response
+          if ("tasksByDate" in old) {
+            const weekData = old as WeekTasksResponse;
+            const deletedTask = weekData.tasks.find((t) => t.id === taskId);
+            const wasCompleted = deletedTask?.status === "COMPLETED";
+            return {
+              ...weekData,
+              tasks: weekData.tasks.filter((task) => task.id !== taskId),
+              tasksByDate: Object.fromEntries(
+                Object.entries(weekData.tasksByDate).map(([date, tasks]) => [
+                  date,
+                  tasks.filter((task) => task.id !== taskId),
+                ])
+              ),
+              stats: {
+                ...weekData.stats,
+                total: Math.max(0, weekData.stats.total - 1),
+                completed: wasCompleted ? Math.max(0, weekData.stats.completed - 1) : weekData.stats.completed,
+              },
+            };
+          }
+
+          return old;
+        }
+      );
+
+      return { previousData };
+    },
+    onError: (_err, _taskId, context) => {
+      if (context?.previousData) {
+        context.previousData.forEach(([queryKey, data]) => {
+          if (data) {
+            queryClient.setQueryData(queryKey, data);
+          }
+        });
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
   });
 }
 
-// Complete a task
+// Context type for optimistic updates
+type TaskMutationContext = {
+  previousData: [readonly unknown[], TasksResponse | WeekTasksResponse | undefined][];
+};
+
+// Complete a task (with optimistic update)
 export function useCompleteTask() {
   const queryClient = useQueryClient();
 
-  return useMutation<CompleteTaskResponse, Error, string>({
+  return useMutation<CompleteTaskResponse, Error, string, TaskMutationContext>({
     mutationFn: async (id: string) => {
       const res = await fetch(`/api/tasks/${id}/complete`, {
         method: "POST",
@@ -225,7 +389,83 @@ export function useCompleteTask() {
       }
       return res.json();
     },
-    onSuccess: () => {
+    // Optimistic update: immediately show task as completed
+    onMutate: async (taskId: string) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["tasks"] });
+
+      // Snapshot the previous value for all task queries
+      const previousData = queryClient.getQueriesData<TasksResponse | WeekTasksResponse>({ queryKey: ["tasks"] });
+
+      // Optimistically update all matching queries
+      queryClient.setQueriesData<TasksResponse | WeekTasksResponse>(
+        { queryKey: ["tasks"] },
+        (old) => {
+          if (!old) return old;
+
+          // Handle daily tasks response
+          if ("tasks" in old && !("tasksByDate" in old)) {
+            const dailyData = old as TasksResponse;
+            return {
+              ...dailyData,
+              tasks: dailyData.tasks.map((task) =>
+                task.id === taskId
+                  ? { ...task, status: "COMPLETED" as TaskStatus, completedAt: new Date() }
+                  : task
+              ),
+              stats: {
+                ...dailyData.stats,
+                completed: dailyData.stats.completed + 1,
+              },
+            };
+          }
+
+          // Handle week tasks response
+          if ("tasksByDate" in old) {
+            const weekData = old as WeekTasksResponse;
+            return {
+              ...weekData,
+              tasks: weekData.tasks.map((task) =>
+                task.id === taskId
+                  ? { ...task, status: "COMPLETED" as TaskStatus, completedAt: new Date() }
+                  : task
+              ),
+              tasksByDate: Object.fromEntries(
+                Object.entries(weekData.tasksByDate).map(([date, tasks]) => [
+                  date,
+                  tasks.map((task) =>
+                    task.id === taskId
+                      ? { ...task, status: "COMPLETED" as TaskStatus, completedAt: new Date() }
+                      : task
+                  ),
+                ])
+              ),
+              stats: {
+                ...weekData.stats,
+                completed: weekData.stats.completed + 1,
+              },
+            };
+          }
+
+          return old;
+        }
+      );
+
+      // Return context for rollback
+      return { previousData };
+    },
+    onError: (_err, _taskId, context) => {
+      // Rollback to previous data on error
+      if (context?.previousData) {
+        context.previousData.forEach(([queryKey, data]) => {
+          if (data) {
+            queryClient.setQueryData(queryKey, data);
+          }
+        });
+      }
+    },
+    onSettled: () => {
+      // Always refetch after success or error to ensure consistency
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["user", "stats"] });
       queryClient.invalidateQueries({ queryKey: ["user", "streaks"] });
@@ -238,11 +478,11 @@ interface UncompleteTaskResponse {
   pointsRemoved: number;
 }
 
-// Uncomplete a task (undo completion)
+// Uncomplete a task (undo completion, with optimistic update)
 export function useUncompleteTask() {
   const queryClient = useQueryClient();
 
-  return useMutation<UncompleteTaskResponse, Error, string>({
+  return useMutation<UncompleteTaskResponse, Error, string, TaskMutationContext>({
     mutationFn: async (id: string) => {
       const res = await fetch(`/api/tasks/${id}/uncomplete`, {
         method: "POST",
@@ -253,7 +493,77 @@ export function useUncompleteTask() {
       }
       return res.json();
     },
-    onSuccess: () => {
+    // Optimistic update: immediately show task as pending
+    onMutate: async (taskId: string) => {
+      await queryClient.cancelQueries({ queryKey: ["tasks"] });
+
+      const previousData = queryClient.getQueriesData<TasksResponse | WeekTasksResponse>({ queryKey: ["tasks"] });
+
+      queryClient.setQueriesData<TasksResponse | WeekTasksResponse>(
+        { queryKey: ["tasks"] },
+        (old) => {
+          if (!old) return old;
+
+          // Handle daily tasks response
+          if ("tasks" in old && !("tasksByDate" in old)) {
+            const dailyData = old as TasksResponse;
+            return {
+              ...dailyData,
+              tasks: dailyData.tasks.map((task) =>
+                task.id === taskId
+                  ? { ...task, status: "PENDING" as TaskStatus, completedAt: null }
+                  : task
+              ),
+              stats: {
+                ...dailyData.stats,
+                completed: Math.max(0, dailyData.stats.completed - 1),
+              },
+            };
+          }
+
+          // Handle week tasks response
+          if ("tasksByDate" in old) {
+            const weekData = old as WeekTasksResponse;
+            return {
+              ...weekData,
+              tasks: weekData.tasks.map((task) =>
+                task.id === taskId
+                  ? { ...task, status: "PENDING" as TaskStatus, completedAt: null }
+                  : task
+              ),
+              tasksByDate: Object.fromEntries(
+                Object.entries(weekData.tasksByDate).map(([date, tasks]) => [
+                  date,
+                  tasks.map((task) =>
+                    task.id === taskId
+                      ? { ...task, status: "PENDING" as TaskStatus, completedAt: null }
+                      : task
+                  ),
+                ])
+              ),
+              stats: {
+                ...weekData.stats,
+                completed: Math.max(0, weekData.stats.completed - 1),
+              },
+            };
+          }
+
+          return old;
+        }
+      );
+
+      return { previousData };
+    },
+    onError: (_err, _taskId, context) => {
+      if (context?.previousData) {
+        context.previousData.forEach(([queryKey, data]) => {
+          if (data) {
+            queryClient.setQueryData(queryKey, data);
+          }
+        });
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["user", "stats"] });
       queryClient.invalidateQueries({ queryKey: ["user", "streaks"] });

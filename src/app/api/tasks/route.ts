@@ -87,6 +87,19 @@ export async function GET(request: NextRequest) {
                   select: {
                     id: true,
                     title: true,
+                    threeYearGoal: {
+                      select: {
+                        id: true,
+                        title: true,
+                        sevenYearVision: {
+                          select: {
+                            id: true,
+                            title: true,
+                            description: true,
+                          },
+                        },
+                      },
+                    },
                   },
                 },
               },

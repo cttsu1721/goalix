@@ -42,13 +42,19 @@ interface UpdateGoalInput {
 }
 
 // Fetch goals by level
-export function useGoals(level: GoalLevel = "sevenYear", parentId?: string, status?: GoalStatus) {
+export function useGoals(
+  level: GoalLevel = "sevenYear",
+  parentId?: string,
+  status?: GoalStatus,
+  includeArchived?: boolean
+) {
   const params = new URLSearchParams({ level });
   if (parentId) params.set("parentId", parentId);
   if (status) params.set("status", status);
+  if (includeArchived) params.set("includeArchived", "true");
 
   return useQuery<GoalsResponse>({
-    queryKey: ["goals", level, parentId, status],
+    queryKey: ["goals", level, parentId, status, includeArchived],
     queryFn: async () => {
       const res = await fetch(`/api/goals?${params.toString()}`);
       if (!res.ok) {
@@ -60,8 +66,8 @@ export function useGoals(level: GoalLevel = "sevenYear", parentId?: string, stat
 }
 
 // Fetch visions (convenience hook)
-export function useVisions(status?: GoalStatus) {
-  return useGoals("sevenYear", undefined, status);
+export function useVisions(status?: GoalStatus, includeArchived?: boolean) {
+  return useGoals("sevenYear", undefined, status, includeArchived);
 }
 
 // Backward compatibility alias
@@ -152,5 +158,74 @@ export function useDeleteGoal() {
       queryClient.invalidateQueries({ queryKey: ["goals"] });
       queryClient.invalidateQueries({ queryKey: ["goal"] });
     },
+  });
+}
+
+// Types for unlinked goals
+interface UnlinkedGoal {
+  id: string;
+  title: string;
+  level: "threeYear" | "oneYear" | "monthly" | "weekly";
+  category: string;
+  status: string;
+  createdAt: string;
+}
+
+interface UnlinkedGoalsResponse {
+  unlinkedGoals: UnlinkedGoal[];
+  count: number;
+  breakdown: {
+    threeYear: number;
+    oneYear: number;
+    monthly: number;
+    weekly: number;
+  };
+}
+
+// Fetch unlinked (orphaned) goals - goals without parent links
+export function useUnlinkedGoals() {
+  return useQuery<UnlinkedGoalsResponse>({
+    queryKey: ["goals", "unlinked"],
+    queryFn: async () => {
+      const res = await fetch("/api/goals/unlinked");
+      if (!res.ok) {
+        throw new Error("Failed to fetch unlinked goals");
+      }
+      return res.json();
+    },
+    // Refetch less frequently since this is for warnings
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+}
+
+// Sibling goal type for navigation context (3.8)
+interface SiblingGoal {
+  id: string;
+  title: string;
+  category: GoalCategory;
+  status: GoalStatus;
+  progress: number;
+}
+
+interface SiblingsResponse {
+  siblings: SiblingGoal[];
+  level: GoalLevel;
+  count: number;
+}
+
+// Fetch sibling goals (same parent, same level) for navigation context
+// Used for 3.8 - Show sibling goals when viewing one goal
+export function useSiblingGoals(goalId: string) {
+  return useQuery<SiblingsResponse>({
+    queryKey: ["goals", goalId, "siblings"],
+    queryFn: async () => {
+      const res = await fetch(`/api/goals/${goalId}/siblings`);
+      if (!res.ok) {
+        throw new Error("Failed to fetch sibling goals");
+      }
+      return res.json();
+    },
+    enabled: !!goalId,
+    staleTime: 2 * 60 * 1000, // 2 minutes
   });
 }

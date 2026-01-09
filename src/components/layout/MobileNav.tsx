@@ -2,24 +2,37 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { cn } from "@/lib/utils";
-import { CheckCircle, CalendarRange, Star, Target, TrendingUp, Settings } from "lucide-react";
+import {
+  CheckCircle,
+  Star,
+  Target,
+  TrendingUp,
+  MoreHorizontal,
+  Calendar,
+  CalendarCheck,
+  CalendarDays,
+  Settings,
+  X,
+} from "lucide-react";
 
 interface MobileNavProps {
   className?: string;
 }
 
-const navItems = [
+interface NavItem {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
+}
+
+// Main 4 nav items (always visible)
+const mainNavItems: NavItem[] = [
   {
     href: "/dashboard",
     label: "Today",
     icon: CheckCircle,
-  },
-  {
-    href: "/month",
-    label: "Month",
-    icon: CalendarRange,
   },
   {
     href: "/goals?view=vision",
@@ -33,8 +46,27 @@ const navItems = [
   },
   {
     href: "/progress",
-    label: "Progress",
+    label: "Stats",
     icon: TrendingUp,
+  },
+];
+
+// Overflow items (in More menu)
+const moreNavItems: NavItem[] = [
+  {
+    href: "/week",
+    label: "This Week",
+    icon: Calendar,
+  },
+  {
+    href: "/review/weekly",
+    label: "Weekly Review",
+    icon: CalendarCheck,
+  },
+  {
+    href: "/review/monthly",
+    label: "Monthly Review",
+    icon: CalendarDays,
   },
   {
     href: "/settings",
@@ -46,6 +78,7 @@ const navItems = [
 function MobileNavContent({ className }: MobileNavProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [showMore, setShowMore] = useState(false);
 
   const isActive = (href: string) => {
     const [hrefPath, hrefQuery] = href.split("?");
@@ -73,50 +106,137 @@ function MobileNavContent({ className }: MobileNavProps) {
     return pathname.startsWith(hrefPath);
   };
 
-  return (
-    <nav
-      className={cn(
-        "fixed bottom-0 left-0 right-0 z-50",
-        "bg-night/95 backdrop-blur-lg border-t border-night-mist",
-        // Safe area padding for devices with home indicators
-        "pb-[env(safe-area-inset-bottom,0px)]",
-        className
-      )}
-    >
-      <div className="flex justify-around items-center px-1 py-1">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const active = isActive(item.href);
+  // Check if any "more" item is active
+  const isMoreActive = moreNavItems.some((item) => isActive(item.href));
 
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                // Minimum 44px touch target - slightly smaller for 5 items
-                "flex flex-col items-center justify-center",
-                "min-w-[56px] min-h-[52px] py-2 px-2",
-                "rounded-xl",
-                "text-[0.625rem] font-medium tracking-wide",
-                "transition-all duration-200 active:scale-95",
-                active
-                  ? "text-lantern bg-lantern/10"
-                  : "text-moon-faint active:text-moon active:bg-night-soft"
-              )}
+  return (
+    <>
+      {/* More Menu Overlay */}
+      {showMore && (
+        <div
+          className="fixed inset-0 z-40 bg-void/80 backdrop-blur-sm"
+          onClick={() => setShowMore(false)}
+        />
+      )}
+
+      {/* More Menu Panel */}
+      <div
+        className={cn(
+          "fixed bottom-[60px] left-0 right-0 z-50",
+          "bg-night border-t border-night-mist",
+          "transform transition-transform duration-200 ease-out",
+          "pb-[env(safe-area-inset-bottom,0px)]",
+          showMore ? "translate-y-0" : "translate-y-full pointer-events-none"
+        )}
+      >
+        <div className="px-4 py-3">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-medium text-moon-faint uppercase tracking-wider">
+              More Options
+            </span>
+            <button
+              onClick={() => setShowMore(false)}
+              className="p-1.5 rounded-lg text-moon-faint hover:text-moon hover:bg-night-soft"
             >
-              <Icon
-                className={cn(
-                  "w-[22px] h-[22px] mb-0.5",
-                  active && "drop-shadow-[0_0_8px_rgba(232,168,87,0.4)]"
-                )}
-                strokeWidth={active ? 2 : 1.5}
-              />
-              <span className={cn(active && "font-semibold")}>{item.label}</span>
-            </Link>
-          );
-        })}
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {moreNavItems.map((item) => {
+              const Icon = item.icon;
+              const active = isActive(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setShowMore(false)}
+                  className={cn(
+                    "flex items-center gap-3 px-4 py-3 rounded-xl",
+                    "text-sm font-medium transition-all duration-200",
+                    active
+                      ? "text-lantern bg-lantern/10"
+                      : "text-moon-dim hover:text-moon hover:bg-night-soft"
+                  )}
+                >
+                  <Icon
+                    className={cn("w-5 h-5", active && "text-lantern")}
+                    strokeWidth={active ? 2 : 1.5}
+                  />
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
       </div>
-    </nav>
+
+      {/* Main Bottom Nav */}
+      <nav
+        className={cn(
+          "fixed bottom-0 left-0 right-0 z-50",
+          "bg-night/95 backdrop-blur-lg border-t border-night-mist",
+          "pb-[env(safe-area-inset-bottom,0px)]",
+          className
+        )}
+      >
+        <div className="flex justify-around items-center px-1 py-1">
+          {mainNavItems.map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item.href);
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex flex-col items-center justify-center",
+                  "min-w-[64px] min-h-[52px] py-2 px-2",
+                  "rounded-xl",
+                  "text-[0.625rem] font-medium tracking-wide",
+                  "transition-all duration-200 active:scale-95",
+                  active
+                    ? "text-lantern bg-lantern/10"
+                    : "text-moon-faint active:text-moon active:bg-night-soft"
+                )}
+              >
+                <Icon
+                  className={cn(
+                    "w-[22px] h-[22px] mb-0.5",
+                    active && "drop-shadow-[0_0_8px_rgba(232,168,87,0.4)]"
+                  )}
+                  strokeWidth={active ? 2 : 1.5}
+                />
+                <span className={cn(active && "font-semibold")}>{item.label}</span>
+              </Link>
+            );
+          })}
+
+          {/* More Button */}
+          <button
+            onClick={() => setShowMore(!showMore)}
+            className={cn(
+              "flex flex-col items-center justify-center",
+              "min-w-[64px] min-h-[52px] py-2 px-2",
+              "rounded-xl",
+              "text-[0.625rem] font-medium tracking-wide",
+              "transition-all duration-200 active:scale-95",
+              showMore || isMoreActive
+                ? "text-lantern bg-lantern/10"
+                : "text-moon-faint active:text-moon active:bg-night-soft"
+            )}
+          >
+            <MoreHorizontal
+              className={cn(
+                "w-[22px] h-[22px] mb-0.5",
+                (showMore || isMoreActive) && "drop-shadow-[0_0_8px_rgba(232,168,87,0.4)]"
+              )}
+              strokeWidth={showMore || isMoreActive ? 2 : 1.5}
+            />
+            <span className={cn((showMore || isMoreActive) && "font-semibold")}>More</span>
+          </button>
+        </div>
+      </nav>
+    </>
   );
 }
 
@@ -139,12 +259,12 @@ function MobileNavFallback({ className }: MobileNavProps) {
       )}
     >
       <div className="flex justify-around items-center px-1 py-1">
-        {navItems.map((item) => {
+        {[...mainNavItems, { href: "#more", label: "More", icon: MoreHorizontal }].map((item) => {
           const Icon = item.icon;
           return (
             <div
               key={item.href}
-              className="flex flex-col items-center justify-center min-w-[56px] min-h-[52px] py-2 px-2 text-moon-faint"
+              className="flex flex-col items-center justify-center min-w-[64px] min-h-[52px] py-2 px-2 text-moon-faint"
             >
               <Icon className="w-[22px] h-[22px] mb-0.5" strokeWidth={1.5} />
               <span className="text-[0.625rem] font-medium tracking-wide">{item.label}</span>

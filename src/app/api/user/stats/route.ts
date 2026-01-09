@@ -17,6 +17,7 @@ export async function GET() {
         totalPoints: true,
         level: true,
         streakFreezes: true,
+        maxMitCount: true,
         streaks: true,
         earnedBadges: {
           include: {
@@ -101,6 +102,7 @@ export async function GET() {
       pointsToNextLevel,
       levelProgress,
       streakFreezes: user.streakFreezes,
+      maxMitCount: user.maxMitCount,
       streaks: user.streaks,
       badges: user.earnedBadges,
       todayStats,

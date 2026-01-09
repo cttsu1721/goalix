@@ -16,13 +16,17 @@ export async function GET(request: NextRequest) {
     const level = searchParams.get("level") as GoalLevel | null;
     const parentId = searchParams.get("parentId");
     const status = searchParams.get("status") as GoalStatus | null;
+    const includeArchived = searchParams.get("includeArchived") === "true";
 
     // Default to sevenYear if no level specified
     const goalLevel = level || "sevenYear";
 
     let goals;
+    // By default, exclude archived goals unless specifically requested
     const where = {
-      ...(status && { status }),
+      ...(status
+        ? { status }
+        : !includeArchived && { status: { not: "ARCHIVED" as GoalStatus } }),
     };
 
     switch (goalLevel) {

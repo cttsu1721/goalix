@@ -1,6 +1,8 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { PointsExplainer } from "./PointsExplainer";
+import { LEVELS } from "@/types/gamification";
 
 interface LevelProgressProps {
   levelName: string;
@@ -17,10 +19,16 @@ export function LevelProgress({
 }: LevelProgressProps) {
   const percentage = Math.min((currentXp / requiredXp) * 100, 100);
 
+  // Derive level number from level name
+  const currentLevel = LEVELS.find((l) => l.name === levelName)?.level || 1;
+
   return (
     <div className={cn("mb-9", className)}>
-      <div className="text-[0.6875rem] font-normal uppercase tracking-[0.15em] text-moon-faint mb-4">
-        Level
+      <div className="flex items-center justify-between mb-4">
+        <div className="text-[0.6875rem] font-normal uppercase tracking-[0.15em] text-moon-faint">
+          Level
+        </div>
+        <PointsExplainer currentLevel={currentLevel} currentPoints={currentXp} />
       </div>
       <div className="flex justify-between items-baseline mb-3">
         <span className="text-base font-normal text-moon">{levelName}</span>

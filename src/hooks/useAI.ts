@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { GoalSharpenResponse, TaskSuggestResponse, GoalSuggestResponse } from "@/lib/ai/schemas";
-import type { GoalLevelForSuggestion } from "@/lib/ai/prompts";
+import type { GoalSharpenResponse, TaskSuggestResponse, GoalSuggestResponse, GoalLinkSuggestResponse } from "@/lib/ai/schemas";
+import type { GoalLevelForSuggestion, GoalForLinking } from "@/lib/ai/prompts";
 
 interface AIUsage {
   remaining: number;
@@ -23,6 +23,12 @@ interface SuggestResult {
 interface GoalSuggestResult {
   success: boolean;
   data: GoalSuggestResponse;
+  usage: AIUsage;
+}
+
+interface GoalLinkSuggestResult {
+  success: boolean;
+  data: GoalLinkSuggestResponse;
   usage: AIUsage;
 }
 
@@ -141,6 +147,39 @@ export function useGoalSuggest() {
       if (!res.ok) {
         const error = await res.json();
         throw new Error(error.error || "Failed to suggest goals");
+      }
+
+      return res.json();
+    },
+    onSuccess: (data) => {
+      // Update AI usage in cache
+      queryClient.setQueryData(["ai", "usage"], data.usage);
+    },
+  });
+}
+
+// Goal Link Suggester mutation - suggests a goal to link to a task based on title
+export function useGoalLinkSuggest() {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    GoalLinkSuggestResult,
+    Error,
+    {
+      taskTitle: string;
+      goals: GoalForLinking[];
+    }
+  >({
+    mutationFn: async ({ taskTitle, goals }) => {
+      const res = await fetch("/api/ai/suggest-goal-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ taskTitle, goals }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to suggest goal link");
       }
 
       return res.json();

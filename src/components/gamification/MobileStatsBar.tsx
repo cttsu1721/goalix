@@ -82,8 +82,13 @@ export function MobileStatsBar({
           </span>
         </div>
 
-        {/* Arrow indicating tap for more */}
-        <ChevronRight className="w-4 h-4 text-moon-faint flex-shrink-0" />
+        {/* View Stats indicator */}
+        <div className="flex items-center gap-1 flex-shrink-0">
+          <span className="text-[0.625rem] text-moon-faint hidden sm:inline">
+            View Stats
+          </span>
+          <ChevronRight className="w-4 h-4 text-moon-faint" />
+        </div>
       </div>
     </Link>
   );

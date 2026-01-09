@@ -19,6 +19,8 @@ import {
   Target,
   Circle,
   Loader2,
+  Star,
+  CircleDot,
 } from "lucide-react";
 import type { TaskPriority, TaskStatus } from "@prisma/client";
 
@@ -99,31 +101,36 @@ function TaskRow({
       )}
       style={{ animationDelay: `${index * 50}ms` }}
     >
-      {/* Completion checkbox */}
+      {/* Completion checkbox - 44px touch target with 24px visual */}
       <button
         onClick={onComplete}
         disabled={isCompleting}
-        className={cn(
-          "relative flex-shrink-0 w-6 h-6 rounded-lg border-2 transition-all duration-300",
-          "flex items-center justify-center mt-0.5",
-          "hover:scale-110 active:scale-95",
-          completed
-            ? "bg-zen-green border-zen-green"
-            : isMit
-            ? "border-lantern hover:border-lantern-soft hover:bg-lantern/10"
-            : "border-night-glow hover:border-moon-dim"
-        )}
+        className="flex-shrink-0 w-11 h-11 -m-2 flex items-center justify-center"
+        aria-label={completed ? "Mark as incomplete" : "Mark as complete"}
       >
-        {isCompleting ? (
-          <Loader2 className="w-3.5 h-3.5 animate-spin text-moon-dim" />
-        ) : completed ? (
-          <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
-        ) : null}
+        <div
+          className={cn(
+            "relative w-6 h-6 rounded-lg border-2 transition-all duration-300",
+            "flex items-center justify-center",
+            "hover:scale-110 active:scale-95",
+            completed
+              ? "bg-zen-green border-zen-green"
+              : isMit
+              ? "border-lantern hover:border-lantern-soft hover:bg-lantern/10"
+              : "border-night-glow hover:border-moon-dim"
+          )}
+        >
+          {isCompleting ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin text-moon-dim" />
+          ) : completed ? (
+            <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
+          ) : null}
 
-        {/* Ripple effect on completion */}
-        {completed && (
-          <span className="absolute inset-0 rounded-lg animate-ping bg-zen-green/30" />
-        )}
+          {/* Ripple effect on completion */}
+          {completed && (
+            <span className="absolute inset-0 rounded-lg animate-ping bg-zen-green/30" />
+          )}
+        </div>
       </button>
 
       {/* Task content - clickable for edit */}
@@ -167,16 +174,22 @@ function TaskRow({
         )}
       </button>
 
-      {/* Priority indicator dot */}
+      {/* Priority indicator with icon */}
       <div
         className={cn(
-          "flex-shrink-0 w-2 h-2 rounded-full mt-2",
-          isMit && "bg-lantern",
-          isPrimary && !isMit && "bg-zen-green/60",
-          !isMit && !isPrimary && "bg-moon-dim/40",
+          "flex-shrink-0 mt-1.5",
           completed && "opacity-40"
         )}
-      />
+        title={isMit ? "MIT" : isPrimary ? "Primary" : "Secondary"}
+      >
+        {isMit ? (
+          <Sparkles className="w-3.5 h-3.5 text-lantern" />
+        ) : isPrimary ? (
+          <Star className="w-3.5 h-3.5 text-zen-green" />
+        ) : (
+          <CircleDot className="w-3.5 h-3.5 text-moon-dim/60" />
+        )}
+      </div>
     </div>
   );
 }

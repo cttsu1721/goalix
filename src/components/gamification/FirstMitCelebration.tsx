@@ -25,12 +25,14 @@ interface FirstMitCelebrationProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   pointsEarned?: number;
+  visionQuote?: string; // Optional vision title to show
 }
 
 export function FirstMitCelebration({
   open,
   onOpenChange,
   pointsEarned = 100,
+  visionQuote,
 }: FirstMitCelebrationProps) {
   const [step, setStep] = useState(0);
 
@@ -66,10 +68,18 @@ export function FirstMitCelebration({
       title: "Your First MIT!",
       subtitle: `+${pointsEarned} points earned`,
       content: (
-        <p className="text-moon-soft text-center">
-          You just completed your Most Important Task — the single action that
-          moves you closest to your goals.
-        </p>
+        <div className="space-y-4">
+          <p className="text-moon-soft text-center">
+            You just completed your Most Important Task — the single action that
+            moves you closest to your goals.
+          </p>
+          {visionQuote && (
+            <div className="p-4 bg-night-soft rounded-xl border-l-2 border-zen-purple">
+              <p className="text-xs text-moon-faint mb-1">Your Vision:</p>
+              <p className="text-sm text-moon italic">&quot;{visionQuote}&quot;</p>
+            </div>
+          )}
+        </div>
       ),
     },
     {

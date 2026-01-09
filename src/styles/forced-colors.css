@@ -1,0 +1,240 @@
+/**
+ * Forced Colors Mode Support (Windows High Contrast)
+ *
+ * This stylesheet ensures the app remains usable when
+ * Windows High Contrast mode is enabled.
+ */
+
+@media (forced-colors: active) {
+  /* Ensure all text is visible */
+  body,
+  p,
+  span,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  label {
+    forced-color-adjust: auto;
+  }
+
+  /* Buttons need visible borders */
+  button,
+  [role="button"],
+  .btn,
+  a {
+    border: 1px solid ButtonText !important;
+  }
+
+  button:focus,
+  [role="button"]:focus,
+  a:focus {
+    outline: 2px solid Highlight !important;
+    outline-offset: 2px;
+  }
+
+  button:disabled,
+  [role="button"]:disabled {
+    border-color: GrayText !important;
+    color: GrayText !important;
+  }
+
+  /* Checkboxes and radio buttons */
+  input[type="checkbox"],
+  input[type="radio"] {
+    forced-color-adjust: auto;
+    border: 1px solid ButtonText !important;
+  }
+
+  input[type="checkbox"]:checked,
+  input[type="radio"]:checked {
+    background-color: Highlight !important;
+    border-color: Highlight !important;
+  }
+
+  /* Custom checkbox indicators */
+  .checkbox-indicator {
+    border: 2px solid ButtonText !important;
+  }
+
+  .checkbox-indicator[data-state="checked"] {
+    background-color: Highlight !important;
+    border-color: Highlight !important;
+  }
+
+  /* Progress bars */
+  .progress-bar,
+  [role="progressbar"] {
+    border: 1px solid ButtonText !important;
+  }
+
+  .progress-bar-fill,
+  [role="progressbar"] > div {
+    background-color: Highlight !important;
+  }
+
+  /* Form inputs */
+  input,
+  textarea,
+  select {
+    border: 1px solid ButtonText !important;
+    background: Canvas !important;
+    color: CanvasText !important;
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: 2px solid Highlight !important;
+    outline-offset: 2px;
+  }
+
+  /* Cards and containers */
+  .card,
+  [role="region"],
+  [role="group"],
+  .bg-night,
+  .bg-night-soft {
+    border: 1px solid ButtonText !important;
+  }
+
+  /* Dialogs and modals */
+  [role="dialog"],
+  [role="alertdialog"],
+  .modal,
+  .dialog {
+    border: 2px solid ButtonText !important;
+    background: Canvas !important;
+  }
+
+  /* Links */
+  a {
+    color: LinkText !important;
+    text-decoration: underline !important;
+  }
+
+  a:visited {
+    color: VisitedText !important;
+  }
+
+  /* Selection */
+  ::selection {
+    background-color: Highlight !important;
+    color: HighlightText !important;
+  }
+
+  /* SVG icons */
+  svg {
+    forced-color-adjust: auto;
+  }
+
+  svg path,
+  svg circle,
+  svg rect {
+    stroke: currentColor;
+    fill: currentColor;
+  }
+
+  /* Badges and tags */
+  .badge,
+  [role="status"] {
+    border: 1px solid ButtonText !important;
+  }
+
+  /* Toast notifications */
+  [role="alert"],
+  .toast {
+    border: 2px solid ButtonText !important;
+    background: Canvas !important;
+  }
+
+  /* Navigation */
+  nav a,
+  nav button {
+    border: none !important;
+  }
+
+  nav a[aria-current="page"],
+  nav button[aria-current="page"],
+  .nav-active {
+    border: 2px solid Highlight !important;
+    background: Highlight !important;
+    color: HighlightText !important;
+  }
+
+  /* Tabs */
+  [role="tab"] {
+    border: 1px solid ButtonText !important;
+  }
+
+  [role="tab"][aria-selected="true"] {
+    background: Highlight !important;
+    color: HighlightText !important;
+    border-color: Highlight !important;
+  }
+
+  /* Tooltips */
+  [role="tooltip"] {
+    border: 1px solid ButtonText !important;
+    background: Canvas !important;
+    color: CanvasText !important;
+  }
+
+  /* Drag and drop indicators */
+  .drop-target,
+  [aria-dropeffect] {
+    outline: 2px dashed Highlight !important;
+  }
+
+  /* Focus visible for keyboard navigation */
+  :focus-visible {
+    outline: 2px solid Highlight !important;
+    outline-offset: 2px;
+  }
+
+  /* Remove decorative borders in high contrast */
+  .border-decorative,
+  .divider {
+    border-color: ButtonText !important;
+  }
+
+  /* Ensure streaks and gamification elements are visible */
+  .streak-flame,
+  .badge-icon,
+  .level-indicator {
+    border: 1px solid ButtonText !important;
+  }
+
+  /* Goal hierarchy connections */
+  .goal-connector,
+  .hierarchy-line {
+    background-color: ButtonText !important;
+  }
+
+  /* Swipe gesture indicators - make them visible */
+  .swipe-indicator {
+    background-color: Highlight !important;
+    border: 2px solid HighlightText !important;
+  }
+}
+
+/**
+ * Reduced transparency for forced colors
+ * Some users with forced colors also prefer reduced transparency
+ */
+@media (forced-colors: active), (prefers-reduced-transparency: reduce) {
+  .glass,
+  .backdrop-blur,
+  [class*="bg-opacity-"],
+  [class*="/10"],
+  [class*="/20"],
+  [class*="/30"],
+  [class*="/40"],
+  [class*="/50"] {
+    backdrop-filter: none !important;
+    background-color: Canvas !important;
+    opacity: 1 !important;
+  }
+}

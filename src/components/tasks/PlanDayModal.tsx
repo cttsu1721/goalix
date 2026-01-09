@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useGoals, useCreateTask } from "@/hooks";
-import { ArrowRight, ArrowLeft, Plus, X, Sparkles, Check } from "lucide-react";
+import { ArrowRight, ArrowLeft, Plus, X, Sparkles, Check, Star, CircleDot } from "lucide-react";
 import type { TaskPriority } from "@prisma/client";
 
 interface PlanDayModalProps {
@@ -207,13 +207,17 @@ export function PlanDayModal({
       className="flex items-center gap-3 p-3 bg-night-soft rounded-xl border border-night-glow group"
     >
       <div
-        className={cn(
-          "w-2 h-2 rounded-full flex-shrink-0",
-          task.priority === "MIT" && "bg-lantern",
-          task.priority === "PRIMARY" && "bg-zen-green",
-          task.priority === "SECONDARY" && "bg-moon-dim"
+        className="flex-shrink-0"
+        title={task.priority === "MIT" ? "MIT" : task.priority === "PRIMARY" ? "Primary" : "Secondary"}
+      >
+        {task.priority === "MIT" ? (
+          <Sparkles className="w-3.5 h-3.5 text-lantern" />
+        ) : task.priority === "PRIMARY" ? (
+          <Star className="w-3.5 h-3.5 text-zen-green" />
+        ) : (
+          <CircleDot className="w-3.5 h-3.5 text-moon-dim" />
         )}
-      />
+      </div>
       <span className="flex-1 text-moon text-sm truncate">{task.title}</span>
       <button
         onClick={() => removeTask(task.id)}

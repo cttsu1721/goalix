@@ -3,8 +3,10 @@
 import { memo, useCallback, useState } from "react";
 import { cn } from "@/lib/utils";
 import { haptics } from "@/lib/haptics";
-import { Check, ChevronRight, AlertTriangle, Target, Link2Off, X, GripVertical } from "lucide-react";
-import { useSwipeGesture } from "@/hooks";
+import { Check, ChevronRight, AlertTriangle, Target, Link2Off, X, GripVertical, ArrowUp } from "lucide-react";
+import { useSwipeGesture, useReducedMotion } from "@/hooks";
+import { TaskNotePreview } from "./TaskNotePreview";
+import { Button } from "@/components/ui/button";
 
 // Format overdue date to show relative time (e.g., "Dec 30" or "Yesterday")
 function formatOverdueDate(dateString: string): string {
@@ -31,6 +33,11 @@ interface GoalChain {
     id: string;
     title: string;
   } | null;
+  sevenYearVision?: {
+    id: string;
+    title: string;
+    description?: string | null;
+  } | null;
 }
 
 interface TaskItemProps {
@@ -44,11 +51,13 @@ interface TaskItemProps {
     scheduledDate?: string;
     goalChain?: GoalChain;
     priority?: "MIT" | "PRIMARY" | "SECONDARY";
+    notes?: string | null;
   };
   onToggle?: () => void;
   onEdit?: () => void;
   onDragStart?: (taskId: string, title: string, priority: "PRIMARY" | "SECONDARY") => void;
   onDragEnd?: () => void;
+  onPromoteToMit?: (task: { id: string; title: string; priority: "PRIMARY" | "SECONDARY" }) => void;
   draggable?: boolean;
   className?: string;
 }
@@ -59,10 +68,12 @@ export const TaskItem = memo(function TaskItem({
   onEdit,
   onDragStart,
   onDragEnd,
+  onPromoteToMit,
   draggable = false,
   className
 }: TaskItemProps) {
   const [isDragging, setIsDragging] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
 
   const { ref, offset, isSwiping, direction, progress } = useSwipeGesture<HTMLDivElement>({
     threshold: 80,
@@ -261,55 +272,77 @@ export const TaskItem = memo(function TaskItem({
         </button>
 
         {/* Content - tap to edit */}
-        <button
-          tabIndex={-1}
-          className="flex-1 text-left min-w-0"
-          onClick={onEdit}
-        >
-          <div
-            className={cn(
-              "text-[0.9375rem] font-normal mb-0.5 truncate",
-              task.completed
-                ? "line-through text-moon-faint"
-                : "text-moon"
-            )}
+        <div className="flex-1 min-w-0">
+          <button
+            tabIndex={-1}
+            className="w-full text-left"
+            onClick={onEdit}
           >
-            {task.title}
-          </div>
-          <div className="text-xs text-moon-faint truncate flex items-center gap-1.5">
-            {task.isOverdue && !task.completed && (
-              <>
-                <AlertTriangle className="w-3 h-3 text-zen-red flex-shrink-0" />
-                <span className="text-zen-red">
-                  {task.scheduledDate ? formatOverdueDate(task.scheduledDate) : "Overdue"}
-                </span>
-                <span className="text-moon-faint/50">·</span>
-              </>
-            )}
-            {/* Goal Chain or Standalone indicator */}
-            {task.goalChain?.weeklyGoal ? (
-              <>
-                <Target className="w-3 h-3 text-zen-green flex-shrink-0" />
-                <span className="text-moon-dim truncate">
-                  {task.goalChain.weeklyGoal.title}
-                  {task.goalChain.oneYearGoal && (
-                    <span className="text-lantern/60"> → {task.goalChain.oneYearGoal.title}</span>
-                  )}
-                </span>
-              </>
-            ) : (
-              <>
-                <Link2Off className="w-3 h-3 text-moon-faint/50 flex-shrink-0" />
-                <span className="text-moon-faint/70">Standalone</span>
-                <span className="text-moon-faint/30">·</span>
-                <span>{task.category}</span>
-              </>
-            )}
-          </div>
-        </button>
+            <div
+              className={cn(
+                "text-[0.9375rem] font-normal mb-0.5 truncate",
+                task.completed
+                  ? "line-through text-moon-faint"
+                  : "text-moon"
+              )}
+            >
+              {task.title}
+            </div>
+            <div className="text-xs text-moon-faint truncate flex items-center gap-1.5">
+              {task.isOverdue && !task.completed && (
+                <>
+                  <AlertTriangle className="w-3 h-3 text-zen-red flex-shrink-0" />
+                  <span className="text-zen-red">
+                    {task.scheduledDate ? formatOverdueDate(task.scheduledDate) : "Overdue"}
+                  </span>
+                  <span className="text-moon-faint/50">·</span>
+                </>
+              )}
+              {/* Goal Chain or Standalone indicator */}
+              {task.goalChain?.weeklyGoal ? (
+                <>
+                  <Target className="w-3 h-3 text-zen-green flex-shrink-0" />
+                  <span className="text-moon-dim truncate">
+                    {task.goalChain.weeklyGoal.title}
+                    {task.goalChain.oneYearGoal && (
+                      <span className="text-lantern/60"> → {task.goalChain.oneYearGoal.title}</span>
+                    )}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <Link2Off className="w-3 h-3 text-moon-faint/50 flex-shrink-0" />
+                  <span className="text-moon-faint/70">Standalone</span>
+                  <span className="text-moon-faint/30">·</span>
+                  <span>{task.category}</span>
+                </>
+              )}
+            </div>
+          </button>
+          {/* Note preview */}
+          {task.notes && <TaskNotePreview note={task.notes} />}
+        </div>
 
         {/* Points + Edit indicator */}
         <div className="flex items-center gap-2 flex-shrink-0">
+          {/* Promote to MIT button - shown for reduced motion users as fallback for drag */}
+          {prefersReducedMotion && canDrag && onPromoteToMit && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                const priority = task.priority as "PRIMARY" | "SECONDARY";
+                onPromoteToMit({ id: task.id, title: task.title, priority });
+                haptics.tap();
+              }}
+              className="h-8 px-2 text-xs text-moon-dim hover:text-lantern hover:bg-lantern/10"
+              title="Promote to MIT"
+            >
+              <ArrowUp className="w-3.5 h-3.5 mr-1" />
+              MIT
+            </Button>
+          )}
           <span
             className={cn(
               "text-sm font-medium tabular-nums",

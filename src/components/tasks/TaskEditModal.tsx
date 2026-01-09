@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useUpdateTask, useDeleteTask, useGoals, useUnsavedChanges } from "@/hooks";
+import { useUpdateTask, useDeleteTask, useGoals, useUnsavedChanges, scrollInputIntoView } from "@/hooks";
 import {
   Dialog,
   DialogContent,
@@ -25,6 +25,7 @@ import { Loader2, Save, Trash2, Clock, AlertCircle, CalendarDays } from "lucide-
 import { cn } from "@/lib/utils";
 import type { TaskPriority, TaskStatus, GoalCategory } from "@prisma/client";
 import { GoalSelector } from "@/components/goals";
+import { SubtaskList } from "./SubtaskList";
 import { formatLocalDate } from "@/lib/utils";
 
 interface Task {
@@ -180,6 +181,7 @@ function TaskEditForm({ task, onClose }: { task: Task; onClose: () => void }) {
           id="edit-title"
           value={title}
           onChange={(e) => { setTitle(e.target.value); markChanged(); }}
+          onFocus={scrollInputIntoView}
           placeholder="What do you need to do?"
           className="bg-night-soft border-night-mist text-moon placeholder:text-moon-faint focus:border-lantern focus:ring-lantern/20"
         />
@@ -255,10 +257,16 @@ function TaskEditForm({ task, onClose }: { task: Task; onClose: () => void }) {
           id="edit-description"
           value={description}
           onChange={(e) => { setDescription(e.target.value); markChanged(); }}
+          onFocus={scrollInputIntoView}
           placeholder="Add details or notes..."
           rows={3}
           className="bg-night-soft border-night-mist text-moon placeholder:text-moon-faint focus:border-lantern focus:ring-lantern/20 resize-none"
         />
+      </div>
+
+      {/* Subtasks */}
+      <div className="p-4 rounded-lg bg-night-soft/30 border border-night-mist">
+        <SubtaskList taskId={task.id} onSubtaskChange={markChanged} />
       </div>
 
       {/* Scheduled Date */}

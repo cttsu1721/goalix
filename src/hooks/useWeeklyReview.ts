@@ -141,3 +141,53 @@ export function useSubmitWeeklyReview() {
     },
   });
 }
+
+// Review history types for timeline (8.4)
+interface ReviewHistoryItem {
+  id: string;
+  weekNumber?: number;
+  month?: number;
+  year: number;
+  createdAt: string;
+  completedAt?: string | null;
+  wins?: string | null;
+  challenges?: string | null;
+  focusAreas?: string | null;
+  reflections?: string | null;
+  insights?: string | null;
+  rating?: number | null;
+}
+
+interface ReviewHistoryResponse {
+  reviews: ReviewHistoryItem[];
+  total: number;
+  hasMore: boolean;
+}
+
+// Fetch review history for timeline view (8.4)
+export function useReviewHistory(type: "weekly" | "monthly" = "weekly", limit = 20) {
+  return useQuery<ReviewHistoryResponse>({
+    queryKey: ["review", "history", type, limit],
+    queryFn: async () => {
+      const res = await fetch(`/api/review/history?type=${type}&limit=${limit}`);
+      if (!res.ok) {
+        throw new Error(`Failed to fetch ${type} review history`);
+      }
+      return res.json();
+    },
+    staleTime: 2 * 60 * 1000, // 2 minutes
+  });
+}
+
+// Fetch both weekly and monthly reviews for combined timeline
+export function useAllReviewHistory(limit = 20) {
+  const weeklyQuery = useReviewHistory("weekly", limit);
+  const monthlyQuery = useReviewHistory("monthly", limit);
+
+  return {
+    weeklyReviews: weeklyQuery.data?.reviews || [],
+    monthlyReviews: monthlyQuery.data?.reviews || [],
+    isLoading: weeklyQuery.isLoading || monthlyQuery.isLoading,
+    error: weeklyQuery.error || monthlyQuery.error,
+  };
+}
