@@ -56,23 +56,6 @@ export function isStreakActive(
 }
 
 /**
- * Check if a date was N days ago
- */
-function isDaysAgo(date: Date | null, days: number, timezone: string = "UTC"): boolean {
-  if (!date) return false;
-
-  const now = new Date();
-  const targetStart = new Date(now.toLocaleString("en-US", { timeZone: timezone }));
-  targetStart.setDate(targetStart.getDate() - days);
-  targetStart.setHours(0, 0, 0, 0);
-
-  const actionDate = new Date(date.toLocaleString("en-US", { timeZone: timezone }));
-  actionDate.setHours(0, 0, 0, 0);
-
-  return actionDate.getTime() === targetStart.getTime();
-}
-
-/**
  * Check how many days ago the last action was
  */
 function daysSinceAction(date: Date | null, timezone: string = "UTC"): number {

@@ -18,7 +18,6 @@ import {
   Dumbbell,
   Loader2,
   Check,
-  X,
 } from "lucide-react";
 import {
   KAIZEN_AREAS,

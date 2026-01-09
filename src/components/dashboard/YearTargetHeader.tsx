@@ -39,22 +39,10 @@ interface WeeklyGoal {
 interface YearTargetHeaderProps {
   oneYearGoal?: OneYearGoal | null;
   weeklyGoal?: WeeklyGoal | null;
-  tasksCompleted?: number;
   tasksTotal?: number;
   goalAlignedTasks?: number;
   className?: string;
 }
-
-const CATEGORY_COLORS: Record<GoalCategory, string> = {
-  HEALTH: "text-zen-green",
-  WEALTH: "text-lantern",
-  RELATIONSHIPS: "text-zen-red",
-  CAREER: "text-zen-blue",
-  PERSONAL_GROWTH: "text-zen-purple",
-  LIFESTYLE: "text-moon-soft",
-  LIFE_MAINTENANCE: "text-moon-faint",
-  OTHER: "text-moon-dim",
-};
 
 const CATEGORY_BG: Record<GoalCategory, string> = {
   HEALTH: "bg-zen-green/10 border-zen-green/20",
@@ -70,7 +58,6 @@ const CATEGORY_BG: Record<GoalCategory, string> = {
 export function YearTargetHeader({
   oneYearGoal,
   weeklyGoal,
-  tasksCompleted = 0,
   tasksTotal = 0,
   goalAlignedTasks = 0,
   className,
@@ -102,7 +89,6 @@ export function YearTargetHeader({
     );
   }
 
-  const categoryColor = CATEGORY_COLORS[oneYearGoal.category];
   const categoryBg = CATEGORY_BG[oneYearGoal.category];
   const progress = oneYearGoal.progress || 0;
   const alignmentPercent = tasksTotal > 0 ? Math.round((goalAlignedTasks / tasksTotal) * 100) : 0;

@@ -59,7 +59,7 @@ export function GoalSharpenModal({
         category: goalCategory,
       });
       setResult(response.data);
-    } catch (error) {
+    } catch {
       // Error handled by mutation
     }
   };

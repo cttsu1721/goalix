@@ -8,7 +8,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { MitCard, TaskList, shouldShowCarryOverPrompt } from "@/components/tasks";
 import { StatsPanel } from "@/components/gamification/StatsPanel";
 import { MobileStatsBar } from "@/components/gamification/MobileStatsBar";
-import { YearTargetHeader, DayNavigation, SwipeContainer, MotivationalQuote } from "@/components/dashboard";
+import { YearTargetHeader, DayNavigation, MotivationalQuote } from "@/components/dashboard";
 import { ReviewDuePromptAuto } from "@/components/review";
 import { useMobileView } from "@/hooks/useMobileView";
 
@@ -372,20 +372,24 @@ export default function DashboardPage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Day navigation handlers for mobile swipe
-  const handleSwipeLeft = useCallback(() => {
+  // Day navigation handlers for mobile swipe (kept for future use)
+  const _handleSwipeLeft = useCallback(() => {
     // Swipe left = next day
     const nextDay = new Date(selectedDate);
     nextDay.setDate(nextDay.getDate() + 1);
     setSelectedDate(nextDay);
   }, [selectedDate]);
 
-  const handleSwipeRight = useCallback(() => {
+  const _handleSwipeRight = useCallback(() => {
     // Swipe right = previous day
     const prevDay = new Date(selectedDate);
     prevDay.setDate(prevDay.getDate() - 1);
     setSelectedDate(prevDay);
   }, [selectedDate]);
+
+  // Suppress unused variable warnings (these are for future swipe functionality)
+  void _handleSwipeLeft;
+  void _handleSwipeRight;
 
   // Uncomplete a task (revert to pending)
   const uncompleteTask = useCallback(async (taskId: string) => {

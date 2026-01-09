@@ -345,7 +345,7 @@ function ReviewWizard({ weekData, streaks, onComplete, initialMode = "review" }:
       }
 
       onComplete();
-    } catch (error) {
+    } catch {
       toast.error("Failed to submit review. Please try again.");
     }
   };

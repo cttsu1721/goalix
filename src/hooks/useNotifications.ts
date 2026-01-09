@@ -92,7 +92,7 @@ export function useNotifications(): UseNotificationsReturn {
 
       try {
         new Notification(title, defaultOptions);
-      } catch (error) {
+      } catch {
         // Fallback for when Notification constructor fails (e.g., in SW context)
         if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
           navigator.serviceWorker.ready.then((registration) => {

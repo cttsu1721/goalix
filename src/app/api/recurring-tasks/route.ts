@@ -4,16 +4,6 @@ import { prisma } from "@/lib/db";
 import { RecurrencePattern, TaskPriority } from "@prisma/client";
 import { parseLocalDate } from "@/lib/utils";
 
-const DAY_MAP: Record<string, number> = {
-  SUN: 0,
-  MON: 1,
-  TUE: 2,
-  WED: 3,
-  THU: 4,
-  FRI: 5,
-  SAT: 6,
-};
-
 // GET /api/recurring-tasks - List recurring task templates
 export async function GET(request: NextRequest) {
   try {

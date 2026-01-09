@@ -1,14 +1,13 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { format, parseISO, startOfWeek, startOfMonth } from "date-fns";
+import { format, parseISO } from "date-fns";
 import Link from "next/link";
 import {
   Calendar,
   ChevronDown,
   ChevronRight,
   CheckCircle2,
-  XCircle,
   FileText,
   TrendingUp,
   Star,
@@ -154,7 +153,7 @@ export function ReviewTimeline({
                 {group.monthLabel}
               </h3>
               <div className="space-y-2 ml-2 border-l-2 border-night-mist pl-4">
-                {group.items.map((item, index) => (
+                {group.items.map((item) => (
                   <ReviewTimelineItem
                     key={`${item.type}-${item.data.id}`}
                     type={item.type}

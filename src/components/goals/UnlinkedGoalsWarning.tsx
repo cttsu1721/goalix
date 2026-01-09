@@ -10,14 +10,6 @@ import { useUnlinkedGoals } from "@/hooks";
 // API level types
 type GoalLevel = "threeYear" | "oneYear" | "monthly" | "weekly";
 
-interface UnlinkedGoal {
-  id: string;
-  title: string;
-  level: GoalLevel;
-  category: string;
-  status: string;
-}
-
 interface UnlinkedGoalsWarningProps {
   className?: string;
 }

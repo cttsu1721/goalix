@@ -16,9 +16,7 @@ import {
   CalendarDays,
   CheckSquare,
   ChevronDown,
-  ArrowRight,
   Sparkles,
-  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 

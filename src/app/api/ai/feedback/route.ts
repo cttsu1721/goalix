@@ -75,7 +75,8 @@ export async function POST(request: NextRequest) {
 }
 
 // GET /api/ai/feedback/stats - Get feedback statistics (for admin/analytics)
-export async function GET(request: NextRequest) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function GET(_request: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user?.id) {

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRight, Home, Sparkles, Target, Calendar, Layers, CheckCircle2 } from "lucide-react";
+import { ChevronRight, Home } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { GoalLevel } from "@/types/goals";
 
@@ -16,14 +16,6 @@ interface GoalBreadcrumbProps {
   currentTitle: string;
   currentLevel: GoalLevel;
 }
-
-const LEVEL_ICONS: Record<GoalLevel, React.ReactNode> = {
-  sevenYear: <Sparkles className="w-3.5 h-3.5" />,
-  threeYear: <Target className="w-3.5 h-3.5" />,
-  oneYear: <Calendar className="w-3.5 h-3.5" />,
-  monthly: <Layers className="w-3.5 h-3.5" />,
-  weekly: <CheckCircle2 className="w-3.5 h-3.5" />,
-};
 
 const LEVEL_LABELS: Record<GoalLevel, string> = {
   sevenYear: "7Y",

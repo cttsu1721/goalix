@@ -6,7 +6,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { GoalCard, GoalCategoryBadge, GoalCreateModal, GoalEditModal, GoalBreadcrumb, SiblingGoalsSection } from "@/components/goals";
 import { Button } from "@/components/ui/button";
 import { useGoal, useUpdateGoal, useDeleteGoal } from "@/hooks";
-import { GOAL_CATEGORY_LABELS, GOAL_STATUS_LABELS } from "@/types/goals";
+import { GOAL_STATUS_LABELS } from "@/types/goals";
 import type { GoalLevel } from "@/types/goals";
 import type { GoalCategory, GoalStatus } from "@prisma/client";
 import {

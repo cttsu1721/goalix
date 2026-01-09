@@ -1001,3 +1001,129 @@ Or for errors:
 - Mobile components: See `MobileStatsBar.tsx` for responsive pattern
 - Celebration modals: See `LevelUpModal.tsx` and `BadgeEarnedModal.tsx`
 - Review prompts: See `weekly/page.tsx` and `monthly/page.tsx`
+
+---
+
+## Code Quality & CAPAs
+
+### Pre-commit Hooks (Enforced)
+
+**All commits are blocked if lint fails.** This is enforced via husky + lint-staged.
+
+```bash
+# Runs automatically on git commit
+npx lint-staged  # Lints only staged .ts/.tsx files with --max-warnings=0
+```
+
+**Configuration:**
+- `.husky/pre-commit` — Runs `npx lint-staged`
+- `package.json` → `lint-staged` — Elevates `@typescript-eslint/no-unused-vars` to error level
+
+**Strategy:** The hook specifically targets unused variables (the most common issue) while allowing other warnings to be addressed separately. This prevents the "broken window" effect without blocking all commits for React Compiler suggestions.
+
+### Corrective and Preventive Actions (CAPAs)
+
+These are permanent coding standards to prevent recurring issues.
+
+#### CAPA-001: Unused Variables and Imports
+
+**Root Cause:** Code drift during iterative development — imports/variables added but not cleaned up after refactoring.
+
+**Preventive Actions:**
+1. **Pre-commit hook** blocks commits with unused variables (enforced)
+2. **IDE setup:** Enable "Organize Imports on Save" in VS Code
+3. **Review checklist:** Before committing, run `npm run lint` locally
+4. **Refactoring rule:** When removing code, trace back and remove supporting imports/variables
+
+**Patterns to avoid:**
+```typescript
+// BAD: Unused import
+import { useState, useEffect } from "react"; // useEffect never used
+
+// BAD: Unused map index
+items.map((item, index) => <div>{item}</div>)  // index never used
+
+// BAD: Unused catch variable
+try { ... } catch (error) { console.log("failed") }  // error never used
+
+// BAD: Speculative props
+interface Props {
+  onSave: () => void;
+  onCancel?: () => void;  // Added "just in case" but never implemented
+}
+```
+
+**Correct patterns:**
+```typescript
+// GOOD: Only import what's used
+import { useState } from "react";
+
+// GOOD: Omit unused parameters
+items.map((item) => <div>{item}</div>)
+
+// GOOD: Omit unused catch variable
+try { ... } catch { console.log("failed") }
+
+// GOOD: Only add props when implementing
+interface Props {
+  onSave: () => void;
+  // Add onCancel when actually needed
+}
+```
+
+#### CAPA-002: Interface/Type Hygiene
+
+**Rule:** Interface props must match component destructuring. Remove unused props from both.
+
+```typescript
+// When refactoring, update BOTH:
+interface Props {
+  // Remove unused props here
+}
+
+function Component({
+  // AND remove from destructuring here
+}: Props) {}
+```
+
+#### CAPA-003: Constants and Helper Functions
+
+**Rule:** Delete unused constants and helper functions immediately. Don't keep "for later."
+
+**Rationale:** "Later" often never comes, and orphaned code creates confusion and lint errors.
+
+#### CAPA-004: Next.js API Route Handlers
+
+**Pattern:** When API route handler doesn't use `request`, use eslint-disable comment:
+
+```typescript
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function GET(_request: NextRequest) {
+  // Handler that doesn't need request object
+}
+```
+
+### Lint Commands
+
+```bash
+# Full project lint
+npm run lint
+
+# Lint with auto-fix (where possible)
+npx eslint --fix .
+
+# Check specific file
+npx eslint src/components/MyComponent.tsx
+```
+
+### VS Code Settings (Recommended)
+
+Add to `.vscode/settings.json`:
+```json
+{
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  },
+  "typescript.preferences.organizeImportsIgnoreCase": false
+}
+```

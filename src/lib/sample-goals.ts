@@ -7,39 +7,9 @@
 
 import type { GoalCategory, TaskPriority } from "@prisma/client";
 
-// Get dates relative to today
-function getRelativeDate(daysOffset: number): Date {
-  const date = new Date();
-  date.setDate(date.getDate() + daysOffset);
-  date.setHours(0, 0, 0, 0);
-  return date;
-}
-
 function getYearsFromNow(years: number): Date {
   const date = new Date();
   date.setFullYear(date.getFullYear() + years);
-  return date;
-}
-
-function getMonthsFromNow(months: number): Date {
-  const date = new Date();
-  date.setMonth(date.getMonth() + months);
-  return date;
-}
-
-function getEndOfWeek(): Date {
-  const date = new Date();
-  const day = date.getDay();
-  const daysUntilSunday = day === 0 ? 0 : 7 - day;
-  date.setDate(date.getDate() + daysUntilSunday);
-  date.setHours(23, 59, 59, 999);
-  return date;
-}
-
-function getEndOfMonth(): Date {
-  const date = new Date();
-  date.setMonth(date.getMonth() + 1, 0);
-  date.setHours(23, 59, 59, 999);
   return date;
 }
 

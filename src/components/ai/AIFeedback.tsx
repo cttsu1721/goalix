@@ -49,7 +49,7 @@ export function AIFeedback({
           ? "Thanks! We'll keep improving."
           : "Thanks for the feedback. We'll do better."
       );
-    } catch (error) {
+    } catch {
       // Still show the feedback locally even if API fails
       setFeedback(newFeedback);
       onFeedback?.(isPositive);

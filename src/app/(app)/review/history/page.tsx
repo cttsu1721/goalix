@@ -4,7 +4,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ReviewTimeline } from "@/components/review";
 import { useAllReviewHistory } from "@/hooks";
-import { Loader2, FileText, ArrowLeft } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 

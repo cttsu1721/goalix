@@ -7,7 +7,6 @@ import {
   ChevronRight,
   Target,
   Star,
-  Calendar,
   CalendarDays,
   CalendarRange,
   Sparkles,

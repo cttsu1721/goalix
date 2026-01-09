@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, createContext, useContext, useCallback } from "react";
+import { useState, createContext, useContext, useCallback } from "react";
 
 interface AnnouncerContextType {
   announce: (message: string, politeness?: "polite" | "assertive") => void;

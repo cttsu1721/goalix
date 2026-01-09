@@ -22,7 +22,6 @@ import type { TaskSuggestResponse, SuggestedTask } from "@/lib/ai/schemas";
 import {
   Sparkles,
   Loader2,
-  Star,
   Clock,
   Info,
   CheckCircle2,
@@ -115,7 +114,7 @@ export function TaskSuggestModal({
       setResult(response.data);
       // Select all tasks by default
       setSelectedTasks(new Set(response.data.tasks.map((_, i) => i)));
-    } catch (error) {
+    } catch {
       // Error handled by mutation
     }
   };

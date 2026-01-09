@@ -184,7 +184,7 @@ export function OnboardingWizard() {
       } else {
         toast.error(data.error?.message || "Failed to create sample goals");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to create sample goals");
     } finally {
       setIsLoadingSamples(false);

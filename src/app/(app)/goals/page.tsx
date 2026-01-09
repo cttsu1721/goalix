@@ -256,7 +256,7 @@ function VisionPageContent() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isVisionBuilderOpen, setIsVisionBuilderOpen] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
-  const [isLoadingSamples, setIsLoadingSamples] = useState(false);
+  const [, setIsLoadingSamples] = useState(false);
   // For creating 3-year goals from vision cards
   const [createChildTarget, setCreateChildTarget] = useState<{
     parentId: string;
@@ -297,7 +297,7 @@ function VisionPageContent() {
       } else {
         toast.error(data.error?.message || "Failed to create sample goals");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to create sample goals");
     } finally {
       setIsLoadingSamples(false);

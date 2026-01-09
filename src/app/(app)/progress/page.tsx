@@ -4,7 +4,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { LifestyleInsight, KaizenHeatmap, PointsExplainer, MonthSoFarCard, AlignmentTrendCard } from "@/components/gamification";
 import { useUserStats, useUserStreaks, useUserBadges } from "@/hooks/useGamification";
-import { LEVELS, STREAK_TYPE_LABELS } from "@/types/gamification";
+import { LEVELS } from "@/types/gamification";
 import {
   Trophy,
   Flame,
@@ -363,8 +363,8 @@ export default function ProgressPage() {
   const badges = badgesData?.badges || [];
   const badgeSummary = badgesData?.summary || { earned: 0, total: 0 };
 
-  // Calculate all-time stats
-  const allTimeTasksCompleted = weeklyStats.tasksCompleted; // This would ideally come from API
+  // All-time stats would ideally come from API
+  // const allTimeTasksCompleted = weeklyStats.tasksCompleted;
 
   return (
     <AppShell>

@@ -16,7 +16,6 @@ import {
   ChevronRight,
   ChevronLeft,
   Sparkles,
-  FileText,
   Award,
   Star,
   Link2,
@@ -396,7 +395,7 @@ function ReviewWizard({ monthData, onComplete }: {
       }
 
       onComplete();
-    } catch (error) {
+    } catch {
       toast.error("Failed to submit review. Please try again.");
     }
   };

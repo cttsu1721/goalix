@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Target, Check, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {

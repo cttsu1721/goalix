@@ -19,7 +19,6 @@ import {
   Flame,
   Trophy,
   Star,
-  ChevronRight,
 } from "lucide-react";
 
 interface PointsExplainerProps {
@@ -145,7 +144,7 @@ export function PointsExplainer({ currentLevel, currentPoints }: PointsExplainer
 
                 {/* All Levels */}
                 <div className="space-y-2">
-                  {LEVELS.map((level, index) => {
+                  {LEVELS.map((level) => {
                     const isCurrentLevel = level.level === currentLevel;
                     const isUnlocked = level.level <= currentLevel;
                     return (

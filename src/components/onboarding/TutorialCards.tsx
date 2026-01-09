@@ -14,7 +14,6 @@ import {
   ChevronRight,
   Star,
   Zap,
-  BarChart3,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -35,7 +34,6 @@ interface TutorialCard {
 interface TutorialCardsProps {
   onDismiss?: () => void;
   onCreateTask?: () => void;
-  onCreateGoal?: () => void;
   className?: string;
 }
 
@@ -83,7 +81,6 @@ const TUTORIAL_CARDS: TutorialCard[] = [
 export function TutorialCards({
   onDismiss,
   onCreateTask,
-  onCreateGoal,
   className,
 }: TutorialCardsProps) {
   const [dismissed, setDismissed] = useState(true); // Default to hidden until we check

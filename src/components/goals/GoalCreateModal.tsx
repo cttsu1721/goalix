@@ -24,7 +24,7 @@ import type { GoalLevel } from "@/types/goals";
 import type { GoalCategory } from "@prisma/client";
 import { Sparkles, Target, Calendar, Layers, CheckCircle2, Loader2, Wand2, Stars } from "lucide-react";
 import { toast } from "sonner";
-import { AiButton, GoalSharpenModal, GoalSuggestModal } from "@/components/ai";
+import { GoalSharpenModal, GoalSuggestModal } from "@/components/ai";
 import type { GoalSharpenResponse, SuggestedGoal } from "@/lib/ai/schemas";
 import type { GoalLevelForSuggestion } from "@/lib/ai/prompts";
 

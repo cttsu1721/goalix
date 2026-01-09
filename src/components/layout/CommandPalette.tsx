@@ -19,11 +19,7 @@ import {
   Settings,
   CalendarDays,
   Plus,
-  Search,
   Sparkles,
-  Calendar,
-  Moon,
-  Layers,
   CalendarRange,
   Loader2,
 } from "lucide-react";

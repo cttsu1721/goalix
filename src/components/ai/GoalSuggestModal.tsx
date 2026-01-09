@@ -85,7 +85,7 @@ export function GoalSuggestModal({
         parentLevel,
       });
       setResult(response.data);
-    } catch (error) {
+    } catch {
       // Error handled by mutation
     }
   };

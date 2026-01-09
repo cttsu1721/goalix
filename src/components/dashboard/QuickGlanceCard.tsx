@@ -9,7 +9,6 @@ import {
   CheckCircle2,
   Circle,
   ArrowRight,
-  Calendar,
   Clock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";

@@ -5,16 +5,6 @@ import { formatLocalDate, parseLocalDate } from "@/lib/utils";
 import { TASK_PRIORITY_LIMITS } from "@/types/tasks";
 import { TaskPriority } from "@prisma/client";
 
-const DAY_MAP: Record<string, number> = {
-  SUN: 0,
-  MON: 1,
-  TUE: 2,
-  WED: 3,
-  THU: 4,
-  FRI: 5,
-  SAT: 6,
-};
-
 const DAY_NAMES = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
 function shouldGenerateForDate(
