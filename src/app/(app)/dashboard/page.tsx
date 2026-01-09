@@ -403,10 +403,13 @@ export default function DashboardPage() {
   }, [updateTask, refetchTasks]);
 
   // Transform tasks data - memoized (MUST be before early return to follow Rules of Hooks)
-  const allTasks = tasksData?.tasks || [];
-  const requestedDate = tasksData?.requestedDate || today;
+  // Note: Move fallback values inside useMemo to avoid React Compiler exhaustive-deps warning
 
-  const { tasks, overdueTasks, mitTasks, mitsFormatted, primaryTasksFormatted, secondaryTasksFormatted, overdueTasksFormatted } = useMemo(() => {
+  const { tasks, overdueTasks, mitTasks, mitsFormatted, primaryTasksFormatted, secondaryTasksFormatted, overdueTasksFormatted, allTasks } = useMemo(() => {
+    // Extract tasks with fallback inside useMemo to satisfy React Compiler
+    const allTasks = tasksData?.tasks || [];
+    const requestedDate = tasksData?.requestedDate || today;
+
     // Separate today's tasks from overdue tasks
     const todayTasks = allTasks.filter((t) => {
       const taskDate = formatLocalDate(new Date(t.scheduledDate));
@@ -465,8 +468,9 @@ export default function DashboardPage() {
       primaryTasksFormatted: primaryTasks.map((t) => transformTask(t)),
       secondaryTasksFormatted: secondaryTasks.map((t) => transformTask(t)),
       overdueTasksFormatted: overdue.map((t) => transformTask(t, true)),
+      allTasks,
     };
-  }, [allTasks, requestedDate]);
+  }, [tasksData?.tasks, tasksData?.requestedDate, today]);
 
   // Handle MIT task toggle (complete or uncomplete) - memoized with useCallback (MUST be before early return)
   const handleToggleMit = useCallback(async (taskId: string) => {

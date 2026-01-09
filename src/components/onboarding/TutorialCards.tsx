@@ -87,13 +87,16 @@ export function TutorialCards({
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // Check if tutorial was dismissed
+  // Using requestAnimationFrame to defer setState and avoid cascading renders
   useEffect(() => {
-    try {
-      const isDismissed = localStorage.getItem(TUTORIAL_DISMISSED_KEY);
-      setDismissed(isDismissed === "true");
-    } catch {
-      setDismissed(false);
-    }
+    requestAnimationFrame(() => {
+      try {
+        const isDismissed = localStorage.getItem(TUTORIAL_DISMISSED_KEY);
+        setDismissed(isDismissed === "true");
+      } catch {
+        setDismissed(false);
+      }
+    });
   }, []);
 
   const handleDismiss = () => {
@@ -289,13 +292,16 @@ export function TutorialCards({
 export function useTutorialDismissed(): boolean {
   const [dismissed, setDismissed] = useState(true);
 
+  // Using requestAnimationFrame to defer setState and avoid cascading renders
   useEffect(() => {
-    try {
-      const isDismissed = localStorage.getItem(TUTORIAL_DISMISSED_KEY);
-      setDismissed(isDismissed === "true");
-    } catch {
-      setDismissed(false);
-    }
+    requestAnimationFrame(() => {
+      try {
+        const isDismissed = localStorage.getItem(TUTORIAL_DISMISSED_KEY);
+        setDismissed(isDismissed === "true");
+      } catch {
+        setDismissed(false);
+      }
+    });
   }, []);
 
   return dismissed;

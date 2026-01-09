@@ -86,9 +86,12 @@ export function HowItWorksModal({ open, onOpenChange }: HowItWorksModalProps) {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
   // Reset expanded state when modal opens
+  // Using requestAnimationFrame to defer setState and avoid cascading renders
   useEffect(() => {
     if (open) {
-      setExpandedIndex(null);
+      requestAnimationFrame(() => {
+        setExpandedIndex(null);
+      });
     }
   }, [open]);
 

@@ -26,12 +26,15 @@ export function SyncStatus({ className, showLabel = false }: SyncStatusProps) {
   const [showSynced, setShowSynced] = useState(false);
 
   // Track online/offline status
+  // Using requestAnimationFrame to defer initial setState and avoid cascading renders
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
 
-    // Check initial state
-    setIsOnline(navigator.onLine);
+    // Check initial state with deferred setState
+    requestAnimationFrame(() => {
+      setIsOnline(navigator.onLine);
+    });
 
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
@@ -43,10 +46,13 @@ export function SyncStatus({ className, showLabel = false }: SyncStatusProps) {
   }, []);
 
   // Track when sync completes
+  // Using requestAnimationFrame to defer setState and avoid cascading renders
   useEffect(() => {
     if (isFetching === 0 && isMutating === 0 && isOnline) {
-      setLastSynced(new Date());
-      setShowSynced(true);
+      requestAnimationFrame(() => {
+        setLastSynced(new Date());
+        setShowSynced(true);
+      });
 
       // Hide "synced" checkmark after 2 seconds
       const timer = setTimeout(() => {
@@ -68,10 +74,21 @@ export function SyncStatus({ className, showLabel = false }: SyncStatusProps) {
 
   const syncState = getSyncState();
 
-  // Format last synced time
+  // Track current time for relative time display (updates on component re-render)
+  // This avoids calling Date.now() directly during render which React Compiler flags as impure
+  const [now, setNow] = useState(() => Date.now());
+
+  // Update 'now' periodically when displaying relative time
+  useEffect(() => {
+    if (!lastSynced) return;
+    const interval = setInterval(() => setNow(Date.now()), 10000);
+    return () => clearInterval(interval);
+  }, [lastSynced]);
+
+  // Format last synced time using memoized 'now' value
   const getLastSyncedText = () => {
     if (!lastSynced) return "Not synced yet";
-    const seconds = Math.floor((Date.now() - lastSynced.getTime()) / 1000);
+    const seconds = Math.floor((now - lastSynced.getTime()) / 1000);
     if (seconds < 5) return "Just now";
     if (seconds < 60) return `${seconds}s ago`;
     const minutes = Math.floor(seconds / 60);

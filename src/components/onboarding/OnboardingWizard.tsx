@@ -300,8 +300,11 @@ export function OnboardingWizard() {
 export function useOnboardingComplete(): boolean {
   const [complete, setComplete] = useState(true); // Default true to prevent flash
 
+  // Using requestAnimationFrame to defer setState and avoid cascading renders
   useEffect(() => {
-    setComplete(localStorage.getItem(ONBOARDING_KEY) === "true");
+    requestAnimationFrame(() => {
+      setComplete(localStorage.getItem(ONBOARDING_KEY) === "true");
+    });
   }, []);
 
   return complete;

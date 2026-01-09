@@ -133,9 +133,12 @@ export function ContextualTip({
   const [isDismissed, setIsDismissed] = useState(true);
   const tip = TIPS[tipId];
 
+  // Using requestAnimationFrame to defer setState and avoid cascading renders
   useEffect(() => {
-    const dismissed = getDismissedTips();
-    setIsDismissed(dismissed.includes(tipId));
+    requestAnimationFrame(() => {
+      const dismissed = getDismissedTips();
+      setIsDismissed(dismissed.includes(tipId));
+    });
   }, [tipId]);
 
   const handleDismiss = () => {
@@ -244,9 +247,12 @@ export function ContextualTip({
 export function useShouldShowTip(tipId: TipId): boolean {
   const [shouldShow, setShouldShow] = useState(false);
 
+  // Using requestAnimationFrame to defer setState and avoid cascading renders
   useEffect(() => {
-    const dismissed = getDismissedTips();
-    setShouldShow(!dismissed.includes(tipId));
+    requestAnimationFrame(() => {
+      const dismissed = getDismissedTips();
+      setShouldShow(!dismissed.includes(tipId));
+    });
   }, [tipId]);
 
   return shouldShow;

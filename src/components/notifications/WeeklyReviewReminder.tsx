@@ -108,6 +108,7 @@ export function WeeklyReviewReminder() {
   }, [checkAndNotify]);
 
   // Check if we should prompt for notification permission
+  // Using requestAnimationFrame to defer setState and avoid cascading renders
   useEffect(() => {
     if (
       isSupported &&
@@ -115,8 +116,9 @@ export function WeeklyReviewReminder() {
       settingsData?.user?.notifyWeeklyReview &&
       isSundayEvening(settingsData.user.timezone || "UTC")
     ) {
-      // Show permission prompt if user wants notifications but hasn't granted permission
-      setShowPermissionPrompt(true);
+      requestAnimationFrame(() => {
+        setShowPermissionPrompt(true);
+      });
     }
   }, [isSupported, permission, settingsData]);
 

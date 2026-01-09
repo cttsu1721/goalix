@@ -1103,6 +1103,121 @@ export async function GET(_request: NextRequest) {
 }
 ```
 
+#### CAPA-005: React Compiler — setState in Effects
+
+**Root Cause:** Calling `setState` synchronously during effect execution causes "cascading renders" — React schedules additional renders before the current one completes. Common when initializing state from browser APIs (localStorage, navigator, window) unavailable during SSR.
+
+**Preventive Actions:**
+1. **Use `requestAnimationFrame`** to defer setState to the next frame
+2. **Consider initial state factories** when the value is known at mount
+3. **Review pattern:** Any `setState` inside `useEffect` should be wrapped
+
+**Patterns to avoid:**
+```typescript
+// ❌ BAD: Synchronous setState in effect
+useEffect(() => {
+  setIsOnline(navigator.onLine);
+  setDismissed(localStorage.getItem("key") === "true");
+}, []);
+
+// ❌ BAD: Conditional setState still triggers warning
+useEffect(() => {
+  if (someCondition) {
+    setValue(computedValue);
+  }
+}, [someCondition]);
+```
+
+**Correct patterns:**
+```typescript
+// ✅ GOOD: Defer with requestAnimationFrame
+useEffect(() => {
+  requestAnimationFrame(() => {
+    setIsOnline(navigator.onLine);
+    setDismissed(localStorage.getItem("key") === "true");
+  });
+}, []);
+
+// ✅ GOOD: Use state initializer when possible
+const [isOnline, setIsOnline] = useState(() =>
+  typeof window !== "undefined" ? navigator.onLine : true
+);
+
+// ✅ GOOD: Wrap conditional setState too
+useEffect(() => {
+  if (someCondition) {
+    requestAnimationFrame(() => {
+      setValue(computedValue);
+    });
+  }
+}, [someCondition]);
+```
+
+**When to add comment explaining the pattern:**
+```typescript
+// Using requestAnimationFrame to defer setState and avoid cascading renders
+useEffect(() => {
+  requestAnimationFrame(() => {
+    setInitialValue(getFromStorage());
+  });
+}, []);
+```
+
+#### CAPA-006: React Compiler — Unstable Hook Dependencies
+
+**Root Cause:** Using logical expressions with fallbacks (e.g., `data?.items || []`) outside of memoization creates new references on every render, causing unnecessary re-computations and exhaustive-deps warnings.
+
+**Preventive Actions:**
+1. **Move fallbacks inside useMemo/useCallback** — not in the component body
+2. **Depend on the raw data** — let the memoized function handle undefined
+3. **Wrap derived data in useMemo** when used in other hook dependencies
+
+**Patterns to avoid:**
+```typescript
+// ❌ BAD: Fallback creates new array every render
+const items = data?.items || [];
+const filtered = useMemo(() => items.filter(...), [items]); // items is unstable!
+
+// ❌ BAD: Inline fallback in dependency
+const result = useMemo(() => {
+  return (data?.items || []).map(...);
+}, [data?.items || []]); // Creates new array in deps!
+
+// ❌ BAD: Derived data used in another hook's deps
+const tasksByDate = tasksData?.tasksByDate || {};
+const sorted = useMemo(() => tasksByDate[key]?.sort(), [tasksByDate, key]);
+```
+
+**Correct patterns:**
+```typescript
+// ✅ GOOD: Fallback inside useMemo, depend on raw data
+const filtered = useMemo(() => {
+  const items = data?.items || [];
+  return items.filter(...);
+}, [data?.items]); // Stable reference
+
+// ✅ GOOD: Access property inside, depend on parent
+const result = useMemo(() => {
+  const items = data?.items || [];
+  return items.map(...);
+}, [data]); // Or [data?.items] - both stable
+
+// ✅ GOOD: Wrap intermediate data in useMemo
+const tasksByDate = useMemo(() => tasksData?.tasksByDate || {}, [tasksData?.tasksByDate]);
+const sorted = useMemo(() => tasksByDate[key]?.sort(), [tasksByDate, key]);
+```
+
+**Memoization dependency rule:**
+```typescript
+// When the compiler says "dependencies don't match inferred":
+// Depend on the object, not the optional-chained property
+const result = useMemo(() => {
+  const data = goalsData?.data;  // Access inside
+  if (!data) return [];
+  return data.filter(...);
+}, [goalsData, searchQuery]);  // Not [goalsData?.data]
+```
+
 ### Lint Commands
 
 ```bash

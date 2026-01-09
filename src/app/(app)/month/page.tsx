@@ -274,7 +274,8 @@ export default function MonthPage() {
   const completeTask = useCompleteTask();
   const updateTask = useUpdateTask();
 
-  const tasksByDate = tasksData?.tasksByDate || {};
+  // Memoize tasksByDate to avoid React Compiler exhaustive-deps warning
+  const tasksByDate = useMemo(() => tasksData?.tasksByDate || {}, [tasksData?.tasksByDate]);
 
   const goToThisMonth = useCallback(() => {
     setMonthOffset(0);
@@ -329,10 +330,11 @@ export default function MonthPage() {
 
   // Get tasks for selected date
   const selectedDateKey = formatDateKey(selectedDate);
-  const selectedDayTasks = (tasksByDate[selectedDateKey] || []) as TaskItem[];
 
   // Sort tasks: MIT first, then PRIMARY, then SECONDARY, pending before completed
+  // Note: Move fallback inside useMemo to avoid React Compiler exhaustive-deps warning
   const sortedSelectedTasks = useMemo(() => {
+    const selectedDayTasks = (tasksByDate[selectedDateKey] || []) as TaskItem[];
     const priorityOrder = { MIT: 0, PRIMARY: 1, SECONDARY: 2 };
     return [...selectedDayTasks].sort((a, b) => {
       // Completed tasks go to the bottom
@@ -341,7 +343,7 @@ export default function MonthPage() {
       // Then sort by priority
       return priorityOrder[a.priority] - priorityOrder[b.priority];
     });
-  }, [selectedDayTasks]);
+  }, [tasksByDate, selectedDateKey]);
 
   // Format selected date for display
   const selectedDateDisplay = selectedDate.toLocaleDateString("en-AU", {

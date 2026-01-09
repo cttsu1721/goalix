@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useCreateTask, useGoals, scrollInputIntoView, useGoalLinkSuggest } from "@/hooks";
 import {
   Dialog,
@@ -105,7 +105,11 @@ export function TaskCreateModal({
   const { data: weeklyGoalsData } = useGoals("weekly");
   const goalLinkSuggest = useGoalLinkSuggest();
 
-  const weeklyGoals = (weeklyGoalsData?.goals || []) as Array<{ id: string; title: string; description?: string; category: GoalCategory }>;
+  // Memoize weeklyGoals to avoid React Compiler exhaustive-deps warning
+  const weeklyGoals = useMemo(
+    () => (weeklyGoalsData?.goals || []) as Array<{ id: string; title: string; description?: string; category: GoalCategory }>,
+    [weeklyGoalsData?.goals]
+  );
 
   // Get selected weekly goal details for AI suggest
   const selectedWeeklyGoal = weeklyGoals.find((g) => g.id === weeklyGoalId);
@@ -138,10 +142,13 @@ export function TaskCreateModal({
   }, [weeklyGoals, goalLinkSuggest]);
 
   // Debounced goal suggestion trigger
+  // Using requestAnimationFrame to defer setState and avoid cascading renders
   useEffect(() => {
     // Only suggest if no goal is selected and suggestion not dismissed
     if (weeklyGoalId || suggestionDismissed || !open) {
-      setGoalSuggestion(null);
+      requestAnimationFrame(() => {
+        setGoalSuggestion(null);
+      });
       return;
     }
 
@@ -156,7 +163,10 @@ export function TaskCreateModal({
         fetchGoalSuggestion(title.trim());
       }, 1500);
     } else {
-      setGoalSuggestion(null);
+      // Defer setState to avoid cascading renders
+      requestAnimationFrame(() => {
+        setGoalSuggestion(null);
+      });
     }
 
     return () => {

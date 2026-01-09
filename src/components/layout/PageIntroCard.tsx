@@ -29,14 +29,17 @@ export function PageIntroCard({
 }: PageIntroCardProps) {
   const [isDismissed, setIsDismissed] = useState(true); // Default to hidden to prevent flash
 
+  // Using requestAnimationFrame to defer setState and avoid cascading renders
   useEffect(() => {
-    try {
-      const dismissed = localStorage.getItem(DISMISSED_INTROS_KEY);
-      const dismissedList: string[] = dismissed ? JSON.parse(dismissed) : [];
-      setIsDismissed(dismissedList.includes(id));
-    } catch {
-      setIsDismissed(false);
-    }
+    requestAnimationFrame(() => {
+      try {
+        const dismissed = localStorage.getItem(DISMISSED_INTROS_KEY);
+        const dismissedList: string[] = dismissed ? JSON.parse(dismissed) : [];
+        setIsDismissed(dismissedList.includes(id));
+      } catch {
+        setIsDismissed(false);
+      }
+    });
   }, [id]);
 
   const handleDismiss = () => {

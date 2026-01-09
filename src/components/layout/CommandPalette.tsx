@@ -56,13 +56,15 @@ export function CommandPalette({ onCreateTask, onCreateGoal }: CommandPalettePro
   });
 
   // Filter goals based on search query
+  // Using goalsData.data (not optional chain) in deps to match inferred dependency
   const filteredGoals = useMemo(() => {
-    if (!goalsData?.data || !searchQuery.trim()) return [];
+    const data = goalsData?.data;
+    if (!data || !searchQuery.trim()) return [];
     const query = searchQuery.toLowerCase();
-    return goalsData.data
+    return data
       .filter((goal) => goal.title.toLowerCase().includes(query))
       .slice(0, 8); // Limit to 8 results
-  }, [goalsData?.data, searchQuery]);
+  }, [goalsData, searchQuery]);
 
   const GOAL_TYPE_LABELS: Record<SearchableGoal["type"], string> = {
     vision: "Vision",
@@ -163,9 +165,12 @@ export function CommandPalette({ onCreateTask, onCreateGoal }: CommandPalettePro
   ];
 
   // Reset search when closing
+  // Using requestAnimationFrame to defer setState and avoid cascading renders
   useEffect(() => {
     if (!open) {
-      setSearchQuery("");
+      requestAnimationFrame(() => {
+        setSearchQuery("");
+      });
     }
   }, [open]);
 

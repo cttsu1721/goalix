@@ -14,12 +14,15 @@ export function useFocusMode() {
   const [isHydrated, setIsHydrated] = useState(false);
 
   // Load initial state from localStorage (client-side only)
+  // Using requestAnimationFrame to defer setState and avoid cascading renders
   useEffect(() => {
-    const stored = localStorage.getItem(FOCUS_MODE_KEY);
-    if (stored === "true") {
-      setIsFocusModeState(true);
-    }
-    setIsHydrated(true);
+    requestAnimationFrame(() => {
+      const stored = localStorage.getItem(FOCUS_MODE_KEY);
+      if (stored === "true") {
+        setIsFocusModeState(true);
+      }
+      setIsHydrated(true);
+    });
   }, []);
 
   // Update localStorage when state changes
