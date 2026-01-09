@@ -74,7 +74,7 @@
 
   /* Font - Dark theme uses Sora */
   --font-sans: var(--font-sora), system-ui, sans-serif;
-  --font-serif: var(--font-cormorant), Georgia, serif;
+  --font-heading: var(--font-poppins), system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), monospace;
 
   /* Border radius */
@@ -272,18 +272,18 @@
   --chart-4: var(--zen-purple);
   --chart-5: #7A6B5A; /* Warm taupe */
 
-  /* Font - Light theme uses DM Sans for body, Cormorant for headings */
-  --font-sans: var(--font-dm-sans), -apple-system, sans-serif;
-  --font-serif: var(--font-cormorant), Georgia, serif;
+  /* Font - Light theme uses Work Sans for body, Poppins for headings */
+  --font-sans: var(--font-work-sans), -apple-system, sans-serif;
+  --font-heading: var(--font-poppins), system-ui, sans-serif;
 }
 
-/* Zen Light Theme Typography */
+/* Zen Light Theme Typography - Poppins headings */
 .light h1,
 .light h2,
 .light h3 {
-  font-family: var(--font-cormorant), Georgia, serif;
-  font-weight: 500;
-  letter-spacing: -0.01em;
+  font-family: var(--font-poppins), system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 /* ========== BASE STYLES ========== */

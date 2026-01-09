@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Sora, JetBrains_Mono, Cormorant_Garamond, DM_Sans } from "next/font/google";
+import { Sora, JetBrains_Mono, Poppins, Work_Sans } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { Providers } from "@/components/providers";
 import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistration";
@@ -17,17 +17,17 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ["400", "500"],
 });
 
-// Zen light theme fonts
-const cormorantGaramond = Cormorant_Garamond({
-  variable: "--font-cormorant",
+// Zen light theme fonts - Geometric Confident
+const poppins = Poppins({
+  variable: "--font-poppins",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500", "600", "700"],
 });
 
-const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
+const workSans = Work_Sans({
+  variable: "--font-work-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["300", "400", "500", "600"],
 });
 
 export const metadata: Metadata = {
@@ -64,7 +64,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${sora.variable} ${jetbrainsMono.variable} ${cormorantGaramond.variable} ${dmSans.variable} antialiased min-h-screen bg-background font-sans`}
+        className={`${sora.variable} ${jetbrainsMono.variable} ${poppins.variable} ${workSans.variable} antialiased min-h-screen bg-background font-sans`}
       >
         <Providers>
           {children}
