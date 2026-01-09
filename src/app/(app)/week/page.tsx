@@ -19,11 +19,6 @@ import {
   GripVertical,
 } from "lucide-react";
 import { cn, formatLocalDate } from "@/lib/utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useGoals, useWeekTasks, useCompleteTask, useUpdateTask } from "@/hooks";
 import { TaskCreateModal } from "@/components/tasks/TaskCreateModal";
 import { TaskEditModal } from "@/components/tasks/TaskEditModal";
@@ -307,7 +302,7 @@ function DaySection({
     <div
       ref={setNodeRef}
       className={cn(
-        "rounded-2xl transition-all duration-300",
+        "rounded-xl sm:rounded-2xl transition-all duration-300",
         today
           ? "bg-gradient-to-br from-night-soft via-night to-night-soft border-2 border-lantern/30 shadow-lg shadow-lantern/10"
           : "bg-night-soft border border-night-glow hover:border-night-mist",
@@ -320,25 +315,25 @@ function DaySection({
         onClick={() => !today && setIsExpanded(!isExpanded)}
         disabled={today}
         className={cn(
-          "w-full flex items-center gap-4 p-4 text-left",
-          !today && "cursor-pointer hover:bg-night-mist/30 rounded-2xl transition-colors"
+          "w-full flex items-center gap-3 sm:gap-4 p-3 sm:p-4 text-left",
+          !today && "cursor-pointer hover:bg-night-mist/30 rounded-xl sm:rounded-2xl transition-colors"
         )}
       >
-        {/* Date Badge */}
+        {/* Date Badge - Compact on mobile */}
         <div className={cn(
-          "flex flex-col items-center justify-center w-14 h-14 rounded-xl flex-shrink-0",
+          "flex flex-col items-center justify-center w-11 h-11 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl flex-shrink-0",
           today
             ? "bg-lantern/20 border-2 border-lantern/40"
             : "bg-night-mist/30"
         )}>
           <span className={cn(
-            "text-[0.6rem] uppercase tracking-wider font-medium",
+            "text-[0.55rem] sm:text-[0.6rem] uppercase tracking-wider font-medium",
             today ? "text-lantern" : "text-moon-dim"
           )}>
             {dayName.slice(0, 3)}
           </span>
           <span className={cn(
-            "text-xl font-semibold leading-none",
+            "text-base sm:text-xl font-semibold leading-none",
             today ? "text-lantern" : "text-moon-dim"
           )}>
             {dayNum}
@@ -347,46 +342,46 @@ function DaySection({
 
         {/* Day Info */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <h3 className={cn(
-              "font-medium",
+              "text-sm sm:text-base font-medium",
               today ? "text-lantern" : "text-moon"
             )}>
               {today ? "Today" : dayName}
             </h3>
             {today && (
-              <span className="px-2 py-0.5 bg-lantern/20 text-lantern text-[0.65rem] rounded-full font-medium uppercase tracking-wider">
+              <span className="hidden sm:inline px-2 py-0.5 bg-lantern/20 text-lantern text-[0.65rem] rounded-full font-medium uppercase tracking-wider">
                 Focus Day
               </span>
             )}
           </div>
-          <p className="text-sm text-moon-dim mt-0.5">
-            {monthName} {dayNum}
+          <p className="text-xs sm:text-sm text-moon-dim mt-0.5">
+            <span className="hidden sm:inline">{monthName} {dayNum}</span>
             {total > 0 && (
-              <span className="ml-2">
-                · {completed}/{total} tasks
+              <span className="sm:ml-2">
+                <span className="hidden sm:inline">· </span>{completed}/{total} tasks
               </span>
             )}
           </p>
         </div>
 
-        {/* Progress Ring */}
+        {/* Progress Ring - Smaller on mobile */}
         {total > 0 && (
-          <div className="relative w-10 h-10 flex-shrink-0">
-            <svg className="w-10 h-10 -rotate-90">
+          <div className="relative w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0">
+            <svg className="w-8 h-8 sm:w-10 sm:h-10 -rotate-90">
               <circle
-                cx="20"
-                cy="20"
-                r="16"
+                cx="50%"
+                cy="50%"
+                r="40%"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="3"
                 className="text-night-mist/30"
               />
               <circle
-                cx="20"
-                cy="20"
-                r="16"
+                cx="50%"
+                cy="50%"
+                r="40%"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="3"
@@ -397,7 +392,7 @@ function DaySection({
                 )}
               />
             </svg>
-            <span className="absolute inset-0 flex items-center justify-center text-[0.65rem] font-medium text-moon-dim">
+            <span className="absolute inset-0 flex items-center justify-center text-[0.55rem] sm:text-[0.65rem] font-medium text-moon-dim">
               {Math.round((completed / total) * 100)}%
             </span>
           </div>
@@ -407,7 +402,7 @@ function DaySection({
         {!today && (
           <ChevronDown
             className={cn(
-              "w-5 h-5 text-moon-faint transition-transform duration-200",
+              "w-4 h-4 sm:w-5 sm:h-5 text-moon-faint transition-transform duration-200",
               showExpanded && "rotate-180"
             )}
           />
@@ -421,7 +416,7 @@ function DaySection({
           showExpanded ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
         )}
       >
-        <div className="px-4 pb-4">
+        <div className="px-3 pb-3 sm:px-4 sm:pb-4">
           {/* Tasks List */}
           {tasks.length > 0 ? (
             <div className="space-y-1">
@@ -648,119 +643,142 @@ export default function WeekPage() {
 
   return (
     <AppShell>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-moon">Week View</h1>
-          <p className="text-moon-dim mt-1">{formatWeekRange(weekDates)}</p>
-        </div>
+      {/* Compact Header - combines title + navigation */}
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
         <div className="flex items-center gap-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={goToPrevWeek}
-                aria-label="Previous week"
-                className="h-9 w-9 p-0 border-night-glow bg-night-soft hover:bg-night-mist"
-              >
-                <ChevronLeft className="w-4 h-4 text-moon-soft" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Previous week</TooltipContent>
-          </Tooltip>
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
-            onClick={goToThisWeek}
-            disabled={weekOffset === 0}
-            className="h-9 px-4 border-night-glow bg-night-soft hover:bg-night-mist text-moon-soft text-sm"
+            onClick={goToPrevWeek}
+            aria-label="Previous week"
+            className="h-7 w-7 sm:h-9 sm:w-9 p-0 text-moon-dim hover:text-moon hover:bg-night-soft"
           >
-            Today
+            <ChevronLeft className="w-4 h-4" />
           </Button>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={goToNextWeek}
-                aria-label="Next week"
-                className="h-9 w-9 p-0 border-night-glow bg-night-soft hover:bg-night-mist"
-              >
-                <ChevronRight className="w-4 h-4 text-moon-soft" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Next week</TooltipContent>
-          </Tooltip>
+          <button
+            onClick={goToThisWeek}
+            className={cn(
+              "text-sm sm:text-base font-medium transition-colors",
+              weekOffset === 0 ? "text-lantern" : "text-moon hover:text-lantern"
+            )}
+          >
+            <span className="hidden sm:inline">{formatWeekRange(weekDates)}</span>
+            <span className="sm:hidden">
+              {weekOffset === 0 ? "This Week" : formatWeekRange(weekDates).split(" ").slice(0, 3).join(" ")}
+            </span>
+          </button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={goToNextWeek}
+            aria-label="Next week"
+            className="h-7 w-7 sm:h-9 sm:w-9 p-0 text-moon-dim hover:text-moon hover:bg-night-soft"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Button>
         </div>
+        <Link href="/dashboard">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 sm:h-9 px-2 sm:px-3 text-moon-dim hover:text-moon text-xs sm:text-sm"
+          >
+            <Calendar className="w-4 h-4 mr-1" />
+            <span className="hidden sm:inline">Day View</span>
+          </Button>
+        </Link>
       </div>
 
-      {/* Week Stats Bar */}
-      <div className="flex items-center gap-6 mb-6 p-5 bg-night-soft border border-night-glow rounded-2xl">
-        <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-zen-green/10 flex items-center justify-center">
-            <Trophy className="w-5 h-5 text-zen-green" />
+      {/* Week Stats Bar - Compact on mobile */}
+      <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-night-soft border border-night-glow rounded-xl sm:rounded-2xl">
+        {/* Mobile: Horizontal compact pills */}
+        <div className="flex items-center justify-between gap-2 sm:hidden">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-zen-green/10 rounded-lg">
+              <Trophy className="w-3.5 h-3.5 text-zen-green" />
+              <span className="text-sm font-medium text-moon tabular-nums">
+                {weekStats.completed}/{weekStats.total}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-lantern/10 rounded-lg">
+              <Flame className="w-3.5 h-3.5 text-lantern" />
+              <span className="text-sm font-medium text-lantern tabular-nums">
+                {weekStats.mitsCompleted}/{weekStats.mitsTotal}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-night-mist/30 rounded-lg">
+              <Target className="w-3.5 h-3.5 text-moon-soft" />
+              <span className="text-sm font-medium text-moon tabular-nums">
+                {weeklyGoals.filter((g) => g.status === "COMPLETED").length}/{weeklyGoals.length}
+              </span>
+            </div>
           </div>
-          <div>
-            <p className="text-2xl font-semibold text-moon">
-              {weekStats.completed}
-              <span className="text-moon-faint text-base font-normal">/{weekStats.total}</span>
-            </p>
-            <p className="text-xs text-moon-dim">Tasks completed</p>
-          </div>
+          <span className="text-sm font-medium text-moon-soft tabular-nums">
+            {weekStats.total > 0 ? Math.round((weekStats.completed / weekStats.total) * 100) : 0}%
+          </span>
         </div>
 
-        <div className="w-px h-10 bg-night-glow" />
+        {/* Desktop: Full layout with labels */}
+        <div className="hidden sm:flex items-center gap-4 lg:gap-6">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-lg bg-zen-green/10 flex items-center justify-center">
+              <Trophy className="w-4 h-4 lg:w-5 lg:h-5 text-zen-green" />
+            </div>
+            <div>
+              <p className="text-lg lg:text-xl font-semibold text-moon">
+                {weekStats.completed}
+                <span className="text-moon-faint text-sm font-normal">/{weekStats.total}</span>
+              </p>
+              <p className="text-[0.65rem] lg:text-xs text-moon-dim">Tasks</p>
+            </div>
+          </div>
 
-        <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-lantern/10 flex items-center justify-center">
-            <Flame className="w-5 h-5 text-lantern" />
-          </div>
-          <div>
-            <p className="text-2xl font-semibold text-lantern">
-              {weekStats.mitsCompleted}
-              <span className="text-moon-faint text-base font-normal">/{weekStats.mitsTotal}</span>
-            </p>
-            <p className="text-xs text-moon-dim">MITs completed</p>
-          </div>
-        </div>
+          <div className="w-px h-8 bg-night-glow" />
 
-        <div className="w-px h-10 bg-night-glow" />
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-lg bg-lantern/10 flex items-center justify-center">
+              <Flame className="w-4 h-4 lg:w-5 lg:h-5 text-lantern" />
+            </div>
+            <div>
+              <p className="text-lg lg:text-xl font-semibold text-lantern">
+                {weekStats.mitsCompleted}
+                <span className="text-moon-faint text-sm font-normal">/{weekStats.mitsTotal}</span>
+              </p>
+              <p className="text-[0.65rem] lg:text-xs text-moon-dim">MITs</p>
+            </div>
+          </div>
 
-        <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-night-mist/30 flex items-center justify-center">
-            <Target className="w-5 h-5 text-moon-soft" />
-          </div>
-          <div>
-            <p className="text-2xl font-semibold text-moon">
-              {weeklyGoals.filter((g) => g.status === "COMPLETED").length}
-              <span className="text-moon-faint text-base font-normal">/{weeklyGoals.length}</span>
-            </p>
-            <p className="text-xs text-moon-dim">Weekly goals</p>
-          </div>
-        </div>
+          <div className="w-px h-8 bg-night-glow" />
 
-        {/* Progress Bar */}
-        <div className="flex-1 ml-4">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs text-moon-dim">Week Progress</span>
-            <span className="text-xs font-medium text-moon">
-              {weekStats.total > 0
-                ? Math.round((weekStats.completed / weekStats.total) * 100)
-                : 0}%
-            </span>
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-lg bg-night-mist/30 flex items-center justify-center">
+              <Target className="w-4 h-4 lg:w-5 lg:h-5 text-moon-soft" />
+            </div>
+            <div>
+              <p className="text-lg lg:text-xl font-semibold text-moon">
+                {weeklyGoals.filter((g) => g.status === "COMPLETED").length}
+                <span className="text-moon-faint text-sm font-normal">/{weeklyGoals.length}</span>
+              </p>
+              <p className="text-[0.65rem] lg:text-xs text-moon-dim">Goals</p>
+            </div>
           </div>
-          <div className="h-2 bg-night-mist/30 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-lantern to-zen-green rounded-full transition-all duration-500"
-              style={{
-                width: `${
-                  weekStats.total > 0
-                    ? (weekStats.completed / weekStats.total) * 100
-                    : 0
-                }%`,
-              }}
-            />
+
+          {/* Progress Bar */}
+          <div className="flex-1 ml-2">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[0.65rem] lg:text-xs text-moon-dim">Progress</span>
+              <span className="text-xs font-medium text-moon">
+                {weekStats.total > 0 ? Math.round((weekStats.completed / weekStats.total) * 100) : 0}%
+              </span>
+            </div>
+            <div className="h-1.5 lg:h-2 bg-night-mist/30 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-lantern to-zen-green rounded-full transition-all duration-500"
+                style={{
+                  width: `${weekStats.total > 0 ? (weekStats.completed / weekStats.total) * 100 : 0}%`,
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -778,7 +796,7 @@ export default function WeekPage() {
           onDragEnd={handleDragEnd}
           onDragCancel={handleDragCancel}
         >
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             {weekDates.map((date, index) => {
               const dateKey = formatDateKey(date);
               const dayTasks = (tasksByDate[dateKey] || []) as TaskItem[];
@@ -809,18 +827,17 @@ export default function WeekPage() {
         </DndContext>
       )}
 
-      {/* Weekly Goals Section */}
-      <div className="mt-8 bg-night-soft border border-night-glow rounded-2xl p-6">
-        <div className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-lantern/10 flex items-center justify-center">
-              <Target className="w-5 h-5 text-lantern" />
+      {/* Weekly Goals Section - Compact on mobile */}
+      <div className="mt-6 sm:mt-8 bg-night-soft border border-night-glow rounded-xl sm:rounded-2xl p-4 sm:p-6">
+        <div className="flex items-center justify-between mb-3 sm:mb-5">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-lantern/10 flex items-center justify-center">
+              <Target className="w-4 h-4 sm:w-5 sm:h-5 text-lantern" />
             </div>
             <div>
-              <h3 className="font-medium text-moon">Weekly Goals</h3>
-              <p className="text-sm text-moon-dim">
-                {weeklyGoals.filter((g) => g.status === "COMPLETED").length} of{" "}
-                {weeklyGoals.length} completed
+              <h3 className="text-sm sm:text-base font-medium text-moon">Weekly Goals</h3>
+              <p className="text-xs sm:text-sm text-moon-dim">
+                {weeklyGoals.filter((g) => g.status === "COMPLETED").length}/{weeklyGoals.length} completed
               </p>
             </div>
           </div>
@@ -828,40 +845,41 @@ export default function WeekPage() {
             <Button
               variant="outline"
               size="sm"
-              className="border-night-glow bg-night-soft hover:bg-night-mist text-moon-soft"
+              className="h-7 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm border-night-glow bg-night-soft hover:bg-night-mist text-moon-soft"
             >
-              <Plus className="w-4 h-4 mr-1" />
-              Add Goal
+              <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" />
+              <span className="hidden sm:inline">Add Goal</span>
+              <span className="sm:hidden">Add</span>
             </Button>
           </Link>
         </div>
 
         {weeklyGoals.length === 0 ? (
-          <div className="text-center py-8">
-            <Target className="w-10 h-10 text-moon-faint/30 mx-auto mb-3" />
-            <p className="text-moon-dim text-sm">No weekly goals yet</p>
+          <div className="text-center py-6 sm:py-8">
+            <Target className="w-8 h-8 sm:w-10 sm:h-10 text-moon-faint/30 mx-auto mb-2 sm:mb-3" />
+            <p className="text-moon-dim text-xs sm:text-sm">No weekly goals yet</p>
             <Link href="/goals?level=weekly">
-              <Button variant="link" className="text-lantern hover:text-lantern-soft mt-2">
+              <Button variant="link" className="text-lantern hover:text-lantern-soft mt-2 text-sm">
                 Create your first weekly goal
               </Button>
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
             {weeklyGoals.map((goal) => (
               <Link
                 key={goal.id}
                 href={`/goals/${goal.id}`}
-                className="flex items-center gap-3 p-4 bg-night-mist/30 rounded-xl hover:bg-night-mist/50 transition-colors"
+                className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-night-mist/30 rounded-lg sm:rounded-xl hover:bg-night-mist/50 transition-colors"
               >
                 {goal.status === "COMPLETED" ? (
-                  <CheckCircle2 className="w-5 h-5 text-zen-green flex-shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-zen-green flex-shrink-0" />
                 ) : (
-                  <Circle className="w-5 h-5 text-moon-faint flex-shrink-0" />
+                  <Circle className="w-4 h-4 sm:w-5 sm:h-5 text-moon-faint flex-shrink-0" />
                 )}
                 <span
                   className={cn(
-                    "text-sm flex-1",
+                    "text-xs sm:text-sm flex-1",
                     goal.status === "COMPLETED" ? "text-moon-dim line-through" : "text-moon"
                   )}
                 >
@@ -873,18 +891,19 @@ export default function WeekPage() {
         )}
       </div>
 
-      {/* Weekly Review CTA */}
-      <div className="mt-6 bg-gradient-to-r from-lantern/10 to-night-soft border border-lantern/20 rounded-2xl p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="font-medium text-moon mb-1">Ready for your weekly review?</h3>
-            <p className="text-sm text-moon-dim">
+      {/* Weekly Review CTA - Compact on mobile */}
+      <div className="mt-4 sm:mt-6 bg-gradient-to-r from-lantern/10 to-night-soft border border-lantern/20 rounded-xl sm:rounded-2xl p-4 sm:p-6">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h3 className="text-sm sm:text-base font-medium text-moon mb-0.5 sm:mb-1">Weekly review?</h3>
+            <p className="text-xs sm:text-sm text-moon-dim hidden sm:block">
               Reflect on your progress and plan for next week
             </p>
           </div>
           <Link href="/review/weekly">
-            <Button className="bg-lantern text-void hover:bg-lantern-soft shadow-md shadow-lantern/20">
-              Start Review
+            <Button className="h-8 sm:h-10 px-3 sm:px-4 text-sm bg-lantern text-void hover:bg-lantern-soft shadow-md shadow-lantern/20">
+              <span className="hidden sm:inline">Start Review</span>
+              <span className="sm:hidden">Review</span>
             </Button>
           </Link>
         </div>
