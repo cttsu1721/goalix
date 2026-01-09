@@ -14,11 +14,6 @@ import {
   Circle,
 } from "lucide-react";
 import { cn, formatLocalDate } from "@/lib/utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useWeekTasks, useCompleteTask, useUpdateTask } from "@/hooks";
 import { TaskCreateModal } from "@/components/tasks/TaskCreateModal";
 import { TaskEditModal } from "@/components/tasks/TaskEditModal";
@@ -118,16 +113,16 @@ function CompactDayCell({
     <button
       onClick={onClick}
       className={cn(
-        "flex flex-col items-center justify-center py-2 rounded-lg transition-all",
+        "flex flex-col items-center justify-center py-1 sm:py-2 rounded-md sm:rounded-lg transition-all",
         "hover:bg-night-mist/30 focus:outline-none focus:ring-2 focus:ring-lantern/50",
         !isInMonth && "opacity-40",
         isSelected && !today && "bg-night-mist/50"
       )}
     >
-      {/* Day number */}
+      {/* Day number - smaller on mobile */}
       <div
         className={cn(
-          "w-8 h-8 flex items-center justify-center text-sm font-medium rounded-full",
+          "w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-xs sm:text-sm font-medium rounded-full",
           today && "bg-moon text-night font-semibold",
           !today && isInMonth && "text-moon",
           !today && !isInMonth && "text-moon-faint"
@@ -136,17 +131,17 @@ function CompactDayCell({
         {dayNum}
       </div>
 
-      {/* Task indicator dots */}
-      <div className="flex items-center justify-center gap-0.5 mt-1 h-2">
+      {/* Task indicator dots - tighter on mobile */}
+      <div className="flex items-center justify-center gap-0.5 mt-0.5 sm:mt-1 h-1.5 sm:h-2">
         {dots.map((dot) => (
-          <div key={dot.key} className={cn("w-1.5 h-1.5 rounded-full", dot.color)} />
+          <div key={dot.key} className={cn("w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full", dot.color)} />
         ))}
       </div>
     </button>
   );
 }
 
-// Task row component for the list below calendar
+// Task row component for the list below calendar - compact on mobile
 function TaskListItem({
   task,
   onComplete,
@@ -165,7 +160,7 @@ function TaskListItem({
   return (
     <div
       className={cn(
-        "group flex items-center gap-3 py-3 border-b border-night-glow/30 last:border-b-0",
+        "group flex items-center gap-2 sm:gap-3 py-2.5 sm:py-3 border-b border-night-glow/30 last:border-b-0",
         "transition-colors hover:bg-night-mist/20"
       )}
     >
@@ -174,7 +169,7 @@ function TaskListItem({
         onClick={onComplete}
         disabled={isCompleting}
         className={cn(
-          "flex-shrink-0 w-6 h-6 rounded-full border-2 transition-all duration-200",
+          "flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 transition-all duration-200",
           "flex items-center justify-center",
           "hover:scale-110 active:scale-95",
           completed
@@ -187,9 +182,9 @@ function TaskListItem({
         )}
       >
         {isCompleting ? (
-          <Loader2 className="w-3 h-3 animate-spin text-moon-dim" />
+          <Loader2 className="w-2.5 h-2.5 sm:w-3 sm:h-3 animate-spin text-moon-dim" />
         ) : completed ? (
-          <Check className="w-3 h-3 text-white" strokeWidth={3} />
+          <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" strokeWidth={3} />
         ) : null}
       </button>
 
@@ -198,16 +193,16 @@ function TaskListItem({
         onClick={onEdit}
         className="flex-1 min-w-0 text-left hover:opacity-80 transition-opacity"
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {/* Priority indicator */}
           {isMit && !completed && (
-            <Sparkles className="w-3.5 h-3.5 text-lantern flex-shrink-0" />
+            <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-lantern flex-shrink-0" />
           )}
 
           {/* Task title */}
           <span
             className={cn(
-              "text-sm font-medium truncate",
+              "text-xs sm:text-sm font-medium truncate",
               completed ? "line-through text-moon-dim/60" : "text-moon"
             )}
           >
@@ -215,9 +210,9 @@ function TaskListItem({
           </span>
         </div>
 
-        {/* Linked goal */}
+        {/* Linked goal - hidden on mobile */}
         {task.weeklyGoal && !completed && (
-          <div className="flex items-center gap-1 mt-0.5">
+          <div className="hidden sm:flex items-center gap-1 mt-0.5">
             <Target className="w-3 h-3 text-lantern/50" />
             <span className="text-xs text-moon-dim truncate">
               {task.weeklyGoal.title}
@@ -229,7 +224,7 @@ function TaskListItem({
       {/* Priority color dot */}
       <div
         className={cn(
-          "flex-shrink-0 w-2 h-2 rounded-full",
+          "flex-shrink-0 w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full",
           isMit && "bg-lantern",
           isPrimary && !isMit && "bg-pink-400",
           !isMit && !isPrimary && "bg-sky-400",
@@ -356,45 +351,47 @@ export default function MonthPage() {
 
   return (
     <AppShell>
-      {/* Header with year navigation */}
-      <div className="flex items-center justify-between mb-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={goToPrevMonth}
-          className="h-9 px-3 text-moon-soft hover:text-moon hover:bg-night-mist/50"
-        >
-          <ChevronLeft className="w-4 h-4 mr-1" />
-          {year}
-        </Button>
-        <div className="flex items-center gap-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={goToThisMonth}
-                disabled={monthOffset === 0}
-                className="h-8 px-3 text-xs border-night-glow bg-night-soft hover:bg-night-mist text-moon-soft"
-              >
-                Today
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Go to today</TooltipContent>
-          </Tooltip>
+      {/* Compact Header - month name + navigation */}
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <div className="flex items-center gap-1 sm:gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={goToPrevMonth}
+            className="h-7 w-7 sm:h-9 sm:w-9 p-0 text-moon-dim hover:text-moon hover:bg-night-soft"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          <button
+            onClick={goToThisMonth}
+            className={cn(
+              "text-lg sm:text-2xl font-semibold sm:font-bold transition-colors",
+              monthOffset === 0 ? "text-lantern" : "text-moon hover:text-lantern"
+            )}
+          >
+            {monthName}
+            <span className="text-moon-dim font-normal ml-1.5 text-sm sm:text-base">{year}</span>
+          </button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={goToNextMonth}
+            className="h-7 w-7 sm:h-9 sm:w-9 p-0 text-moon-dim hover:text-moon hover:bg-night-soft"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Button>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={goToNextMonth}
-          className="h-9 px-3 text-moon-soft hover:text-moon hover:bg-night-mist/50"
-        >
-          <ChevronRight className="w-4 h-4" />
-        </Button>
+        {monthOffset !== 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={goToThisMonth}
+            className="h-7 sm:h-8 px-2 sm:px-3 text-xs border-night-glow bg-night-soft hover:bg-night-mist text-moon-soft"
+          >
+            Today
+          </Button>
+        )}
       </div>
-
-      {/* Month name */}
-      <h1 className="text-3xl font-bold text-moon mb-6">{monthName}</h1>
 
       {/* Compact Calendar Grid */}
       {tasksLoading ? (
@@ -403,13 +400,13 @@ export default function MonthPage() {
         </div>
       ) : (
         <>
-          {/* Week day headers */}
-          <div className="grid grid-cols-7 mb-2">
+          {/* Week day headers - compact on mobile */}
+          <div className="grid grid-cols-7 mb-1 sm:mb-2">
             {weekDays.map((day, index) => (
               <div
                 key={day}
                 className={cn(
-                  "py-2 text-center text-xs font-medium uppercase tracking-wider",
+                  "py-1 sm:py-2 text-center text-[0.65rem] sm:text-xs font-medium uppercase tracking-wider",
                   index >= 5 ? "text-moon-faint" : "text-moon-dim"
                 )}
               >
@@ -419,7 +416,7 @@ export default function MonthPage() {
           </div>
 
           {/* Calendar days - compact grid */}
-          <div className="grid grid-cols-7 gap-y-1 mb-6">
+          <div className="grid grid-cols-7 gap-y-0.5 sm:gap-y-1 mb-4 sm:mb-6">
             {monthDates.map((date) => {
               const dateKey = formatDateKey(date);
               const dayTasks = (tasksByDate[dateKey] || []) as TaskItem[];
@@ -438,14 +435,14 @@ export default function MonthPage() {
             })}
           </div>
 
-          {/* Selected Day Tasks Section */}
-          <div className="border-t border-night-glow/50 pt-4">
+          {/* Selected Day Tasks Section - Compact on mobile */}
+          <div className="border-t border-night-glow/50 pt-3 sm:pt-4">
             {/* Selected date header */}
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-moon">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <h2 className="text-sm sm:text-lg font-semibold text-moon">
                 {selectedDateDisplay}
                 {isToday(selectedDate) && (
-                  <span className="ml-2 text-xs font-medium text-lantern bg-lantern/10 px-2 py-0.5 rounded-full">
+                  <span className="ml-1.5 sm:ml-2 text-[0.6rem] sm:text-xs font-medium text-lantern bg-lantern/10 px-1.5 sm:px-2 py-0.5 rounded-full">
                     Today
                   </span>
                 )}
@@ -454,21 +451,22 @@ export default function MonthPage() {
                 variant="outline"
                 size="sm"
                 onClick={handleAddTask}
-                className="h-8 px-3 gap-1.5 border-night-glow bg-night-soft hover:bg-night-mist hover:border-lantern/50 text-moon-soft hover:text-lantern"
+                className="h-7 sm:h-8 px-2 sm:px-3 gap-1 sm:gap-1.5 text-xs border-night-glow bg-night-soft hover:bg-night-mist hover:border-lantern/50 text-moon-soft hover:text-lantern"
               >
-                <Plus className="w-3.5 h-3.5" />
-                Add Task
+                <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                <span className="hidden sm:inline">Add Task</span>
+                <span className="sm:hidden">Add</span>
               </Button>
             </div>
 
             {/* Tasks list */}
-            <div className="bg-night-soft border border-night-glow rounded-xl px-4">
+            <div className="bg-night-soft border border-night-glow rounded-lg sm:rounded-xl px-3 sm:px-4">
               {sortedSelectedTasks.length === 0 ? (
-                <div className="py-8 text-center">
-                  <Circle className="w-10 h-10 mx-auto mb-3 text-moon-faint/30" />
-                  <p className="text-sm text-moon-dim">No tasks for this day</p>
-                  <p className="text-xs text-moon-faint mt-1">
-                    Click &quot;Add Task&quot; to create one
+                <div className="py-6 sm:py-8 text-center">
+                  <Circle className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-2 sm:mb-3 text-moon-faint/30" />
+                  <p className="text-xs sm:text-sm text-moon-dim">No tasks for this day</p>
+                  <p className="text-[0.65rem] sm:text-xs text-moon-faint mt-1">
+                    Tap &quot;Add&quot; to create one
                   </p>
                 </div>
               ) : (
@@ -484,9 +482,9 @@ export default function MonthPage() {
               )}
             </div>
 
-            {/* Task legend */}
+            {/* Task legend - hidden on mobile to save space */}
             {sortedSelectedTasks.length > 0 && (
-              <div className="flex items-center justify-center gap-4 mt-4 text-xs text-moon-faint">
+              <div className="hidden sm:flex items-center justify-center gap-4 mt-4 text-xs text-moon-faint">
                 <div className="flex items-center gap-1.5">
                   <div className="w-2 h-2 rounded-full bg-lantern" />
                   <span>MIT</span>
