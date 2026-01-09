@@ -30,19 +30,31 @@ export function AppShell({ children, rightPanel, className, onRefresh }: AppShel
     (e: TouchEvent) => {
       if (!onRefresh || isRefreshing) return;
       const main = mainRef.current;
-      if (!main || main.scrollTop > 0) return;
+      if (!main) return;
 
-      startY.current = e.touches[0].clientY;
-      setIsPulling(true);
+      // Only enable pull-to-refresh when at the very top
+      if (main.scrollTop <= 0) {
+        startY.current = e.touches[0].clientY;
+        setIsPulling(true);
+      } else {
+        // Explicitly disable when not at top
+        setIsPulling(false);
+      }
     },
     [onRefresh, isRefreshing]
   );
 
   const handleTouchMove = useCallback(
     (e: TouchEvent) => {
+      // Early exit if not in pull-to-refresh mode
       if (!isPulling || !onRefresh || isRefreshing) return;
+
       const main = mainRef.current;
-      if (!main || main.scrollTop > 0) {
+      if (!main) return;
+
+      // If user scrolled away from top, cancel pull-to-refresh
+      if (main.scrollTop > 0) {
+        setIsPulling(false);
         setPullDistance(0);
         return;
       }
@@ -50,19 +62,33 @@ export function AppShell({ children, rightPanel, className, onRefresh }: AppShel
       const currentY = e.touches[0].clientY;
       const diff = currentY - startY.current;
 
+      // Only handle downward pulls (positive diff = finger moving down = pull to refresh gesture)
       if (diff > 0) {
         const resistance = 0.5;
         const distance = Math.min(diff * resistance, maxPull);
         setPullDistance(distance);
-        if (distance > 0) e.preventDefault();
+        // Only prevent default when actually pulling down for refresh
+        if (distance > 10) {
+          e.preventDefault();
+        }
+      } else {
+        // User is trying to scroll down, cancel pull mode
+        if (pullDistance > 0) {
+          setPullDistance(0);
+        }
       }
     },
-    [isPulling, onRefresh, isRefreshing]
+    [isPulling, onRefresh, isRefreshing, pullDistance]
   );
 
   const handleTouchEnd = useCallback(async () => {
-    if (!isPulling || !onRefresh) return;
+    // Always reset isPulling on touch end
     setIsPulling(false);
+
+    if (!onRefresh) {
+      setPullDistance(0);
+      return;
+    }
 
     if (pullDistance >= threshold && !isRefreshing) {
       setIsRefreshing(true);
@@ -75,7 +101,13 @@ export function AppShell({ children, rightPanel, className, onRefresh }: AppShel
     } else {
       setPullDistance(0);
     }
-  }, [isPulling, onRefresh, pullDistance, isRefreshing]);
+  }, [onRefresh, pullDistance, isRefreshing]);
+
+  // Also handle touchcancel to reset state
+  const handleTouchCancel = useCallback(() => {
+    setIsPulling(false);
+    setPullDistance(0);
+  }, []);
 
   useEffect(() => {
     const main = mainRef.current;
@@ -84,13 +116,15 @@ export function AppShell({ children, rightPanel, className, onRefresh }: AppShel
     main.addEventListener("touchstart", handleTouchStart, { passive: true });
     main.addEventListener("touchmove", handleTouchMove, { passive: false });
     main.addEventListener("touchend", handleTouchEnd);
+    main.addEventListener("touchcancel", handleTouchCancel);
 
     return () => {
       main.removeEventListener("touchstart", handleTouchStart);
       main.removeEventListener("touchmove", handleTouchMove);
       main.removeEventListener("touchend", handleTouchEnd);
+      main.removeEventListener("touchcancel", handleTouchCancel);
     };
-  }, [handleTouchStart, handleTouchMove, handleTouchEnd, onRefresh, isTouchDevice]);
+  }, [handleTouchStart, handleTouchMove, handleTouchEnd, handleTouchCancel, onRefresh, isTouchDevice]);
 
   const showIndicator = (pullDistance > 0 || isRefreshing) && onRefresh;
   const progress = Math.min(pullDistance / threshold, 1);
@@ -116,6 +150,12 @@ export function AppShell({ children, rightPanel, className, onRefresh }: AppShel
       <main
         ref={mainRef}
         className="bg-void overflow-y-auto overflow-x-hidden min-h-screen min-w-0 relative"
+        style={{
+          // Ensure smooth scrolling and proper touch handling on iOS
+          WebkitOverflowScrolling: "touch",
+          // Prevent overscroll on the main element to avoid scroll lock
+          overscrollBehavior: "contain",
+        }}
       >
         {/* Pull-to-refresh indicator */}
         {showIndicator && (

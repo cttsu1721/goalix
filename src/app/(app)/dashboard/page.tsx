@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { MitCard, TaskList, shouldShowCarryOverPrompt, FloatingActionButton } from "@/components/tasks";
+import { MitCard, TaskList, shouldShowCarryOverPrompt } from "@/components/tasks";
 import { StatsPanel } from "@/components/gamification/StatsPanel";
 import { MobileStatsBar } from "@/components/gamification/MobileStatsBar";
 import { YearTargetHeader, DayNavigation, SwipeContainer, MotivationalQuote } from "@/components/dashboard";
@@ -1131,9 +1131,6 @@ export default function DashboardPage() {
         }}
         badge={earnedBadge}
       />
-
-      {/* Floating Action Button - Mobile Quick Add */}
-      <FloatingActionButton onClick={() => openCreateModal("SECONDARY")} />
     </AppShell>
   );
 }
