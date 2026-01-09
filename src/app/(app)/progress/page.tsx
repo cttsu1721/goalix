@@ -374,7 +374,7 @@ export default function ProgressPage() {
       />
 
       {/* All-Time Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
         <StatCard
           icon={CheckCircle2}
           label="Tasks Today"
@@ -404,22 +404,22 @@ export default function ProgressPage() {
       </div>
 
       {/* Month So Far Card */}
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         <MonthSoFarCard />
       </div>
 
       {/* Weekly Alignment Trend Sparkline */}
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         <AlignmentTrendCard weeks={12} />
       </div>
 
       {/* Lifestyle Insight (only shows if user has milestone-worthy streaks) */}
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         <LifestyleInsight streaks={streaks} />
       </div>
 
       {/* Level and Streaks */}
-      <div className="grid lg:grid-cols-2 gap-6 mb-6">
+      <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
         <LevelProgressCard
           level={level}
           levelName={levelName}
@@ -431,7 +431,7 @@ export default function ProgressPage() {
       </div>
 
       {/* Kaizen Heatmap */}
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         <KaizenHeatmap days={91} />
       </div>
 

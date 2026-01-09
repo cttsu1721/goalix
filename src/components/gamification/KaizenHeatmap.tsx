@@ -82,9 +82,9 @@ export function KaizenHeatmap({ days = 91 }: KaizenHeatmapProps) {
 
   if (isLoading) {
     return (
-      <div className="bg-night border border-night-mist rounded-2xl p-6">
-        <div className="flex items-center justify-center py-8">
-          <Loader2 className="w-6 h-6 animate-spin text-lantern" />
+      <div className="bg-night border border-night-mist rounded-xl sm:rounded-2xl p-4 sm:p-6">
+        <div className="flex items-center justify-center py-6 sm:py-8">
+          <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 animate-spin text-lantern" />
         </div>
       </div>
     );
@@ -145,33 +145,33 @@ export function KaizenHeatmap({ days = 91 }: KaizenHeatmapProps) {
   }
 
   return (
-    <div className="bg-night border border-night-mist rounded-2xl p-6">
+    <div className="bg-night border border-night-mist rounded-xl sm:rounded-2xl p-4 sm:p-6">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-12 h-12 rounded-xl bg-zen-green/10 flex items-center justify-center">
-          <Star className="w-6 h-6 text-zen-green" />
+      <div className="flex items-center gap-2.5 sm:gap-3 mb-4 sm:mb-6">
+        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-zen-green/10 flex items-center justify-center">
+          <Star className="w-5 h-5 sm:w-6 sm:h-6 text-zen-green" />
         </div>
         <div>
-          <h3 className="text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-moon-faint">
+          <h3 className="text-[0.625rem] sm:text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-moon-faint">
             Kaizen Activity
           </h3>
-          <p className="text-xl font-semibold text-moon">Last {days} Days</p>
+          <p className="text-lg sm:text-xl font-semibold text-moon">Last {days} Days</p>
         </div>
       </div>
 
       {/* Stats Row */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="text-center p-3 bg-night-soft rounded-xl">
-          <p className="text-xl font-bold text-moon">{totalCheckins}</p>
-          <p className="text-xs text-moon-faint">Check-ins</p>
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6">
+        <div className="text-center p-2 sm:p-3 bg-night-soft rounded-lg sm:rounded-xl">
+          <p className="text-lg sm:text-xl font-bold text-moon">{totalCheckins}</p>
+          <p className="text-[0.625rem] sm:text-xs text-moon-faint">Check-ins</p>
         </div>
-        <div className="text-center p-3 bg-night-soft rounded-xl">
-          <p className="text-xl font-bold text-zen-green">{balancedDays}</p>
-          <p className="text-xs text-moon-faint">Balanced Days</p>
+        <div className="text-center p-2 sm:p-3 bg-night-soft rounded-lg sm:rounded-xl">
+          <p className="text-lg sm:text-xl font-bold text-zen-green">{balancedDays}</p>
+          <p className="text-[0.625rem] sm:text-xs text-moon-faint">Balanced</p>
         </div>
-        <div className="text-center p-3 bg-night-soft rounded-xl">
-          <p className="text-xl font-bold text-lantern">{avgAreas}</p>
-          <p className="text-xs text-moon-faint">Avg. Areas</p>
+        <div className="text-center p-2 sm:p-3 bg-night-soft rounded-lg sm:rounded-xl">
+          <p className="text-lg sm:text-xl font-bold text-lantern">{avgAreas}</p>
+          <p className="text-[0.625rem] sm:text-xs text-moon-faint">Avg. Areas</p>
         </div>
       </div>
 
@@ -238,7 +238,7 @@ export function KaizenHeatmap({ days = 91 }: KaizenHeatmapProps) {
       </div>
 
       {/* Legend */}
-      <div className="flex items-center justify-end gap-2 mt-4 text-xs text-moon-faint">
+      <div className="flex items-center justify-end gap-1.5 sm:gap-2 mt-3 sm:mt-4 text-[0.625rem] sm:text-xs text-moon-faint">
         <span>Less</span>
         <div className="flex gap-1">
           <div className="w-3 h-3 rounded-sm bg-night-mist/30" />
