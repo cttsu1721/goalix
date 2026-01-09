@@ -824,18 +824,18 @@ export default function DashboardPage() {
 
       {/* Focus Mode Indicator - show when hiding overdue tasks */}
       {isFocusMode && overdueTasksFormatted.length > 0 && (
-        <div className="mb-4 px-4 py-2 bg-lantern/5 border border-lantern/20 rounded-lg flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm text-lantern">
-            <Focus className="w-4 h-4" />
-            <span>Focus mode: {overdueTasksFormatted.length} overdue task{overdueTasksFormatted.length !== 1 ? "s" : ""} hidden</span>
+        <div className="mb-3 sm:mb-4 px-3 sm:px-4 py-1.5 sm:py-2 bg-lantern/5 border border-lantern/20 rounded-lg flex items-center justify-between">
+          <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-lantern">
+            <Focus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span>{overdueTasksFormatted.length} overdue <span className="hidden sm:inline">task{overdueTasksFormatted.length !== 1 ? "s" : ""}</span> hidden</span>
           </div>
           <Button
             variant="ghost"
             size="sm"
             onClick={toggleFocusMode}
-            className="h-7 text-xs text-lantern hover:text-moon hover:bg-lantern/10"
+            className="h-6 sm:h-7 text-[0.625rem] sm:text-xs text-lantern hover:text-moon hover:bg-lantern/10 px-2"
           >
-            Show all
+            Show
           </Button>
         </div>
       )}
@@ -855,20 +855,20 @@ export default function DashboardPage() {
 
       {/* Overdue Tasks Section - shown when there are overdue tasks (hidden in focus mode) */}
       {overdueTasksFormatted.length > 0 && !isFocusMode && (
-        <section className="mb-5 sm:mb-8">
-          <div className="flex items-center gap-2 mb-4 pb-3 border-b border-zen-red/20">
-            <AlertTriangle className="w-4 h-4 text-zen-red" />
-            <h2 className="text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-zen-red">
+        <section className="mb-4 sm:mb-8">
+          <div className="flex items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4 pb-2 sm:pb-3 border-b border-zen-red/20">
+            <AlertTriangle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zen-red" />
+            <h2 className="text-[0.625rem] sm:text-[0.6875rem] font-medium uppercase tracking-[0.15em] sm:tracking-[0.2em] text-zen-red">
               Overdue
             </h2>
-            <span className="text-xs text-zen-red/70">
-              {overdueTasksFormatted.length} task{overdueTasksFormatted.length !== 1 ? "s" : ""} from previous days
+            <span className="text-[0.625rem] sm:text-xs text-zen-red/70">
+              {overdueTasksFormatted.length} <span className="hidden sm:inline">task{overdueTasksFormatted.length !== 1 ? "s" : ""} from previous days</span>
             </span>
             <div className="flex-1" />
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 px-2 text-xs text-zen-red hover:text-zen-red hover:bg-zen-red/10"
+              className="h-6 sm:h-7 px-1.5 sm:px-2 text-[0.625rem] sm:text-xs text-zen-red hover:text-zen-red hover:bg-zen-red/10"
               onClick={async () => {
                 try {
                   const result = await rescheduleOverdue.mutateAsync(undefined);
@@ -884,49 +884,52 @@ export default function DashboardPage() {
               }}
               disabled={rescheduleOverdue.isPending}
             >
-              <CalendarCheck className="w-3.5 h-3.5 mr-1" />
-              {rescheduleOverdue.isPending ? "Moving..." : "Move All to Today"}
+              <CalendarCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-0.5 sm:mr-1" />
+              <span className="hidden sm:inline">{rescheduleOverdue.isPending ? "Moving..." : "Move All to Today"}</span>
+              <span className="sm:hidden">{rescheduleOverdue.isPending ? "..." : "Move"}</span>
             </Button>
           </div>
-          <div className="flex flex-col bg-zen-red/5 rounded-xl border border-zen-red/20 px-4">
+          <div className="flex flex-col bg-zen-red/5 rounded-lg sm:rounded-xl border border-zen-red/20 px-3 sm:px-4">
             {overdueTasksFormatted.map((task) => (
               <div
                 key={task.id}
-                className="group flex items-center gap-3 sm:gap-4 py-4 border-b border-zen-red/10 last:border-b-0"
+                className="group flex items-center gap-2 sm:gap-4 py-3 sm:py-4 border-b border-zen-red/10 last:border-b-0"
               >
                 {/* Checkbox */}
                 <button
-                  className="w-11 h-11 sm:w-10 sm:h-10 flex-shrink-0 flex items-center justify-center -ml-2 sm:-ml-1 rounded-xl transition-all duration-200 active:scale-90"
+                  className="w-10 h-10 sm:w-10 sm:h-10 flex-shrink-0 flex items-center justify-center -ml-1.5 sm:-ml-1 rounded-xl transition-all duration-200 active:scale-90"
                   onClick={() => handleToggleOverdue(task.id)}
                 >
-                  <div className="w-6 h-6 sm:w-[22px] sm:h-[22px] rounded-lg border-2 border-zen-red/50 flex items-center justify-center transition-all duration-200" />
+                  <div className="w-5 h-5 sm:w-[22px] sm:h-[22px] rounded-md sm:rounded-lg border-2 border-zen-red/50 flex items-center justify-center transition-all duration-200" />
                 </button>
 
                 {/* Content */}
                 <button className="flex-1 text-left min-w-0" onClick={() => openEditModal(task.id)}>
-                  <div className="text-[0.9375rem] font-normal mb-0.5 truncate text-moon">
+                  <div className="text-sm sm:text-[0.9375rem] font-normal mb-0.5 truncate text-moon">
                     {task.title}
                   </div>
-                  <div className="text-xs text-moon-faint truncate flex items-center gap-1.5">
-                    <AlertTriangle className="w-3 h-3 text-zen-red flex-shrink-0" />
+                  <div className="text-[0.625rem] sm:text-xs text-moon-faint truncate flex items-center gap-1 sm:gap-1.5">
+                    <AlertTriangle className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-zen-red flex-shrink-0" />
                     <span className="text-zen-red">{formatOverdueLabel(task.scheduledDate)}</span>
-                    <span className="text-moon-faint/50">·</span>
-                    {task.goalChain ? (
-                      <span className="truncate">
-                        {task.goalChain.weeklyGoal.title}
-                        {task.goalChain.oneYearGoal && (
-                          <span className="text-lantern/70"> → {task.goalChain.oneYearGoal.title}</span>
-                        )}
-                      </span>
-                    ) : (
-                      task.category
-                    )}
+                    <span className="text-moon-faint/50 hidden sm:inline">·</span>
+                    <span className="truncate hidden sm:inline">
+                      {task.goalChain ? (
+                        <>
+                          {task.goalChain.weeklyGoal.title}
+                          {task.goalChain.oneYearGoal && (
+                            <span className="text-lantern/70"> → {task.goalChain.oneYearGoal.title}</span>
+                          )}
+                        </>
+                      ) : (
+                        task.category
+                      )}
+                    </span>
                   </div>
                 </button>
 
                 {/* Points */}
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <span className="text-sm font-medium tabular-nums text-moon-faint">
+                  <span className="text-xs sm:text-sm font-medium tabular-nums text-moon-faint">
                     {task.points}
                   </span>
                 </div>
@@ -938,38 +941,38 @@ export default function DashboardPage() {
 
       {/* Empty State - No tasks planned */}
       {tasks.length === 0 && overdueTasksFormatted.length === 0 ? (
-        <div className="space-y-8">
+        <div className="space-y-5 sm:space-y-8">
           {/* Tutorial Cards */}
           <TutorialCards
             onCreateTask={() => openCreateModal("MIT")}
           />
 
           {/* Empty state CTA */}
-          <div className="flex flex-col items-center justify-center py-12 px-4">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-lantern/20 to-zen-green/10 border border-night-glow flex items-center justify-center mb-6 animate-pulse">
-              <CalendarDays className="w-10 h-10 text-lantern" />
+          <div className="flex flex-col items-center justify-center py-8 sm:py-12 px-3 sm:px-4">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-lantern/20 to-zen-green/10 border border-night-glow flex items-center justify-center mb-4 sm:mb-6 animate-pulse">
+              <CalendarDays className="w-8 h-8 sm:w-10 sm:h-10 text-lantern" />
             </div>
-            <h3 className="text-xl font-light text-moon mb-2">Ready to make progress?</h3>
-            <p className="text-moon-dim text-center mb-4 max-w-sm">
+            <h3 className="text-lg sm:text-xl font-light text-moon mb-1.5 sm:mb-2">Ready to make progress?</h3>
+            <p className="text-moon-dim text-center mb-3 sm:mb-4 max-w-sm text-sm sm:text-base">
               Start your day with intention. What&apos;s the ONE thing that would make today a win?
             </p>
-            <p className="text-xs text-moon-faint/60 italic mb-8">
+            <p className="text-[0.625rem] sm:text-xs text-moon-faint/60 italic mb-5 sm:mb-8">
               &ldquo;Small daily improvements lead to stunning results.&rdquo;
             </p>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
               <Button
                 onClick={() => setIsPlanDayModalOpen(true)}
                 variant="outline"
-                className="border-night-glow text-moon hover:bg-night-soft h-12 px-6"
+                className="border-night-glow text-moon hover:bg-night-soft h-10 sm:h-12 px-4 sm:px-6 text-sm sm:text-base"
               >
-                <CalendarDays className="w-4 h-4 mr-2" />
+                <CalendarDays className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                 Plan Manually
               </Button>
               <Button
                 onClick={handleOpenTaskSuggest}
-                className="bg-zen-purple text-void hover:bg-zen-purple/90 h-12 px-6"
+                className="bg-zen-purple text-void hover:bg-zen-purple/90 h-10 sm:h-12 px-4 sm:px-6 text-sm sm:text-base"
               >
-                <Sparkles className="w-4 h-4 mr-2" />
+                <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                 AI Suggest Tasks
               </Button>
             </div>

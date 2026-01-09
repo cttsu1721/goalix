@@ -91,13 +91,13 @@ export function MitCard({ task, onToggle, onAiSuggest, onDrop, className }: MitC
 
   if (!task) {
     return (
-      <section className={cn("mb-8 sm:mb-12", className)}>
+      <section className={cn("mb-5 sm:mb-12", className)}>
         <div
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDropEvent}
           className={cn(
-            "bg-night border rounded-2xl sm:rounded-[20px] p-5 sm:p-8 relative overflow-hidden",
+            "bg-night border rounded-xl sm:rounded-[20px] p-4 sm:p-8 relative overflow-hidden",
             "transition-all duration-200",
             isDropTarget
               ? "border-lantern border-dashed scale-[1.02] shadow-lg shadow-lantern/20"
@@ -113,13 +113,13 @@ export function MitCard({ task, onToggle, onAiSuggest, onDrop, className }: MitC
           )} />
 
           <div className="relative">
-            <div className="flex items-center gap-2 mb-4">
-              <Trophy className="w-4 h-4 text-lantern" />
-              <span className="text-[0.6875rem] font-semibold uppercase tracking-[0.2em] text-lantern">
+            <div className="flex items-center gap-2 mb-3 sm:mb-4">
+              <Trophy className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-lantern" />
+              <span className="text-[0.625rem] sm:text-[0.6875rem] font-semibold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-lantern">
                 Most Important Task
               </span>
             </div>
-            <div className="text-center py-6 sm:py-8">
+            <div className="text-center py-4 sm:py-8">
               {isDropTarget ? (
                 <>
                   <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-lantern/20 flex items-center justify-center animate-pulse">
@@ -130,17 +130,17 @@ export function MitCard({ task, onToggle, onAiSuggest, onDrop, className }: MitC
                 </>
               ) : (
                 <>
-                  <p className="text-moon-dim mb-2 text-sm sm:text-base">No MIT set for today</p>
-                  <p className="text-moon-faint/60 text-xs mb-4">Drag a task here to promote it</p>
+                  <p className="text-moon-dim mb-1.5 sm:mb-2 text-xs sm:text-base">No MIT set for today</p>
+                  <p className="text-moon-faint/60 text-[0.625rem] sm:text-xs mb-3 sm:mb-4">Drag a task here to promote it</p>
                   <Button
                     variant="outline"
                     onClick={onAiSuggest}
-                    className="bg-night-soft border-night-mist text-moon-soft hover:border-lantern hover:text-lantern hover:bg-lantern/5 h-11 px-5 rounded-xl"
+                    className="bg-night-soft border-night-mist text-moon-soft hover:border-lantern hover:text-lantern hover:bg-lantern/5 h-9 sm:h-11 px-4 sm:px-5 rounded-lg sm:rounded-xl text-xs sm:text-sm"
                   >
-                    <Sparkles className="w-4 h-4 mr-2" />
+                    <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                     AI Suggest MIT
                   </Button>
-                  <div className="mt-4">
+                  <div className="mt-3 sm:mt-4">
                     <ContextualTip tipId="mit_importance" variant="inline" />
                   </div>
                 </>
@@ -153,7 +153,7 @@ export function MitCard({ task, onToggle, onAiSuggest, onDrop, className }: MitC
   }
 
   return (
-    <section className={cn("mb-8 sm:mb-12", className)}>
+    <section className={cn("mb-5 sm:mb-12", className)}>
       <div
         tabIndex={0}
         role="button"
@@ -163,7 +163,7 @@ export function MitCard({ task, onToggle, onAiSuggest, onDrop, className }: MitC
         onDragLeave={handleDragLeave}
         onDrop={handleDropEvent}
         className={cn(
-          "bg-night border rounded-2xl sm:rounded-[20px] p-5 sm:p-8 relative overflow-hidden",
+          "bg-night border rounded-xl sm:rounded-[20px] p-4 sm:p-8 relative overflow-hidden",
           "transition-all duration-200",
           // Focus ring for keyboard navigation
           "focus:outline-none focus-visible:ring-2 focus-visible:ring-lantern focus-visible:ring-offset-2 focus-visible:ring-offset-night",
@@ -202,17 +202,17 @@ export function MitCard({ task, onToggle, onAiSuggest, onDrop, className }: MitC
           </div>
         )}
 
-        <div className="relative pl-4 sm:pl-6">
+        <div className="relative pl-3 sm:pl-6">
           {/* Label */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Trophy className="w-4 h-4 text-lantern" />
-              <span className="text-[0.6875rem] font-semibold uppercase tracking-[0.2em] text-lantern">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <Trophy className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-lantern" />
+              <span className="text-[0.625rem] sm:text-[0.6875rem] font-semibold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-lantern">
                 Most Important Task
               </span>
             </div>
             <span className={cn(
-              "text-sm font-bold tabular-nums",
+              "text-xs sm:text-sm font-bold tabular-nums",
               task.completed ? "text-zen-green" : "text-lantern"
             )}>
               {task.completed ? "+100" : "100"} pts
@@ -220,14 +220,14 @@ export function MitCard({ task, onToggle, onAiSuggest, onDrop, className }: MitC
           </div>
 
           {/* Content - mobile-first layout */}
-          <div className="flex items-start gap-4">
+          <div className="flex items-start gap-3 sm:gap-4">
             {/* Checkbox - 44px touch target */}
             <button
               tabIndex={-1}
               onClick={onToggle}
               className={cn(
                 // Large touch target
-                "w-12 h-12 flex-shrink-0",
+                "w-11 h-11 sm:w-12 sm:h-12 flex-shrink-0",
                 "flex items-center justify-center",
                 "-ml-1 -mt-1",
                 "rounded-xl",
@@ -236,7 +236,7 @@ export function MitCard({ task, onToggle, onAiSuggest, onDrop, className }: MitC
             >
               <div
                 className={cn(
-                  "w-8 h-8 rounded-xl border-2",
+                  "w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl border-2",
                   "flex items-center justify-center",
                   "transition-all duration-300",
                   task.completed
@@ -245,16 +245,16 @@ export function MitCard({ task, onToggle, onAiSuggest, onDrop, className }: MitC
                 )}
               >
                 {task.completed && (
-                  <Check className="w-5 h-5 text-void" strokeWidth={2.5} />
+                  <Check className="w-4 h-4 sm:w-5 sm:h-5 text-void" strokeWidth={2.5} />
                 )}
               </div>
             </button>
 
             {/* Body */}
-            <div className="flex-1 min-w-0 pt-1">
+            <div className="flex-1 min-w-0 pt-0.5 sm:pt-1">
               <h3
                 className={cn(
-                  "text-lg sm:text-xl font-medium leading-snug mb-2",
+                  "text-base sm:text-xl font-medium leading-snug mb-1.5 sm:mb-2",
                   task.completed && "line-through text-moon-faint"
                 )}
               >

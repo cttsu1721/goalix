@@ -69,9 +69,9 @@ export function TaskList({
   }, [tasks, hintDismissed]);
 
   return (
-    <section className={cn("mb-12", className)}>
+    <section className={cn("mb-8 sm:mb-12", className)}>
       {/* Header */}
-      <div className="flex justify-between items-center mb-5 pb-4 border-b border-night-soft">
+      <div className="flex justify-between items-center mb-3 sm:mb-5 pb-3 sm:pb-4 border-b border-night-soft">
         <h2 className="text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-moon-faint">
           {title}
         </h2>

@@ -69,15 +69,15 @@ export function QuickGlanceCard({
   return (
     <div
       className={cn(
-        "bg-gradient-to-br from-night via-night-soft to-night rounded-xl border border-night-mist overflow-hidden",
+        "bg-gradient-to-br from-night via-night-soft to-night rounded-lg sm:rounded-xl border border-night-mist overflow-hidden",
         className
       )}
     >
       {/* Header with greeting */}
-      <div className="p-4 border-b border-night-mist">
+      <div className="p-3 sm:p-4 border-b border-night-mist">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-medium text-moon">{getGreeting()}</h2>
-          <div className="flex items-center gap-3">
+          <h2 className="text-base sm:text-lg font-medium text-moon">{getGreeting()}</h2>
+          <div className="flex items-center gap-2 sm:gap-3">
             <StatPill
               icon={<Flame className="w-3 h-3" />}
               value={streak}
@@ -95,28 +95,28 @@ export function QuickGlanceCard({
       </div>
 
       {/* MIT Focus */}
-      <div className="p-4 bg-lantern/5 border-b border-night-mist">
-        <div className="flex items-start gap-3">
+      <div className="p-3 sm:p-4 bg-lantern/5 border-b border-night-mist">
+        <div className="flex items-start gap-2 sm:gap-3">
           <div
             className={cn(
-              "w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5",
+              "w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5",
               stats.mit?.completed
                 ? "border-zen-green bg-zen-green"
                 : "border-lantern"
             )}
           >
             {stats.mit?.completed && (
-              <CheckCircle2 className="w-3 h-3 text-void" />
+              <CheckCircle2 className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-void" />
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-lantern font-medium mb-1">
+            <p className="text-[0.625rem] sm:text-xs text-lantern font-medium mb-0.5 sm:mb-1">
               Today&apos;s MIT
             </p>
             {stats.mit ? (
               <p
                 className={cn(
-                  "text-sm",
+                  "text-xs sm:text-sm",
                   stats.mit.completed
                     ? "text-moon-dim line-through"
                     : "text-moon font-medium"
@@ -127,10 +127,10 @@ export function QuickGlanceCard({
             ) : (
               <Link
                 href="/dashboard"
-                className="text-sm text-moon-dim hover:text-lantern transition-colors flex items-center gap-1"
+                className="text-xs sm:text-sm text-moon-dim hover:text-lantern transition-colors flex items-center gap-1"
               >
                 Set your MIT
-                <ArrowRight className="w-3 h-3" />
+                <ArrowRight className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
               </Link>
             )}
           </div>
@@ -138,24 +138,24 @@ export function QuickGlanceCard({
       </div>
 
       {/* Progress Overview */}
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <Target className="w-4 h-4 text-moon-dim" />
-            <span className="text-sm text-moon">
+      <div className="p-3 sm:p-4">
+        <div className="flex items-center justify-between mb-2 sm:mb-3">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-moon-dim" />
+            <span className="text-xs sm:text-sm text-moon">
               {stats.completed} of {stats.total} tasks
             </span>
           </div>
           {stats.remainingTime > 0 && (
-            <span className="text-xs text-moon-faint flex items-center gap-1">
-              <Clock className="w-3 h-3" />
+            <span className="text-[0.625rem] sm:text-xs text-moon-faint flex items-center gap-1">
+              <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
               ~{formatTime(stats.remainingTime)} left
             </span>
           )}
         </div>
 
         {/* Progress bar */}
-        <div className="h-2 bg-night rounded-full overflow-hidden">
+        <div className="h-1.5 sm:h-2 bg-night rounded-full overflow-hidden">
           <div
             className="h-full bg-gradient-to-r from-lantern to-zen-green rounded-full transition-all duration-500"
             style={{ width: `${stats.completionRate}%` }}
@@ -164,18 +164,18 @@ export function QuickGlanceCard({
 
         {/* Quick task preview */}
         {stats.primaryTasks.length > 0 && (
-          <div className="mt-4 pt-3 border-t border-night-mist">
-            <p className="text-xs text-moon-dim mb-2">Up Next</p>
-            <ul className="space-y-1.5">
+          <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-night-mist">
+            <p className="text-[0.625rem] sm:text-xs text-moon-dim mb-1.5 sm:mb-2">Up Next</p>
+            <ul className="space-y-1 sm:space-y-1.5">
               {stats.primaryTasks
                 .filter((t) => !t.completed)
                 .slice(0, 2)
                 .map((task) => (
                   <li
                     key={task.id}
-                    className="flex items-center gap-2 text-sm text-moon-dim"
+                    className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-moon-dim"
                   >
-                    <Circle className="w-3 h-3 flex-shrink-0" />
+                    <Circle className="w-2.5 h-2.5 sm:w-3 sm:h-3 flex-shrink-0" />
                     <span className="truncate">{task.title}</span>
                   </li>
                 ))}
@@ -185,8 +185,8 @@ export function QuickGlanceCard({
 
         {/* All done state */}
         {stats.completed === stats.total && stats.total > 0 && (
-          <div className="mt-4 pt-3 border-t border-night-mist text-center">
-            <p className="text-sm text-zen-green">
+          <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-night-mist text-center">
+            <p className="text-xs sm:text-sm text-zen-green">
               ✓ All tasks completed! Great work!
             </p>
           </div>
@@ -194,9 +194,9 @@ export function QuickGlanceCard({
       </div>
 
       {/* Footer with points */}
-      <div className="px-4 py-3 bg-night flex items-center justify-between">
-        <span className="text-xs text-moon-faint">Today&apos;s points</span>
-        <span className="text-sm font-medium text-lantern">{points} pts</span>
+      <div className="px-3 sm:px-4 py-2 sm:py-3 bg-night flex items-center justify-between">
+        <span className="text-[0.625rem] sm:text-xs text-moon-faint">Today&apos;s points</span>
+        <span className="text-xs sm:text-sm font-medium text-lantern">{points} pts</span>
       </div>
     </div>
   );
@@ -248,41 +248,41 @@ export function QuickGlanceCompact({
   return (
     <div
       className={cn(
-        "flex items-center gap-4 p-3 bg-night-soft rounded-lg border border-night-mist",
+        "flex items-center gap-3 sm:gap-4 p-2.5 sm:p-3 bg-night-soft rounded-lg border border-night-mist",
         className
       )}
     >
       {/* MIT status */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5 sm:gap-2">
         {mit?.completed ? (
-          <CheckCircle2 className="w-5 h-5 text-zen-green" />
+          <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-zen-green" />
         ) : (
-          <Target className="w-5 h-5 text-lantern" />
+          <Target className="w-4 h-4 sm:w-5 sm:h-5 text-lantern" />
         )}
         <div>
-          <p className="text-xs text-moon-dim">MIT</p>
-          <p className="text-sm font-medium text-moon">
+          <p className="text-[0.625rem] sm:text-xs text-moon-dim">MIT</p>
+          <p className="text-xs sm:text-sm font-medium text-moon">
             {mit?.completed ? "Done" : "Pending"}
           </p>
         </div>
       </div>
 
-      <div className="w-px h-8 bg-night-mist" />
+      <div className="w-px h-6 sm:h-8 bg-night-mist" />
 
       {/* Tasks */}
       <div>
-        <p className="text-xs text-moon-dim">Tasks</p>
-        <p className="text-sm font-medium text-moon">
+        <p className="text-[0.625rem] sm:text-xs text-moon-dim">Tasks</p>
+        <p className="text-xs sm:text-sm font-medium text-moon">
           {completed}/{total}
         </p>
       </div>
 
-      <div className="w-px h-8 bg-night-mist" />
+      <div className="w-px h-6 sm:h-8 bg-night-mist" />
 
       {/* Streak */}
       <div className="flex items-center gap-1">
-        <Flame className="w-4 h-4 text-zen-red" />
-        <span className="text-sm font-medium text-moon">{streak}</span>
+        <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zen-red" />
+        <span className="text-xs sm:text-sm font-medium text-moon">{streak}</span>
       </div>
     </div>
   );
