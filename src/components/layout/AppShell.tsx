@@ -133,7 +133,8 @@ export function AppShell({ children, rightPanel, className, onRefresh }: AppShel
   return (
     <div
       className={cn(
-        "min-h-screen grid w-full max-w-full overflow-x-hidden",
+        // Fixed height to create scroll container - NOT min-h-screen
+        "h-screen grid w-full max-w-full overflow-hidden",
         // Desktop: 3 columns
         "xl:grid-cols-[260px_1fr_320px]",
         // Tablet: 2 columns (no stats panel)
@@ -146,10 +147,14 @@ export function AppShell({ children, rightPanel, className, onRefresh }: AppShel
       {/* Sidebar - Hidden on mobile */}
       <Sidebar className="hidden lg:flex" />
 
-      {/* Main Content */}
+      {/* Main Content - This is the scroll container */}
       <main
         ref={mainRef}
-        className="bg-void overflow-y-auto overflow-x-hidden min-h-screen min-w-0 relative"
+        className={cn(
+          "bg-void overflow-y-auto overflow-x-hidden min-w-0 relative",
+          // Fill the grid cell height (don't use min-h-screen which allows growing)
+          "h-full"
+        )}
         style={{
           // Ensure smooth scrolling and proper touch handling on iOS
           WebkitOverflowScrolling: "touch",
