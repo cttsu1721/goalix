@@ -149,6 +149,7 @@ function MobileNavContent({ className }: MobileNavProps) {
                 <Link
                   key={item.href}
                   href={item.href}
+                  prefetch={false}
                   onClick={() => setShowMore(false)}
                   className={cn(
                     "flex items-center gap-3 px-4 py-3 rounded-xl",
@@ -188,6 +189,7 @@ function MobileNavContent({ className }: MobileNavProps) {
               <Link
                 key={item.href}
                 href={item.href}
+                prefetch={false}
                 className={cn(
                   "flex flex-col items-center justify-center",
                   "min-w-[64px] min-h-[52px] py-2 px-2",

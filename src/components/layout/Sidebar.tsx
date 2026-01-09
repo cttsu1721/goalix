@@ -153,6 +153,7 @@ function SidebarContent({ className }: SidebarProps) {
               <Link
                 key={item.href}
                 href={item.href}
+                prefetch={false}
                 className={cn(
                   "flex items-center gap-3.5 px-4 py-3.5 rounded-xl mb-1",
                   "text-sm font-normal transition-all duration-300",
