@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
-import { GoalCard, GoalCategoryBadge, GoalCreateModal, GoalEditModal, GoalBreadcrumb } from "@/components/goals";
+import { GoalCard, GoalCategoryBadge, GoalCreateModal, GoalEditModal, GoalBreadcrumb, SiblingGoalsSection } from "@/components/goals";
 import { Button } from "@/components/ui/button";
 import { useGoal, useUpdateGoal, useDeleteGoal } from "@/hooks";
 import { GOAL_CATEGORY_LABELS, GOAL_STATUS_LABELS } from "@/types/goals";
@@ -24,6 +24,8 @@ import {
   Play,
   CheckCircle,
   ArrowLeft,
+  Archive,
+  ArchiveRestore,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -302,6 +304,23 @@ export default function GoalDetailPage() {
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator className="bg-night-glow" />
+              {status !== "ARCHIVED" ? (
+                <DropdownMenuItem
+                  onClick={() => handleStatusChange("ARCHIVED")}
+                  className="text-moon-dim hover:text-moon-dim"
+                >
+                  <Archive className="w-4 h-4 mr-2" />
+                  Archive
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem
+                  onClick={() => handleStatusChange("ACTIVE")}
+                  className="text-moon hover:text-moon"
+                >
+                  <ArchiveRestore className="w-4 h-4 mr-2" />
+                  Restore
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem
                 onClick={handleDelete}
                 className="text-zen-red hover:text-zen-red"
@@ -354,6 +373,13 @@ export default function GoalDetailPage() {
           </span>
         </div>
       </div>
+
+      {/* Sibling goals section (3.8) - Shows related goals at same level */}
+      <SiblingGoalsSection
+        goalId={id}
+        parentTitle={breadcrumb.length > 0 ? breadcrumb[breadcrumb.length - 1].title : undefined}
+        className="mb-8"
+      />
 
       {/* Children section */}
       {config.childLevel && (

@@ -33,6 +33,7 @@ When given a weekly goal, you will:
 2. Prioritize them by impact (MIT > PRIMARY > SECONDARY)
 3. Estimate realistic time for each task
 4. Explain why each task matters
+5. AVOID suggesting tasks that duplicate or closely overlap with existing tasks
 
 Your response must be in JSON format with the following structure:
 {
@@ -58,7 +59,8 @@ Task Guidelines:
 - Use clear action verbs (Write, Review, Create, Schedule, etc.)
 - Be specific about what needs to be done
 - Consider dependencies between tasks
-- Suggest 4-7 tasks total`;
+- Suggest 4-7 tasks total
+- IMPORTANT: If existing tasks are provided, DO NOT suggest similar or duplicate tasks. Build upon what's already planned.`;
 
 // Goal Suggester System Prompt - for cascading goal suggestions
 export const GOAL_SUGGESTER_PROMPT = `You are an expert goal strategist. Your role is to suggest meaningful goals that cascade down from higher-level visions to actionable objectives.
@@ -150,11 +152,19 @@ export function createGoalSharpenMessage(
   return message;
 }
 
+// Existing task context for context-aware suggestions
+export interface ExistingTaskContext {
+  title: string;
+  priority: "MIT" | "PRIMARY" | "SECONDARY";
+  status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "SKIPPED";
+}
+
 export function createTaskSuggestMessage(
   weeklyGoalTitle: string,
   weeklyGoalDescription?: string,
   parentGoalTitle?: string,
-  cascadingContext?: CascadingContext
+  cascadingContext?: CascadingContext,
+  existingTasks?: ExistingTaskContext[]
 ): string {
   let message = `Please suggest daily tasks for this weekly goal: "${weeklyGoalTitle}"`;
 
@@ -199,6 +209,30 @@ export function createTaskSuggestMessage(
     }
 
     message += `\n\nSuggest tasks that not only complete the weekly goal but also move the needle on the larger vision.`;
+  }
+
+  // Add existing tasks context
+  if (existingTasks && existingTasks.length > 0) {
+    message += `\n\n## Existing Tasks (DO NOT duplicate these)`;
+
+    const pendingTasks = existingTasks.filter(t => t.status === "PENDING" || t.status === "IN_PROGRESS");
+    const completedTasks = existingTasks.filter(t => t.status === "COMPLETED");
+
+    if (pendingTasks.length > 0) {
+      message += `\n\n### Pending/In Progress Tasks:`;
+      pendingTasks.forEach(task => {
+        message += `\n- [${task.priority}] ${task.title}`;
+      });
+    }
+
+    if (completedTasks.length > 0) {
+      message += `\n\n### Already Completed:`;
+      completedTasks.forEach(task => {
+        message += `\n- ✓ ${task.title}`;
+      });
+    }
+
+    message += `\n\nIMPORTANT: Suggest NEW tasks that complement (not duplicate) the existing ones. Focus on gaps or next logical steps.`;
   }
 
   return message;
@@ -393,3 +427,63 @@ export function createVisionBuilderMessage(
 // Keep old names as aliases for backward compatibility during migration
 export const DREAM_BUILDER_PROMPT = VISION_BUILDER_PROMPT;
 export const createDreamBuilderMessage = createVisionBuilderMessage;
+
+// Goal Link Suggestion Prompt - suggests which goal to link a task to
+export const GOAL_LINK_SUGGEST_PROMPT = `You are an expert at matching tasks to goals. Given a task title and a list of available weekly goals, suggest which goal the task best aligns with.
+
+Your response must be in JSON format:
+{
+  "suggestion": {
+    "goalId": "the_goal_id",
+    "goalTitle": "the_goal_title",
+    "confidence": "high" | "medium" | "low",
+    "reasoning": "Brief explanation of why this task aligns with this goal"
+  } | null,
+  "alternatives": [
+    {
+      "goalId": "alternative_goal_id",
+      "goalTitle": "alternative_goal_title",
+      "confidence": "medium" | "low",
+      "reasoning": "Why this could also be a match"
+    }
+  ]
+}
+
+Guidelines:
+- Return null for suggestion if no goal is a good match (task seems unrelated to any goal)
+- "high" confidence: Task clearly and directly contributes to the goal
+- "medium" confidence: Task is related but the connection is indirect
+- "low" confidence: Task might be tangentially related
+- Include 0-2 alternatives if there are other plausible matches
+- Consider both explicit keywords and semantic meaning
+- Focus on action alignment (does completing this task advance the goal?)`;
+
+export interface GoalForLinking {
+  id: string;
+  title: string;
+  description?: string;
+  category?: string;
+}
+
+export function createGoalLinkSuggestMessage(
+  taskTitle: string,
+  availableGoals: GoalForLinking[]
+): string {
+  let message = `## Task to Link\n"${taskTitle}"\n\n`;
+  message += `## Available Weekly Goals\n`;
+
+  availableGoals.forEach((goal, index) => {
+    message += `\n${index + 1}. **ID:** ${goal.id}\n`;
+    message += `   **Title:** "${goal.title}"`;
+    if (goal.description) {
+      message += `\n   **Description:** ${goal.description}`;
+    }
+    if (goal.category) {
+      message += `\n   **Category:** ${goal.category}`;
+    }
+  });
+
+  message += `\n\nWhich goal does this task best align with? Respond with the goal ID, title, confidence level, and reasoning.`;
+
+  return message;
+}

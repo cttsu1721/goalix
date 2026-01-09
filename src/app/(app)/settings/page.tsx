@@ -25,6 +25,11 @@ import {
   Loader2,
   Flower2,
   Repeat,
+  Download,
+  FileJson,
+  FileSpreadsheet,
+  Volume2,
+  Target,
 } from "lucide-react";
 import { RecurringTasksCard } from "@/components/tasks";
 import { useTheme } from "next-themes";
@@ -383,6 +388,9 @@ export default function SettingsPage() {
     weeklyReview: true,
     achievements: true,
   });
+  const [soundEffects, setSoundEffects] = useState(false);
+  const [motivationalQuotes, setMotivationalQuotes] = useState(true);
+  const [maxMitCount, setMaxMitCount] = useState(1);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Initialize form with fetched data
@@ -395,6 +403,9 @@ export default function SettingsPage() {
         weeklyReview: data.user.notifyWeeklyReview,
         achievements: data.user.notifyAchievements,
       });
+      setSoundEffects(data.user.enableSoundEffects ?? false);
+      setMotivationalQuotes(data.user.showMotivationalQuotes ?? true);
+      setMaxMitCount(data.user.maxMitCount ?? 1);
     }
   }, [data]);
 
@@ -428,6 +439,48 @@ export default function SettingsPage() {
         [key]: !newValue,
       }));
       toast.error("Failed to update notification preference");
+    }
+  };
+
+  const handleToggleSoundEffects = async () => {
+    const newValue = !soundEffects;
+    setSoundEffects(newValue);
+
+    try {
+      await updateSettings.mutateAsync({ enableSoundEffects: newValue });
+      toast.success(newValue ? "Sound effects enabled" : "Sound effects disabled");
+    } catch {
+      // Revert on error
+      setSoundEffects(!newValue);
+      toast.error("Failed to update sound effects preference");
+    }
+  };
+
+  const handleToggleMotivationalQuotes = async () => {
+    const newValue = !motivationalQuotes;
+    setMotivationalQuotes(newValue);
+
+    try {
+      await updateSettings.mutateAsync({ showMotivationalQuotes: newValue });
+      toast.success(newValue ? "Motivational quotes enabled" : "Motivational quotes disabled");
+    } catch {
+      // Revert on error
+      setMotivationalQuotes(!newValue);
+      toast.error("Failed to update motivational quotes preference");
+    }
+  };
+
+  const handleMitCountChange = async (newCount: number) => {
+    const oldCount = maxMitCount;
+    setMaxMitCount(newCount);
+
+    try {
+      await updateSettings.mutateAsync({ maxMitCount: newCount });
+      toast.success(`MIT limit set to ${newCount}`);
+    } catch {
+      // Revert on error
+      setMaxMitCount(oldCount);
+      toast.error("Failed to update MIT limit");
     }
   };
 
@@ -587,6 +640,93 @@ export default function SettingsPage() {
           </div>
         </SettingsSection>
 
+        {/* Sound Effects Section */}
+        <SettingsSection
+          icon={Volume2}
+          title="Sound Effects"
+          description="Audio feedback for task completion"
+        >
+          <div className="divide-y divide-night-mist">
+            <ToggleSwitch
+              checked={soundEffects}
+              onChange={handleToggleSoundEffects}
+              label="Enable Sound Effects"
+              description="Play sounds when completing tasks and earning achievements"
+              disabled={updateSettings.isPending}
+            />
+          </div>
+          <p className="text-xs text-moon-faint mt-4">
+            Satisfying audio feedback for task completions, MIT achievements, badges, and level-ups.
+          </p>
+        </SettingsSection>
+
+        {/* Motivational Quotes Section */}
+        <SettingsSection
+          icon={Flower2}
+          title="Daily Inspiration"
+          description="Motivational quotes on your dashboard"
+        >
+          <div className="divide-y divide-night-mist">
+            <ToggleSwitch
+              checked={motivationalQuotes}
+              onChange={handleToggleMotivationalQuotes}
+              label="Show Motivational Quotes"
+              description="Display a daily inspirational quote on your dashboard"
+              disabled={updateSettings.isPending}
+            />
+          </div>
+          <p className="text-xs text-moon-faint mt-4">
+            Get a fresh dose of motivation each day. Quotes change daily, or refresh for a new one anytime.
+          </p>
+        </SettingsSection>
+
+        {/* MIT Limit Section */}
+        <SettingsSection
+          icon={Target}
+          title="Daily MIT Limit"
+          description="Most Important Tasks per day"
+        >
+          <div className="space-y-4">
+            <p className="text-sm text-moon-soft">
+              Choose how many MITs (Most Important Tasks) you can set each day. Most productivity experts recommend focusing on just one.
+            </p>
+            <div className="flex gap-3">
+              {[1, 2, 3].map((count) => (
+                <button
+                  key={count}
+                  onClick={() => handleMitCountChange(count)}
+                  disabled={updateSettings.isPending}
+                  className={`
+                    flex-1 py-3 px-4 rounded-xl border-2 transition-all duration-200
+                    flex flex-col items-center gap-1
+                    ${maxMitCount === count
+                      ? "border-lantern bg-lantern/10 text-lantern"
+                      : "border-night-mist bg-night-soft text-moon-dim hover:border-moon-dim hover:text-moon"
+                    }
+                    ${updateSettings.isPending ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                  `}
+                >
+                  <span className="text-2xl font-bold">{count}</span>
+                  <span className="text-xs">
+                    {count === 1 ? "MIT" : "MITs"}
+                  </span>
+                  {count === 1 && (
+                    <span className="text-[0.625rem] text-lantern/70 mt-1">Recommended</span>
+                  )}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-moon-faint">
+              {maxMitCount === 1
+                ? "Focus on your single highest-impact task each day."
+                : maxMitCount === 2
+                ? "Balanced approach for those with multiple priorities."
+                : "Power user mode: tackle three critical items daily."
+              }
+            </p>
+          </div>
+        </SettingsSection>
+
         {/* Recurring Tasks Section */}
         <SettingsSection
           icon={Repeat}
@@ -598,6 +738,40 @@ export default function SettingsPage() {
 
         {/* Appearance Section */}
         <AppearanceSection />
+
+        {/* Data Export Section */}
+        <SettingsSection
+          icon={Download}
+          title="Data Export"
+          description="Download your goals and tasks"
+        >
+          <div className="space-y-4">
+            <p className="text-sm text-moon-soft">
+              Export all your data including goals, tasks, Kaizen check-ins, and achievements.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button
+                variant="outline"
+                onClick={() => window.open("/api/user/export?format=json", "_blank")}
+                className="border-night-mist bg-night-soft text-moon hover:bg-night-mist hover:border-moon-dim rounded-xl flex-1"
+              >
+                <FileJson className="w-4 h-4 mr-2" />
+                Export as JSON
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => window.open("/api/user/export?format=csv", "_blank")}
+                className="border-night-mist bg-night-soft text-moon hover:bg-night-mist hover:border-moon-dim rounded-xl flex-1"
+              >
+                <FileSpreadsheet className="w-4 h-4 mr-2" />
+                Export Tasks as CSV
+              </Button>
+            </div>
+            <p className="text-xs text-moon-faint">
+              JSON includes all data. CSV includes task history for spreadsheet analysis.
+            </p>
+          </div>
+        </SettingsSection>
 
         {/* Security Section */}
         <SettingsSection

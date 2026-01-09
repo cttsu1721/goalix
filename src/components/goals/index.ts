@@ -7,3 +7,8 @@ export { VisionBuilderModal, DreamBuilderModal } from "./VisionBuilderModal";
 export { VisionBuilderPreview, DreamBuilderPreview } from "./VisionBuilderPreview";
 export { GoalSelector } from "./GoalSelector";
 export { GoalBreadcrumb } from "./GoalBreadcrumb";
+export { UnlinkedGoalsWarning } from "./UnlinkedGoalsWarning";
+export { GoalArchiveDialog } from "./GoalArchiveDialog";
+export { SiblingGoals, SiblingGoalsList, SiblingGoalsSection } from "./SiblingGoals";
+export { GoalTree, GoalMindMap } from "./GoalTree";
+export { SuggestedCategory, CategorySelector } from "./SuggestedCategory";

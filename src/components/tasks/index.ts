@@ -16,3 +16,8 @@ export { RecurringTaskModal } from "./RecurringTaskModal";
 export { RecurringTasksCard } from "./RecurringTasksCard";
 export { SwipeHint, hasSeenSwipeHint, markSwipeHintShown } from "./SwipeHint";
 export { FloatingActionButton, FloatingActionMenu } from "./FloatingActionButton";
+export { TaskNotePreview } from "./TaskNotePreview";
+export { TimelineView } from "./TimelineView";
+export { Subtasks, SubtasksPreview } from "./Subtasks";
+export type { Subtask } from "./Subtasks";
+export { SubtaskList } from "./SubtaskList";

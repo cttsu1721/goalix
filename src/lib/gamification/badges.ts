@@ -16,6 +16,9 @@ export const BADGE_ICONS: Record<BadgeSlug, string> = {
   health_nut: "💪",
   wealth_builder: "💰",
   kaizen_starter: "🧘",
+  perfect_alignment: "🎯",
+  focused_week: "🔥",
+  laser_focused: "💎",
 };
 
 interface BadgeCheckResult {
@@ -336,6 +339,46 @@ export async function checkKaizenStarter(userId: string): Promise<BadgeCheckResu
 }
 
 /**
+ * Check and award perfect_alignment badge (100% goal-aligned tasks in a day)
+ */
+export async function checkPerfectAlignment(
+  userId: string,
+  alignmentPercentage: number
+): Promise<BadgeCheckResult | null> {
+  if (alignmentPercentage < 100) return null;
+
+  const hasIt = await hasBadge(userId, "perfect_alignment");
+  if (hasIt) return null;
+
+  await awardBadge(userId, "perfect_alignment");
+  return {
+    earned: true,
+    newlyEarned: true,
+    badge: BADGE_DEFINITIONS.perfect_alignment,
+  };
+}
+
+/**
+ * Check and award focused_week badge (80%+ alignment for a week)
+ */
+export async function checkFocusedWeek(
+  userId: string,
+  weeklyAlignmentPercentage: number
+): Promise<BadgeCheckResult | null> {
+  if (weeklyAlignmentPercentage < 80) return null;
+
+  const hasIt = await hasBadge(userId, "focused_week");
+  if (hasIt) return null;
+
+  await awardBadge(userId, "focused_week");
+  return {
+    earned: true,
+    newlyEarned: true,
+    badge: BADGE_DEFINITIONS.focused_week,
+  };
+}
+
+/**
  * Run all badge checks after an action
  */
 export async function checkAllBadges(
@@ -346,6 +389,8 @@ export async function checkAllBadges(
     todayPoints?: number;
     currentStreak?: number;
     category?: string;
+    dailyAlignmentPercentage?: number;
+    weeklyAlignmentPercentage?: number;
   }
 ): Promise<BadgeCheckResult[]> {
   const results: BadgeCheckResult[] = [];
@@ -383,6 +428,18 @@ export async function checkAllBadges(
   // Planner pro (check on daily planning)
   const plannerPro = await checkPlannerPro(userId);
   if (plannerPro) results.push(plannerPro);
+
+  // Perfect alignment (100% daily)
+  if (context.dailyAlignmentPercentage !== undefined) {
+    const perfectAlign = await checkPerfectAlignment(userId, context.dailyAlignmentPercentage);
+    if (perfectAlign) results.push(perfectAlign);
+  }
+
+  // Focused week (80%+ weekly)
+  if (context.weeklyAlignmentPercentage !== undefined) {
+    const focusedWeek = await checkFocusedWeek(userId, context.weeklyAlignmentPercentage);
+    if (focusedWeek) results.push(focusedWeek);
+  }
 
   return results;
 }

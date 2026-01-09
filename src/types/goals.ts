@@ -73,4 +73,5 @@ export const GOAL_STATUS_LABELS: Record<GoalStatus, string> = {
   COMPLETED: "Completed",
   PAUSED: "Paused",
   ABANDONED: "Abandoned",
+  ARCHIVED: "Archived",
 };

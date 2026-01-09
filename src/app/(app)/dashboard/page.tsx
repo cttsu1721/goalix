@@ -8,8 +8,9 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { MitCard, TaskList, shouldShowCarryOverPrompt, FloatingActionButton } from "@/components/tasks";
 import { StatsPanel } from "@/components/gamification/StatsPanel";
 import { MobileStatsBar } from "@/components/gamification/MobileStatsBar";
-import { YearTargetHeader } from "@/components/dashboard";
+import { YearTargetHeader, DayNavigation, SwipeContainer, MotivationalQuote } from "@/components/dashboard";
 import { ReviewDuePromptAuto } from "@/components/review";
+import { useMobileView } from "@/hooks/useMobileView";
 
 // Lazy load modal components to reduce initial bundle size
 const TaskCreateModal = dynamic(
@@ -60,16 +61,18 @@ import {
   useCarryOverTasks,
   useRescheduleOverdue,
   useUserStats,
+  useUserSettings,
   useKaizenCheckin,
   useSaveKaizenCheckin,
   useGoals,
   useGenerateRecurringTasks,
+  useFocusMode,
 } from "@/hooks";
 import { useAIUsage } from "@/hooks/useAI";
 import { LEVELS } from "@/types/gamification";
 import { TASK_PRIORITY_POINTS } from "@/types/tasks";
-import { formatLocalDate } from "@/lib/utils";
-import { Sparkles, CalendarDays, AlertTriangle, CalendarCheck } from "lucide-react";
+import { formatLocalDate, cn } from "@/lib/utils";
+import { Sparkles, CalendarDays, AlertTriangle, CalendarCheck, Focus, Eye } from "lucide-react";
 import { DashboardSkeleton, StatsPanelSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -125,6 +128,18 @@ export default function DashboardPage() {
   const { data: session } = useSession();
   const today = formatLocalDate();
 
+  // Mobile detection for day view swipe navigation
+  const { isMobile, isReady: isMobileReady } = useMobileView();
+
+  // Selected date state (for mobile day navigation)
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const selectedDateKey = formatLocalDate(selectedDate);
+
+  // Determine which date to show tasks for
+  // On mobile: use selected date (swipe navigation)
+  // On desktop: always show today
+  const displayDate = isMobile ? selectedDateKey : today;
+
   // Modal state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [defaultPriority, setDefaultPriority] = useState<TaskPriority>("SECONDARY");
@@ -152,9 +167,16 @@ export default function DashboardPage() {
     category: string;
   } | null>(null);
 
+  // Focus mode - hides overdue tasks to reduce cognitive load
+  const { isFocusMode, toggleFocusMode } = useFocusMode();
+
   // Fetch data - include overdue tasks for Today's Focus
-  const { data: tasksData, isLoading: tasksLoading, refetch: refetchTasks } = useTasks(today, { includeOverdue: true });
+  // Use displayDate for tasks - on mobile this follows swipe navigation, on desktop it's always today
+  // Only include overdue tasks when viewing today (not when browsing other dates on mobile)
+  const isViewingToday = displayDate === today;
+  const { data: tasksData, isLoading: tasksLoading, refetch: refetchTasks } = useTasks(displayDate, { includeOverdue: isViewingToday });
   const { data: statsData, isLoading: statsLoading, refetch: refetchStats } = useUserStats();
+  const { data: settingsData } = useUserSettings();
 
   // Pull-to-refresh handler
   const handleRefresh = useCallback(async () => {
@@ -350,6 +372,21 @@ export default function DashboardPage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  // Day navigation handlers for mobile swipe
+  const handleSwipeLeft = useCallback(() => {
+    // Swipe left = next day
+    const nextDay = new Date(selectedDate);
+    nextDay.setDate(nextDay.getDate() + 1);
+    setSelectedDate(nextDay);
+  }, [selectedDate]);
+
+  const handleSwipeRight = useCallback(() => {
+    // Swipe right = previous day
+    const prevDay = new Date(selectedDate);
+    prevDay.setDate(prevDay.getDate() - 1);
+    setSelectedDate(prevDay);
+  }, [selectedDate]);
+
   // Uncomplete a task (revert to pending)
   const uncompleteTask = useCallback(async (taskId: string) => {
     try {
@@ -365,7 +402,7 @@ export default function DashboardPage() {
   const allTasks = tasksData?.tasks || [];
   const requestedDate = tasksData?.requestedDate || today;
 
-  const { tasks, overdueTasks, mitTask, mit, primaryTasksFormatted, secondaryTasksFormatted, overdueTasksFormatted } = useMemo(() => {
+  const { tasks, overdueTasks, mitTasks, mitsFormatted, primaryTasksFormatted, secondaryTasksFormatted, overdueTasksFormatted } = useMemo(() => {
     // Separate today's tasks from overdue tasks
     const todayTasks = allTasks.filter((t) => {
       const taskDate = formatLocalDate(new Date(t.scheduledDate));
@@ -376,7 +413,7 @@ export default function DashboardPage() {
       return taskDate < requestedDate && t.status !== "COMPLETED";
     });
 
-    const mitTask = todayTasks.find((t) => t.priority === "MIT");
+    const mitTasks = todayTasks.filter((t) => t.priority === "MIT");
     const primaryTasks = todayTasks.filter((t) => t.priority === "PRIMARY");
     const secondaryTasks = todayTasks.filter((t) => t.priority === "SECONDARY");
 
@@ -390,49 +427,77 @@ export default function DashboardPage() {
       isOverdue,
       scheduledDate: formatLocalDate(new Date(task.scheduledDate)),
       priority: task.priority as "MIT" | "PRIMARY" | "SECONDARY",
+      estimatedMinutes: task.estimatedMinutes || undefined,
       goalChain: task.weeklyGoal
         ? {
             weeklyGoal: { id: task.weeklyGoal.id, title: task.weeklyGoal.title },
             oneYearGoal: task.weeklyGoal.monthlyGoal?.oneYearGoal || null,
+            sevenYearVision: task.weeklyGoal.monthlyGoal?.oneYearGoal?.threeYearGoal?.sevenYearVision || null,
           }
         : undefined,
     });
 
+    // Transform MIT tasks for display
+    const mitsFormatted = mitTasks.map((task) => ({
+      id: task.id,
+      title: task.title,
+      category: getCategoryLabel(task.weeklyGoal?.category || "OTHER"),
+      estimatedMinutes: task.estimatedMinutes || undefined,
+      completed: task.status === "COMPLETED",
+      goalChain: task.weeklyGoal
+        ? {
+            weeklyGoal: { id: task.weeklyGoal.id, title: task.weeklyGoal.title },
+            oneYearGoal: task.weeklyGoal.monthlyGoal?.oneYearGoal || null,
+            sevenYearVision: task.weeklyGoal.monthlyGoal?.oneYearGoal?.threeYearGoal?.sevenYearVision || null,
+          }
+        : undefined,
+    }));
+
     return {
       tasks: todayTasks,
       overdueTasks: overdue,
-      mitTask,
-      mit: mitTask
-        ? {
-            id: mitTask.id,
-            title: mitTask.title,
-            category: getCategoryLabel(mitTask.weeklyGoal?.category || "OTHER"),
-            estimatedMinutes: mitTask.estimatedMinutes || undefined,
-            completed: mitTask.status === "COMPLETED",
-            goalChain: mitTask.weeklyGoal
-              ? {
-                  weeklyGoal: { id: mitTask.weeklyGoal.id, title: mitTask.weeklyGoal.title },
-                  oneYearGoal: mitTask.weeklyGoal.monthlyGoal?.oneYearGoal || null,
-                }
-              : undefined,
-          }
-        : undefined,
+      mitTasks,
+      mitsFormatted,
       primaryTasksFormatted: primaryTasks.map((t) => transformTask(t)),
       secondaryTasksFormatted: secondaryTasks.map((t) => transformTask(t)),
       overdueTasksFormatted: overdue.map((t) => transformTask(t, true)),
     };
   }, [allTasks, requestedDate]);
 
-  // Handle task toggle (complete or uncomplete) - memoized with useCallback (MUST be before early return)
-  const handleToggleMit = useCallback(() => {
-    if (!mitTask || isCompleting || updateTask.isPending) return;
+  // Handle MIT task toggle (complete or uncomplete) - memoized with useCallback (MUST be before early return)
+  const handleToggleMit = useCallback(async (taskId: string) => {
+    if (isCompleting || updateTask.isPending) return;
+
+    const mitTask = mitTasks.find((t) => t.id === taskId);
+    if (!mitTask) return;
 
     if (mitTask.status === "COMPLETED") {
       uncompleteTask(mitTask.id);
     } else {
-      completeTask(mitTask.id, true); // true = MIT, triggers confetti
+      await completeTask(mitTask.id, true); // true = MIT, triggers confetti
+
+      // Show vision quote if MIT is linked to a vision (after a delay for other toasts)
+      const mitFormatted = mitsFormatted.find((m) => m.id === taskId);
+      const vision = mitFormatted?.goalChain?.sevenYearVision;
+      if (vision?.title) {
+        setTimeout(() => {
+          toast(
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <span className="text-lantern">✨</span>
+                <span className="font-medium text-moon">One step closer to your vision</span>
+              </div>
+              <p className="text-sm text-moon-dim italic pl-6">&ldquo;{vision.title}&rdquo;</p>
+            </div>,
+            {
+              duration: 5000,
+              className: "bg-night border-lantern/20",
+            }
+          );
+        }, 2500); // Delay to show after points toast
+      }
     }
-  }, [mitTask, isCompleting, updateTask.isPending, completeTask, uncompleteTask]);
+  }, [mitTasks, mitsFormatted, isCompleting, updateTask.isPending, completeTask, uncompleteTask]);
 
   const handleTogglePrimary = useCallback((taskId: string) => {
     if (isCompleting || updateTask.isPending) return;
@@ -480,10 +545,13 @@ export default function DashboardPage() {
     if (updateTask.isPending) return;
 
     try {
-      // If there's already an MIT, demote it to the dropped task's original priority
-      if (mitTask) {
+      const maxMitCount = statsData?.maxMitCount ?? 1;
+      const currentMitCount = mitTasks.length;
+
+      // If at MIT limit, demote the first MIT to the dropped task's original priority
+      if (currentMitCount >= maxMitCount && mitTasks[0]) {
         await updateTask.mutateAsync({
-          id: mitTask.id,
+          id: mitTasks[0].id,
           priority: droppedTask.priority,
         });
       }
@@ -495,7 +563,7 @@ export default function DashboardPage() {
       });
 
       // Show success message
-      if (mitTask) {
+      if (currentMitCount >= maxMitCount) {
         toast.success(`Swapped! "${droppedTask.title}" is now your MIT`);
       } else {
         toast.success(`"${droppedTask.title}" promoted to MIT!`);
@@ -505,7 +573,7 @@ export default function DashboardPage() {
     } catch {
       toast.error("Failed to promote task");
     }
-  }, [mitTask, updateTask, refetchTasks]);
+  }, [mitTasks, statsData?.maxMitCount, updateTask, refetchTasks]);
 
   // Open create modal with specific priority
   const openCreateModal = (priority: TaskPriority) => {
@@ -540,10 +608,12 @@ export default function DashboardPage() {
   const handleApplySuggestedTasks = async (suggestedTasks: SuggestedTask[], weeklyGoalId?: string) => {
     try {
       // Check current task limits
-      const hasMit = tasks.some((t) => t.priority === "MIT");
+      const maxMitCount = statsData?.maxMitCount ?? 1;
+      const currentMitCount = tasks.filter((t) => t.priority === "MIT").length;
       const primaryCount = tasks.filter((t) => t.priority === "PRIMARY").length;
 
       let addedCount = 0;
+      let mitAdded = currentMitCount;
       let primaryAdded = primaryCount;
 
       // Create tasks sequentially to maintain order
@@ -551,14 +621,16 @@ export default function DashboardPage() {
         let priority = task.priority;
 
         // Handle priority conflicts
-        if (priority === "MIT" && hasMit) {
-          // Already have a MIT, try to add as PRIMARY
+        if (priority === "MIT" && mitAdded >= maxMitCount) {
+          // Already at MIT limit, try to add as PRIMARY
           if (primaryAdded < 3) {
             priority = "PRIMARY";
             primaryAdded++;
           } else {
             priority = "SECONDARY";
           }
+        } else if (priority === "MIT") {
+          mitAdded++;
         } else if (priority === "PRIMARY" && primaryAdded >= 3) {
           priority = "SECONDARY";
         } else if (priority === "PRIMARY") {
@@ -575,8 +647,8 @@ export default function DashboardPage() {
         addedCount++;
       }
 
-      if (hasMit && suggestedTasks.some((t) => t.priority === "MIT")) {
-        toast.success(`Added ${addedCount} tasks (MIT → Primary since you already have one)`);
+      if (currentMitCount >= maxMitCount && suggestedTasks.some((t) => t.priority === "MIT")) {
+        toast.success(`Added ${addedCount} tasks (MIT → Primary since you've reached your MIT limit)`);
       } else {
         toast.success(`Added ${addedCount} tasks to your day!`);
       }
@@ -587,7 +659,7 @@ export default function DashboardPage() {
   };
 
   // Calculate stats for today's tasks
-  const todayFormattedTasks = [...(mit ? [mit] : []), ...primaryTasksFormatted, ...secondaryTasksFormatted];
+  const todayFormattedTasks = [...mitsFormatted, ...primaryTasksFormatted, ...secondaryTasksFormatted];
   const completedCount = todayFormattedTasks.filter((t) => t.completed).length;
   const pointsEarned = tasksData?.stats?.mit?.pointsEarned
     ? tasks.reduce((sum, t) => sum + t.pointsEarned, 0)
@@ -687,7 +759,47 @@ export default function DashboardPage() {
         aiUsesTotal={aiLimit}
         onAiClick={handleOpenTaskSuggest}
         showSettingsIcon
-      />
+        showSyncStatus
+        showHelpButton
+      >
+        {/* Focus Mode Toggle */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            toggleFocusMode();
+            toast.success(isFocusMode ? "Focus mode off" : "Focus mode on", {
+              icon: isFocusMode ? "👁️" : "🎯",
+              description: isFocusMode
+                ? "Showing all tasks including overdue"
+                : "Hiding overdue tasks to focus on today",
+              duration: 2000,
+            });
+          }}
+          className={cn(
+            "flex items-center gap-2",
+            "bg-night-soft border-night-mist",
+            "text-moon-soft text-[0.8125rem] font-normal",
+            "transition-all duration-300",
+            isFocusMode
+              ? "border-lantern text-lantern bg-lantern/10"
+              : "hover:border-lantern/50 hover:text-lantern"
+          )}
+          title={isFocusMode ? "Exit Focus Mode" : "Enter Focus Mode"}
+        >
+          {isFocusMode ? (
+            <>
+              <Focus className="w-4 h-4" />
+              <span className="hidden sm:inline">Focused</span>
+            </>
+          ) : (
+            <>
+              <Eye className="w-4 h-4" />
+              <span className="hidden sm:inline">Focus</span>
+            </>
+          )}
+        </Button>
+      </PageHeader>
 
       {/* Mobile Stats Bar - tap to see full Progress page */}
       <MobileStatsBar
@@ -697,8 +809,35 @@ export default function DashboardPage() {
         levelName={currentLevel.name}
       />
 
+      {/* Mobile Day Navigation - swipe between days (5.5) */}
+      {isMobile && isMobileReady && (
+        <DayNavigation
+          currentDate={selectedDate}
+          onDateChange={setSelectedDate}
+          className="mb-4 md:hidden"
+        />
+      )}
+
       {/* Review Due Prompt - shows when weekly/monthly review is due */}
       <ReviewDuePromptAuto className="mb-6" />
+
+      {/* Focus Mode Indicator - show when hiding overdue tasks */}
+      {isFocusMode && overdueTasksFormatted.length > 0 && (
+        <div className="mb-4 px-4 py-2 bg-lantern/5 border border-lantern/20 rounded-lg flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm text-lantern">
+            <Focus className="w-4 h-4" />
+            <span>Focus mode: {overdueTasksFormatted.length} overdue task{overdueTasksFormatted.length !== 1 ? "s" : ""} hidden</span>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleFocusMode}
+            className="h-7 text-xs text-lantern hover:text-moon hover:bg-lantern/10"
+          >
+            Show all
+          </Button>
+        </div>
+      )}
 
       {/* 1-Year Target Header - The Decision Filter */}
       <YearTargetHeader
@@ -709,8 +848,13 @@ export default function DashboardPage() {
         goalAlignedTasks={linkedTasks}
       />
 
-      {/* Overdue Tasks Section - shown when there are overdue tasks */}
-      {overdueTasksFormatted.length > 0 && (
+      {/* Motivational Quote - optional, shown based on user settings */}
+      {settingsData?.user?.showMotivationalQuotes && isViewingToday && (
+        <MotivationalQuote className="mb-6" />
+      )}
+
+      {/* Overdue Tasks Section - shown when there are overdue tasks (hidden in focus mode) */}
+      {overdueTasksFormatted.length > 0 && !isFocusMode && (
         <section className="mb-8">
           <div className="flex items-center gap-2 mb-4 pb-3 border-b border-zen-red/20">
             <AlertTriangle className="w-4 h-4 text-zen-red" />
@@ -833,12 +977,33 @@ export default function DashboardPage() {
         </div>
       ) : tasks.length > 0 ? (
         <>
-          <MitCard
-            task={mit}
-            onToggle={handleToggleMit}
-            onAiSuggest={handleOpenTaskSuggest}
-            onDrop={handlePromoteToMit}
-          />
+          {/* MIT Cards - render one for each MIT task */}
+          {mitsFormatted.length > 0 ? (
+            mitsFormatted.map((mit, index) => (
+              <MitCard
+                key={mit.id}
+                task={mit}
+                onToggle={() => handleToggleMit(mit.id)}
+                onAiSuggest={handleOpenTaskSuggest}
+                onDrop={handlePromoteToMit}
+                className={index > 0 ? "mt-4" : undefined}
+              />
+            ))
+          ) : (
+            <MitCard
+              onAiSuggest={handleOpenTaskSuggest}
+              onDrop={handlePromoteToMit}
+            />
+          )}
+
+          {/* Show add MIT drop zone if under the limit and have at least one MIT */}
+          {mitsFormatted.length > 0 && mitsFormatted.length < (statsData?.maxMitCount ?? 1) && (
+            <MitCard
+              onAiSuggest={handleOpenTaskSuggest}
+              onDrop={handlePromoteToMit}
+              className="mt-4 opacity-60"
+            />
+          )}
 
           <TaskList
             title="Primary"
@@ -847,6 +1012,7 @@ export default function DashboardPage() {
             onTaskEdit={openEditModal}
             onAddTask={() => openCreateModal("PRIMARY")}
             draggable
+            onPromoteToMit={handlePromoteToMit}
           />
 
           <TaskList
@@ -856,6 +1022,7 @@ export default function DashboardPage() {
             onTaskEdit={openEditModal}
             onAddTask={() => openCreateModal("SECONDARY")}
             draggable
+            onPromoteToMit={handlePromoteToMit}
           />
         </>
       ) : null}

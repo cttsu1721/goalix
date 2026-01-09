@@ -77,8 +77,54 @@ export type DreamBuilderOneYearGoal = VisionBuilderOneYearGoal;
 export type DreamBuilderFiveYearGoal = VisionBuilderThreeYearGoal;
 export type DreamBuilderResponse = VisionBuilderResponse;
 
+// Goal Link Suggestion Response Schema
+export interface GoalLinkSuggestion {
+  goalId: string;
+  goalTitle: string;
+  confidence: "high" | "medium" | "low";
+  reasoning: string;
+}
+
+export interface GoalLinkSuggestResponse {
+  suggestion: GoalLinkSuggestion | null;
+  alternatives: GoalLinkSuggestion[];
+}
+
+export function validateGoalLinkSuggestResponse(data: unknown): data is GoalLinkSuggestResponse {
+  if (!data || typeof data !== "object") return false;
+  const obj = data as Record<string, unknown>;
+
+  // Suggestion can be null
+  if (obj.suggestion !== null) {
+    if (typeof obj.suggestion !== "object") return false;
+    const s = obj.suggestion as Record<string, unknown>;
+    if (
+      typeof s.goalId !== "string" ||
+      typeof s.goalTitle !== "string" ||
+      !["high", "medium", "low"].includes(s.confidence as string) ||
+      typeof s.reasoning !== "string"
+    ) {
+      return false;
+    }
+  }
+
+  // Alternatives must be an array
+  if (!Array.isArray(obj.alternatives)) return false;
+
+  return obj.alternatives.every((alt: unknown) => {
+    if (!alt || typeof alt !== "object") return false;
+    const a = alt as Record<string, unknown>;
+    return (
+      typeof a.goalId === "string" &&
+      typeof a.goalTitle === "string" &&
+      ["high", "medium", "low"].includes(a.confidence as string) &&
+      typeof a.reasoning === "string"
+    );
+  });
+}
+
 // AI Interaction Types
-export type AIInteractionType = "GOAL_SHARPEN" | "TASK_SUGGEST" | "GOAL_SUGGEST" | "VISION_BUILD";
+export type AIInteractionType = "GOAL_SHARPEN" | "TASK_SUGGEST" | "GOAL_SUGGEST" | "VISION_BUILD" | "GOAL_LINK_SUGGEST";
 
 // Rate limit configuration
 export const AI_RATE_LIMITS = {

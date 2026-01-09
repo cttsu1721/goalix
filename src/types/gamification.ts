@@ -128,6 +128,28 @@ export const BADGE_DEFINITIONS = {
     category: "kaizen",
     icon: "🧘",
   },
+  // Alignment badges
+  perfect_alignment: {
+    slug: "perfect_alignment",
+    name: "Perfect Alignment",
+    description: "Complete a day with 100% goal-aligned tasks",
+    category: "alignment",
+    icon: "🎯",
+  },
+  focused_week: {
+    slug: "focused_week",
+    name: "Focused Week",
+    description: "Complete a week with 80%+ goal-aligned tasks",
+    category: "alignment",
+    icon: "🔥",
+  },
+  laser_focused: {
+    slug: "laser_focused",
+    name: "Laser Focused",
+    description: "4 consecutive weeks with 80%+ alignment",
+    category: "alignment",
+    icon: "💎",
+  },
 } as const;
 
 export type BadgeSlug = keyof typeof BADGE_DEFINITIONS;

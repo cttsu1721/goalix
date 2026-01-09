@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { useWeeklyReview, useSubmitWeeklyReview, formatAreaName, useUserStreaks } from "@/hooks";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { toast } from "sonner";
 import {
   Calendar,
@@ -29,6 +30,7 @@ import {
   Brain,
   Palmtree,
 } from "lucide-react";
+import { GoalReviewSection } from "@/components/review/GoalReviewSection";
 
 const AREA_ICONS: Record<string, React.ElementType> = {
   health: Heart,
@@ -48,11 +50,17 @@ const AREA_COLORS: Record<string, string> = {
   lifestyle: "text-lantern",
 };
 
+// Review steps (past-focused)
 const reviewSteps = [
   { id: 1, title: "Week Stats", description: "Review your performance" },
   { id: 2, title: "Wins", description: "Celebrate achievements" },
   { id: 3, title: "Challenges", description: "Identify obstacles" },
-  { id: 4, title: "Next Week", description: "Set priorities" },
+];
+
+// Planning steps (future-focused)
+const planSteps = [
+  { id: 1, title: "Focus", description: "Set your priorities" },
+  { id: 2, title: "Actions", description: "Plan key tasks" },
 ];
 
 function StatCard({
@@ -283,24 +291,42 @@ function KaizenWeeklyCard({ kaizen }: {
   );
 }
 
-function ReviewWizard({ weekData, streaks, onComplete }: {
+type ReviewMode = "review" | "plan";
+
+function ReviewWizard({ weekData, streaks, onComplete, initialMode = "review" }: {
   weekData: ReturnType<typeof useWeeklyReview>["data"];
   streaks: Array<{ type: string; currentCount: number }>;
   onComplete: () => void;
+  initialMode?: ReviewMode;
 }) {
-  const [currentStep, setCurrentStep] = useState(1);
+  const [mode, setMode] = useState<ReviewMode>(initialMode);
+  const [reviewStep, setReviewStep] = useState(1);
+  const [planStep, setPlanStep] = useState(1);
   const [wins, setWins] = useState("");
   const [challenges, setChallenges] = useState("");
   const [nextWeekFocus, setNextWeekFocus] = useState("");
+  const [keyActions, setKeyActions] = useState("");
+  const [reviewCompleted, setReviewCompleted] = useState(false);
+  const [planCompleted, setPlanCompleted] = useState(false);
 
   const submitReview = useSubmitWeeklyReview();
 
-  const handleNext = () => {
-    if (currentStep < 4) setCurrentStep(currentStep + 1);
+  const handleReviewNext = () => {
+    if (reviewStep < 3) setReviewStep(reviewStep + 1);
+    else setReviewCompleted(true);
   };
 
-  const handlePrev = () => {
-    if (currentStep > 1) setCurrentStep(currentStep - 1);
+  const handleReviewPrev = () => {
+    if (reviewStep > 1) setReviewStep(reviewStep - 1);
+  };
+
+  const handlePlanNext = () => {
+    if (planStep < 2) setPlanStep(planStep + 1);
+    else setPlanCompleted(true);
+  };
+
+  const handlePlanPrev = () => {
+    if (planStep > 1) setPlanStep(planStep - 1);
   };
 
   const handleSubmit = async () => {
@@ -308,7 +334,7 @@ function ReviewWizard({ weekData, streaks, onComplete }: {
       const result = await submitReview.mutateAsync({
         wins,
         challenges,
-        nextWeekFocus,
+        nextWeekFocus: `${nextWeekFocus}${keyActions ? `\n\nKey Actions:\n${keyActions}` : ""}`,
         weekOffset: 0,
       });
 
@@ -324,39 +350,82 @@ function ReviewWizard({ weekData, streaks, onComplete }: {
     }
   };
 
+  const canSubmit = reviewCompleted || planCompleted;
   const currentStreak = streaks.find((s) => s.type === "WEEKLY_REVIEW")?.currentCount || 0;
+
+  const currentSteps = mode === "review" ? reviewSteps : planSteps;
+  const currentStep = mode === "review" ? reviewStep : planStep;
+  const isCurrentModeCompleted = mode === "review" ? reviewCompleted : planCompleted;
 
   return (
     <div className="bg-night border border-night-mist rounded-2xl overflow-hidden">
+      {/* Mode Tabs */}
+      <div className="border-b border-night-mist bg-night-soft">
+        <div className="flex">
+          <button
+            onClick={() => setMode("review")}
+            className={`
+              flex-1 px-4 py-3 text-sm font-medium flex items-center justify-center gap-2 transition-colors
+              ${mode === "review"
+                ? "text-lantern border-b-2 border-lantern bg-night"
+                : "text-moon-dim hover:text-moon border-b-2 border-transparent"
+              }
+            `}
+          >
+            <Calendar className="w-4 h-4" />
+            Review Past
+            {reviewCompleted && <CheckCircle2 className="w-3.5 h-3.5 text-zen-green" />}
+          </button>
+          <button
+            onClick={() => setMode("plan")}
+            className={`
+              flex-1 px-4 py-3 text-sm font-medium flex items-center justify-center gap-2 transition-colors
+              ${mode === "plan"
+                ? "text-zen-green border-b-2 border-zen-green bg-night"
+                : "text-moon-dim hover:text-moon border-b-2 border-transparent"
+              }
+            `}
+          >
+            <Sparkles className="w-4 h-4" />
+            Plan Ahead
+            {planCompleted && <CheckCircle2 className="w-3.5 h-3.5 text-zen-green" />}
+          </button>
+        </div>
+      </div>
+
       {/* Step Indicator */}
-      <div className="p-4 border-b border-night-mist bg-night-soft">
-        <div className="flex items-center justify-between">
-          {reviewSteps.map((step, index) => (
+      <div className="p-4 border-b border-night-mist">
+        <div className="flex items-center justify-center gap-4">
+          {currentSteps.map((step, index) => (
             <div key={step.id} className="flex items-center">
               <div className="flex flex-col items-center">
                 <div
                   className={`
                     w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
                     ${
-                      currentStep === step.id
-                        ? "bg-lantern text-void"
+                      isCurrentModeCompleted
+                        ? "bg-zen-green text-void"
+                        : currentStep === step.id
+                        ? mode === "review" ? "bg-lantern text-void" : "bg-zen-green text-void"
                         : currentStep > step.id
                         ? "bg-zen-green text-void"
                         : "bg-night-mist text-moon-faint"
                     }
                   `}
                 >
-                  {currentStep > step.id ? <CheckCircle2 className="w-4 h-4" /> : step.id}
+                  {isCurrentModeCompleted || currentStep > step.id
+                    ? <CheckCircle2 className="w-4 h-4" />
+                    : step.id}
                 </div>
-                <span className="text-[0.625rem] text-moon-faint mt-1 hidden sm:block">
+                <span className="text-[0.625rem] text-moon-faint mt-1">
                   {step.title}
                 </span>
               </div>
-              {index < reviewSteps.length - 1 && (
+              {index < currentSteps.length - 1 && (
                 <div
                   className={`
-                    w-12 h-0.5 mx-2
-                    ${currentStep > step.id ? "bg-zen-green" : "bg-night-mist"}
+                    w-16 h-0.5 mx-3
+                    ${isCurrentModeCompleted || currentStep > step.id ? "bg-zen-green" : "bg-night-mist"}
                   `}
                 />
               )}
@@ -367,7 +436,8 @@ function ReviewWizard({ weekData, streaks, onComplete }: {
 
       {/* Step Content */}
       <div className="p-6">
-        {currentStep === 1 && weekData && (
+        {/* REVIEW MODE - Step 1: Week Stats */}
+        {mode === "review" && reviewStep === 1 && weekData && !reviewCompleted && (
           <div className="space-y-4">
             <div className="text-center mb-6">
               <h3 className="text-lg font-medium text-moon mb-2">Week in Review</h3>
@@ -437,7 +507,8 @@ function ReviewWizard({ weekData, streaks, onComplete }: {
           </div>
         )}
 
-        {currentStep === 2 && weekData && (
+        {/* REVIEW MODE - Step 2: Wins */}
+        {mode === "review" && reviewStep === 2 && weekData && !reviewCompleted && (
           <div className="space-y-5">
             <div className="text-center mb-6">
               <div className="w-12 h-12 rounded-xl bg-lantern-soft flex items-center justify-center mx-auto mb-3">
@@ -502,7 +573,8 @@ function ReviewWizard({ weekData, streaks, onComplete }: {
           </div>
         )}
 
-        {currentStep === 3 && weekData && (
+        {/* REVIEW MODE - Step 3: Challenges */}
+        {mode === "review" && reviewStep === 3 && weekData && !reviewCompleted && (
           <div className="space-y-5">
             <div className="text-center mb-6">
               <div className="w-12 h-12 rounded-xl bg-zen-red-soft flex items-center justify-center mx-auto mb-3">
@@ -568,15 +640,36 @@ function ReviewWizard({ weekData, streaks, onComplete }: {
           </div>
         )}
 
-        {currentStep === 4 && weekData && (
+        {/* REVIEW MODE - Completed state */}
+        {mode === "review" && reviewCompleted && (
+          <div className="text-center py-8">
+            <div className="w-16 h-16 rounded-2xl bg-zen-green/10 flex items-center justify-center mx-auto mb-4">
+              <CheckCircle2 className="w-8 h-8 text-zen-green" />
+            </div>
+            <h3 className="text-lg font-medium text-moon mb-2">Review Complete!</h3>
+            <p className="text-sm text-moon-dim mb-4">
+              You&apos;ve reflected on your week. Now switch to &quot;Plan Ahead&quot; to set your priorities.
+            </p>
+            <Button
+              onClick={() => setMode("plan")}
+              className="bg-zen-green text-void hover:bg-zen-green/90 rounded-xl"
+            >
+              <Sparkles className="w-4 h-4 mr-2" />
+              Start Planning
+            </Button>
+          </div>
+        )}
+
+        {/* PLAN MODE - Step 1: Focus */}
+        {mode === "plan" && planStep === 1 && weekData && !planCompleted && (
           <div className="space-y-5">
             <div className="text-center mb-6">
               <div className="w-12 h-12 rounded-xl bg-zen-green-soft flex items-center justify-center mx-auto mb-3">
-                <Sparkles className="w-6 h-6 text-zen-green" />
+                <Target className="w-6 h-6 text-zen-green" />
               </div>
-              <h3 className="text-lg font-medium text-moon mb-2">Plan Next Week</h3>
+              <h3 className="text-lg font-medium text-moon mb-2">Set Your Focus</h3>
               <p className="text-sm text-moon-dim">
-                Set your intention for the week ahead
+                What will make next week a success?
               </p>
             </div>
 
@@ -602,7 +695,6 @@ function ReviewWizard({ weekData, streaks, onComplete }: {
               <div className="space-y-2 text-sm text-moon-dim">
                 <p>• What ONE thing would make next week a success?</p>
                 <p>• What will your MIT focus on?</p>
-                <p>• What habit will you protect or build?</p>
                 <p>• How will you stay aligned with your 1-year target?</p>
               </div>
             </div>
@@ -612,6 +704,40 @@ function ReviewWizard({ weekData, streaks, onComplete }: {
               onChange={(e) => setNextWeekFocus(e.target.value)}
               placeholder="My #1 priority is... I will protect time for... To stay aligned I will..."
               className="w-full h-28 bg-night-soft border border-night-mist rounded-xl p-4 text-moon placeholder:text-moon-faint resize-none focus:border-zen-green focus:ring-1 focus:ring-zen-green/20 outline-none"
+            />
+          </div>
+        )}
+
+        {/* PLAN MODE - Step 2: Actions */}
+        {mode === "plan" && planStep === 2 && !planCompleted && (
+          <div className="space-y-5">
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 rounded-xl bg-lantern-soft flex items-center justify-center mx-auto mb-3">
+                <CheckCircle2 className="w-6 h-6 text-lantern" />
+              </div>
+              <h3 className="text-lg font-medium text-moon mb-2">Key Actions</h3>
+              <p className="text-sm text-moon-dim">
+                What specific tasks will you tackle?
+              </p>
+            </div>
+
+            {/* Guided questions */}
+            <div className="space-y-3">
+              <label className="text-xs font-medium uppercase tracking-wider text-moon-faint">
+                Action Prompts
+              </label>
+              <div className="space-y-2 text-sm text-moon-dim">
+                <p>• What&apos;s the first MIT you&apos;ll tackle?</p>
+                <p>• What habit will you protect or build?</p>
+                <p>• What might get in your way, and how will you handle it?</p>
+              </div>
+            </div>
+
+            <textarea
+              value={keyActions}
+              onChange={(e) => setKeyActions(e.target.value)}
+              placeholder="My first MIT will be... I will build the habit of... To prevent distractions I will..."
+              className="w-full h-28 bg-night-soft border border-night-mist rounded-xl p-4 text-moon placeholder:text-moon-faint resize-none focus:border-lantern focus:ring-1 focus:ring-lantern/20 outline-none"
             />
 
             {/* Streak reminder */}
@@ -625,28 +751,83 @@ function ReviewWizard({ weekData, streaks, onComplete }: {
             )}
           </div>
         )}
+
+        {/* PLAN MODE - Completed state */}
+        {mode === "plan" && planCompleted && (
+          <div className="text-center py-8">
+            <div className="w-16 h-16 rounded-2xl bg-zen-green/10 flex items-center justify-center mx-auto mb-4">
+              <CheckCircle2 className="w-8 h-8 text-zen-green" />
+            </div>
+            <h3 className="text-lg font-medium text-moon mb-2">Planning Complete!</h3>
+            <p className="text-sm text-moon-dim mb-4">
+              You&apos;re all set for next week.
+              {!reviewCompleted && " Consider reviewing your past week too."}
+            </p>
+            <div className="flex items-center justify-center gap-3">
+              {!reviewCompleted && (
+                <Button
+                  onClick={() => setMode("review")}
+                  variant="outline"
+                  className="border-night-mist bg-night-soft text-moon hover:border-lantern rounded-xl"
+                >
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Review Past
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Navigation */}
       <div className="p-4 border-t border-night-mist flex items-center justify-between">
-        <Button
-          variant="outline"
-          onClick={handlePrev}
-          disabled={currentStep === 1}
-          className="border-night-mist bg-night-soft text-moon hover:border-moon-dim disabled:opacity-30 rounded-xl"
-        >
-          <ChevronLeft className="w-4 h-4 mr-1" />
-          Back
-        </Button>
-        {currentStep < 4 ? (
+        {/* Back button - mode specific */}
+        {mode === "review" && !reviewCompleted && (
           <Button
-            onClick={handleNext}
+            variant="outline"
+            onClick={handleReviewPrev}
+            disabled={reviewStep === 1}
+            className="border-night-mist bg-night-soft text-moon hover:border-moon-dim disabled:opacity-30 rounded-xl"
+          >
+            <ChevronLeft className="w-4 h-4 mr-1" />
+            Back
+          </Button>
+        )}
+        {mode === "plan" && !planCompleted && (
+          <Button
+            variant="outline"
+            onClick={handlePlanPrev}
+            disabled={planStep === 1}
+            className="border-night-mist bg-night-soft text-moon hover:border-moon-dim disabled:opacity-30 rounded-xl"
+          >
+            <ChevronLeft className="w-4 h-4 mr-1" />
+            Back
+          </Button>
+        )}
+        {(isCurrentModeCompleted) && <div />}
+
+        {/* Next/Complete button - mode specific */}
+        {mode === "review" && !reviewCompleted && (
+          <Button
+            onClick={handleReviewNext}
             className="bg-lantern text-void hover:bg-lantern/90 rounded-xl"
           >
-            Next
+            {reviewStep < 3 ? "Next" : "Complete Review"}
             <ChevronRight className="w-4 h-4 ml-1" />
           </Button>
-        ) : (
+        )}
+        {mode === "plan" && !planCompleted && (
+          <Button
+            onClick={handlePlanNext}
+            className="bg-zen-green text-void hover:bg-zen-green/90 rounded-xl"
+          >
+            {planStep < 2 ? "Next" : "Complete Planning"}
+            <ChevronRight className="w-4 h-4 ml-1" />
+          </Button>
+        )}
+
+        {/* Submit button - when both complete or at least one is complete */}
+        {canSubmit && (
           <Button
             onClick={handleSubmit}
             disabled={submitReview.isPending}
@@ -660,7 +841,7 @@ function ReviewWizard({ weekData, streaks, onComplete }: {
             ) : (
               <>
                 <CheckCircle2 className="w-4 h-4 mr-2" />
-                Complete Review
+                Save & Finish
               </>
             )}
           </Button>
@@ -670,24 +851,34 @@ function ReviewWizard({ weekData, streaks, onComplete }: {
   );
 }
 
-function EmptyReviewState({ onStartReview }: { onStartReview: () => void }) {
+function EmptyReviewState({ onStartReview, onStartPlan }: { onStartReview: () => void; onStartPlan: () => void }) {
   return (
     <div className="bg-night border border-night-mist rounded-2xl p-12 text-center">
       <div className="w-20 h-20 rounded-2xl bg-lantern-soft flex items-center justify-center mx-auto mb-6">
         <FileText className="w-10 h-10 text-lantern" />
       </div>
-      <h3 className="text-xl font-medium text-moon mb-3">Complete Your Weekly Review</h3>
+      <h3 className="text-xl font-medium text-moon mb-3">Weekly Check-in</h3>
       <p className="text-moon-dim max-w-md mx-auto mb-8 leading-relaxed">
         Take a few minutes to reflect on your progress, celebrate wins, and plan
-        for the week ahead. Regular reviews are key to continuous improvement.
+        for the week ahead. You can review, plan, or do both.
       </p>
-      <Button
-        onClick={onStartReview}
-        className="bg-lantern text-void hover:bg-lantern/90 font-medium px-6 h-11 rounded-xl"
-      >
-        <Sparkles className="w-4 h-4 mr-2" />
-        Start Weekly Review
-      </Button>
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+        <Button
+          onClick={onStartReview}
+          className="bg-lantern text-void hover:bg-lantern/90 font-medium px-6 h-11 rounded-xl w-full sm:w-auto"
+        >
+          <Calendar className="w-4 h-4 mr-2" />
+          Review Past Week
+        </Button>
+        <Button
+          onClick={onStartPlan}
+          variant="outline"
+          className="border-zen-green text-zen-green hover:bg-zen-green/10 font-medium px-6 h-11 rounded-xl w-full sm:w-auto"
+        >
+          <Sparkles className="w-4 h-4 mr-2" />
+          Plan Ahead
+        </Button>
+      </div>
     </div>
   );
 }
@@ -704,10 +895,17 @@ export default function WeeklyReviewPage() {
   const router = useRouter();
   const [isReviewing, setIsReviewing] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [initialMode, setInitialMode] = useState<ReviewMode>("review");
   const { data: weekData, isLoading } = useWeeklyReview(0);
   const { data: streaksData } = useUserStreaks();
 
   const handleStartReview = () => {
+    setInitialMode("review");
+    setIsReviewing(true);
+  };
+
+  const handleStartPlan = () => {
+    setInitialMode("plan");
     setIsReviewing(true);
   };
 
@@ -767,10 +965,22 @@ export default function WeeklyReviewPage() {
 
   return (
     <AppShell>
-      <PageHeader
-        title="Weekly Review"
-        subtitle={`Week of ${getWeekRange()}`}
-      />
+      <div className="flex items-center justify-between mb-4">
+        <PageHeader
+          title="Weekly Review"
+          subtitle={`Week of ${getWeekRange()}`}
+        />
+        <Link href="/review/history">
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-night-mist text-moon-dim hover:text-moon hover:border-night-glow"
+          >
+            <FileText className="w-4 h-4 mr-2" />
+            Past Reviews
+          </Button>
+        </Link>
+      </div>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -817,6 +1027,9 @@ export default function WeeklyReviewPage() {
         )}
       </div>
 
+      {/* Goal Review Section - Edit/Pause/Abandon Goals */}
+      <GoalReviewSection className="mb-6" />
+
       {/* Review Wizard, Completed State, or Empty State */}
       {isCompleted ? (
         <div className="bg-night border border-night-mist rounded-2xl p-12 text-center">
@@ -847,9 +1060,9 @@ export default function WeeklyReviewPage() {
           </div>
         </div>
       ) : isReviewing ? (
-        <ReviewWizard weekData={weekData} streaks={streaksData?.streaks || []} onComplete={handleComplete} />
+        <ReviewWizard weekData={weekData} streaks={streaksData?.streaks || []} onComplete={handleComplete} initialMode={initialMode} />
       ) : (
-        <EmptyReviewState onStartReview={handleStartReview} />
+        <EmptyReviewState onStartReview={handleStartReview} onStartPlan={handleStartPlan} />
       )}
     </AppShell>
   );

@@ -2,7 +2,7 @@
 
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { LifestyleInsight, KaizenHeatmap } from "@/components/gamification";
+import { LifestyleInsight, KaizenHeatmap, PointsExplainer, MonthSoFarCard, AlignmentTrendCard } from "@/components/gamification";
 import { useUserStats, useUserStreaks, useUserBadges } from "@/hooks/useGamification";
 import { LEVELS, STREAK_TYPE_LABELS } from "@/types/gamification";
 import {
@@ -25,15 +25,22 @@ function StatCard({
   value,
   subtext,
   iconColor = "text-lantern",
+  action,
 }: {
   icon: React.ElementType;
   label: string;
   value: string | number;
   subtext?: string;
   iconColor?: string;
+  action?: React.ReactNode;
 }) {
   return (
-    <div className="bg-night border border-night-mist rounded-xl sm:rounded-2xl p-4 sm:p-5">
+    <div className="bg-night border border-night-mist rounded-xl sm:rounded-2xl p-4 sm:p-5 relative">
+      {action && (
+        <div className="absolute top-3 right-3">
+          {action}
+        </div>
+      )}
       <div className="flex items-center gap-3 sm:block">
         <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-night-soft flex items-center justify-center ${iconColor} sm:mb-3`}>
           <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -335,8 +342,8 @@ export default function ProgressPage() {
     return (
       <AppShell>
         <PageHeader
-          title="Your Progress"
-          subtitle="Track your achievements and gamification stats"
+          title="Stats & Achievements"
+          subtitle="Your points, streaks, badges, and level — earned through daily action"
         />
         <LoadingState />
       </AppShell>
@@ -362,8 +369,8 @@ export default function ProgressPage() {
   return (
     <AppShell>
       <PageHeader
-        title="Your Progress"
-        subtitle="Track your achievements and gamification stats"
+        title="Stats & Achievements"
+        subtitle="Your points, streaks, badges, and level — earned through daily action"
       />
 
       {/* All-Time Stats Grid */}
@@ -385,6 +392,7 @@ export default function ProgressPage() {
           label="Total Points"
           value={totalPoints.toLocaleString()}
           iconColor="text-lantern"
+          action={<PointsExplainer currentLevel={level} currentPoints={totalPoints} />}
         />
         <StatCard
           icon={Calendar}
@@ -393,6 +401,16 @@ export default function ProgressPage() {
           subtext={levelName}
           iconColor="text-zen-purple"
         />
+      </div>
+
+      {/* Month So Far Card */}
+      <div className="mb-6">
+        <MonthSoFarCard />
+      </div>
+
+      {/* Weekly Alignment Trend Sparkline */}
+      <div className="mb-6">
+        <AlignmentTrendCard weeks={12} />
       </div>
 
       {/* Lifestyle Insight (only shows if user has milestone-worthy streaks) */}

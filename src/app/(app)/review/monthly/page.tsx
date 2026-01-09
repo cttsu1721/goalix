@@ -31,6 +31,7 @@ import {
   Trophy,
   BarChart3,
 } from "lucide-react";
+import { GoalReviewSection } from "@/components/review/GoalReviewSection";
 
 const AREA_ICONS: Record<string, React.ElementType> = {
   health: Heart,
@@ -973,6 +974,9 @@ export default function MonthlyReviewPage() {
           <GoalAlignmentCard goalAlignment={monthData.goalAlignment} />
         </div>
       )}
+
+      {/* Goal Review Section - Edit/Pause/Abandon Monthly Goals */}
+      <GoalReviewSection level="monthly" className="mb-6" />
 
       {/* Review Wizard, Completed State, or Empty State */}
       {isCompleted ? (

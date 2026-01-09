@@ -16,3 +16,8 @@ export {
   hasSeenFirstMitCelebration,
   resetFirstMitCelebration,
 } from "./FirstMitCelebration";
+export { PointsExplainer } from "./PointsExplainer";
+export { MonthSoFarCard } from "./MonthSoFarCard";
+export { AlignmentSparkline, AlignmentSparklineMini } from "./AlignmentSparkline";
+export { AlignmentTrendCard } from "./AlignmentTrendCard";
+export { DailyChallenge, ChallengesCard, generateSampleChallenges } from "./DailyChallenge";
