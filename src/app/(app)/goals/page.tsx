@@ -78,33 +78,33 @@ const levelConfig: Record<
 
 function EmptyState({ onCreateVision, onVisionBuilder, onTrySamples }: { onCreateVision: () => void; onVisionBuilder: () => void; onTrySamples: () => void }) {
   return (
-    <div className="bg-night border border-night-mist rounded-2xl p-12 text-center">
+    <div className="bg-night border border-night-mist rounded-xl sm:rounded-2xl p-6 sm:p-12 text-center">
       {/* Icon */}
-      <div className="w-20 h-20 rounded-2xl bg-lantern/10 flex items-center justify-center mx-auto mb-6">
-        <Target className="w-10 h-10 text-lantern" />
+      <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl bg-lantern/10 flex items-center justify-center mx-auto mb-4 sm:mb-6">
+        <Target className="w-7 h-7 sm:w-10 sm:h-10 text-lantern" />
       </div>
 
       {/* Text */}
-      <h3 className="text-xl font-medium text-moon mb-3">Start with a Vision</h3>
-      <p className="text-moon-dim max-w-md mx-auto mb-8 leading-relaxed">
+      <h3 className="text-lg sm:text-xl font-medium text-moon mb-2 sm:mb-3">Start with a Vision</h3>
+      <p className="text-sm sm:text-base text-moon-dim max-w-md mx-auto mb-5 sm:mb-8 leading-relaxed">
         Create your first 7-year vision and cascade it down into achievable
-        milestones. The journey of a thousand miles begins with a single step.
+        milestones.
       </p>
 
       {/* CTAs */}
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mb-4 sm:mb-6">
         <Button
           onClick={onVisionBuilder}
-          className="bg-gradient-to-r from-lantern to-lantern/80 text-void hover:from-lantern/90 hover:to-lantern/70 font-medium px-6 h-11 rounded-xl shadow-lg shadow-lantern/20"
+          className="bg-gradient-to-r from-lantern to-lantern/80 text-void hover:from-lantern/90 hover:to-lantern/70 font-medium px-4 sm:px-6 h-9 sm:h-11 rounded-lg sm:rounded-xl shadow-lg shadow-lantern/20 text-sm sm:text-base"
         >
           <Wand2 className="w-4 h-4 mr-2" />
           Vision Builder
         </Button>
-        <span className="text-moon-faint text-sm">or</span>
+        <span className="text-moon-faint text-xs sm:text-sm">or</span>
         <Button
           onClick={onCreateVision}
           variant="outline"
-          className="border-night-mist bg-night-soft text-moon hover:border-lantern hover:text-lantern hover:bg-lantern/5 font-medium px-6 h-11 rounded-xl"
+          className="border-night-mist bg-night-soft text-moon hover:border-lantern hover:text-lantern hover:bg-lantern/5 font-medium px-4 sm:px-6 h-9 sm:h-11 rounded-lg sm:rounded-xl text-sm sm:text-base"
         >
           <Plus className="w-4 h-4 mr-2" />
           Create Manually
@@ -112,12 +112,12 @@ function EmptyState({ onCreateVision, onVisionBuilder, onTrySamples }: { onCreat
       </div>
 
       {/* Sample Goals Option */}
-      <div className="pt-6 border-t border-night-mist">
-        <p className="text-moon-faint text-sm mb-3">Want to explore the app first?</p>
+      <div className="pt-4 sm:pt-6 border-t border-night-mist">
+        <p className="text-moon-faint text-xs sm:text-sm mb-2 sm:mb-3">Want to explore the app first?</p>
         <Button
           onClick={onTrySamples}
           variant="ghost"
-          className="text-moon-dim hover:text-moon hover:bg-night-soft"
+          className="text-moon-dim hover:text-moon hover:bg-night-soft text-sm"
         >
           <Play className="w-4 h-4 mr-2" />
           Try with Sample Goals
@@ -139,8 +139,17 @@ function LevelTabs({
   const allLevels: UIGoalLevel[] = ["vision", "3-year", "1-year", "monthly", "weekly"];
   const levels = hideVision ? allLevels.filter((l) => l !== "vision") : allLevels;
 
+  // Short labels for mobile
+  const shortLabels: Record<UIGoalLevel, string> = {
+    vision: "Vision",
+    "3-year": "3Y",
+    "1-year": "1Y",
+    monthly: "Month",
+    weekly: "Week",
+  };
+
   return (
-    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+    <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-2 scrollbar-hide">
       {levels.map((level) => {
         const config = levelConfig[level];
         const isActive = activeLevel === level;
@@ -150,7 +159,7 @@ function LevelTabs({
             key={level}
             onClick={() => onLevelChange(level)}
             className={`
-              flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium
+              flex items-center gap-1.5 sm:gap-2 px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium
               whitespace-nowrap transition-all duration-200
               ${
                 isActive
@@ -159,8 +168,9 @@ function LevelTabs({
               }
             `}
           >
-            {config.icon}
-            {config.label}
+            <span className="[&>svg]:w-3.5 [&>svg]:h-3.5 sm:[&>svg]:w-4 sm:[&>svg]:h-4">{config.icon}</span>
+            <span className="sm:hidden">{shortLabels[level]}</span>
+            <span className="hidden sm:inline">{config.label}</span>
           </button>
         );
       })}
@@ -307,77 +317,80 @@ function VisionPageContent() {
   return (
     <AppShell onRefresh={handleRefresh}>
       {/* Hero Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-lantern/20 to-lantern/5 border border-lantern/20 flex items-center justify-center">
-            <Star className="w-5 h-5 text-lantern" />
+      <div className="mb-5 sm:mb-8">
+        <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-lantern/20 to-lantern/5 border border-lantern/20 flex items-center justify-center">
+            <Star className="w-4 h-4 sm:w-5 sm:h-5 text-lantern" />
           </div>
-          <h1 className="text-2xl font-semibold text-moon tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-semibold text-moon tracking-tight">
             Your 7-Year Vision
           </h1>
         </div>
-        <p className="text-moon-dim ml-[52px]">
+        <p className="text-sm sm:text-base text-moon-dim ml-10 sm:ml-[52px]">
           Think big. These are the destinations that shape your journey.
         </p>
       </div>
 
       {/* Goal hierarchy tip for new users */}
-      <ContextualTip tipId="goal_hierarchy" variant="inline" className="mb-6" />
+      <ContextualTip tipId="goal_hierarchy" variant="inline" className="mb-4 sm:mb-6" />
 
       {/* Unlinked Goals Warning - show on Vision page too */}
-      <UnlinkedGoalsWarning className="mb-6" />
+      <UnlinkedGoalsWarning className="mb-4 sm:mb-6" />
 
       {/* Action Bar */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
-          <span className="text-moon-faint text-sm">
+      <div className="flex items-center justify-between mb-5 sm:mb-8">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <span className="text-moon-faint text-xs sm:text-sm">
             {visions.length} {visions.length === 1 ? "vision" : "visions"}
           </span>
           <button
             onClick={() => setShowArchived(!showArchived)}
-            className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg transition-colors ${
+            className={`flex items-center gap-1 sm:gap-1.5 text-[0.625rem] sm:text-xs px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg transition-colors ${
               showArchived
                 ? "bg-moon-faint/20 text-moon-soft"
                 : "text-moon-faint hover:text-moon-soft hover:bg-night-soft"
             }`}
           >
-            <Archive className="w-3.5 h-3.5" />
-            {showArchived ? "Hide archived" : "Show archived"}
+            <Archive className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+            <span className="hidden sm:inline">{showArchived ? "Hide archived" : "Show archived"}</span>
+            <span className="sm:hidden">{showArchived ? "Hide" : "Archived"}</span>
           </button>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <Button
             onClick={() => setIsVisionBuilderOpen(true)}
-            className="bg-gradient-to-r from-lantern to-lantern/80 text-void hover:from-lantern/90 hover:to-lantern/70 font-medium rounded-xl h-10 shadow-lg shadow-lantern/20"
+            className="bg-gradient-to-r from-lantern to-lantern/80 text-void hover:from-lantern/90 hover:to-lantern/70 font-medium rounded-lg sm:rounded-xl h-8 sm:h-10 px-3 sm:px-4 text-xs sm:text-sm shadow-lg shadow-lantern/20"
           >
-            <Wand2 className="w-4 h-4 mr-2" />
-            Vision Builder
+            <Wand2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+            <span className="hidden sm:inline">Vision Builder</span>
+            <span className="sm:hidden">Builder</span>
           </Button>
           <Button
             onClick={() => setIsCreateModalOpen(true)}
             variant="outline"
-            className="border-night-mist bg-night-soft text-moon hover:border-lantern hover:text-lantern hover:bg-lantern/5 rounded-xl h-10"
+            className="border-night-mist bg-night-soft text-moon hover:border-lantern hover:text-lantern hover:bg-lantern/5 rounded-lg sm:rounded-xl h-8 sm:h-10 px-3 sm:px-4 text-xs sm:text-sm"
           >
-            <Plus className="w-4 h-4 mr-2" />
-            Add Vision
+            <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Add Vision</span>
+            <span className="sm:hidden">Add</span>
           </Button>
         </div>
       </div>
 
       {/* Content */}
       {isLoading ? (
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
           {Array.from({ length: 2 }).map((_, i) => (
-            <div key={i} className="bg-gradient-to-br from-night via-night to-night-soft border border-lantern/20 rounded-2xl p-6 animate-pulse">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-xl bg-night-mist" />
+            <div key={i} className="bg-gradient-to-br from-night via-night to-night-soft border border-lantern/20 rounded-xl sm:rounded-2xl p-4 sm:p-6 animate-pulse">
+              <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-night-mist" />
                 <div className="flex-1">
-                  <div className="h-5 w-3/4 bg-night-mist rounded mb-2" />
+                  <div className="h-4 sm:h-5 w-3/4 bg-night-mist rounded mb-2" />
                   <div className="h-3 w-1/2 bg-night-mist rounded" />
                 </div>
               </div>
               <div className="h-4 w-full bg-night-mist rounded mb-2" />
-              <div className="h-4 w-2/3 bg-night-mist rounded mb-4" />
+              <div className="h-4 w-2/3 bg-night-mist rounded mb-3 sm:mb-4" />
               <div className="h-2 w-full bg-night-mist rounded-full" />
             </div>
           ))}
@@ -389,7 +402,7 @@ function VisionPageContent() {
           onTrySamples={handleTrySamples}
         />
       ) : (
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
           {visions.map((vision) => (
             <VisionCard
               key={vision.id}
@@ -500,7 +513,7 @@ function GoalsOnlyPageContent() {
       />
 
       {/* Level Tabs (without Vision) */}
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         <LevelTabs
           activeLevel={activeLevel}
           onLevelChange={(level) => setActiveLevel(level as GoalsOnlyLevel)}
@@ -509,63 +522,65 @@ function GoalsOnlyPageContent() {
       </div>
 
       {/* Goal hierarchy tip for new users */}
-      <ContextualTip tipId="goal_hierarchy" variant="inline" className="mb-6" />
+      <ContextualTip tipId="goal_hierarchy" variant="inline" className="mb-4 sm:mb-6" />
 
       {/* Unlinked Goals Warning */}
-      <UnlinkedGoalsWarning className="mb-6" />
+      <UnlinkedGoalsWarning className="mb-4 sm:mb-6" />
 
       {/* Action Bar */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className={`w-3 h-3 rounded-full ${levelConfig[activeLevel].color}`} />
-          <h2 className="text-lg font-medium text-moon">
-            {levelConfig[activeLevel].label}
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full ${levelConfig[activeLevel].color}`} />
+          <h2 className="text-base sm:text-lg font-medium text-moon">
+            <span className="sm:hidden">{levelConfig[activeLevel].label.replace(" Goals", "")}</span>
+            <span className="hidden sm:inline">{levelConfig[activeLevel].label}</span>
           </h2>
-          <span className="text-moon-faint text-sm">({goals.length})</span>
+          <span className="text-moon-faint text-xs sm:text-sm">({goals.length})</span>
           <button
             onClick={() => setShowArchived(!showArchived)}
-            className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg transition-colors ml-2 ${
+            className={`flex items-center gap-1 sm:gap-1.5 text-[0.625rem] sm:text-xs px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg transition-colors ml-1 sm:ml-2 ${
               showArchived
                 ? "bg-moon-faint/20 text-moon-soft"
                 : "text-moon-faint hover:text-moon-soft hover:bg-night-soft"
             }`}
           >
-            <Archive className="w-3.5 h-3.5" />
+            <Archive className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             <span className="hidden sm:inline">{showArchived ? "Hide archived" : "Show archived"}</span>
           </button>
         </div>
         <Button
           onClick={() => setIsCreateModalOpen(true)}
           variant="outline"
-          className="border-night-mist bg-night-soft text-moon hover:border-lantern hover:text-lantern hover:bg-lantern/5 rounded-xl h-10"
+          className="border-night-mist bg-night-soft text-moon hover:border-lantern hover:text-lantern hover:bg-lantern/5 rounded-lg sm:rounded-xl h-8 sm:h-10 px-3 sm:px-4 text-xs sm:text-sm"
         >
-          <Plus className="w-4 h-4 mr-2" />
-          New Goal
+          <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+          <span className="hidden sm:inline">New Goal</span>
+          <span className="sm:hidden">Add</span>
         </Button>
       </div>
 
       {/* Content */}
       {isLoading ? (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
           {Array.from({ length: 4 }).map((_, i) => (
             <GoalCardSkeleton key={i} />
           ))}
         </div>
       ) : goals.length === 0 ? (
-        <div className="bg-night border border-night-mist rounded-2xl p-8 text-center">
-          <p className="text-moon-dim">
+        <div className="bg-night border border-night-mist rounded-xl sm:rounded-2xl p-5 sm:p-8 text-center">
+          <p className="text-sm sm:text-base text-moon-dim">
             No {levelConfig[activeLevel].label.toLowerCase()} yet.
           </p>
           <Button
             onClick={() => setIsCreateModalOpen(true)}
             variant="link"
-            className="text-lantern hover:text-lantern/80 mt-2"
+            className="text-lantern hover:text-lantern/80 mt-2 text-sm"
           >
             Create your first one
           </Button>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 min-w-0 w-full" style={{ maxWidth: '100%', boxSizing: 'border-box' }}>
+        <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 min-w-0 w-full" style={{ maxWidth: '100%', boxSizing: 'border-box' }}>
           {goals.map((goal) => (
             <GoalCard
               key={goal.id}
@@ -578,13 +593,13 @@ function GoalsOnlyPageContent() {
         </div>
       )}
 
-      {/* Cascade Tip */}
+      {/* Cascade Tip - hidden on mobile */}
       {goals.length > 0 && (
-        <div className="mt-8 p-4 bg-night-soft border border-night-mist rounded-xl">
-          <div className="flex items-start gap-3">
-            <Layers className="w-5 h-5 text-lantern flex-shrink-0 mt-0.5" />
+        <div className="hidden sm:block mt-6 sm:mt-8 p-3 sm:p-4 bg-night-soft border border-night-mist rounded-lg sm:rounded-xl">
+          <div className="flex items-start gap-2 sm:gap-3">
+            <Layers className="w-4 h-4 sm:w-5 sm:h-5 text-lantern flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm text-moon-soft">
+              <p className="text-xs sm:text-sm text-moon-soft">
                 <span className="text-lantern font-medium">Tip:</span> Click on any
                 goal to see its sub-goals and cascade down the hierarchy.
               </p>

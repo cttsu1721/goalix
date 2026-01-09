@@ -49,7 +49,7 @@ export function GoalCard({
       onClick={onClick}
       className={cn(
         "w-full max-w-full text-left group relative overflow-hidden",
-        "bg-night border border-night-mist rounded-2xl p-5",
+        "bg-night border border-night-mist rounded-xl sm:rounded-2xl p-3 sm:p-5",
         "transition-all duration-200",
         "hover:border-lantern/30 hover:bg-night-soft",
         "focus:outline-none focus:ring-2 focus:ring-lantern/50 focus:ring-offset-2 focus:ring-offset-void",
@@ -61,20 +61,20 @@ export function GoalCard({
     >
       {/* Parent reference */}
       {parentTitle && (
-        <div className="text-[0.625rem] text-moon-faint mb-2 truncate max-w-full overflow-hidden">
+        <div className="text-[0.5625rem] sm:text-[0.625rem] text-moon-faint mb-1.5 sm:mb-2 truncate max-w-full overflow-hidden">
           From: {parentTitle}
         </div>
       )}
 
       {/* Category indicator */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-2 sm:mb-3">
         <GoalCategoryBadge category={category} />
         <div className="flex items-center gap-1">
           {onCreateChild && (
             <button
               onClick={handleCreateChild}
               className={cn(
-                "w-11 h-11 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center",
+                "w-9 h-9 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl flex items-center justify-center",
                 "text-moon-faint hover:text-lantern hover:bg-lantern/10",
                 "sm:opacity-0 group-hover:opacity-100 transition-all duration-200",
                 "focus:outline-none focus:ring-2 focus:ring-lantern/50 focus:opacity-100"
@@ -82,35 +82,35 @@ export function GoalCard({
               title={`Add ${childLabel}`}
               aria-label={`Add ${childLabel} to ${title}`}
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
           )}
-          <ChevronRight className="w-4 h-4 text-moon-faint group-hover:text-lantern transition-colors" />
+          <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-moon-faint group-hover:text-lantern transition-colors" />
         </div>
       </div>
 
       {/* Title */}
       <h3
         className={cn(
-          "font-medium mb-2 text-moon line-clamp-2",
+          "font-medium mb-1.5 sm:mb-2 text-moon line-clamp-2 text-sm sm:text-base",
           isCompleted && "line-through text-moon-dim"
         )}
       >
         {title}
       </h3>
 
-      {/* Description */}
+      {/* Description - hidden on mobile for compactness */}
       {description && (
-        <p className="text-sm text-moon-dim mb-4 line-clamp-2">{description}</p>
+        <p className="hidden sm:block text-sm text-moon-dim mb-4 line-clamp-2">{description}</p>
       )}
 
       {/* Progress */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between text-xs">
+      <div className="space-y-1.5 sm:space-y-2">
+        <div className="flex items-center justify-between text-[0.625rem] sm:text-xs">
           <span className="text-moon-faint">Progress</span>
           <span className="text-moon-soft font-medium">{Math.round(progress)}%</span>
         </div>
-        <div className="h-1.5 bg-night-mist rounded-full overflow-hidden">
+        <div className="h-1 sm:h-1.5 bg-night-mist rounded-full overflow-hidden">
           <div
             className={cn(
               "h-full rounded-full transition-all duration-500",
@@ -125,10 +125,10 @@ export function GoalCard({
 
       {/* Children count */}
       {childrenCount > 0 && (
-        <div className="mt-3 pt-3 border-t border-night-mist flex items-center justify-between text-xs">
+        <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-night-mist flex items-center justify-between text-[0.625rem] sm:text-xs">
           <span className="text-moon-faint">Sub-goals</span>
           <span className="text-moon-soft">
-            {completedChildren}/{childrenCount} completed
+            {completedChildren}/{childrenCount}
           </span>
         </div>
       )}
