@@ -81,7 +81,7 @@ export function OnboardingWizard() {
           <div className="bg-night-soft rounded-xl p-4 text-left">
             <p className="text-moon-dim text-sm mb-2">Example vision:</p>
             <p className="text-moon italic">
-              "Build a successful SaaS business generating $10M ARR while maintaining work-life balance"
+              &ldquo;Build a successful SaaS business generating $10M ARR while maintaining work-life balance&rdquo;
             </p>
           </div>
         </div>

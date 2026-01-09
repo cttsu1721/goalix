@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback, useSyncExternalStore } from "react";
 
 const MOBILE_BREAKPOINT = 768;
 const STORAGE_KEY = "goalzenix_view_preference";
@@ -17,27 +17,53 @@ const DEFAULT_PREFERENCE: ViewPreference = {
   mobile: "day", // Day view default on mobile (5.5)
 };
 
+// Get current mobile state
+function getIsMobileSnapshot(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.innerWidth < MOBILE_BREAKPOINT;
+}
+
+// SSR fallback - default to mobile for mobile-first approach
+function getServerSnapshot(): boolean {
+  return false;
+}
+
+// Subscribe to resize events
+function subscribeToResize(callback: () => void): () => void {
+  if (typeof window === "undefined") return () => {};
+  window.addEventListener("resize", callback);
+  return () => window.removeEventListener("resize", callback);
+}
+
 /**
  * Hook for managing mobile vs desktop view preferences
  * Defaults to day view on mobile for reduced cognitive load (5.5)
  */
 export function useMobileView() {
-  const [isMobile, setIsMobile] = useState(false);
-  const [isReady, setIsReady] = useState(false);
+  const isMobile = useSyncExternalStore(
+    subscribeToResize,
+    getIsMobileSnapshot,
+    getServerSnapshot
+  );
 
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
-    };
-
-    checkMobile();
-    setIsReady(true);
-
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
+  // isReady is true on client side
+  const isReady = typeof window !== "undefined";
 
   return { isMobile, isReady };
+}
+
+// Get view preference from localStorage
+function getViewPreference(): ViewPreference {
+  if (typeof window === "undefined") return DEFAULT_PREFERENCE;
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      return JSON.parse(stored) as ViewPreference;
+    }
+  } catch {
+    // Ignore parse errors
+  }
+  return DEFAULT_PREFERENCE;
 }
 
 /**
@@ -45,32 +71,24 @@ export function useMobileView() {
  */
 export function useViewMode() {
   const { isMobile, isReady } = useMobileView();
-  const [viewMode, setViewMode] = useState<ViewMode>("day");
-  const [hasUserPreference, setHasUserPreference] = useState(false);
 
-  // Load preference from localStorage
-  useEffect(() => {
-    if (!isReady) return;
+  // Initialize from localStorage using lazy initial state
+  const [viewMode, setViewModeState] = useState<ViewMode>(() => {
+    const pref = getViewPreference();
+    // On SSR, default to day view
+    if (typeof window === "undefined") return "day";
+    return window.innerWidth < MOBILE_BREAKPOINT ? pref.mobile : pref.desktop;
+  });
 
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const pref = JSON.parse(stored) as ViewPreference;
-        setViewMode(isMobile ? pref.mobile : pref.desktop);
-        setHasUserPreference(true);
-      } else {
-        // Use defaults
-        setViewMode(isMobile ? DEFAULT_PREFERENCE.mobile : DEFAULT_PREFERENCE.desktop);
-      }
-    } catch {
-      setViewMode(isMobile ? DEFAULT_PREFERENCE.mobile : DEFAULT_PREFERENCE.desktop);
-    }
-  }, [isMobile, isReady]);
+  const [hasUserPreference, setHasUserPreference] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem(STORAGE_KEY) !== null;
+  });
 
   // Update view mode and save preference
   const setView = useCallback(
     (mode: ViewMode) => {
-      setViewMode(mode);
+      setViewModeState(mode);
       setHasUserPreference(true);
 
       try {

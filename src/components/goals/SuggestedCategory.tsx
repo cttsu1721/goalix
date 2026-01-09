@@ -137,7 +137,7 @@ export function SuggestedCategory({
           <div>
             <p className="text-xs text-moon">
               <span className="font-medium">Suggested: </span>
-              You haven't set any{" "}
+              You haven&apos;t set any{" "}
               <span className="text-lantern">
                 {CATEGORY_INFO[suggestedCategory].label}
               </span>{" "}

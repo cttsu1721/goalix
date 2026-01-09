@@ -182,7 +182,7 @@ export function GoalSharpenComparison({
               <div className="space-y-4">
                 <h4 className="text-sm font-medium text-moon flex items-center gap-2">
                   <Target className="w-4 h-4 text-zen-green" />
-                  What's improved
+                  What&apos;s improved
                 </h4>
 
                 {/* Measurable outcomes */}

@@ -220,7 +220,7 @@ export function TaskSuggestModal({
                 </div>
                 <p className="text-moon mb-2">Daily limit reached</p>
                 <p className="text-sm text-moon-dim mb-4">
-                  You've used all your AI credits for today
+                  You&apos;ve used all your AI credits for today
                 </p>
                 <Button
                   onClick={() => setShowUpsell(true)}

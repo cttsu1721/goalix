@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback, useSyncExternalStore } from "react";
 
 export type NotificationPermission = "default" | "granted" | "denied";
 
@@ -11,20 +11,55 @@ interface UseNotificationsReturn {
   sendNotification: (title: string, options?: NotificationOptions) => void;
 }
 
+// Check if notifications are supported
+function getIsSupported(): boolean {
+  if (typeof window === "undefined") return false;
+  return "Notification" in window;
+}
+
+// Get current notification permission
+function getPermissionSnapshot(): NotificationPermission {
+  if (typeof window === "undefined" || !("Notification" in window)) {
+    return "default";
+  }
+  return Notification.permission as NotificationPermission;
+}
+
+// SSR fallback
+function getServerSnapshot(): NotificationPermission {
+  return "default";
+}
+
+// Subscribe to permission changes (permission changes via user action are handled in callbacks)
+function subscribeToPermission(callback: () => void): () => void {
+  // Notification API doesn't have a native event for permission changes
+  // We'll poll periodically as a fallback, or rely on our own callbacks
+  if (typeof window === "undefined") return () => {};
+
+  // Listen for visibility change as a proxy for potential permission changes
+  const handleVisibilityChange = () => {
+    if (document.visibilityState === "visible") {
+      callback();
+    }
+  };
+  document.addEventListener("visibilitychange", handleVisibilityChange);
+  return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+}
+
 /**
  * Hook for managing browser notifications
  * Handles permission requests and sending notifications
  */
 export function useNotifications(): UseNotificationsReturn {
-  const [permission, setPermission] = useState<NotificationPermission>("default");
-  const [isSupported, setIsSupported] = useState(false);
+  // Use useSyncExternalStore for permission (avoids setState in effect)
+  const permission = useSyncExternalStore(
+    subscribeToPermission,
+    getPermissionSnapshot,
+    getServerSnapshot
+  );
 
-  useEffect(() => {
-    if (typeof window !== "undefined" && "Notification" in window) {
-      setIsSupported(true);
-      setPermission(Notification.permission);
-    }
-  }, []);
+  // isSupported is static and can be computed once
+  const [isSupported] = useState(getIsSupported);
 
   const requestPermission = useCallback(async (): Promise<NotificationPermission> => {
     if (!isSupported) {
@@ -33,8 +68,8 @@ export function useNotifications(): UseNotificationsReturn {
 
     try {
       const result = await Notification.requestPermission();
-      setPermission(result);
-      return result;
+      // Permission is now synced via useSyncExternalStore
+      return result as NotificationPermission;
     } catch {
       // Some browsers throw on requestPermission
       return "denied";

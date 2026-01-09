@@ -37,9 +37,8 @@ function BadgeEarnedContent({
 
   // Trigger animation and confetti on mount
   useEffect(() => {
-    // For reduced motion: show content immediately, skip confetti
+    // For reduced motion: content is already shown via initial state, skip confetti
     if (prefersReducedMotion) {
-      setShowContent(true);
       return;
     }
 

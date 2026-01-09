@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Quote as QuoteIcon, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getDailyQuote, getRandomQuote, type Quote } from "@/lib/quotes";
@@ -15,26 +15,26 @@ interface MotivationalQuoteProps {
  * Shows a daily quote with option to refresh for a new random one
  */
 export function MotivationalQuote({ className }: MotivationalQuoteProps) {
-  const [quote, setQuote] = useState<Quote | null>(null);
+  // Track refresh count to trigger new quote selection
+  const [refreshCount, setRefreshCount] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Initialize with daily quote on mount
-  useEffect(() => {
-    setQuote(getDailyQuote());
-  }, []);
+  // Memoize quote based on refresh count - avoids setState in effect
+  const quote = useMemo<Quote>(() => {
+    if (refreshCount === 0) {
+      return getDailyQuote();
+    }
+    return getRandomQuote();
+  }, [refreshCount]);
 
   const handleRefresh = () => {
     setIsRefreshing(true);
     // Small delay for animation feedback
     setTimeout(() => {
-      setQuote(getRandomQuote());
+      setRefreshCount((c) => c + 1);
       setIsRefreshing(false);
     }, 300);
   };
-
-  if (!quote) {
-    return null; // SSR placeholder
-  }
 
   return (
     <div
@@ -95,15 +95,8 @@ export function MotivationalQuote({ className }: MotivationalQuoteProps) {
  * Compact inline quote for smaller spaces
  */
 export function MotivationalQuoteInline({ className }: MotivationalQuoteProps) {
-  const [quote, setQuote] = useState<Quote | null>(null);
-
-  useEffect(() => {
-    setQuote(getDailyQuote());
-  }, []);
-
-  if (!quote) {
-    return null;
-  }
+  // Use useMemo instead of useState + useEffect to avoid setState in effect
+  const quote = useMemo<Quote>(() => getDailyQuote(), []);
 
   return (
     <div className={cn("flex items-start gap-2 text-moon-dim", className)}>

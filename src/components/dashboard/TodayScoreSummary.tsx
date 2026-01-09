@@ -69,7 +69,7 @@ export function TodayScoreSummary({
             <span className={getScoreColor(compositeScore)}>{compositeScore}</span>
           </div>
           <div>
-            <p className="text-sm font-medium text-moon">Today's Score</p>
+            <p className="text-sm font-medium text-moon">Today&apos;s Score</p>
             <p className={cn("text-xs", getScoreColor(compositeScore))}>
               {getScoreLabel(compositeScore)}
             </p>

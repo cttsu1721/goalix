@@ -50,16 +50,9 @@ export function AlignmentSparkline({
     return { average, trend, max, min };
   }, [data]);
 
-  if (!stats || data.length === 0) {
-    return (
-      <div className={cn("text-xs text-moon-faint", className)}>
-        No alignment data yet
-      </div>
-    );
-  }
-
-  // Generate SVG path
+  // Generate SVG path (moved before early return to follow hooks rules)
   const pathData = useMemo(() => {
+    if (data.length === 0) return "";
     const width = 100; // Percentage width
     const padding = 2;
     const usableHeight = height - padding * 2;
@@ -77,6 +70,7 @@ export function AlignmentSparkline({
 
   // Generate area path (filled)
   const areaPath = useMemo(() => {
+    if (data.length === 0) return "";
     const width = 100;
     const padding = 2;
     const usableHeight = height - padding * 2;
@@ -91,6 +85,14 @@ export function AlignmentSparkline({
     // Close the path to create filled area
     return `M 0,${height} L ${points.join(" L ")} L ${width},${height} Z`;
   }, [data, height]);
+
+  if (!stats || data.length === 0) {
+    return (
+      <div className={cn("text-xs text-moon-faint", className)}>
+        No alignment data yet
+      </div>
+    );
+  }
 
   return (
     <div className={cn("space-y-2", className)}>

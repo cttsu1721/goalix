@@ -157,7 +157,7 @@ export function GoalSharpenModal({
                 </div>
                 <p className="text-moon mb-2">Daily limit reached</p>
                 <p className="text-sm text-moon-dim mb-4">
-                  You've used all your AI credits for today
+                  You&apos;ve used all your AI credits for today
                 </p>
                 <Button
                   onClick={() => setShowUpsell(true)}
@@ -191,7 +191,7 @@ export function GoalSharpenModal({
             {/* What's Improved Header */}
             <div className="flex items-center gap-2 text-sm font-medium text-moon">
               <Target className="w-4 h-4 text-zen-green" />
-              What's improved
+              What&apos;s improved
             </div>
 
             {/* Measurable Outcomes */}

@@ -112,7 +112,7 @@ export function QuickGlanceCard({
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs text-lantern font-medium mb-1">
-              Today's MIT
+              Today&apos;s MIT
             </p>
             {stats.mit ? (
               <p
@@ -196,7 +196,7 @@ export function QuickGlanceCard({
 
       {/* Footer with points */}
       <div className="px-4 py-3 bg-night flex items-center justify-between">
-        <span className="text-xs text-moon-faint">Today's points</span>
+        <span className="text-xs text-moon-faint">Today&apos;s points</span>
         <span className="text-sm font-medium text-lantern">{points} pts</span>
       </div>
     </div>
