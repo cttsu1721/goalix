@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Sora, JetBrains_Mono } from "next/font/google";
+import { Sora, JetBrains_Mono, Cormorant_Garamond, DM_Sans } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { Providers } from "@/components/providers";
 import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistration";
@@ -15,6 +15,19 @@ const jetbrainsMono = JetBrains_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
   weight: ["400", "500"],
+});
+
+// Zen light theme fonts
+const cormorantGaramond = Cormorant_Garamond({
+  variable: "--font-cormorant",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+});
+
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
@@ -51,7 +64,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${sora.variable} ${jetbrainsMono.variable} antialiased min-h-screen bg-background font-sans`}
+        className={`${sora.variable} ${jetbrainsMono.variable} ${cormorantGaramond.variable} ${dmSans.variable} antialiased min-h-screen bg-background font-sans`}
       >
         <Providers>
           {children}

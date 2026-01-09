@@ -6,11 +6,11 @@ import { ThemeProvider as NextThemesProvider } from "next-themes";
 type ThemeProviderProps = React.ComponentProps<typeof NextThemesProvider>;
 
 /**
- * Theme provider for Goalix
+ * Theme provider for Goalzenix
  *
  * Themes:
  * - "dark" (default) - Yoru Zen: Deep midnight blue with golden lantern accents
- * - "light" - Sakura: Cherry blossom pink with warm cream backgrounds
+ * - "light" - Zen Minimalist: Pure white with sage accents and serif typography
  */
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
   return (
@@ -32,7 +32,7 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
  */
 export const THEME_NAMES = {
   dark: "Yoru Zen",
-  light: "Sakura",
+  light: "Zen Light",
 } as const;
 
 /**
@@ -40,5 +40,5 @@ export const THEME_NAMES = {
  */
 export const THEME_DESCRIPTIONS = {
   dark: "Deep midnight blue with golden lantern accents. Inspired by Japanese night gardens.",
-  light: "Soft cherry blossom pink with warm cream backgrounds. Inspired by spring in Kyoto.",
+  light: "Pure white with sage accents. Contemplative, minimalist, maximum whitespace.",
 } as const;

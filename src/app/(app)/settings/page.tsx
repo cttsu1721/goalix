@@ -30,6 +30,7 @@ import {
   FileSpreadsheet,
   Volume2,
   Target,
+  Leaf,
 } from "lucide-react";
 import { RecurringTasksCard } from "@/components/tasks";
 import { useTheme } from "next-themes";
@@ -250,7 +251,7 @@ function ThemeCard({
           w-full aspect-[4/3] rounded-md sm:rounded-lg overflow-hidden mb-2 sm:mb-3 relative
           ${isDark
             ? "bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#334155]"
-            : "bg-gradient-to-br from-[#fefdfb] via-[#faf8f4] to-[#f5f2eb]"
+            : "bg-[#FFFFFF]"
           }
         `}
       >
@@ -260,16 +261,16 @@ function ThemeCard({
             absolute left-0 top-0 bottom-0 w-1/4 border-r
             ${isDark
               ? "bg-[#0f172a] border-[#334155]"
-              : "bg-[#faf8f4] border-[#ebe5db]"
+              : "bg-[#FAFAFA] border-[#E5E5E5]"
             }
           `}
         >
-          <div className={`w-3 h-3 m-2 rounded-full ${isDark ? "bg-amber-500/80" : "bg-pink-400/80"}`} />
+          <div className={`w-3 h-3 m-2 rounded-full ${isDark ? "bg-amber-500/80" : "bg-[#5A6B5A]/80"}`} />
           <div className="space-y-1 px-2 mt-2">
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className={`h-1.5 rounded-full ${isDark ? "bg-slate-600" : "bg-stone-300"}`}
+                className={`h-1.5 rounded-full ${isDark ? "bg-slate-600" : "bg-[#D4D4D4]"}`}
                 style={{ width: `${60 + i * 10}%` }}
               />
             ))}
@@ -278,12 +279,12 @@ function ThemeCard({
 
         {/* Mini content preview */}
         <div className="absolute left-1/4 right-0 top-0 bottom-0 p-2">
-          <div className={`h-2 w-1/2 rounded-full mb-2 ${isDark ? "bg-slate-500" : "bg-stone-400"}`} />
+          <div className={`h-2 w-1/2 rounded-full mb-2 ${isDark ? "bg-slate-500" : "bg-[#111111]"}`} />
           <div className="grid grid-cols-2 gap-1">
             {[1, 2].map((i) => (
               <div
                 key={i}
-                className={`aspect-video rounded ${isDark ? "bg-slate-700/50" : "bg-white/80"} border ${isDark ? "border-slate-600" : "border-stone-200"}`}
+                className={`aspect-video rounded ${isDark ? "bg-slate-700/50" : "bg-[#FAFAFA]"} border ${isDark ? "border-slate-600" : "border-[#E5E5E5]"}`}
               />
             ))}
           </div>
@@ -293,7 +294,7 @@ function ThemeCard({
         {isDark ? (
           <Moon className="absolute bottom-2 right-2 w-4 h-4 text-amber-500/50" />
         ) : (
-          <Flower2 className="absolute bottom-2 right-2 w-4 h-4 text-pink-400/50" />
+          <Leaf className="absolute bottom-2 right-2 w-4 h-4 text-[#5A6B5A]/50" />
         )}
       </div>
 

@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goalzenix — Zen Light Theme</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      /* Pure zen palette */
+      --white: #FFFFFF;
+      --black: #111111;
+      --gray-100: #F7F7F7;
+      --gray-200: #EBEBEB;
+      --gray-400: #A0A0A0;
+      --gray-500: #717171;
+      --gray-600: #525252;
+
+      /* Single muted accent - sage */
+      --sage: #7A8B7A;
+      --sage-soft: rgba(122, 139, 122, 0.08);
+
+      /* Spacing - generous */
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 36px;
+      --space-2xl: 56px;
+    }
+
+    html {
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      background: var(--white);
+      color: var(--black);
+      line-height: 1.6;
+    }
+
+    /* Serif for headings - contemplative */
+    h1, h2, h3 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+    }
+
+    .phone-frame {
+      max-width: 375px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: var(--white);
+      padding-bottom: 90px;
+    }
+
+    main {
+      padding: var(--space-xl) var(--space-lg);
+    }
+
+    /* ============================================
+       HEADER - Serene, spacious
+       ============================================ */
+    .header {
+      margin-bottom: var(--space-2xl);
+      text-align: center;
+    }
+
+    .greeting {
+      font-size: 0.75rem;
+      color: var(--gray-500);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: var(--space-lg);
+    }
+
+    .page-title {
+      font-size: 2rem;
+      font-weight: 400;
+      color: var(--black);
+      margin-bottom: var(--space-xs);
+      line-height: 1.2;
+    }
+
+    .date-display {
+      font-size: 0.875rem;
+      color: var(--gray-500);
+      font-style: italic;
+      font-family: 'Cormorant Garamond', serif;
+    }
+
+    /* ============================================
+       DAY NAVIGATION - Minimal
+       ============================================ */
+    .day-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-lg);
+      margin-bottom: var(--space-xl);
+      padding: var(--space-md) 0;
+    }
+
+    .nav-arrow {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--gray-400);
+      transition: color 0.2s ease;
+    }
+
+    .nav-arrow:hover {
+      color: var(--black);
+    }
+
+    .nav-arrow svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 1.5;
+    }
+
+    .today-label {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.125rem;
+      color: var(--black);
+      font-weight: 500;
+    }
+
+    .day-stats {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-xl);
+      padding-bottom: var(--space-lg);
+      border-bottom: 1px solid var(--gray-200);
+      margin-bottom: var(--space-xl);
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      font-weight: 500;
+      color: var(--black);
+      display: block;
+    }
+
+    .stat-label {
+      font-size: 0.6875rem;
+      color: var(--gray-500);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* ============================================
+       YEAR TARGET - Clean card
+       ============================================ */
+    .year-target {
+      margin-bottom: var(--space-xl);
+      padding: var(--space-lg);
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+    }
+
+    .target-label {
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--sage);
+      margin-bottom: var(--space-sm);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .target-label::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: var(--sage);
+      border-radius: 50%;
+    }
+
+    .target-title {
+      font-size: 1.25rem;
+      font-weight: 400;
+      color: var(--black);
+      line-height: 1.4;
+      margin-bottom: var(--space-lg);
+    }
+
+    .progress-container {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+
+    .progress-bar {
+      flex: 1;
+      height: 2px;
+      background: var(--gray-200);
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--sage);
+      width: 0%;
+    }
+
+    .progress-text {
+      font-size: 0.75rem;
+      color: var(--gray-500);
+      font-family: 'Cormorant Garamond', serif;
+    }
+
+    .weekly-goal {
+      margin-top: var(--space-lg);
+      padding-top: var(--space-lg);
+      border-top: 1px solid var(--gray-200);
+    }
+
+    .weekly-label {
+      font-size: 0.625rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--gray-500);
+      margin-bottom: var(--space-xs);
+    }
+
+    .weekly-title {
+      font-size: 0.9375rem;
+      color: var(--gray-600);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .weekly-title:hover {
+      color: var(--black);
+    }
+
+    /* ============================================
+       INSPIRATION - Italic, literary
+       ============================================ */
+    .inspiration {
+      margin-bottom: var(--space-xl);
+      padding: var(--space-xl) var(--space-lg);
+      background: var(--gray-100);
+      text-align: center;
+    }
+
+    .quote-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.125rem;
+      font-style: italic;
+      color: var(--gray-600);
+      line-height: 1.6;
+      margin-bottom: var(--space-sm);
+    }
+
+    .quote-author {
+      font-size: 0.75rem;
+      color: var(--gray-500);
+      letter-spacing: 0.05em;
+    }
+
+    /* ============================================
+       EMPTY STATE - Centered, calm
+       ============================================ */
+    .empty-state {
+      text-align: center;
+      padding: var(--space-xl) 0;
+    }
+
+    .empty-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto var(--space-lg);
+      color: var(--gray-400);
+    }
+
+    .empty-icon svg {
+      width: 100%;
+      height: 100%;
+      stroke-width: 1;
+    }
+
+    .empty-title {
+      font-size: 1.375rem;
+      font-weight: 400;
+      color: var(--black);
+      margin-bottom: var(--space-sm);
+    }
+
+    .empty-description {
+      font-size: 0.875rem;
+      color: var(--gray-500);
+      max-width: 260px;
+      margin: 0 auto var(--space-xl);
+    }
+
+    .empty-actions {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+      max-width: 280px;
+      margin: 0 auto;
+    }
+
+    .btn-primary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      padding: 14px var(--space-lg);
+      background: var(--black);
+      color: var(--white);
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.85;
+    }
+
+    .btn-primary svg {
+      width: 16px;
+      height: 16px;
+      stroke-width: 2;
+    }
+
+    .btn-secondary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      padding: 14px var(--space-lg);
+      background: transparent;
+      color: var(--gray-600);
+      border: 1px solid var(--gray-200);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--gray-400);
+      color: var(--black);
+    }
+
+    .btn-secondary svg {
+      width: 16px;
+      height: 16px;
+      stroke-width: 1.5;
+    }
+
+    /* ============================================
+       AI SUGGEST - Subtle, bottom positioned
+       ============================================ */
+    .ai-suggest {
+      text-align: center;
+      margin-top: var(--space-xl);
+      padding-top: var(--space-lg);
+      border-top: 1px solid var(--gray-200);
+    }
+
+    .ai-link {
+      font-size: 0.8125rem;
+      color: var(--gray-500);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      transition: color 0.2s ease;
+    }
+
+    .ai-link:hover {
+      color: var(--black);
+    }
+
+    .ai-link svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .ai-counter {
+      font-size: 0.6875rem;
+      color: var(--gray-400);
+    }
+
+    /* ============================================
+       FAB - Minimal circle
+       ============================================ */
+    .fab {
+      position: fixed;
+      bottom: 110px;
+      right: calc(50% - 187.5px + 24px);
+      width: 48px;
+      height: 48px;
+      background: var(--black);
+      color: var(--white);
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease;
+    }
+
+    .fab:hover {
+      transform: scale(1.05);
+    }
+
+    .fab svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2;
+    }
+
+    /* ============================================
+       BOTTOM NAV - Ultra minimal
+       ============================================ */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 375px;
+      background: var(--white);
+      border-top: 1px solid var(--gray-200);
+      padding: var(--space-md) 0;
+      padding-bottom: calc(var(--space-md) + env(safe-area-inset-bottom, 0));
+    }
+
+    .nav-items {
+      display: flex;
+      justify-content: space-around;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: var(--space-xs) var(--space-md);
+      text-decoration: none;
+      color: var(--gray-400);
+      font-size: 0.625rem;
+      letter-spacing: 0.04em;
+      transition: color 0.2s ease;
+    }
+
+    .nav-item:hover {
+      color: var(--gray-600);
+    }
+
+    .nav-item.active {
+      color: var(--black);
+    }
+
+    .nav-item svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 1.5;
+    }
+
+    /* ============================================
+       ANIMATIONS - Subtle fade
+       ============================================ */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .header { animation: fadeIn 0.6s ease; }
+    .day-nav { animation: fadeIn 0.6s ease 0.1s backwards; }
+    .day-stats { animation: fadeIn 0.6s ease 0.15s backwards; }
+    .year-target { animation: fadeIn 0.6s ease 0.2s backwards; }
+    .inspiration { animation: fadeIn 0.6s ease 0.25s backwards; }
+    .empty-state { animation: fadeIn 0.6s ease 0.3s backwards; }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <main>
+      <!-- Header -->
+      <header class="header">
+        <p class="greeting">Good evening, Thomas</p>
+        <h1 class="page-title">Today's Focus</h1>
+        <p class="date-display">Friday, January 9</p>
+      </header>
+
+      <!-- Day Navigation -->
+      <nav class="day-nav">
+        <button class="nav-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <span class="today-label">Today</span>
+        <button class="nav-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </nav>
+
+      <!-- Stats -->
+      <div class="day-stats">
+        <div class="stat-item">
+          <span class="stat-value">7</span>
+          <span class="stat-label">Day Streak</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">0</span>
+          <span class="stat-label">Points</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">—</span>
+          <span class="stat-label">Alignment</span>
+        </div>
+      </div>
+
+      <!-- Year Target -->
+      <section class="year-target">
+        <p class="target-label">1-Year Target</p>
+        <h2 class="target-title">Achieve Product-Market Fit with 100 Paying Customers</h2>
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div class="progress-fill"></div>
+          </div>
+          <span class="progress-text">0%</span>
+        </div>
+
+        <div class="weekly-goal">
+          <p class="weekly-label">This Week</p>
+          <a href="#" class="weekly-title">Identify Target Market and Problem Space</a>
+        </div>
+      </section>
+
+      <!-- Inspiration -->
+      <section class="inspiration">
+        <p class="quote-text">"Motivation gets you going, but discipline keeps you growing."</p>
+        <p class="quote-author">— John C. Maxwell</p>
+      </section>
+
+      <!-- Empty State -->
+      <section class="empty-state">
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 6v6l4 2"/>
+          </svg>
+        </div>
+        <h3 class="empty-title">Begin with intention</h3>
+        <p class="empty-description">What single task would bring you peace of mind today?</p>
+        <div class="empty-actions">
+          <button class="btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M12 4v16m8-8H4"/>
+            </svg>
+            Add Task
+          </button>
+          <button class="btn-secondary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>
+            </svg>
+            Suggest for me
+          </button>
+        </div>
+      </section>
+
+      <!-- AI Suggest link -->
+      <div class="ai-suggest">
+        <a href="#" class="ai-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>
+          </svg>
+          AI Assistance
+          <span class="ai-counter">5 remaining</span>
+        </a>
+      </div>
+    </main>
+
+    <!-- FAB -->
+    <button class="fab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path d="M12 4v16m8-8H4"/>
+      </svg>
+    </button>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <div class="nav-items">
+        <a href="#" class="nav-item active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 6v6l4 2"/>
+          </svg>
+          Today
+        </a>
+        <a href="#" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          Vision
+        </a>
+        <a href="#" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="12" cy="12" r="10"/>
+            <circle cx="12" cy="12" r="6"/>
+            <circle cx="12" cy="12" r="2"/>
+          </svg>
+          Goals
+        </a>
+        <a href="#" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+          </svg>
+          Stats
+        </a>
+        <a href="#" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="12" cy="12" r="1"/>
+            <circle cx="19" cy="12" r="1"/>
+            <circle cx="5" cy="12" r="1"/>
+          </svg>
+          More
+        </a>
+      </div>
+    </nav>
+  </div>
+</body>
+</html>
