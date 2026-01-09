@@ -67,14 +67,14 @@ export function YearTargetHeader({
   // No 1-year goal set - show prompt to create one
   if (!oneYearGoal) {
     return (
-      <div className={cn("mb-8", className)}>
+      <div className={cn("mb-5 sm:mb-6", className)}>
         <Link
           href="/goals?view=1-year"
-          className="block p-6 rounded-2xl border border-dashed border-night-glow bg-night-soft/50 hover:border-lantern/30 hover:bg-night-soft transition-all group"
+          className="block p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-dashed border-night-glow bg-night-soft/50 hover:border-lantern/30 hover:bg-night-soft transition-all group"
         >
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-lantern/10 border border-lantern/20 flex items-center justify-center group-hover:scale-105 transition-transform">
-              <Target className="w-6 h-6 text-lantern" />
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-lantern/10 border border-lantern/20 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <Target className="w-5 h-5 sm:w-6 sm:h-6 text-lantern" />
             </div>
             <div className="flex-1">
               <h3 className="text-moon font-medium mb-1">Set Your 1-Year Target</h3>
@@ -94,18 +94,18 @@ export function YearTargetHeader({
   const alignmentPercent = tasksTotal > 0 ? Math.round((goalAlignedTasks / tasksTotal) * 100) : 0;
 
   return (
-    <div className={cn("mb-8", className)}>
+    <div className={cn("mb-5 sm:mb-6", className)}>
       {/* Main 1-Year Target Card */}
-      <div className={cn("rounded-2xl border overflow-hidden", categoryBg)}>
+      <div className={cn("rounded-xl sm:rounded-2xl border overflow-hidden", categoryBg)}>
         {/* Header */}
-        <div className="p-4 sm:p-5">
-          <div className="flex items-start gap-4">
+        <div className="p-3 sm:p-4">
+          <div className="flex items-start gap-3">
             {/* Icon */}
             <div className={cn(
-              "w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0",
+              "w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0",
               "bg-gradient-to-br from-lantern/20 to-lantern/5 border border-lantern/30"
             )}>
-              <Target className="w-5 h-5 text-lantern" />
+              <Target className="w-4 h-4 sm:w-5 sm:h-5 text-lantern" />
             </div>
 
             {/* Content */}
@@ -179,7 +179,7 @@ export function YearTargetHeader({
 
         {/* Weekly Focus Strip */}
         {weeklyGoal && (
-          <div className="px-4 sm:px-5 py-3 bg-void/30 border-t border-white/5">
+          <div className="px-3 sm:px-4 py-2 sm:py-3 bg-void/30 border-t border-white/5">
             <div className="flex items-center gap-3">
               <Calendar className="w-4 h-4 text-zen-green flex-shrink-0" />
               <div className="flex-1 min-w-0">

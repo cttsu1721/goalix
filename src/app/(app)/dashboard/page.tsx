@@ -7,8 +7,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { MitCard, TaskList, shouldShowCarryOverPrompt } from "@/components/tasks";
 import { StatsPanel } from "@/components/gamification/StatsPanel";
-import { MobileStatsBar } from "@/components/gamification/MobileStatsBar";
-import { YearTargetHeader, DayNavigation, MotivationalQuote } from "@/components/dashboard";
+import { YearTargetHeader, MotivationalQuote, CompactDayHeader } from "@/components/dashboard";
 import { ReviewDuePromptAuto } from "@/components/review";
 import { useMobileView } from "@/hooks/useMobileView";
 
@@ -809,25 +808,19 @@ export default function DashboardPage() {
         </Button>
       </PageHeader>
 
-      {/* Mobile Stats Bar - tap to see full Progress page */}
-      <MobileStatsBar
-        streak={mitStreak?.currentCount || 0}
-        todayPoints={statsData?.todayStats?.pointsEarned || pointsEarned}
-        goalAlignment={goalAlignment}
-        levelName={currentLevel.name}
-      />
-
-      {/* Mobile Day Navigation - swipe between days (5.5) */}
+      {/* Mobile: Compact unified header (stats + day nav in one row) */}
       {isMobile && isMobileReady && (
-        <DayNavigation
+        <CompactDayHeader
           currentDate={selectedDate}
           onDateChange={setSelectedDate}
-          className="mb-4 md:hidden"
+          streak={mitStreak?.currentCount || 0}
+          todayPoints={statsData?.todayStats?.pointsEarned || pointsEarned}
+          goalAlignment={goalAlignment}
         />
       )}
 
       {/* Review Due Prompt - shows when weekly/monthly review is due */}
-      <ReviewDuePromptAuto className="mb-6" />
+      <ReviewDuePromptAuto className="mb-4 sm:mb-6" />
 
       {/* Focus Mode Indicator - show when hiding overdue tasks */}
       {isFocusMode && overdueTasksFormatted.length > 0 && (
@@ -855,14 +848,14 @@ export default function DashboardPage() {
         goalAlignedTasks={linkedTasks}
       />
 
-      {/* Motivational Quote - optional, shown based on user settings */}
+      {/* Motivational Quote - optional, collapsible, shown based on user settings */}
       {settingsData?.user?.showMotivationalQuotes && isViewingToday && (
-        <MotivationalQuote className="mb-6" />
+        <MotivationalQuote className="mb-4 sm:mb-6" defaultCollapsed={isMobile} />
       )}
 
       {/* Overdue Tasks Section - shown when there are overdue tasks (hidden in focus mode) */}
       {overdueTasksFormatted.length > 0 && !isFocusMode && (
-        <section className="mb-8">
+        <section className="mb-5 sm:mb-8">
           <div className="flex items-center gap-2 mb-4 pb-3 border-b border-zen-red/20">
             <AlertTriangle className="w-4 h-4 text-zen-red" />
             <h2 className="text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-zen-red">
