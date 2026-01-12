@@ -52,6 +52,14 @@ const TutorialCards = dynamic(
   () => import("@/components/onboarding/TutorialCards").then((m) => m.TutorialCards),
   { ssr: false }
 );
+const MorningPlanningPrompt = dynamic(
+  () => import("@/components/notifications/MorningPlanningPrompt").then((m) => m.MorningPlanningPrompt),
+  { ssr: false }
+);
+const StreakAtRiskNudge = dynamic(
+  () => import("@/components/notifications/StreakAtRiskNudge").then((m) => m.StreakAtRiskNudge),
+  { ssr: false }
+);
 import {
   useTasks,
   useCreateTask,
@@ -1133,6 +1141,29 @@ export default function DashboardPage() {
           if (!open) setEarnedBadge(null);
         }}
         badge={earnedBadge}
+      />
+
+      {/* Morning Planning Prompt */}
+      <MorningPlanningPrompt
+        onStartPlanning={() => setIsPlanDayModalOpen(true)}
+      />
+
+      {/* Streak At Risk Nudge */}
+      <StreakAtRiskNudge
+        onTakeAction={(streakType) => {
+          // Route to appropriate action based on streak type
+          if (streakType === "MIT_COMPLETION") {
+            // If no MIT, open plan modal, otherwise focus on tasks
+            if (mitsFormatted.length === 0) {
+              setIsPlanDayModalOpen(true);
+            }
+            // Otherwise user can click on their MIT to complete it
+          } else if (streakType === "DAILY_PLANNING") {
+            setIsPlanDayModalOpen(true);
+          } else if (streakType === "KAIZEN_CHECKIN") {
+            setIsKaizenPromptOpen(true);
+          }
+        }}
       />
     </AppShell>
   );

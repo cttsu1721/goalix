@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
-import { GoalCard, GoalCategoryBadge, GoalCreateModal, GoalEditModal, GoalBreadcrumb, SiblingGoalsSection } from "@/components/goals";
+import { GoalCard, GoalCategoryBadge, GoalCreateModal, GoalEditModal, GoalBreadcrumb, SiblingGoalsSection, GoalCascadeWizard } from "@/components/goals";
 import { Button } from "@/components/ui/button";
 import { useGoal, useUpdateGoal, useDeleteGoal } from "@/hooks";
 import { GOAL_STATUS_LABELS } from "@/types/goals";
@@ -123,6 +123,7 @@ export default function GoalDetailPage() {
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isCascadeWizardOpen, setIsCascadeWizardOpen] = useState(false);
   // For creating grandchildren from child cards
   const [createChildTarget, setCreateChildTarget] = useState<{
     parentId: string;
@@ -386,14 +387,27 @@ export default function GoalDetailPage() {
         <div>
           <div className="flex items-center justify-between mb-3 sm:mb-4">
             <h2 className="text-base sm:text-lg font-medium text-moon">{config.childLabel}</h2>
-            <Button
-              onClick={() => setIsCreateModalOpen(true)}
-              variant="outline"
-              className="border-night-mist bg-night-soft text-moon hover:border-lantern hover:text-lantern hover:bg-lantern/5 rounded-lg sm:rounded-xl h-8 sm:h-9 px-3 sm:px-4 text-xs sm:text-sm"
-            >
-              <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
-              Add
-            </Button>
+            <div className="flex items-center gap-2">
+              {/* AI Breakdown button - only for cascadable levels */}
+              {(level === "oneYear" || level === "monthly" || level === "weekly") && (
+                <Button
+                  onClick={() => setIsCascadeWizardOpen(true)}
+                  variant="outline"
+                  className="border-zen-purple/30 bg-zen-purple/10 text-zen-purple hover:border-zen-purple hover:bg-zen-purple/20 rounded-lg sm:rounded-xl h-8 sm:h-9 px-3 sm:px-4 text-xs sm:text-sm"
+                >
+                  <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+                  AI Breakdown
+                </Button>
+              )}
+              <Button
+                onClick={() => setIsCreateModalOpen(true)}
+                variant="outline"
+                className="border-night-mist bg-night-soft text-moon hover:border-lantern hover:text-lantern hover:bg-lantern/5 rounded-lg sm:rounded-xl h-8 sm:h-9 px-3 sm:px-4 text-xs sm:text-sm"
+              >
+                <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+                Add
+              </Button>
+            </div>
           </div>
 
           {children.length === 0 ? (
@@ -521,6 +535,21 @@ export default function GoalDetailPage() {
             refetch();
             setCreateChildTarget(null);
           }}
+        />
+      )}
+
+      {/* Goal cascade wizard - AI breakdown for oneYear, monthly, weekly */}
+      {(level === "oneYear" || level === "monthly" || level === "weekly") && (
+        <GoalCascadeWizard
+          open={isCascadeWizardOpen}
+          onOpenChange={setIsCascadeWizardOpen}
+          parentGoal={{
+            id,
+            title: goal.title as string,
+            description: goal.description as string | null,
+            level: level as "oneYear" | "monthly" | "weekly",
+          }}
+          onComplete={() => refetch()}
         />
       )}
     </AppShell>

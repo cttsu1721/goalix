@@ -11,4 +11,7 @@ export { UnlinkedGoalsWarning } from "./UnlinkedGoalsWarning";
 export { GoalArchiveDialog } from "./GoalArchiveDialog";
 export { SiblingGoals, SiblingGoalsList, SiblingGoalsSection } from "./SiblingGoals";
 export { GoalTree, GoalMindMap } from "./GoalTree";
+export { GoalTreeView } from "./GoalTreeView";
+export { GoalTreeNode } from "./GoalTreeNode";
 export { SuggestedCategory, CategorySelector } from "./SuggestedCategory";
+export { GoalCascadeWizard } from "./GoalCascadeWizard";
