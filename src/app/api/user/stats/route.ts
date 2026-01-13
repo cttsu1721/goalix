@@ -1,18 +1,19 @@
-import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { NextResponse, NextRequest } from "next/server";
+import { authenticateRequest } from "@/lib/api-auth";
 import { prisma } from "@/lib/db";
 import { LEVELS } from "@/types/gamification";
 
 // GET /api/user/stats - Get user gamification stats
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
+    const user = await authenticateRequest(request);
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    const userId = user.id;
 
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+    const userData = await prisma.user.findUnique({
+      where: { id: userId },
       select: {
         totalPoints: true,
         level: true,
@@ -28,19 +29,19 @@ export async function GET() {
       },
     });
 
-    if (!user) {
+    if (!userData) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Calculate level info
-    const currentLevel = LEVELS.find((l) => l.level === user.level) || LEVELS[0];
-    const nextLevel = LEVELS.find((l) => l.level === user.level + 1);
+    const currentLevel = LEVELS.find((l) => l.level === userData.level) || LEVELS[0];
+    const nextLevel = LEVELS.find((l) => l.level === userData.level + 1);
     const pointsToNextLevel = nextLevel
-      ? nextLevel.pointsRequired - user.totalPoints
+      ? nextLevel.pointsRequired - userData.totalPoints
       : 0;
     const levelProgress = nextLevel
       ? Math.round(
-          ((user.totalPoints - currentLevel.pointsRequired) /
+          ((userData.totalPoints - currentLevel.pointsRequired) /
             (nextLevel.pointsRequired - currentLevel.pointsRequired)) *
             100
         )
@@ -54,7 +55,7 @@ export async function GET() {
 
     const todaysTasks = await prisma.dailyTask.findMany({
       where: {
-        userId: session.user.id,
+        userId,
         scheduledDate: {
           gte: today,
           lte: endOfDay,
@@ -83,7 +84,7 @@ export async function GET() {
 
     const weeklyTasks = await prisma.dailyTask.aggregate({
       where: {
-        userId: session.user.id,
+        userId,
         scheduledDate: {
           gte: startOfWeek,
         },
@@ -96,19 +97,22 @@ export async function GET() {
     });
 
     return NextResponse.json({
-      totalPoints: user.totalPoints,
-      level: user.level,
-      levelName: currentLevel.name,
-      pointsToNextLevel,
-      levelProgress,
-      streakFreezes: user.streakFreezes,
-      maxMitCount: user.maxMitCount,
-      streaks: user.streaks,
-      badges: user.earnedBadges,
-      todayStats,
-      weeklyStats: {
-        tasksCompleted: weeklyTasks._count,
-        pointsEarned: weeklyTasks._sum.pointsEarned || 0,
+      success: true,
+      data: {
+        totalPoints: userData.totalPoints,
+        level: userData.level,
+        levelName: currentLevel.name,
+        pointsToNextLevel,
+        levelProgress,
+        streakFreezes: userData.streakFreezes,
+        maxMitCount: userData.maxMitCount,
+        streaks: userData.streaks,
+        badges: userData.earnedBadges,
+        todayStats,
+        weeklyStats: {
+          tasksCompleted: weeklyTasks._count,
+          pointsEarned: weeklyTasks._sum.pointsEarned || 0,
+        },
       },
     });
   } catch (error) {
