@@ -6,7 +6,7 @@
  */
 
 import { createHash, randomBytes } from "crypto";
-import { db } from "./db";
+import { prisma } from "./db";
 
 const TOKEN_PREFIX = "gzx_";
 const TOKEN_LENGTH = 32; // Length of random part
@@ -51,7 +51,7 @@ export async function validateToken(token: string): Promise<{
 
   const tokenHash = hashToken(token);
 
-  const apiToken = await db.mCPApiToken.findUnique({
+  const apiToken = await prisma.mCPApiToken.findUnique({
     where: { tokenHash },
     include: {
       user: {
@@ -80,7 +80,7 @@ export async function validateToken(token: string): Promise<{
   }
 
   // Update last used timestamp (fire and forget)
-  db.mCPApiToken.update({
+  prisma.mCPApiToken.update({
     where: { id: apiToken.id },
     data: { lastUsedAt: new Date() },
   }).catch(() => {
@@ -111,7 +111,7 @@ export async function createApiToken(
 }> {
   const { token, tokenHash, tokenPrefix } = generateToken();
 
-  const apiToken = await db.mCPApiToken.create({
+  const apiToken = await prisma.mCPApiToken.create({
     data: {
       userId,
       name,
@@ -134,7 +134,7 @@ export async function createApiToken(
  * List all tokens for a user (without exposing hash)
  */
 export async function listUserTokens(userId: string) {
-  const tokens = await db.mCPApiToken.findMany({
+  const tokens = await prisma.mCPApiToken.findMany({
     where: { userId },
     select: {
       id: true,
@@ -158,7 +158,7 @@ export async function revokeToken(
   userId: string,
   tokenId: string
 ): Promise<boolean> {
-  const result = await db.mCPApiToken.deleteMany({
+  const result = await prisma.mCPApiToken.deleteMany({
     where: {
       id: tokenId,
       userId, // Ensure user owns the token
@@ -172,7 +172,7 @@ export async function revokeToken(
  * Get token count for a user
  */
 export async function getTokenCount(userId: string): Promise<number> {
-  return db.mCPApiToken.count({
+  return prisma.mCPApiToken.count({
     where: { userId, isActive: true },
   });
 }
