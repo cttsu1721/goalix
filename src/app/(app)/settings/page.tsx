@@ -6,7 +6,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useUserSettings, useUpdateUserSettings } from "@/hooks";
+import { useUserSettings, useUpdateUserSettings, useApiTokens, useCreateToken, useRevokeToken } from "@/hooks";
 import { toast } from "sonner";
 import {
   User,
@@ -31,6 +31,11 @@ import {
   Volume2,
   Target,
   Leaf,
+  Key,
+  Copy,
+  Plus,
+  X,
+  ExternalLink,
 } from "lucide-react";
 import { RecurringTasksCard } from "@/components/tasks";
 import { useTheme } from "next-themes";
@@ -373,6 +378,304 @@ function AppearanceSection() {
         <p className="text-xs text-moon-faint mt-2">
           Your theme preference is saved automatically and synced across devices.
         </p>
+      </div>
+    </SettingsSection>
+  );
+}
+
+function APITokensSection() {
+  const { data: tokens, isLoading } = useApiTokens();
+  const createToken = useCreateToken();
+  const revokeToken = useRevokeToken();
+
+  const [newTokenName, setNewTokenName] = useState("");
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [newlyCreatedToken, setNewlyCreatedToken] = useState<string | null>(null);
+  const [tokenToRevoke, setTokenToRevoke] = useState<string | null>(null);
+
+  const handleCreateToken = async () => {
+    if (!newTokenName.trim()) {
+      toast.error("Please enter a token name");
+      return;
+    }
+
+    try {
+      const result = await createToken.mutateAsync(newTokenName.trim());
+      setNewlyCreatedToken(result.token);
+      setNewTokenName("");
+      setShowCreateForm(false);
+      toast.success("API token created");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to create token");
+    }
+  };
+
+  const handleRevokeToken = async (id: string) => {
+    try {
+      await revokeToken.mutateAsync(id);
+      setTokenToRevoke(null);
+      toast.success("API token revoked");
+    } catch {
+      toast.error("Failed to revoke token");
+    }
+  };
+
+  const handleCopyToken = async () => {
+    if (newlyCreatedToken) {
+      await navigator.clipboard.writeText(newlyCreatedToken);
+      toast.success("Token copied to clipboard");
+    }
+  };
+
+  const formatDate = (dateStr: string | null) => {
+    if (!dateStr) return "Never";
+    return new Date(dateStr).toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  const formatRelativeTime = (dateStr: string | null) => {
+    if (!dateStr) return "Never used";
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return formatDate(dateStr);
+  };
+
+  return (
+    <SettingsSection
+      icon={Key}
+      title="API Tokens"
+      description="Connect Claude AI to your goals via MCP"
+    >
+      <div className="space-y-4">
+        {/* Newly created token modal */}
+        {newlyCreatedToken && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-void/80 p-4">
+            <div className="bg-night border border-night-mist rounded-2xl p-5 sm:p-6 max-w-md w-full shadow-xl">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium text-moon">Token Created</h3>
+                <button
+                  onClick={() => setNewlyCreatedToken(null)}
+                  className="text-moon-faint hover:text-moon"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="bg-zen-green-soft border border-zen-green/30 rounded-xl p-4 mb-4">
+                <p className="text-sm text-moon mb-2">
+                  Copy your token now. <span className="text-zen-red font-medium">It won&apos;t be shown again.</span>
+                </p>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 text-xs sm:text-sm bg-night-soft rounded-lg px-3 py-2 text-moon font-mono overflow-x-auto">
+                    {newlyCreatedToken}
+                  </code>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCopyToken}
+                    className="shrink-0 border-night-mist bg-night-soft text-moon hover:bg-night-mist rounded-lg"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-2 text-sm text-moon-dim">
+                <p className="font-medium text-moon">How to use:</p>
+                <ol className="list-decimal list-inside space-y-1 text-xs">
+                  <li>Go to claude.ai → Settings → Integrations</li>
+                  <li>Add a Custom Connector</li>
+                  <li>Enter <code className="bg-night-soft px-1 rounded">https://goalzenix-mcp.quantum-digital-plus.workers.dev</code></li>
+                  <li>Paste your token as the API Key</li>
+                </ol>
+              </div>
+              <div className="flex justify-end gap-3 mt-5">
+                <Button
+                  onClick={handleCopyToken}
+                  className="bg-lantern text-void hover:bg-lantern/90 rounded-xl"
+                >
+                  <Copy className="w-4 h-4 mr-2" />
+                  Copy Token
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setNewlyCreatedToken(null)}
+                  className="border-night-mist bg-night-soft text-moon hover:bg-night-mist rounded-xl"
+                >
+                  Done
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Token list */}
+        {isLoading ? (
+          <div className="space-y-3">
+            {[1, 2].map((i) => (
+              <div key={i} className="h-16 bg-night-soft rounded-xl animate-pulse" />
+            ))}
+          </div>
+        ) : tokens && tokens.length > 0 ? (
+          <div className="space-y-2">
+            {tokens.map((token) => (
+              <div
+                key={token.id}
+                className="flex items-center justify-between p-3 sm:p-4 bg-night-soft rounded-xl border border-night-mist"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-moon text-sm truncate">{token.name}</span>
+                    {token.isActive ? (
+                      <span className="text-[0.625rem] px-2 py-0.5 bg-zen-green-soft text-zen-green rounded-full">
+                        Active
+                      </span>
+                    ) : (
+                      <span className="text-[0.625rem] px-2 py-0.5 bg-night-mist text-moon-faint rounded-full">
+                        Inactive
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3 mt-1 text-xs text-moon-faint">
+                    <code className="bg-night px-1.5 py-0.5 rounded text-moon-dim">
+                      {token.tokenPrefix}...
+                    </code>
+                    <span>Last used: {formatRelativeTime(token.lastUsedAt)}</span>
+                  </div>
+                </div>
+                {tokenToRevoke === token.id ? (
+                  <div className="flex items-center gap-2 shrink-0 ml-3">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setTokenToRevoke(null)}
+                      disabled={revokeToken.isPending}
+                      className="border-night-mist bg-night text-moon hover:bg-night-mist rounded-lg text-xs"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => handleRevokeToken(token.id)}
+                      disabled={revokeToken.isPending}
+                      className="bg-zen-red text-white hover:bg-zen-red/90 rounded-lg text-xs"
+                    >
+                      {revokeToken.isPending ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        "Revoke"
+                      )}
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setTokenToRevoke(token.id)}
+                    className="shrink-0 ml-3 border-zen-red/30 text-zen-red hover:bg-zen-red-soft rounded-lg text-xs"
+                  >
+                    <Trash2 className="w-3 h-3 mr-1" />
+                    Revoke
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-6 text-moon-faint">
+            <Key className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">No API tokens yet</p>
+            <p className="text-xs mt-1">Create a token to connect Claude AI</p>
+          </div>
+        )}
+
+        {/* Create token form */}
+        {showCreateForm ? (
+          <div className="p-4 bg-night-soft rounded-xl border border-lantern/30 space-y-3">
+            <label className="text-[0.6875rem] font-medium uppercase tracking-[0.15em] text-moon-faint block">
+              Token Name
+            </label>
+            <Input
+              value={newTokenName}
+              onChange={(e) => setNewTokenName(e.target.value)}
+              placeholder="e.g., Claude Desktop, claude.ai"
+              className="h-10 bg-night border-night-mist text-moon placeholder:text-moon-faint rounded-xl focus:border-lantern focus:ring-lantern/20"
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleCreateToken();
+                if (e.key === "Escape") {
+                  setShowCreateForm(false);
+                  setNewTokenName("");
+                }
+              }}
+            />
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={handleCreateToken}
+                disabled={createToken.isPending || !newTokenName.trim()}
+                className="bg-lantern text-void hover:bg-lantern/90 rounded-xl"
+              >
+                {createToken.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Check className="w-4 h-4 mr-2" />
+                    Create Token
+                  </>
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowCreateForm(false);
+                  setNewTokenName("");
+                }}
+                className="border-night-mist bg-night text-moon hover:bg-night-mist rounded-xl"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <Button
+            variant="outline"
+            onClick={() => setShowCreateForm(true)}
+            className="w-full border-night-mist bg-night-soft text-moon hover:bg-night-mist hover:border-moon-dim rounded-xl"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Create New Token
+          </Button>
+        )}
+
+        {/* Info section */}
+        <div className="pt-4 border-t border-night-mist space-y-2">
+          <p className="text-xs text-moon-faint">
+            API tokens allow Claude AI to manage your goals and tasks through the MCP protocol.
+            Tokens are stored securely as SHA-256 hashes.
+          </p>
+          <a
+            href="https://claude.ai/settings"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-xs text-lantern hover:text-lantern/80"
+          >
+            <ExternalLink className="w-3 h-3" />
+            Open claude.ai Settings
+          </a>
+        </div>
       </div>
     </SettingsSection>
   );
@@ -817,6 +1120,9 @@ export default function SettingsPage() {
             </div>
           </div>
         </SettingsSection>
+
+        {/* API Tokens Section */}
+        <APITokensSection />
 
         {/* Danger Zone */}
         <div className="bg-night border border-zen-red/30 rounded-xl sm:rounded-2xl overflow-hidden">

@@ -139,3 +139,10 @@ export {
   useGoalSuggest,
   useGoalLinkSuggest,
 } from "./useAI";
+
+// API Token hooks
+export {
+  useApiTokens,
+  useCreateToken,
+  useRevokeToken,
+} from "./useApiTokens";
