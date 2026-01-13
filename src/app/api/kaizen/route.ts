@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { authenticateRequest } from "@/lib/api-auth";
 import { prisma } from "@/lib/db";
 import {
   calculateKaizenPoints,
@@ -7,12 +7,13 @@ import {
   type KaizenCheckinInput,
 } from "@/types/kaizen";
 import { checkAllBadges } from "@/lib/gamification/badges";
+import { updateChallengeProgressOnKaizen } from "@/lib/challenges";
 
 // GET /api/kaizen - Get Kaizen check-in(s)
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
+    const user = await authenticateRequest(request);
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -30,7 +31,7 @@ export async function GET(request: NextRequest) {
       const checkin = await prisma.kaizenCheckin.findUnique({
         where: {
           userId_checkinDate: {
-            userId: session.user.id,
+            userId: user.id,
             checkinDate: date,
           },
         },
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
 
     const checkins = await prisma.kaizenCheckin.findMany({
       where: {
-        userId: session.user.id,
+        userId: user.id,
         checkinDate: {
           gte: startDate,
           lte: endDate,
@@ -63,7 +64,7 @@ export async function GET(request: NextRequest) {
     // Get streak data
     const kaizenStreak = await prisma.streak.findFirst({
       where: {
-        userId: session.user.id,
+        userId: user.id,
         type: "KAIZEN_CHECKIN",
       },
     });
@@ -87,8 +88,8 @@ export async function GET(request: NextRequest) {
 // POST /api/kaizen - Create or update Kaizen check-in for today
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
+    const user = await authenticateRequest(request);
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -124,7 +125,7 @@ export async function POST(request: NextRequest) {
     const existingCheckin = await prisma.kaizenCheckin.findUnique({
       where: {
         userId_checkinDate: {
-          userId: session.user.id,
+          userId: user.id,
           checkinDate,
         },
       },
@@ -154,7 +155,7 @@ export async function POST(request: NextRequest) {
       // Create new checkin
       checkin = await prisma.kaizenCheckin.create({
         data: {
-          userId: session.user.id,
+          userId: user.id,
           checkinDate,
           health: !!health,
           relationships: !!relationships,
@@ -171,7 +172,7 @@ export async function POST(request: NextRequest) {
     // Update user points if there's a change
     if (pointsDelta !== 0) {
       await prisma.user.update({
-        where: { id: session.user.id },
+        where: { id: user.id },
         data: {
           totalPoints: {
             increment: pointsDelta,
@@ -188,12 +189,12 @@ export async function POST(request: NextRequest) {
       const kaizenStreak = await prisma.streak.upsert({
         where: {
           userId_type: {
-            userId: session.user.id,
+            userId: user.id,
             type: "KAIZEN_CHECKIN",
           },
         },
         create: {
-          userId: session.user.id,
+          userId: user.id,
           type: "KAIZEN_CHECKIN",
           currentCount: 1,
           longestCount: 1,
@@ -219,18 +220,33 @@ export async function POST(request: NextRequest) {
     // Get updated streak
     const streak = await prisma.streak.findFirst({
       where: {
-        userId: session.user.id,
+        userId: user.id,
         type: "KAIZEN_CHECKIN",
       },
     });
 
     // Check and award badges (only for new check-ins)
     const earnedBadges = !existingCheckin
-      ? await checkAllBadges(session.user.id, {
+      ? await checkAllBadges(user.id, {
           kaizenCheckin: true,
           currentStreak: streak?.currentCount || 0,
         })
       : [];
+
+    // Update challenge progress (only for new check-ins)
+    if (!existingCheckin) {
+      const areasChecked = [health, relationships, wealth, career, personalGrowth, lifestyle]
+        .filter(Boolean).length;
+      const userRecord = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: { timezone: true },
+      });
+      updateChallengeProgressOnKaizen(
+        user.id,
+        userRecord?.timezone || "UTC",
+        areasChecked
+      ).catch((err) => console.error("Error updating Kaizen challenge progress:", err));
+    }
 
     return NextResponse.json({
       checkin,

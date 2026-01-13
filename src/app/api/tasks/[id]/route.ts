@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { authenticateRequest } from "@/lib/api-auth";
 import { prisma } from "@/lib/db";
 import { TaskPriority, TaskStatus } from "@prisma/client";
 import { TASK_PRIORITY_LIMITS } from "@/types/tasks";
@@ -12,8 +12,8 @@ interface RouteParams {
 // GET /api/tasks/[id] - Get a single task
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
+    const user = await authenticateRequest(request);
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const task = await prisma.dailyTask.findFirst({
       where: {
         id,
-        userId: session.user.id,
+        userId: user.id,
       },
       include: {
         weeklyGoal: {
@@ -52,8 +52,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 // PATCH /api/tasks/[id] - Update a task
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
+    const user = await authenticateRequest(request);
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -64,7 +64,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const existingTask = await prisma.dailyTask.findFirst({
       where: {
         id,
-        userId: session.user.id,
+        userId: user.id,
       },
     });
 
@@ -101,7 +101,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       if (limit !== null) {
         const existingCount = await prisma.dailyTask.count({
           where: {
-            userId: session.user.id,
+            userId: user.id,
             priority: body.priority as TaskPriority,
             scheduledDate: existingTask.scheduledDate,
             id: { not: id }, // Exclude current task
@@ -161,8 +161,8 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 // DELETE /api/tasks/[id] - Delete a task
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
+    const user = await authenticateRequest(request);
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -172,7 +172,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const existingTask = await prisma.dailyTask.findFirst({
       where: {
         id,
-        userId: session.user.id,
+        userId: user.id,
       },
     });
 

@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { authenticateRequest } from "@/lib/api-auth";
 import { prisma } from "@/lib/db";
 import { TASK_PRIORITY_POINTS } from "@/types/tasks";
 import { checkAllBadges } from "@/lib/gamification/badges";
+import {
+  updateChallengeProgressOnTaskComplete,
+  updateAlignmentChallenges,
+  updateGoalChallenges,
+} from "@/lib/challenges";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -11,10 +16,11 @@ interface RouteParams {
 // POST /api/tasks/[id]/complete - Complete a task and award points
 export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
+    const user = await authenticateRequest(request);
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    const userId = user.id;
 
     const { id } = await params;
 
@@ -22,7 +28,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const existingTask = await prisma.dailyTask.findFirst({
       where: {
         id,
-        userId: session.user.id,
+        userId: userId,
       },
     });
 
@@ -44,7 +50,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     // Get current streak for bonus calculation
     const mitStreak = await prisma.streak.findFirst({
       where: {
-        userId: session.user.id,
+        userId: userId,
         type: "MIT_COMPLETION",
       },
     });
@@ -57,7 +63,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const totalPoints = Math.round(basePoints * (1 + streakBonus));
 
     // Use transaction to update task and user points atomically
-    const [task, user] = await prisma.$transaction([
+    const [task, updatedUser] = await prisma.$transaction([
       // Update task
       prisma.dailyTask.update({
         where: { id },
@@ -78,7 +84,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       }),
       // Update user total points
       prisma.user.update({
-        where: { id: session.user.id },
+        where: { id: userId },
         data: {
           totalPoints: {
             increment: totalPoints,
@@ -95,12 +101,12 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       await prisma.streak.upsert({
         where: {
           userId_type: {
-            userId: session.user.id,
+            userId: userId,
             type: "MIT_COMPLETION",
           },
         },
         create: {
-          userId: session.user.id,
+          userId: userId,
           type: "MIT_COMPLETION",
           currentCount: 1,
           longestCount: 1,
@@ -119,12 +125,12 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     }
 
     // Check if user leveled up
-    const newLevel = calculateLevel(user.totalPoints);
+    const newLevel = calculateLevel(updatedUser.totalPoints);
     let leveledUp = false;
 
-    if (newLevel > (user.level || 1)) {
+    if (newLevel > (updatedUser.level || 1)) {
       await prisma.user.update({
-        where: { id: session.user.id },
+        where: { id: userId },
         data: { level: newLevel },
       });
       leveledUp = true;
@@ -138,7 +144,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     const todayTasks = await prisma.dailyTask.findMany({
       where: {
-        userId: session.user.id,
+        userId: userId,
         scheduledDate: { gte: today, lte: endOfDay },
         status: "COMPLETED",
       },
@@ -155,11 +161,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     // Get current MIT streak for badge checking
     const currentMitStreak = await prisma.streak.findFirst({
-      where: { userId: session.user.id, type: "MIT_COMPLETION" },
+      where: { userId: userId, type: "MIT_COMPLETION" },
     });
 
     // Check and award badges
-    const earnedBadges = await checkAllBadges(session.user.id, {
+    const earnedBadges = await checkAllBadges(userId, {
       taskCompleted: true,
       todayPoints,
       currentStreak: currentMitStreak?.currentCount || 0,
@@ -175,13 +181,31 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       ? STREAK_MILESTONES.find(m => previousStreak < m && newStreak >= m)
       : undefined;
 
+    // Update challenge progress (fire and forget for performance)
+    const userTimezone = (await prisma.user.findUnique({
+      where: { id: userId },
+      select: { timezone: true },
+    }))?.timezone || "UTC";
+
+    Promise.all([
+      updateChallengeProgressOnTaskComplete(
+        userId,
+        userTimezone,
+        existingTask.priority,
+        existingTask.weeklyGoalId !== null,
+        new Date()
+      ),
+      updateAlignmentChallenges(userId, userTimezone),
+      updateGoalChallenges(userId, userTimezone),
+    ]).catch((err) => console.error("Error updating challenge progress:", err));
+
     return NextResponse.json({
       task,
       points: {
         earned: totalPoints,
         base: basePoints,
         streakBonus: Math.round(basePoints * streakBonus),
-        newTotal: user.totalPoints,
+        newTotal: updatedUser.totalPoints,
       },
       leveledUp,
       newLevel: leveledUp ? newLevel : undefined,

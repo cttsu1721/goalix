@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { authenticateRequest } from "@/lib/api-auth";
 import { prisma } from "@/lib/db";
 import { GoalCategory, GoalStatus } from "@prisma/client";
 import type { GoalLevel } from "@/types/goals";
@@ -167,13 +167,13 @@ async function findGoalByIdAndUser(id: string, userId: string) {
 // GET /api/goals/[id] - Get a single goal with children
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
+    const user = await authenticateRequest(request);
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { id } = await params;
-    const result = await findGoalByIdAndUser(id, session.user.id);
+    const result = await findGoalByIdAndUser(id, user.id);
 
     if (!result) {
       return NextResponse.json({ error: "Goal not found" }, { status: 404 });
@@ -192,8 +192,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 // PATCH /api/goals/[id] - Update a goal
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
+    const user = await authenticateRequest(request);
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -202,7 +202,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const { title, description, category, status, targetDate, targetMonth, weekStart, progress } = body;
 
     // Find the goal first
-    const result = await findGoalByIdAndUser(id, session.user.id);
+    const result = await findGoalByIdAndUser(id, user.id);
     if (!result) {
       return NextResponse.json({ error: "Goal not found" }, { status: 404 });
     }
@@ -286,15 +286,15 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 // DELETE /api/goals/[id] - Delete a goal (cascades to children)
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
+    const user = await authenticateRequest(request);
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { id } = await params;
 
     // Find the goal first
-    const result = await findGoalByIdAndUser(id, session.user.id);
+    const result = await findGoalByIdAndUser(id, user.id);
     if (!result) {
       return NextResponse.json({ error: "Goal not found" }, { status: 404 });
     }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { authenticateRequest } from "@/lib/api-auth";
 import { prisma } from "@/lib/db";
 import { TaskPriority } from "@prisma/client";
 import { TASK_PRIORITY_LIMITS } from "@/types/tasks";
@@ -8,8 +8,8 @@ import { formatLocalDate, parseLocalDate } from "@/lib/utils";
 // GET /api/tasks - List tasks for a specific date or date range
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
+    const user = await authenticateRequest(request);
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
     // Build where clause - optionally include overdue incomplete tasks
     const whereClause = includeOverdue
       ? {
-          userId: session.user.id,
+          userId: user.id,
           OR: [
             // Tasks scheduled for the requested date range
             {
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
           ],
         }
       : {
-          userId: session.user.id,
+          userId: user.id,
           scheduledDate: {
             gte: startOfRange,
             lte: endOfRange,
@@ -166,8 +166,8 @@ export async function GET(request: NextRequest) {
 // POST /api/tasks - Create a new task
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
+    const user = await authenticateRequest(request);
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -198,7 +198,7 @@ export async function POST(request: NextRequest) {
     if (limit !== null) {
       const existingCount = await prisma.dailyTask.count({
         where: {
-          userId: session.user.id,
+          userId: user.id,
           priority: priority as TaskPriority,
           scheduledDate: startOfDay,
         },
@@ -220,14 +220,14 @@ export async function POST(request: NextRequest) {
           id: weeklyGoalId,
           OR: [
             // Standalone weekly goal (directly owned by user)
-            { userId: session.user.id },
+            { userId: user.id },
             // Hierarchy-based weekly goal (owned through goal hierarchy)
             {
               monthlyGoal: {
                 oneYearGoal: {
                   threeYearGoal: {
                     sevenYearVision: {
-                      userId: session.user.id,
+                      userId: user.id,
                     },
                   },
                 },
@@ -247,7 +247,7 @@ export async function POST(request: NextRequest) {
 
     const task = await prisma.dailyTask.create({
       data: {
-        userId: session.user.id,
+        userId: user.id,
         title,
         description: description || null,
         priority: priority as TaskPriority,

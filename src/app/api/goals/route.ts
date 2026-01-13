@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { authenticateRequest } from "@/lib/api-auth";
 import { prisma } from "@/lib/db";
 import { GoalCategory, GoalStatus } from "@prisma/client";
 import type { GoalLevel } from "@/types/goals";
@@ -7,8 +7,8 @@ import type { GoalLevel } from "@/types/goals";
 // GET /api/goals - List goals by level
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
+    const user = await authenticateRequest(request);
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
       case "sevenYear":
         goals = await prisma.sevenYearVision.findMany({
           where: {
-            userId: session.user.id,
+            userId: user.id,
             ...where,
           },
           include: {
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
       case "threeYear":
         goals = await prisma.threeYearGoal.findMany({
           where: {
-            userId: session.user.id,
+            userId: user.id,
             ...(parentId && { sevenYearVisionId: parentId }),
             ...where,
           },
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
       case "oneYear":
         goals = await prisma.oneYearGoal.findMany({
           where: {
-            userId: session.user.id,
+            userId: user.id,
             ...(parentId && { threeYearGoalId: parentId }),
             ...where,
           },
@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
       case "monthly":
         goals = await prisma.monthlyGoal.findMany({
           where: {
-            userId: session.user.id,
+            userId: user.id,
             ...(parentId && { oneYearGoalId: parentId }),
             ...where,
           },
@@ -111,7 +111,7 @@ export async function GET(request: NextRequest) {
       case "weekly":
         goals = await prisma.weeklyGoal.findMany({
           where: {
-            userId: session.user.id,
+            userId: user.id,
             ...(parentId && { monthlyGoalId: parentId }),
             ...where,
           },
@@ -150,8 +150,8 @@ export async function GET(request: NextRequest) {
 // POST /api/goals - Create a new goal
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
+    const user = await authenticateRequest(request);
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -177,7 +177,7 @@ export async function POST(request: NextRequest) {
       case "sevenYear":
         goal = await prisma.sevenYearVision.create({
           data: {
-            userId: session.user.id,
+            userId: user.id,
             title,
             description: description || null,
             category: category as GoalCategory,
@@ -190,7 +190,7 @@ export async function POST(request: NextRequest) {
         // If parentId provided, verify it belongs to user
         if (parentId) {
           const vision = await prisma.sevenYearVision.findFirst({
-            where: { id: parentId, userId: session.user.id },
+            where: { id: parentId, userId: user.id },
           });
           if (!vision) {
             return NextResponse.json({ error: "Parent vision not found" }, { status: 404 });
@@ -198,7 +198,7 @@ export async function POST(request: NextRequest) {
         }
         goal = await prisma.threeYearGoal.create({
           data: {
-            userId: session.user.id,
+            userId: user.id,
             sevenYearVisionId: parentId || null,
             title,
             description: description || null,
@@ -212,7 +212,7 @@ export async function POST(request: NextRequest) {
         // If parentId provided, verify it belongs to user
         if (parentId) {
           const threeYearGoal = await prisma.threeYearGoal.findFirst({
-            where: { id: parentId, userId: session.user.id },
+            where: { id: parentId, userId: user.id },
           });
           if (!threeYearGoal) {
             return NextResponse.json({ error: "Parent 3-year goal not found" }, { status: 404 });
@@ -220,7 +220,7 @@ export async function POST(request: NextRequest) {
         }
         goal = await prisma.oneYearGoal.create({
           data: {
-            userId: session.user.id,
+            userId: user.id,
             threeYearGoalId: parentId || null,
             title,
             description: description || null,
@@ -240,7 +240,7 @@ export async function POST(request: NextRequest) {
         // If parentId provided, verify it belongs to user
         if (parentId) {
           const oneYearGoal = await prisma.oneYearGoal.findFirst({
-            where: { id: parentId, userId: session.user.id },
+            where: { id: parentId, userId: user.id },
           });
           if (!oneYearGoal) {
             return NextResponse.json({ error: "Parent 1-year goal not found" }, { status: 404 });
@@ -248,7 +248,7 @@ export async function POST(request: NextRequest) {
         }
         goal = await prisma.monthlyGoal.create({
           data: {
-            userId: session.user.id,
+            userId: user.id,
             oneYearGoalId: parentId || null,
             title,
             description: description || null,
@@ -268,7 +268,7 @@ export async function POST(request: NextRequest) {
         // If parentId provided, verify it belongs to user
         if (parentId) {
           const monthlyGoal = await prisma.monthlyGoal.findFirst({
-            where: { id: parentId, userId: session.user.id },
+            where: { id: parentId, userId: user.id },
           });
           if (!monthlyGoal) {
             return NextResponse.json({ error: "Parent monthly goal not found" }, { status: 404 });
@@ -276,7 +276,7 @@ export async function POST(request: NextRequest) {
         }
         goal = await prisma.weeklyGoal.create({
           data: {
-            userId: session.user.id,
+            userId: user.id,
             monthlyGoalId: parentId || null,
             title,
             description: description || null,
