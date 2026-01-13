@@ -38,7 +38,7 @@ async function findGoalByIdAndUser(id: string, userId: string) {
       },
     }),
     prisma.threeYearGoal.findFirst({
-      where: { id, sevenYearVision: { userId } },
+      where: { id, userId },
       include: {
         sevenYearVision: { select: { id: true, title: true } },
         oneYearGoals: {
@@ -53,7 +53,7 @@ async function findGoalByIdAndUser(id: string, userId: string) {
       },
     }),
     prisma.oneYearGoal.findFirst({
-      where: { id, threeYearGoal: { sevenYearVision: { userId } } },
+      where: { id, userId },
       include: {
         threeYearGoal: {
           select: {
@@ -70,7 +70,7 @@ async function findGoalByIdAndUser(id: string, userId: string) {
       },
     }),
     prisma.monthlyGoal.findFirst({
-      where: { id, oneYearGoal: { threeYearGoal: { sevenYearVision: { userId } } } },
+      where: { id, userId },
       include: {
         oneYearGoal: {
           select: {
@@ -89,7 +89,7 @@ async function findGoalByIdAndUser(id: string, userId: string) {
       },
     }),
     prisma.weeklyGoal.findFirst({
-      where: { id, monthlyGoal: { oneYearGoal: { threeYearGoal: { sevenYearVision: { userId } } } } },
+      where: { id, userId },
       include: {
         monthlyGoal: {
           select: {
